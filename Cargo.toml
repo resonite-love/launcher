@@ -1,0 +1,10 @@
+[workspace]
+members = [
+    "lib",
+    "cli",
+    "gui"
+]
+
+[profile.release]
+opt-level = 3
+lto = true

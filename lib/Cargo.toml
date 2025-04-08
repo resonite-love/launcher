@@ -1,0 +1,11 @@
+[package]
+name = "resonite-tools-lib"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "Library for managing Resonite installations and profiles"
+
+[dependencies]
+regex = "1.5"  # 正規表現
+serde = { version = "1.0", features = ["derive"] }  # JSONシリアライズ/デシリアライズ
+serde_json = "1.0"  # JSON処理

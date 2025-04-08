@@ -1,0 +1,18 @@
+[package]
+name = "resonite-tools-gui"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "GUI application for Resonite Tools"
+
+[dependencies]
+eframe = { version = "0.22.0", features = ["default_fonts", "persistence"] }
+egui = "0.22.0"    # イミディエイトモードGUI
+resonite-tools-lib = { path = "../lib" }  # 内部ライブラリ
+
+[dependencies.winapi]
+version = "0.3.9"
+features = ["winuser", "winerror", "winbase", "handleapi"]
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3.9", features = ["winuser", "winerror", "winbase", "handleapi"] }
