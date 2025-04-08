@@ -1,0 +1,12 @@
+[package]
+name = "resonite-manager"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "A CLI tool to manage Resonite installations using steamcmd"
+
+[dependencies]
+clap = "2.33"  # コマンドライン引数のパース
+regex = "1.5"  # 正規表現
+serde = { version = "1.0", features = ["derive"] }  # JSONシリアライズ/デシリアライズ
+serde_json = "1.0"  # JSON処理
