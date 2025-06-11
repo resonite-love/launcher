@@ -11,6 +11,7 @@ pub struct GameInfo {
     pub depot_id: String,
     pub installed: bool,
     pub last_updated: Option<String>,
+    pub version: Option<String>,
 }
 
 /// Resoniteの起動プロファイルを管理するための構造体
@@ -50,6 +51,14 @@ impl Profile {
     /// プロファイルのResonite実行ファイルパスを取得
     pub fn get_resonite_exe(&self, profile_dir: &Path) -> PathBuf {
         self.get_game_dir(profile_dir).join("Resonite.exe")
+    }
+
+    /// Build.versionファイルからゲームバージョンを読み取る
+    pub fn get_game_version(&self, profile_dir: &Path) -> Option<String> {
+        let build_version_path = self.get_game_dir(profile_dir).join("Build.version");
+        fs::read_to_string(build_version_path)
+            .ok()
+            .map(|content| content.trim().to_string())
     }
 
     /// ゲーム情報を更新
@@ -202,5 +211,32 @@ impl ProfileManager {
         }
         
         Ok(false)
+    }
+
+    /// プロファイルの現在のゲームバージョンを取得
+    pub fn get_current_game_version(&self, profile_name: &str) -> Result<Option<String>, Box<dyn Error>> {
+        let profile = self.get_profile(profile_name)?;
+        let profile_dir = self.get_profile_dir(profile_name);
+        
+        // Build.versionファイルから直接読み取る（最新の実際のバージョン）
+        Ok(profile.get_game_version(&profile_dir))
+    }
+
+    /// プロファイルの保存されたゲーム情報を取得（バージョン含む）
+    pub fn get_game_info_with_version(&self, profile_name: &str) -> Result<Option<GameInfo>, Box<dyn Error>> {
+        let mut profile = self.get_profile(profile_name)?;
+        let profile_dir = self.get_profile_dir(profile_name);
+        
+        // ゲーム情報が存在し、インストールされている場合は最新バージョンで更新
+        if let Some(mut game_info) = profile.game_info.clone() {
+            if game_info.installed {
+                // Build.versionから最新バージョンを取得
+                let current_version = profile.get_game_version(&profile_dir);
+                game_info.version = current_version;
+                return Ok(Some(game_info));
+            }
+        }
+        
+        Ok(profile.game_info)
     }
 }

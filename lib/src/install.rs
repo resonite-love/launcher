@@ -76,12 +76,14 @@ impl ResoniteInstall {
         )?;
 
         // プロファイルのゲーム情報を更新
+        let version = profile.get_game_version(&profile_dir);
         let game_info = GameInfo {
             branch: self.branch.clone(),
             manifest_id: self.manifest_id.clone(),
             depot_id: "2519832".to_string(),
             installed: true,
             last_updated: Some(Utc::now().to_rfc3339()),
+            version,
         };
         
         profile.update_game_info(game_info);
@@ -158,12 +160,15 @@ impl ResoniteInstall {
                     
                     // プロファイル情報を更新
                     if let Ok(mut profile) = profile_manager_clone.get_profile(&profile_name_for_update) {
+                        let profile_dir = profile_manager_clone.get_profile_dir(&profile_name_for_update);
+                        let version = profile.get_game_version(&profile_dir);
                         let game_info = GameInfo {
                             branch: branch_for_update.clone(),
                             manifest_id: manifest_id_for_update.clone(),
                             depot_id: "2519832".to_string(),
                             installed: true,
                             last_updated: Some(Utc::now().to_rfc3339()),
+                            version,
                         };
                         
                         profile.update_game_info(game_info);
@@ -269,12 +274,15 @@ impl ResoniteInstall {
                 
                 // プロファイル情報を更新
                 let mut profile = profile_manager.get_profile(&self.profile_name)?;
+                let profile_dir = profile_manager.get_profile_dir(&self.profile_name);
+                let version = profile.get_game_version(&profile_dir);
                 let game_info = GameInfo {
                     branch: self.branch.clone(),
                     manifest_id: self.manifest_id.clone(),
                     depot_id: "2519832".to_string(),
                     installed: true,
                     last_updated: Some(Utc::now().to_rfc3339()),
+                    version,
                 };
                 
                 profile.update_game_info(game_info);

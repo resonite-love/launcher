@@ -3,7 +3,7 @@
 
 use std::sync::Mutex;
 use std::path::PathBuf;
-use tauri::{State, Manager, Window};
+use tauri::{State, Manager, Window, AppHandle};
 use resonite_tools_lib::{
     depotdownloader::DepotDownloader,
     install::{ResoniteInstall, ResoniteInstallManager},
@@ -37,6 +37,7 @@ pub struct ProfileInfo {
     pub has_game: bool,
     pub branch: Option<String>,
     pub manifest_id: Option<String>,
+    pub version: Option<String>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -53,6 +54,12 @@ pub struct AppStatus {
     pub initialized: bool,
     pub depot_downloader_available: bool,
     pub exe_dir: Option<String>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
+pub struct SteamCredentials {
+    pub username: String,
+    pub password: String,
 }
 
 // Initialize the application
@@ -289,12 +296,22 @@ async fn get_profiles(state: State<'_, Mutex<AppState>>) -> Result<Vec<ProfileIn
     let profiles = profile_manager.list_profiles()
         .map_err(|e| format!("Failed to get profiles: {}", e))?;
     
-    Ok(profiles.into_iter().map(|p| ProfileInfo {
-        name: p.name.clone(),
-        description: p.description.clone(),
-        has_game: p.has_game_installed(),
-        branch: p.game_info.as_ref().map(|info| info.branch.clone()),
-        manifest_id: p.game_info.as_ref().and_then(|info| info.manifest_id.clone()),
+    Ok(profiles.into_iter().map(|p| {
+        let profile_dir = profile_manager.get_profile_dir(&p.name);
+        let current_version = if p.has_game_installed() {
+            p.get_game_version(&profile_dir)
+        } else {
+            None
+        };
+        
+        ProfileInfo {
+            name: p.name.clone(),
+            description: p.description.clone(),
+            has_game: p.has_game_installed(),
+            branch: p.game_info.as_ref().map(|info| info.branch.clone()),
+            manifest_id: p.game_info.as_ref().and_then(|info| info.manifest_id.clone()),
+            version: current_version,
+        }
     }).collect())
 }
 
@@ -361,6 +378,69 @@ async fn steam_login(
     Ok("Steam login successful".to_string())
 }
 
+// Save Steam credentials
+#[tauri::command]
+async fn save_steam_credentials(
+    credentials: SteamCredentials,
+    app: AppHandle,
+) -> Result<String, String> {
+    let app_data_dir = app.path_resolver()
+        .app_data_dir()
+        .ok_or("Failed to get app data directory")?;
+    
+    // Create app data directory if it doesn't exist
+    std::fs::create_dir_all(&app_data_dir)
+        .map_err(|e| format!("Failed to create app data directory: {}", e))?;
+    
+    let credentials_path = app_data_dir.join("steam_credentials.json");
+    let json = serde_json::to_string_pretty(&credentials)
+        .map_err(|e| format!("Failed to serialize credentials: {}", e))?;
+    
+    std::fs::write(credentials_path, json)
+        .map_err(|e| format!("Failed to save credentials: {}", e))?;
+    
+    Ok("Steam credentials saved successfully".to_string())
+}
+
+// Load Steam credentials
+#[tauri::command]
+async fn load_steam_credentials(app: AppHandle) -> Result<Option<SteamCredentials>, String> {
+    let app_data_dir = app.path_resolver()
+        .app_data_dir()
+        .ok_or("Failed to get app data directory")?;
+    
+    let credentials_path = app_data_dir.join("steam_credentials.json");
+    
+    if !credentials_path.exists() {
+        return Ok(None);
+    }
+    
+    let json = std::fs::read_to_string(credentials_path)
+        .map_err(|e| format!("Failed to read credentials: {}", e))?;
+    
+    let credentials: SteamCredentials = serde_json::from_str(&json)
+        .map_err(|e| format!("Failed to parse credentials: {}", e))?;
+    
+    Ok(Some(credentials))
+}
+
+// Clear Steam credentials
+#[tauri::command]
+async fn clear_steam_credentials(app: AppHandle) -> Result<String, String> {
+    let app_data_dir = app.path_resolver()
+        .app_data_dir()
+        .ok_or("Failed to get app data directory")?;
+    
+    let credentials_path = app_data_dir.join("steam_credentials.json");
+    
+    if credentials_path.exists() {
+        std::fs::remove_file(credentials_path)
+            .map_err(|e| format!("Failed to remove credentials: {}", e))?;
+    }
+    
+    Ok("Steam credentials cleared successfully".to_string())
+}
+
 fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(AppState::default()))
@@ -374,7 +454,10 @@ fn main() {
             get_profiles,
             create_profile,
             launch_resonite,
-            steam_login
+            steam_login,
+            save_steam_credentials,
+            load_steam_credentials,
+            clear_steam_credentials
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
