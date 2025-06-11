@@ -411,8 +411,11 @@ impl ResoniteInstallManager {
         println!("Executable: {}", resonite_path.display());
         println!("Arguments: {:?}", expanded_args);
 
-        // Resoniteを起動
-        Command::new(resonite_path).args(&expanded_args).spawn()?;
+        // Resoniteを起動（プロファイルディレクトリをカレントディレクトリに設定）
+        Command::new(resonite_path)
+            .args(&expanded_args)
+            .current_dir(&profile_dir)
+            .spawn()?;
 
         println!("Resonite launched successfully!");
         Ok(())
