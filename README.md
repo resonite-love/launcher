@@ -8,8 +8,7 @@ Resoniteのインストール、更新、プロファイル管理を行うため
 
 - **lib**: コア機能を提供するライブラリ
 - **cli**: コマンドラインインターフェース
-- **gui**: グラフィカルユーザーインターフェース（egui）
-- **tauri-gui**: モダンなデスクトップGUI（Tauri + React）
+- **gui**: モダンなデスクトップGUI（Tauri + React）
 
 ## ビルド方法
 
@@ -27,11 +26,8 @@ cargo build --release
 # CLIのみをビルド
 cargo build --release -p resonite-manager
 
-# GUIのみをビルド（egui版）
-cargo build --release -p resonite-tools-gui
-
-# Tauri GUIをビルド
-cd tauri-gui && npm install && npm run tauri build
+# GUIをビルド
+cd gui && npm install && npm run tauri build
 ```
 
 ## 使用方法
@@ -64,13 +60,10 @@ resonite-manager steamlogin --username <ユーザー名>
 ### GUI
 
 ```
-# eGuiベースのGUIアプリケーションの起動
-resonite-tools-gui
-
-# TauriベースのGUIアプリケーションの起動（推奨）
-cd tauri-gui && npm run tauri dev  # 開発モード
+# GUIアプリケーションの起動
+cd gui && npm run tauri dev  # 開発モード
 # または
-./tauri-gui/src-tauri/target/release/resonite-tools-tauri  # ビルド後
+./gui/src-tauri/target/release/resonite-tools-tauri  # ビルド後
 ```
 
 ## 依存関係

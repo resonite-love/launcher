@@ -12,20 +12,14 @@ cargo build --release
 # Build CLI only
 cargo build --release -p resonite-manager
 
-# Build GUI only (egui)
-cargo build --release -p resonite-tools-gui
-
-# Build Tauri GUI
-cd tauri-gui && npm install && npm run tauri build
+# Build GUI
+cd gui && npm install && npm run tauri build
 
 # Run CLI
 ./target/release/resonite-manager
 
-# Run GUI (egui)
-./target/release/resonite-tools-gui
-
-# Run Tauri GUI (development)
-cd tauri-gui && npm run tauri dev
+# Run GUI (development)
+cd gui && npm run tauri dev
 ```
 
 ### Development Commands
@@ -34,7 +28,7 @@ cd tauri-gui && npm run tauri dev
 cargo run -p resonite-manager
 
 # Run GUI in debug mode
-cargo run -p resonite-tools-gui
+cd gui && npm run tauri dev
 
 # Check all code
 cargo check
@@ -50,8 +44,7 @@ This is a Rust workspace project for managing Resonite VR installations via Depo
 ### Core Components
 - **lib/**: Core library (`resonite-tools-lib`) containing all business logic
 - **cli/**: Command-line interface (`resonite-manager`) using clap for argument parsing
-- **gui/**: Desktop GUI application (`resonite-tools-gui`) using egui/eframe
-- **tauri-gui/**: Modern desktop GUI application using Tauri + React
+- **gui/**: Modern desktop GUI application using Tauri + React
 
 ### Key Library Modules
 - `install.rs`: Handles Resonite installation, updates, and launch via DepotDownloader
