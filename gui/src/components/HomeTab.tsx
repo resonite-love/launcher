@@ -1,14 +1,8 @@
 import { useState, useEffect } from 'react';
-import { invoke } from '@tauri-apps/api/tauri';
-
-interface Profile {
-  name: string;
-  description: string;
-  has_game: boolean;
-  branch?: string;
-  manifest_id?: string;
-  version?: string;
-}
+import { motion } from 'framer-motion';
+import { Play, ChevronDown, Info, Calendar, Loader2, RefreshCw } from 'lucide-react';
+import { useAppStore } from '../store/useAppStore';
+import { useProfiles, useLaunchResonite } from '../hooks/useQueries';
 
 interface UpdateNote {
   version: string;
@@ -17,10 +11,20 @@ interface UpdateNote {
 }
 
 function HomeTab() {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const { 
+    selectedProfile, 
+    setSelectedProfile,
+    isLaunching,
+  } = useAppStore();
+
+  const { 
+    data: profiles = [], 
+    isLoading: isLoadingProfiles,
+    refetch: refetchProfiles 
+  } = useProfiles();
+
+  const launchMutation = useLaunchResonite();
+
   const [updateNotes] = useState<UpdateNote[]>([
     {
       version: "v1.0.0",
@@ -33,114 +37,227 @@ function HomeTab() {
     }
   ]);
 
+  // Auto-select first profile if none selected
   useEffect(() => {
-    loadProfiles();
-  }, []);
-
-  const loadProfiles = async () => {
-    try {
-      const profileList = await invoke<Profile[]>('get_profiles');
-      setProfiles(profileList);
-      if (profileList.length > 0 && !selectedProfile) {
-        setSelectedProfile(profileList[0].name);
-      }
-    } catch (err) {
-      setMessage({ type: 'error', text: `プロファイルの読み込みに失敗しました: ${err}` });
+    if (profiles.length > 0 && !selectedProfile) {
+      setSelectedProfile(profiles[0].name);
     }
-  };
+  }, [profiles, selectedProfile, setSelectedProfile]);
 
-  const launchResonite = async () => {
+  const selectedProfileData = profiles.find(p => p.name === selectedProfile);
+
+  const handleLaunch = async () => {
     if (!selectedProfile) {
-      setMessage({ type: 'error', text: 'プロファイルを選択してください' });
       return;
     }
 
-    try {
-      setIsLoading(true);
-      const result = await invoke<string>('launch_resonite', {
-        profileName: selectedProfile,
-      });
-      setMessage({ type: 'success', text: result });
-    } catch (err) {
-      setMessage({ type: 'error', text: `起動に失敗しました: ${err}` });
-    } finally {
-      setIsLoading(false);
+    if (!selectedProfileData?.has_game) {
+      return;
     }
+
+    launchMutation.mutate(selectedProfile);
   };
 
-  const dismissMessage = () => {
-    setMessage(null);
+  const handleRefresh = () => {
+    refetchProfiles();
   };
 
   return (
-    <div className="home-tab">
+    <div className="space-y-8">
       {/* Update Notes Section */}
-      <div className="update-notes-section">
-        <h2>アップデート情報</h2>
-        <div className="update-notes">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="card"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <Info className="w-6 h-6 text-resonite-blue" />
+            <h2 className="text-2xl font-bold text-white">アップデート情報</h2>
+          </div>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleRefresh}
+            disabled={isLoadingProfiles}
+            className="btn-secondary flex items-center space-x-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoadingProfiles ? 'animate-spin' : ''}`} />
+            <span>更新</span>
+          </motion.button>
+        </div>
+        
+        <div className="max-h-80 overflow-y-auto scrollbar-hide space-y-4">
           {updateNotes.map((update, index) => (
-            <div key={index} className="update-note">
-              <div className="update-header">
-                <span className="version">{update.version}</span>
-                <span className="date">{update.date}</span>
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-dark-800/50 border border-dark-600/30 rounded-lg p-4 hover:border-resonite-blue/30 transition-colors duration-200"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-lg font-semibold text-resonite-blue">
+                  {update.version}
+                </span>
+                <div className="flex items-center space-x-2 text-gray-400 text-sm">
+                  <Calendar className="w-4 h-4" />
+                  <span>{update.date}</span>
+                </div>
               </div>
-              <ul className="update-list">
+              
+              <ul className="space-y-2">
                 {update.notes.map((note, noteIndex) => (
-                  <li key={noteIndex}>{note}</li>
+                  <motion.li
+                    key={noteIndex}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: (index * 0.1) + (noteIndex * 0.05) }}
+                    className="flex items-start space-x-3 text-gray-300"
+                  >
+                    <div className="w-1.5 h-1.5 bg-resonite-blue rounded-full mt-2 flex-shrink-0" />
+                    <span>{note}</span>
+                  </motion.li>
                 ))}
               </ul>
-            </div>
+            </motion.div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Launch Section */}
-      <div className="launch-section">
-        <div className="profile-selector">
-          <label htmlFor="profile-select">プロファイル:</label>
-          <select
-            id="profile-select"
-            value={selectedProfile}
-            onChange={(e) => setSelectedProfile(e.target.value)}
-            className="profile-dropdown"
-          >
-            {profiles.map((profile) => (
-              <option key={profile.name} value={profile.name}>
-                {profile.name} ({profile.branch || 'unknown'})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <button
-          className="launch-button"
-          onClick={launchResonite}
-          disabled={isLoading || !selectedProfile}
-        >
-          {isLoading ? 'Starting Resonite...' : 'Play Resonite'}
-        </button>
-
-        {selectedProfile && (
-          <div className="profile-info">
-            {profiles.find(p => p.name === selectedProfile) && (
-              <div>
-                <p><strong>ブランチ:</strong> {profiles.find(p => p.name === selectedProfile)?.branch || 'unknown'}</p>
-                <p><strong>説明:</strong> {profiles.find(p => p.name === selectedProfile)?.description || 'なし'}</p>
-                <p><strong>ゲーム状態:</strong> {profiles.find(p => p.name === selectedProfile)?.has_game ? 'インストール済み' : '未インストール'}</p>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="card text-center"
+      >
+        {/* Profile Selector */}
+        <div className="mb-8">
+          <label className="block text-lg font-medium text-gray-300 mb-4">
+            プロファイル選択
+          </label>
+          
+          <div className="relative max-w-md mx-auto">
+            {isLoadingProfiles ? (
+              <div className="select-primary w-full pr-10 text-center text-lg font-medium flex items-center justify-center">
+                <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                読み込み中...
               </div>
+            ) : (
+              <select
+                value={selectedProfile}
+                onChange={(e) => setSelectedProfile(e.target.value)}
+                className="select-primary w-full appearance-none pr-10 text-center text-lg font-medium"
+                disabled={profiles.length === 0}
+              >
+                <option value="">
+                  {profiles.length === 0 ? 'プロファイルがありません' : 'プロファイルを選択...'}
+                </option>
+                {profiles.map((profile) => (
+                  <option key={profile.name} value={profile.name}>
+                    {profile.name} ({profile.branch || 'unknown'})
+                  </option>
+                ))}
+              </select>
             )}
+            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
           </div>
-        )}
-      </div>
-
-      {message && (
-        <div className={`alert ${message.type}`}>
-          <p>{message.text}</p>
-          <button className="button secondary" onClick={dismissMessage}>
-            閉じる
-          </button>
         </div>
-      )}
+
+        {/* Launch Button */}
+        <motion.button
+          whileHover={{ 
+            scale: selectedProfileData?.has_game && !isLaunching ? 1.05 : 1 
+          }}
+          whileTap={{ 
+            scale: selectedProfileData?.has_game && !isLaunching ? 0.95 : 1 
+          }}
+          className={`launch-button ${
+            !selectedProfileData?.has_game || isLaunching ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+          onClick={handleLaunch}
+          disabled={!selectedProfile || !selectedProfileData?.has_game || isLaunching}
+        >
+          <div className="flex items-center justify-center space-x-3">
+            {isLaunching ? (
+              <Loader2 className="w-6 h-6 animate-spin" />
+            ) : (
+              <Play className="w-6 h-6" />
+            )}
+            <span className="text-xl">
+              {isLaunching ? 'Starting Resonite...' : 'Play Resonite'}
+            </span>
+          </div>
+        </motion.button>
+
+        {/* Profile Info */}
+        {selectedProfileData && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 bg-dark-800/30 rounded-lg p-4 max-w-md mx-auto"
+          >
+            <div className="grid grid-cols-1 gap-3 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">ブランチ:</span>
+                <span className="font-medium text-white">
+                  {selectedProfileData.branch || 'unknown'}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">説明:</span>
+                <span className="font-medium text-white">
+                  {selectedProfileData.description || 'なし'}
+                </span>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">ゲーム状態:</span>
+                {selectedProfileData.has_game ? (
+                  <span className="status-success">インストール済み</span>
+                ) : (
+                  <span className="status-error">未インストール</span>
+                )}
+              </div>
+              
+              {selectedProfileData.version && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400">バージョン:</span>
+                  <span className="font-medium text-white">
+                    {selectedProfileData.version}
+                  </span>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Warning Messages */}
+        {!selectedProfileData?.has_game && selectedProfile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-4 text-yellow-400 text-sm"
+          >
+            ⚠️ このプロファイルにはゲームがインストールされていません。
+            <br />
+            プロファイル管理タブからインストールしてください。
+          </motion.div>
+        )}
+
+        {profiles.length === 0 && !isLoadingProfiles && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-4 text-gray-400 text-sm"
+          >
+            📝 プロファイル管理タブで新しいプロファイルを作成してください。
+          </motion.div>
+        )}
+      </motion.div>
     </div>
   );
 }

@@ -1,6 +1,23 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { listen } from '@tauri-apps/api/event';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Plus, 
+  Play, 
+  Download, 
+  RefreshCw, 
+  Settings, 
+  X, 
+  Check, 
+  AlertCircle,
+  User,
+  Key,
+  Edit3,
+  Trash2,
+  Loader2
+} from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface ProfileInfo {
   name: string;
@@ -29,7 +46,6 @@ function ProfilesTab() {
   const [newProfileName, setNewProfileName] = useState('');
   const [newProfileDescription, setNewProfileDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
   
   // ゲームインストール用の状態
   const [showInstallModal, setShowInstallModal] = useState(false);
@@ -59,11 +75,10 @@ function ProfilesTab() {
       };
       
       if (data.success) {
-        setMessage({ type: 'success', text: data.message });
-        // プロファイル一覧を自動更新
+        toast.success(data.message);
         loadProfiles();
       } else {
-        setMessage({ type: 'error', text: data.message });
+        toast.error(data.message);
       }
     });
 
@@ -76,9 +91,8 @@ function ProfilesTab() {
         is_complete: boolean;
       };
       
-      // リアルタイムでステータスを表示
       if (!data.is_complete) {
-        setMessage({ type: 'info', text: data.message });
+        toast.loading(data.message, { duration: 2000 });
       }
     });
 
@@ -94,13 +108,13 @@ function ProfilesTab() {
       const profileList = await invoke<ProfileInfo[]>('get_profiles');
       setProfiles(profileList);
     } catch (err) {
-      setMessage({ type: 'error', text: `プロファイルの取得に失敗しました: ${err}` });
+      toast.error(`プロファイルの取得に失敗しました: ${err}`);
     }
   };
 
   const createProfile = async () => {
     if (!newProfileName.trim()) {
-      setMessage({ type: 'error', text: 'プロファイル名を入力してください' });
+      toast.error('プロファイル名を入力してください');
       return;
     }
 
@@ -111,12 +125,12 @@ function ProfilesTab() {
         description: newProfileDescription.trim(),
       });
       
-      setMessage({ type: 'success', text: result });
+      toast.success(result);
       setNewProfileName('');
       setNewProfileDescription('');
       await loadProfiles();
     } catch (err) {
-      setMessage({ type: 'error', text: `プロファイルの作成に失敗しました: ${err}` });
+      toast.error(`プロファイルの作成に失敗しました: ${err}`);
     } finally {
       setIsLoading(false);
     }
@@ -129,9 +143,9 @@ function ProfilesTab() {
         profileName,
       });
       
-      setMessage({ type: 'success', text: result });
+      toast.success(result);
     } catch (err) {
-      setMessage({ type: 'error', text: `起動に失敗しました: ${err}` });
+      toast.error(`起動に失敗しました: ${err}`);
     } finally {
       setIsLoading(false);
     }
@@ -141,7 +155,6 @@ function ProfilesTab() {
     setSelectedProfile(profileName);
     setInstallBranch('release');
     setManifestId('');
-    // 保存されたクレデンシャルがある場合は自動設定
     setUsername(savedCredentials?.username || '');
     setPassword(savedCredentials?.password || '');
     setShowInstallModal(true);
@@ -166,10 +179,10 @@ function ProfilesTab() {
       };
 
       const result = await invoke<string>('install_game_to_profile_interactive', { request });
-      setMessage({ type: 'info', text: result });
+      toast.success(result);
       closeInstallModal();
     } catch (err) {
-      setMessage({ type: 'error', text: `ゲームのインストールに失敗しました: ${err}` });
+      toast.error(`ゲームのインストールに失敗しました: ${err}`);
     } finally {
       setIsLoading(false);
     }
@@ -185,21 +198,18 @@ function ProfilesTab() {
         profile_name: profileName,
         branch: profile.branch || 'release',
         manifest_id: profile.manifest_id,
-        // 保存されたクレデンシャルを自動使用
         username: savedCredentials?.username || undefined,
         password: savedCredentials?.password || undefined,
       };
 
       const result = await invoke<string>('update_profile_game_interactive', { request });
-      setMessage({ type: 'info', text: result });
+      toast.success(result);
     } catch (err) {
-      setMessage({ type: 'error', text: `ゲームの更新に失敗しました: ${err}` });
+      toast.error(`ゲームの更新に失敗しました: ${err}`);
     } finally {
       setIsLoading(false);
     }
   };
-
-  const dismissMessage = () => setMessage(null);
 
   // Steamクレデンシャル関連の関数
   const loadSavedCredentials = async () => {
@@ -225,7 +235,7 @@ function ProfilesTab() {
 
   const saveCredentials = async () => {
     if (!credentialsUsername.trim()) {
-      setMessage({ type: 'error', text: 'Steamユーザー名を入力してください' });
+      toast.error('Steamユーザー名を入力してください');
       return;
     }
 
@@ -237,11 +247,11 @@ function ProfilesTab() {
       };
 
       await invoke<string>('save_steam_credentials', { credentials });
-      setMessage({ type: 'success', text: 'Steamクレデンシャルが保存されました' });
+      toast.success('Steamクレデンシャルが保存されました');
       setSavedCredentials(credentials);
       closeCredentialsModal();
     } catch (err) {
-      setMessage({ type: 'error', text: `クレデンシャルの保存に失敗しました: ${err}` });
+      toast.error(`クレデンシャルの保存に失敗しました: ${err}`);
     } finally {
       setIsLoading(false);
     }
@@ -251,365 +261,485 @@ function ProfilesTab() {
     try {
       setIsLoading(true);
       await invoke<string>('clear_steam_credentials');
-      setMessage({ type: 'success', text: 'Steamクレデンシャルが削除されました' });
+      toast.success('Steamクレデンシャルが削除されました');
       setSavedCredentials(null);
     } catch (err) {
-      setMessage({ type: 'error', text: `クレデンシャルの削除に失敗しました: ${err}` });
+      toast.error(`クレデンシャルの削除に失敗しました: ${err}`);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div>
-      <h2>プロファイル管理</h2>
-
-      {message && (
-        <div className={`alert ${message.type}`}>
-          <p>{message.text}</p>
-          <button className="button secondary" onClick={dismissMessage}>
-            閉じる
-          </button>
+    <div className="space-y-8">
+      {/* Steam Settings Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="card"
+      >
+        <div className="flex items-center space-x-3 mb-6">
+          <Settings className="w-6 h-6 text-resonite-blue" />
+          <h2 className="text-2xl font-bold text-white">Steam設定</h2>
         </div>
-      )}
 
-      {/* Steamクレデンシャル管理 */}
-      <div className="card">
-        <h3>Steam設定</h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-          {savedCredentials ? (
-            <>
-              <span style={{ color: '#4fd69c' }}>
-                ✓ ユーザー名: {savedCredentials.username}
-              </span>
-              <button
-                className="button secondary"
-                onClick={openCredentialsModal}
-                disabled={isLoading}
-                style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-              >
-                編集
-              </button>
-              <button
-                className="button secondary"
+        <div className="flex items-center justify-between p-4 bg-dark-800/30 rounded-lg">
+          <div className="flex items-center space-x-3">
+            {savedCredentials ? (
+              <>
+                <Check className="w-5 h-5 text-emerald-400" />
+                <div>
+                  <p className="text-white font-medium">
+                    ユーザー名: {savedCredentials.username}
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    Steamクレデンシャルが設定されています
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <AlertCircle className="w-5 h-5 text-yellow-400" />
+                <div>
+                  <p className="text-white font-medium">Steam設定が必要</p>
+                  <p className="text-gray-400 text-sm">
+                    ゲームのインストール・更新にはSteamアカウントが必要です
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="flex space-x-2">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="btn-secondary flex items-center space-x-2"
+              onClick={openCredentialsModal}
+              disabled={isLoading}
+            >
+              <Edit3 className="w-4 h-4" />
+              <span>{savedCredentials ? '編集' : '設定'}</span>
+            </motion.button>
+            
+            {savedCredentials && (
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="btn-danger flex items-center space-x-2"
                 onClick={clearCredentials}
                 disabled={isLoading}
-                style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
               >
-                削除
-              </button>
-            </>
-          ) : (
-            <>
-              <span style={{ color: '#ccc' }}>Steamクレデンシャルが設定されていません</span>
-              <button
-                className="button"
-                onClick={openCredentialsModal}
-                disabled={isLoading}
-                style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-              >
-                設定
-              </button>
-            </>
-          )}
+                <Trash2 className="w-4 h-4" />
+                <span>削除</span>
+              </motion.button>
+            )}
+          </div>
         </div>
-        <p style={{ fontSize: '0.8rem', color: '#aaa', margin: 0 }}>
-          ℹ️ Steamクレデンシャルを保存すると、ゲームのインストールや更新時に自動的に使用されます。
-        </p>
-      </div>
+      </motion.div>
 
-      {/* 新規プロファイル作成 */}
-      <div className="card">
-        <h3>新規プロファイル作成</h3>
-        <div className="form-group">
-          <label htmlFor="profileName">プロファイル名:</label>
-          <input
-            id="profileName"
-            type="text"
-            value={newProfileName}
-            onChange={(e) => setNewProfileName(e.target.value)}
-            placeholder="プロファイル名を入力"
-          />
+      {/* Create Profile Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="card"
+      >
+        <div className="flex items-center space-x-3 mb-6">
+          <Plus className="w-6 h-6 text-resonite-blue" />
+          <h2 className="text-2xl font-bold text-white">新規プロファイル作成</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              プロファイル名 *
+            </label>
+            <input
+              type="text"
+              value={newProfileName}
+              onChange={(e) => setNewProfileName(e.target.value)}
+              placeholder="例: メインプロファイル"
+              className="input-primary w-full"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              説明（オプション）
+            </label>
+            <input
+              type="text"
+              value={newProfileDescription}
+              onChange={(e) => setNewProfileDescription(e.target.value)}
+              placeholder="例: 日常使用のプロファイル"
+              className="input-primary w-full"
+            />
+          </div>
         </div>
         
-        <div className="form-group">
-          <label htmlFor="profileDescription">説明:</label>
-          <input
-            id="profileDescription"
-            type="text"
-            value={newProfileDescription}
-            onChange={(e) => setNewProfileDescription(e.target.value)}
-            placeholder="プロファイルの説明（オプション）"
-          />
+        <div className="mt-6">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="btn-primary flex items-center space-x-2"
+            onClick={createProfile}
+            disabled={isLoading || !newProfileName.trim()}
+          >
+            {isLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Plus className="w-4 h-4" />
+            )}
+            <span>プロファイルを作成</span>
+          </motion.button>
         </div>
-        
-        <button
-          className="button"
-          onClick={createProfile}
-          disabled={isLoading || !newProfileName.trim()}
-        >
-          {isLoading ? '作成中...' : 'プロファイルを作成'}
-        </button>
-      </div>
+      </motion.div>
 
-      {/* プロファイル一覧 */}
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3>プロファイル一覧</h3>
-          <button className="button secondary" onClick={loadProfiles}>
-            更新
-          </button>
+      {/* Profiles List Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="card"
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-3">
+            <User className="w-6 h-6 text-resonite-blue" />
+            <h2 className="text-2xl font-bold text-white">プロファイル一覧</h2>
+          </div>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="btn-secondary flex items-center space-x-2"
+            onClick={loadProfiles}
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span>更新</span>
+          </motion.button>
         </div>
 
         {profiles.length === 0 ? (
-          <p>プロファイルがありません。新規作成してください。</p>
+          <div className="text-center py-12">
+            <User className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-400 text-lg">プロファイルがありません</p>
+            <p className="text-gray-500">新規作成してください</p>
+          </div>
         ) : (
-          <div>
-            <div className="profiles-grid header">
-              <div>名前</div>
-              <div>説明</div>
-              <div>ゲーム状態</div>
-              <div>操作</div>
-            </div>
-            
-            {profiles.map((profile) => (
-              <div key={profile.name} className="profiles-grid">
-                <div>{profile.name}</div>
-                <div>{profile.description || '-'}</div>
-                <div>
-                  {profile.has_game ? (
-                    <span style={{ color: '#4fd69c' }}>
-                      ✓ {profile.branch}
-                      {profile.version && (
-                        <div style={{ fontSize: '0.8rem', color: '#aaa' }}>
-                          v{profile.version}
-                        </div>
-                      )}
-                      {profile.manifest_id && (
-                        <div style={{ fontSize: '0.7rem', color: '#666' }}>
-                          ({profile.manifest_id.slice(0, 8)}...)
-                        </div>
-                      )}
-                    </span>
-                  ) : (
-                    <span style={{ color: '#ccc' }}>ゲーム未インストール</span>
-                  )}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {profiles.map((profile, index) => (
+              <motion.div
+                key={profile.name}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6 hover:border-resonite-blue/30 transition-colors duration-200"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white mb-1">
+                      {profile.name}
+                    </h3>
+                    <p className="text-gray-400 text-sm">
+                      {profile.description || '説明なし'}
+                    </p>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    {profile.has_game ? (
+                      <span className="status-success">
+                        ✓ ゲーム済
+                      </span>
+                    ) : (
+                      <span className="status-error">
+                        未インストール
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div>
+
+                {profile.has_game && (
+                  <div className="mb-4 text-sm space-y-1">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">ブランチ:</span>
+                      <span className="text-white">{profile.branch}</span>
+                    </div>
+                    {profile.version && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">バージョン:</span>
+                        <span className="text-white">v{profile.version}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex space-x-2">
                   {profile.has_game ? (
                     <>
-                      <button
-                        className="button"
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="btn-primary flex-1 flex items-center justify-center space-x-2"
                         onClick={() => launchProfile(profile.name)}
                         disabled={isLoading}
-                        style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
                       >
-                        起動
-                      </button>
-                      <button
-                        className="button secondary"
+                        <Play className="w-4 h-4" />
+                        <span>起動</span>
+                      </motion.button>
+                      
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="btn-secondary flex items-center space-x-2"
                         onClick={() => updateGame(profile.name)}
                         disabled={isLoading}
-                        style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                        title="バックグラウンド更新を試行し、Steam認証が必要な場合は自動的にコマンドウィンドウが開きます"
+                        title="ゲームを最新版に更新"
                       >
-                        更新
-                      </button>
+                        <RefreshCw className="w-4 h-4" />
+                        <span>更新</span>
+                      </motion.button>
                     </>
                   ) : (
-                    <button
-                      className="button"
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="btn-primary w-full flex items-center justify-center space-x-2"
                       onClick={() => openInstallModal(profile.name)}
                       disabled={isLoading}
-                      style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                      title="バックグラウンドインストールを試行し、Steam認証が必要な場合は自動的にコマンドウィンドウが開きます"
                     >
-                      ゲームをインストール
-                    </button>
+                      <Download className="w-4 h-4" />
+                      <span>ゲームをインストール</span>
+                    </motion.button>
                   )}
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
-      </div>
+      </motion.div>
 
-      {/* ゲームインストールモーダル */}
-      {showInstallModal && (
-        <div style={{ 
-          position: 'fixed', 
-          top: 0, 
-          left: 0, 
-          right: 0, 
-          bottom: 0, 
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: '#2d2d2d',
-            border: '1px solid #444',
-            borderRadius: '8px',
-            padding: '2rem',
-            maxWidth: '500px',
-            width: '90%'
-          }}>
-            <h3>プロファイル '{selectedProfile}' にゲームをインストール</h3>
-            <div style={{ backgroundColor: '#444', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#ccc' }}>
-                ℹ️ 最初にバックグラウンドインストールを試行し、Steam認証が必要な場合は自動的にコマンドウィンドウが開きます。
-              </p>
-            </div>
-            
-            <div className="form-group">
-              <label>ブランチ:</label>
-              <div className="branch-selector">
-                <label>
-                  <input
-                    type="radio"
-                    value="release"
-                    checked={installBranch === 'release'}
-                    onChange={(e) => setInstallBranch(e.target.value)}
-                  />
-                  リリース版
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    value="prerelease"
-                    checked={installBranch === 'prerelease'}
-                    onChange={(e) => setInstallBranch(e.target.value)}
-                  />
-                  プレリリース版
-                </label>
+      {/* Install Game Modal */}
+      <AnimatePresence>
+        {showInstallModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            onClick={closeInstallModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-dark-900 border border-dark-600 rounded-xl p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-white">
+                  ゲームインストール
+                </h3>
+                <button
+                  onClick={closeInstallModal}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <X className="w-6 h-6" />
+                </button>
               </div>
-            </div>
 
-            <div className="form-group">
-              <label htmlFor="manifestId">マニフェストID（オプション）:</label>
-              <input
-                id="manifestId"
-                type="text"
-                value={manifestId}
-                onChange={(e) => setManifestId(e.target.value)}
-                placeholder="特定バージョンを指定する場合"
-              />
-            </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    プロファイル: {selectedProfile}
+                  </label>
+                </div>
 
-            <div className="form-group">
-              <label htmlFor="steamUsername">Steamユーザー名（オプション）:</label>
-              <input
-                id="steamUsername"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Steamユーザー名"
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    ブランチ
+                  </label>
+                  <div className="flex space-x-4">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        value="release"
+                        checked={installBranch === 'release'}
+                        onChange={(e) => setInstallBranch(e.target.value)}
+                        className="text-resonite-blue"
+                      />
+                      <span className="text-white">リリース版</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        value="prerelease"
+                        checked={installBranch === 'prerelease'}
+                        onChange={(e) => setInstallBranch(e.target.value)}
+                        className="text-resonite-blue"
+                      />
+                      <span className="text-white">プレリリース版</span>
+                    </label>
+                  </div>
+                </div>
 
-            <div className="form-group">
-              <label htmlFor="steamPassword">Steamパスワード（オプション）:</label>
-              <input
-                id="steamPassword"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Steamパスワード"
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    マニフェストID（オプション）
+                  </label>
+                  <input
+                    type="text"
+                    value={manifestId}
+                    onChange={(e) => setManifestId(e.target.value)}
+                    placeholder="特定バージョンを指定"
+                    className="input-primary w-full"
+                  />
+                </div>
 
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <button
-                className="button secondary"
-                onClick={closeInstallModal}
-                disabled={isLoading}
-              >
-                キャンセル
-              </button>
-              <button
-                className="button"
-                onClick={installGame}
-                disabled={isLoading}
-              >
-                {isLoading ? 'インストール中...' : 'インストール（自動フォールバック）'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Steamユーザー名（オプション）
+                  </label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Steamユーザー名"
+                    className="input-primary w-full"
+                  />
+                </div>
 
-      {/* Steamクレデンシャル設定モーダル */}
-      {showCredentialsModal && (
-        <div style={{ 
-          position: 'fixed', 
-          top: 0, 
-          left: 0, 
-          right: 0, 
-          bottom: 0, 
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000
-        }}>
-          <div style={{
-            backgroundColor: '#2d2d2d',
-            border: '1px solid #444',
-            borderRadius: '8px',
-            padding: '2rem',
-            maxWidth: '400px',
-            width: '90%'
-          }}>
-            <h3>Steamクレデンシャル設定</h3>
-            <div style={{ backgroundColor: '#444', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
-              <p style={{ margin: 0, fontSize: '0.9rem', color: '#ccc' }}>
-                🔒 クレデンシャルはローカルに暗号化されて保存され、インストール・更新時に自動使用されます。
-              </p>
-            </div>
-            
-            <div className="form-group">
-              <label htmlFor="credentialsUsername">Steamユーザー名:</label>
-              <input
-                id="credentialsUsername"
-                type="text"
-                value={credentialsUsername}
-                onChange={(e) => setCredentialsUsername(e.target.value)}
-                placeholder="Steamユーザー名"
-              />
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Steamパスワード（オプション）
+                  </label>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Steamパスワード"
+                    className="input-primary w-full"
+                  />
+                </div>
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="credentialsPassword">Steamパスワード:</label>
-              <input
-                id="credentialsPassword"
-                type="password"
-                value={credentialsPassword}
-                onChange={(e) => setCredentialsPassword(e.target.value)}
-                placeholder="Steamパスワード"
-              />
-            </div>
+              <div className="flex space-x-3 mt-6">
+                <button
+                  className="btn-secondary flex-1"
+                  onClick={closeInstallModal}
+                  disabled={isLoading}
+                >
+                  キャンセル
+                </button>
+                <button
+                  className="btn-primary flex-1 flex items-center justify-center space-x-2"
+                  onClick={installGame}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                  <span>インストール</span>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
-              <button
-                className="button secondary"
-                onClick={closeCredentialsModal}
-                disabled={isLoading}
-              >
-                キャンセル
-              </button>
-              <button
-                className="button"
-                onClick={saveCredentials}
-                disabled={isLoading || !credentialsUsername.trim()}
-              >
-                {isLoading ? '保存中...' : '保存'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Steam Credentials Modal */}
+      <AnimatePresence>
+        {showCredentialsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            onClick={closeCredentialsModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-dark-900 border border-dark-600 rounded-xl p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <Key className="w-6 h-6 text-resonite-blue" />
+                  <h3 className="text-xl font-bold text-white">
+                    Steamクレデンシャル設定
+                  </h3>
+                </div>
+                <button
+                  onClick={closeCredentialsModal}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="bg-dark-800/30 rounded-lg p-4 mb-6">
+                <p className="text-sm text-gray-300">
+                  🔒 認証情報はローカルに暗号化保存され、ゲームのインストール・更新時に自動使用されます
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Steamユーザー名 *
+                  </label>
+                  <input
+                    type="text"
+                    value={credentialsUsername}
+                    onChange={(e) => setCredentialsUsername(e.target.value)}
+                    placeholder="Steamユーザー名"
+                    className="input-primary w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Steamパスワード
+                  </label>
+                  <input
+                    type="password"
+                    value={credentialsPassword}
+                    onChange={(e) => setCredentialsPassword(e.target.value)}
+                    placeholder="Steamパスワード"
+                    className="input-primary w-full"
+                  />
+                </div>
+              </div>
+
+              <div className="flex space-x-3 mt-6">
+                <button
+                  className="btn-secondary flex-1"
+                  onClick={closeCredentialsModal}
+                  disabled={isLoading}
+                >
+                  キャンセル
+                </button>
+                <button
+                  className="btn-primary flex-1 flex items-center justify-center space-x-2"
+                  onClick={saveCredentials}
+                  disabled={isLoading || !credentialsUsername.trim()}
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Check className="w-4 h-4" />
+                  )}
+                  <span>保存</span>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

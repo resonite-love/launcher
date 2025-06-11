@@ -6,7 +6,9 @@
       "Bash(rm:*)",
       "Bash(mv:*)",
       "Bash(cargo build:*)",
-      "Bash(cargo check:*)"
+      "Bash(cargo check:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss init:*)"
     ],
     "deny": []
   }
