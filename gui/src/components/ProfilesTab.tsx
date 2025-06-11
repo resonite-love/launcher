@@ -111,10 +111,9 @@ function ProfilesTab() {
         password: password || undefined,
       };
 
-      const result = await invoke<string>('install_game_to_profile', { request });
-      setMessage({ type: 'success', text: result });
+      const result = await invoke<string>('install_game_to_profile_interactive', { request });
+      setMessage({ type: 'info', text: result });
       closeInstallModal();
-      await loadProfiles();
     } catch (err) {
       setMessage({ type: 'error', text: `ゲームのインストールに失敗しました: ${err}` });
     } finally {
@@ -136,9 +135,8 @@ function ProfilesTab() {
         password: password || undefined,
       };
 
-      const result = await invoke<string>('update_profile_game', { request });
-      setMessage({ type: 'success', text: result });
-      await loadProfiles();
+      const result = await invoke<string>('update_profile_game_interactive', { request });
+      setMessage({ type: 'info', text: result });
     } catch (err) {
       setMessage({ type: 'error', text: `ゲームの更新に失敗しました: ${err}` });
     } finally {
@@ -244,6 +242,7 @@ function ProfilesTab() {
                         onClick={() => updateGame(profile.name)}
                         disabled={isLoading}
                         style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                        title="Steam 2FAが必要な場合、コマンドウィンドウが開きます"
                       >
                         更新
                       </button>
@@ -254,6 +253,7 @@ function ProfilesTab() {
                       onClick={() => openInstallModal(profile.name)}
                       disabled={isLoading}
                       style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                      title="Steam 2FAが必要な場合、コマンドウィンドウが開きます"
                     >
                       ゲームをインストール
                     </button>
@@ -288,6 +288,11 @@ function ProfilesTab() {
             width: '90%'
           }}>
             <h3>プロファイル '{selectedProfile}' にゲームをインストール</h3>
+            <div style={{ backgroundColor: '#444', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
+              <p style={{ margin: 0, fontSize: '0.9rem', color: '#ccc' }}>
+                ℹ️ Steam 2FAが必要な場合、別のコマンドウィンドウが開きます。そこで認証コードを入力してください。
+              </p>
+            </div>
             
             <div className="form-group">
               <label>ブランチ:</label>
@@ -359,7 +364,7 @@ function ProfilesTab() {
                 onClick={installGame}
                 disabled={isLoading}
               >
-                {isLoading ? 'インストール中...' : 'インストール'}
+                {isLoading ? 'コマンドウィンドウを起動中...' : 'インストール（Steam認証対応）'}
               </button>
             </div>
           </div>

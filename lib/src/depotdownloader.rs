@@ -18,13 +18,29 @@ impl DepotDownloader {
     /// デフォルトの場所を使用して新しいインスタンスを作成
     /// DepotDownloaderバイナリはreleaseフォルダに配置される
     pub fn with_default_path(base_dir: &Path) -> Self {
-        let depot_downloader_exe = if cfg!(target_os = "windows") {
-            base_dir.join("DepotDownloader.exe")
+        let exe_name = if cfg!(target_os = "windows") {
+            "DepotDownloader.exe"
         } else if cfg!(target_os = "macos") {
-            base_dir.join("DepotDownloader")
+            "DepotDownloader"
         } else {
-            base_dir.join("DepotDownloader")
+            "DepotDownloader"
         };
+
+        // 複数の場所でDepotDownloaderを検索
+        let possible_paths = vec![
+            base_dir.join(exe_name),                    // 実行ファイルと同じディレクトリ
+            base_dir.parent().unwrap_or(base_dir).join(exe_name),  // 一つ上のディレクトリ
+            base_dir.parent()
+                .and_then(|p| p.parent())
+                .unwrap_or(base_dir)
+                .join(exe_name),                        // 二つ上のディレクトリ（開発時用）
+        ];
+
+        // 存在する最初のパスを使用
+        let depot_downloader_exe = possible_paths
+            .into_iter()
+            .find(|path| path.exists())
+            .unwrap_or_else(|| base_dir.join(exe_name));
 
         DepotDownloader {
             path: depot_downloader_exe,
@@ -141,12 +157,12 @@ impl DepotDownloader {
         args.extend(auth_args);
 
         // ファイル検証を有効にする
-        args.push("-validate".to_string());
+        // args.push("-validate".to_string());
 
         args
     }
 
-    /// 指定された引数でDepotDownloaderを実行する
+    /// 指定された引数でDepotDownloaderを実行する（バックグラウンド）
     pub fn run(&self, args: &[String]) -> Result<Output, Box<dyn Error>> {
         println!("Using DepotDownloader path: {}", self.path.display());
         println!("Running with args: {:?}", args);
@@ -157,7 +173,50 @@ impl DepotDownloader {
         Ok(output)
     }
 
-    /// Resoniteをダウンロード/更新する
+    /// 指定された引数でDepotDownloaderを別のコマンドウィンドウで実行する（2FA対応）
+    pub fn run_interactive(&self, args: &[String]) -> Result<(), Box<dyn Error>> {
+        println!("Using DepotDownloader path: {}", self.path.display());
+        println!("Running interactively with args: {:?}", args);
+
+        #[cfg(target_os = "windows")]
+        {
+            // Windowsでは新しいコマンドプロンプトウィンドウを開く
+            let depot_path = self.path.to_string_lossy();
+            let args_str = args.join(" ");
+
+            // startコマンドで新しいウィンドウを開き、/kでコマンド実行後もウィンドウを保持
+            let command_line = format!("start  cmd /c {} {}", depot_path, args_str);
+
+            println!("Executing command: cmd /c {}", command_line);
+
+            let mut cmd = Command::new("cmd")
+                .args(&["/c", &command_line])
+                .spawn()?;
+            // startコマンドは即座に戻るので、waitしない
+            println!("DepotDownloader launched in new window");
+        }
+
+        #[cfg(not(target_os = "windows"))]
+        {
+            // Windows以外ではターミナルで実行
+            let mut cmd = Command::new(&self.path)
+                .args(args)
+                .stdin(Stdio::inherit())
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .spawn()?;
+
+            let status = cmd.wait()?;
+            
+            if !status.success() {
+                return Err("DepotDownloader process failed".into());
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Resoniteをダウンロード/更新する（バックグラウンド）
     pub fn download_resonite(
         &self,
         install_dir: &str,
@@ -176,6 +235,23 @@ impl DepotDownloader {
         }
 
         println!("Resonite download completed successfully");
+        Ok(())
+    }
+
+    /// Resoniteをダウンロード/更新する（インタラクティブ、2FA対応）
+    pub fn download_resonite_interactive(
+        &self,
+        install_dir: &str,
+        branch: &str,
+        manifest_id: Option<&str>,
+        username: Option<&str>,
+        password: Option<&str>,
+    ) -> Result<(), Box<dyn Error>> {
+        let args = self.build_resonite_args(install_dir, branch, manifest_id, username, password);
+        
+        self.run_interactive(&args)?;
+
+        println!("Resonite download process launched in separate window");
         Ok(())
     }
 

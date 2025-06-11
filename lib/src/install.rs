@@ -49,7 +49,7 @@ impl ResoniteInstall {
         Ok(resonite_exe)
     }
 
-    /// プロファイルにResoniteをインストールする
+    /// プロファイルにResoniteをインストールする（バックグラウンド）
     pub fn install(&self, depot_downloader: &DepotDownloader, profile_manager: &ProfileManager) -> Result<(), Box<dyn Error>> {
         println!(
             "Installing Resonite {} branch to profile '{}'",
@@ -91,7 +91,39 @@ impl ResoniteInstall {
         Ok(())
     }
 
-    /// プロファイルのResoniteを更新する
+    /// プロファイルにResoniteをインストールする（インタラクティブ、2FA対応）
+    pub fn install_interactive(&self, depot_downloader: &DepotDownloader, profile_manager: &ProfileManager) -> Result<(), Box<dyn Error>> {
+        println!(
+            "Installing Resonite {} branch to profile '{}' (Interactive Mode)",
+            self.branch, self.profile_name
+        );
+
+        // プロファイルの存在確認
+        let profile = profile_manager.get_profile(&self.profile_name)?;
+        let profile_dir = profile_manager.get_profile_dir(&self.profile_name);
+        let game_dir = profile_dir.join("Game");
+
+        // ゲームディレクトリを作成
+        if !game_dir.exists() {
+            fs::create_dir_all(&game_dir)?;
+        }
+
+        // DepotDownloaderでResoniteをダウンロード（インタラクティブ）
+        depot_downloader.download_resonite_interactive(
+            &game_dir.to_string_lossy(),
+            &self.branch,
+            self.manifest_id.as_deref(),
+            self.username.as_deref(),
+            self.password.as_deref(),
+        )?;
+
+        println!("Installation process launched in separate window!");
+        println!("Please check the command prompt window for Steam 2FA prompts.");
+        println!("After installation completes, you may need to refresh the profile list.");
+        Ok(())
+    }
+
+    /// プロファイルのResoniteを更新する（バックグラウンド）
     pub fn update(&self, depot_downloader: &DepotDownloader, profile_manager: &ProfileManager) -> Result<(), Box<dyn Error>> {
         println!(
             "Updating Resonite {} branch in profile '{}'",
@@ -100,6 +132,17 @@ impl ResoniteInstall {
 
         // For DepotDownloader, update is the same as install
         self.install(depot_downloader, profile_manager)
+    }
+
+    /// プロファイルのResoniteを更新する（インタラクティブ、2FA対応） 
+    pub fn update_interactive(&self, depot_downloader: &DepotDownloader, profile_manager: &ProfileManager) -> Result<(), Box<dyn Error>> {
+        println!(
+            "Updating Resonite {} branch in profile '{}' (Interactive Mode)",
+            self.branch, self.profile_name
+        );
+
+        // For DepotDownloader, update is the same as install
+        self.install_interactive(depot_downloader, profile_manager)
     }
 
     /// プロファイルのアップデートがあるかチェックする

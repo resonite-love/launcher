@@ -110,6 +110,34 @@ async fn install_game_to_profile(
     Ok(format!("Resonite {} branch installed successfully to profile '{}'", request.branch, request.profile_name))
 }
 
+// Install Resonite to a profile (Interactive Mode for 2FA)
+#[tauri::command]
+async fn install_game_to_profile_interactive(
+    request: GameInstallRequest,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let app_state = state.lock().unwrap();
+    
+    let depot_downloader = app_state.depot_downloader.as_ref()
+        .ok_or("DepotDownloader not initialized")?;
+    
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
+    
+    let install = ResoniteInstall::new(
+        request.profile_name.clone(),
+        request.branch.clone(),
+        request.manifest_id.clone(),
+        request.username,
+        request.password,
+    );
+    
+    install.install_interactive(depot_downloader, profile_manager)
+        .map_err(|e| format!("Interactive installation failed: {}", e))?;
+    
+    Ok(format!("Resonite {} branch installation launched in command window for profile '{}'", request.branch, request.profile_name))
+}
+
 // Update Resonite in a profile
 #[tauri::command]
 async fn update_profile_game(
@@ -136,6 +164,34 @@ async fn update_profile_game(
         .map_err(|e| format!("Update failed: {}", e))?;
     
     Ok(format!("Resonite {} branch updated successfully in profile '{}'", request.branch, request.profile_name))
+}
+
+// Update Resonite in a profile (Interactive Mode for 2FA)
+#[tauri::command]
+async fn update_profile_game_interactive(
+    request: GameInstallRequest,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let app_state = state.lock().unwrap();
+    
+    let depot_downloader = app_state.depot_downloader.as_ref()
+        .ok_or("DepotDownloader not initialized")?;
+    
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
+    
+    let install = ResoniteInstall::new(
+        request.profile_name.clone(),
+        request.branch.clone(),
+        request.manifest_id.clone(),
+        request.username,
+        request.password,
+    );
+    
+    install.update_interactive(depot_downloader, profile_manager)
+        .map_err(|e| format!("Interactive update failed: {}", e))?;
+    
+    Ok(format!("Resonite {} branch update launched in command window for profile '{}'", request.branch, request.profile_name))
 }
 
 // Check for updates in a profile
@@ -253,7 +309,9 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             initialize_app,
             install_game_to_profile,
+            install_game_to_profile_interactive,
             update_profile_game,
+            update_profile_game_interactive,
             check_profile_updates,
             get_profiles,
             create_profile,
