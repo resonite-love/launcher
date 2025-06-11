@@ -32,6 +32,7 @@ impl Profile {
             game_info: None, // ゲームは後でインストール
             args: vec![
                 "-SkipIntroTutorial".to_string(),
+                "-Screen".to_string(),
                 "-DataPath".to_string(),
                 "%PROFILE_DIR%\\DataPath".to_string(), // パス変数を使用
             ],
