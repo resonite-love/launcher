@@ -12,14 +12,20 @@ cargo build --release
 # Build CLI only
 cargo build --release -p resonite-manager
 
-# Build GUI only
+# Build GUI only (egui)
 cargo build --release -p resonite-tools-gui
+
+# Build Tauri GUI
+cd tauri-gui && npm install && npm run tauri build
 
 # Run CLI
 ./target/release/resonite-manager
 
-# Run GUI
+# Run GUI (egui)
 ./target/release/resonite-tools-gui
+
+# Run Tauri GUI (development)
+cd tauri-gui && npm run tauri dev
 ```
 
 ### Development Commands
@@ -39,27 +45,29 @@ cargo test
 
 ## Architecture
 
-This is a Rust workspace project for managing Resonite VR installations via SteamCMD. The project is structured as:
+This is a Rust workspace project for managing Resonite VR installations via DepotDownloader. The project is structured as:
 
 ### Core Components
 - **lib/**: Core library (`resonite-tools-lib`) containing all business logic
 - **cli/**: Command-line interface (`resonite-manager`) using clap for argument parsing
 - **gui/**: Desktop GUI application (`resonite-tools-gui`) using egui/eframe
+- **tauri-gui/**: Modern desktop GUI application using Tauri + React
 
 ### Key Library Modules
-- `install.rs`: Handles Resonite installation, updates, and launch via SteamCMD
+- `install.rs`: Handles Resonite installation, updates, and launch via DepotDownloader
 - `profile.rs`: Manages launch profiles with JSON configuration files
-- `steamcmd.rs`: SteamCMD wrapper for Steam authentication and app management
+- `depotdownloader.rs`: DepotDownloader wrapper for Steam depot downloads
 - `utils.rs`: Common utilities and helper functions
 
 ### Data Flow
 1. Both CLI and GUI depend on the shared library
-2. Library communicates with SteamCMD for installation/updates
+2. Library communicates with DepotDownloader for installation/updates
 3. Profiles are stored as JSON files in subdirectories
 4. GUI provides real-time UI updates with error handling
 
 ### Dependencies
-- Uses SteamCMD located at `<executable_dir>/steamcmd/steamcmd.exe`
+- Uses DepotDownloader binary located at `<executable_dir>/DepotDownloader.exe`
+- Requires .NET 8.0 Runtime for DepotDownloader
 - CLI uses clap v2.33 for argument parsing
 - GUI uses egui v0.22 with Japanese font support (Noto Sans JP)
 - Serialization handled via serde with JSON

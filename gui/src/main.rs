@@ -3,7 +3,7 @@ use egui::{CentralPanel, TopBottomPanel, Context, RichText, Ui, FontFamily};
 use resonite_tools_lib::{
     install::{ResoniteInstall, ResoniteInstallManager},
     profile::{Profile, ProfileManager},
-    steamcmd::SteamCmd,
+    depotdownloader::DepotDownloader,
     utils,
 };
 use std::path::PathBuf;
@@ -31,7 +31,7 @@ fn main() -> Result<(), eframe::Error> {
 // アプリケーションの状態
 struct ResoniteToolsApp {
     // ライブラリのインスタンス
-    steam_cmd: Option<SteamCmd>,
+    depot_downloader: Option<DepotDownloader>,
     profile_manager: Option<ProfileManager>,
     install_manager: Option<ResoniteInstallManager>,
     
@@ -110,7 +110,7 @@ impl ResoniteToolsApp {
     fn new(_cc: &eframe::CreationContext<'_>) -> Self {
         // 初期化
         let mut app = Self {
-            steam_cmd: None,
+            depot_downloader: None,
             profile_manager: None,
             install_manager: None,
             current_tab: Tab::Profiles,
@@ -142,8 +142,8 @@ impl ResoniteToolsApp {
             Ok(dir) => {
                 self.exe_dir = Some(dir.clone());
                 
-                // SteamCMDの初期化
-                self.steam_cmd = Some(SteamCmd::with_default_path(&dir));
+                // DepotDownloaderの初期化
+                self.depot_downloader = Some(DepotDownloader::with_default_path(&dir));
                 
                 // プロファイルマネージャの初期化
                 self.profile_manager = Some(ProfileManager::new(&dir));
@@ -465,7 +465,7 @@ impl ResoniteToolsApp {
     
     // Resoniteをインストールする
     fn install_resonite(&mut self) {
-        if let Some(steam_cmd) = &self.steam_cmd {
+        if let Some(depot_downloader) = &self.depot_downloader {
             // インストール情報を作成
             let install = ResoniteInstall::new(
                 self.install_path.clone(),
@@ -476,7 +476,7 @@ impl ResoniteToolsApp {
             );
             
             // インストールを実行
-            match install.install(steam_cmd) {
+            match install.install(depot_downloader) {
                 Ok(()) => {
                     self.success_message = Some(format!("Resonite {} ブランチのインストールが完了しました", self.branch));
                 },
@@ -489,7 +489,7 @@ impl ResoniteToolsApp {
     
     // Resoniteを更新する
     fn update_resonite(&mut self) {
-        if let Some(steam_cmd) = &self.steam_cmd {
+        if let Some(depot_downloader) = &self.depot_downloader {
             // インストール情報を作成
             let install = ResoniteInstall::new(
                 self.install_path.clone(),
@@ -500,7 +500,7 @@ impl ResoniteToolsApp {
             );
             
             // 更新を実行
-            match install.update(steam_cmd) {
+            match install.update(depot_downloader) {
                 Ok(()) => {
                     self.success_message = Some(format!("Resonite {} ブランチの更新が完了しました", self.branch));
                 },
@@ -513,7 +513,7 @@ impl ResoniteToolsApp {
     
     // Resoniteの更新を確認する
     fn check_resonite_updates(&mut self) {
-        if let Some(steam_cmd) = &self.steam_cmd {
+        if let Some(depot_downloader) = &self.depot_downloader {
             // インストール情報を作成
             let install = ResoniteInstall::new(
                 self.install_path.clone(),
@@ -524,7 +524,7 @@ impl ResoniteToolsApp {
             );
             
             // 更新確認を実行
-            match install.check_updates(steam_cmd) {
+            match install.check_updates(depot_downloader) {
                 Ok(available) => {
                     self.update_available = Some(available);
                 },

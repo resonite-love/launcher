@@ -8,14 +8,15 @@ Resoniteのインストール、更新、プロファイル管理を行うため
 
 - **lib**: コア機能を提供するライブラリ
 - **cli**: コマンドラインインターフェース
-- **gui**: グラフィカルユーザーインターフェース（開発中）
+- **gui**: グラフィカルユーザーインターフェース（egui）
+- **tauri-gui**: モダンなデスクトップGUI（Tauri + React）
 
 ## ビルド方法
 
 ### 前提条件
 
 - Rust と Cargo がインストールされていること
-- SteamCMD が利用可能であること（`<実行ファイルがあるディレクトリ>/steamcmd/steamcmd.exe`）
+- DepotDownloader が利用可能であること（`<実行ファイルがあるディレクトリ>/DepotDownloader.exe`）
 
 ### コンパイル
 
@@ -26,8 +27,11 @@ cargo build --release
 # CLIのみをビルド
 cargo build --release -p resonite-manager
 
-# GUIのみをビルド
+# GUIのみをビルド（egui版）
 cargo build --release -p resonite-tools-gui
+
+# Tauri GUIをビルド
+cd tauri-gui && npm install && npm run tauri build
 ```
 
 ## 使用方法
@@ -60,9 +64,30 @@ resonite-manager steamlogin --username <ユーザー名>
 ### GUI
 
 ```
-# GUIアプリケーションの起動
+# eGuiベースのGUIアプリケーションの起動
 resonite-tools-gui
+
+# TauriベースのGUIアプリケーションの起動（推奨）
+cd tauri-gui && npm run tauri dev  # 開発モード
+# または
+./tauri-gui/src-tauri/target/release/resonite-tools-tauri  # ビルド後
 ```
+
+## 依存関係
+
+### DepotDownloader
+
+このツールはSteamのコンテンツをダウンロードするためにDepotDownloaderを使用します。
+
+- **ダウンロード**: [SteamRE/DepotDownloader](https://github.com/SteamRE/DepotDownloader/releases)
+- **配置場所**: 実行ファイルと同じディレクトリに `DepotDownloader.exe` を配置
+- **.NET要件**: .NET 8.0 Runtime が必要
+
+### インストール手順
+
+1. DepotDownloaderの最新リリースをダウンロード
+2. `DepotDownloader.exe` をツールの実行ファイルと同じディレクトリに配置
+3. .NET 8.0 Runtime がインストールされていることを確認
 
 ## ライセンス
 

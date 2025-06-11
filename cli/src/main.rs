@@ -4,7 +4,7 @@ use std::path::Path;
 use resonite_tools_lib::{
     install::{ResoniteInstall, ResoniteInstallManager},
     profile::ProfileManager,
-    steamcmd::SteamCmd,
+    depotdownloader::DepotDownloader,
     utils,
 };
 
@@ -12,11 +12,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 実行可能ファイルのディレクトリを取得
     let exe_dir = utils::get_executable_directory()?;
 
-    // SteamCMDの初期化
-    let steam_cmd = SteamCmd::with_default_path(&exe_dir);
+    // DepotDownloaderの初期化
+    let depot_downloader = DepotDownloader::with_default_path(&exe_dir);
 
-    // SteamCMDの存在確認
-    steam_cmd.check_exists()?;
+    // DepotDownloaderの存在確認
+    depot_downloader.check_exists()?;
 
     // プロファイルマネージャの初期化
     let profile_manager = ProfileManager::new(&exe_dir);
@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = App::new("Resonite Manager")
         .version("1.0")
         .author("Your Name")
-        .about("Manages Resonite installations using steamcmd")
+        .about("Manages Resonite installations using DepotDownloader")
         .subcommand(
             SubCommand::with_name("install")
                 .about("Installs or updates Resonite")
@@ -189,7 +189,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 sub_m.value_of("password").map(String::from),
                 sub_m.value_of("auth_code").map(String::from),
             );
-            install.install(&steam_cmd)?;
+            install.install(&depot_downloader)?;
         }
         ("update", Some(sub_m)) => {
             let branch = sub_m.value_of("branch").unwrap_or("release").to_string();
@@ -203,7 +203,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 sub_m.value_of("password").map(String::from),
                 sub_m.value_of("auth_code").map(String::from),
             );
-            install.update(&steam_cmd)?;
+            install.update(&depot_downloader)?;
         }
         ("check", Some(sub_m)) => {
             let branch = sub_m.value_of("branch").unwrap_or("release").to_string();
@@ -217,11 +217,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 sub_m.value_of("password").map(String::from),
                 sub_m.value_of("auth_code").map(String::from),
             );
-            install.check_updates(&steam_cmd)?;
+            let has_updates = install.check_updates(&depot_downloader)?;
+            if has_updates {
+                println!("Updates are available for Resonite.");
+            } else {
+                println!("Resonite is up to date.");
+            }
         }
         ("steamlogin", Some(sub_m)) => {
             let username = sub_m.value_of("username").unwrap();
-            steam_cmd.interactive_login(username)?;
+            depot_downloader.interactive_login(username)?;
         }
         ("profiles", Some(profiles_m)) => match profiles_m.subcommand() {
             ("new", Some(new_m)) => {

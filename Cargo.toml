@@ -2,7 +2,8 @@
 members = [
     "lib",
     "cli",
-    "gui"
+    "gui",
+    "tauri-gui/src-tauri"
 ]
 
 [profile.release]

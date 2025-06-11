@@ -5,10 +5,10 @@
 
 pub mod profile;
 pub mod install;
-pub mod steamcmd;
+pub mod depotdownloader;
 pub mod utils;
 
 // 必要に応じて公開APIをエクスポートする
 pub use profile::Profile;
 pub use install::ResoniteInstall;
-pub use steamcmd::SteamCmd;
+pub use depotdownloader::DepotDownloader;

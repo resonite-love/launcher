@@ -1,0 +1,52 @@
+1:47:37.875 ( -1 FPS)	[1] Detecting output device
+1:47:38.009 ( -1 FPS)	Steam API Initialized successfully.
+1:47:44.731 ( -1 FPS)	Autodetected device: SteamVR
+1:47:44.983 ( -1 FPS)	[2] Creating FrooxEngineRunner
+1:47:45.877 ( -1 FPS)	Supported Experimental Texture Formats for Sample: R8G8B8A8_SRGB, R8_UNorm, R8G8_UNorm, R8G8B8A8_UNorm, R16_UNorm, R16_SFloat, R16G16_SFloat, R16G16B16A16_SFloat, R32_SFloat, R32G32_SFloat, R32G32B32_SFloat, R32G32B32A32_SFloat, B8G8R8A8_SRGB, B8G8R8A8_UNorm, B4G4R4A4_UNormPack16, B5G6R5_UNormPack16, E5B9G9R9_UFloatPack32, RGBA_DXT1_SRGB, RGBA_DXT1_SRGB, RGBA_DXT1_UNorm, RGBA_DXT1_UNorm, RGBA_DXT3_SRGB, RGBA_DXT3_UNorm, RGBA_DXT5_SRGB, RGBA_DXT5_UNorm, R_BC4_UNorm, RG_BC5_UNorm, RGB_BC6H_UFloat, RGBA_BC7_SRGB, RGBA_BC7_UNorm
+1:47:45.877 ( -1 FPS)	[3] Initializing Engine Runner
+1:47:45.877 ( -1 FPS)	Microphone permission authorized
+1:47:45.877 ( -1 FPS)	External storage read permission authorized
+1:47:45.877 ( -1 FPS)	External storage write permission authorized
+1:47:45.878 ( -1 FPS)	DeviceName: Screen
+1:47:50.340 ( -1 FPS)	DeviceName: SteamVR
+1:47:50.354 ( -1 FPS)	AppPath: C:\Users\neo\GitHub\kokoa-resonite-tools\target\debug\release
+DataPath: C:\Users\neo\GitHub\kokoa-resonite-tools\target\debug\profiles\a\DataPath
+CachePath: C:/Users/neo/AppData/Local/Temp/Yellow Dog Man Studios/Resonite
+1:47:50.393 ( -1 FPS)	Initializing App: Beta 2025.6.4.1085
+Runtime version: 4.0.30319.42000
+Platform: Windows
+HeadDevice: SteamVR
+IsAOT: False
+OS: Windows 10  (10.0.22631) 64bit
+CPU: AMD Ryzen 9 7950X3D 16-Core Processor 
+GPU: NVIDIA GeForce RTX 3090
+PhysicalCores: 
+MemoryBytes: 95.12 GB
+VRAMBytes: 23.76 GB
+MaxTextureSize: 16384
+IsGPUTexturePOTByteAligned: True
+UsingLinearSpace: True
+XR Device Name: OpenVR
+XR Device Model: Index
+StereoRenderingMode: SinglePass
+Max GC Generation: 0, IsLittleEndian: True
+System.Numerics.Vectors HW accelerated: False, Vector<float>.Count: 4
+Brotli native encoding/decoding supported: True
+1:47:50.394 ( -1 FPS)	Supported Texture Formats: Alpha8, R8, RGB24, ARGB32, RGBA32, BGRA32, RGB565, RGBAHalf, RHalf, RGHalf, RGBAFloat, RFloat, RGFloat, BC1, BC3, BC4, BC5, BC6H, BC7
+1:47:50.395 ( -1 FPS)	[4] Processing startup commands...
+1:47:50.404 ( -1 FPS)	[5] Scanning locales...
+1:47:50.408 ( -1 FPS)	Available locales: cs, de, en, en-gb, eo, es, et, fi, fr, hu, is, ja, ko, mn, nl, no, pl, pt-br, ru, sv, th, tr, uk, zh-cn, zh-tw
+1:47:50.419 ( -1 FPS)	[6] Loading Config.json...
+1:47:50.423 ( -1 FPS)	[7] Computing compatibility hash...
+1:47:50.424 ( -1 FPS)	Engine WebProxy initialization failed.
+1:47:50.425 ( -1 FPS)	[8] Initializing FrooxEngine...
+1:47:51.498 ( -1 FPS)	FreeImage Version: 3.18.1
+1:47:51.498 ( -1 FPS)	BepuPhysics Version: 2.4.0.2-ydm-0.1.7+42f333b01e49414a137ceeb41b1bb19404d7b28d
+1:47:51.502 ( -1 FPS)	FreeType Version: 2.10.4
+1:47:51.502 ( -1 FPS)	Opus Version: libopus unknown
+1:47:51.552 ( -1 FPS)	Supported 3D model formats: meshx, 3d, 3ds, 3mf, ac, ac3d, acc, amf, ase, ask, assbin, b3d, blend, bsp, bvh, cob, csm, dae, dxf, enff, fbx, glb, gltf, hmp, ifc, ifczip, iqm, irr, irrmesh, lwo, lws, lxo, md2, md3, md5anim, md5camera, md5mesh, mdc, mdl, mesh, mesh.xml, mot, ms3d, ndo, nff, obj, off, ogex, pk3, ply, pmx, prj, q3o, q3s, raw, scn, sib, smd, step, stl, stp, ter, uc, vta, x, x3d, x3db, xgl, xml, zae, zgl
+1:47:51.552 ( -1 FPS)	Supported point cloud formats: pts, las, laz
+1:47:51.552 ( -1 FPS)	Supported gaussian splat formats: frsplt, ply, spz
+1:47:51.553 ( -1 FPS)	Supported image formats: bmp, ico, jpg, jif, jpeg, jpe, jng, koa, iff, lbm, mng, pbm, pcd, pcx, pgm, png, ppm, ras, tga, targa, tif, tiff, wap, wbmp, wbm, psd, psb, cut, xbm, xpm, dds, gif, hdr, g3, sgi, rgb, rgba, bw, exr, j2k, j2c, jp2, pfm, pct, pict, pic, 3fr, arw, bay, bmq, cap, cine, cr2, crw, cs1, dc2, dcr, drf, dsc, dng, erf, fff, ia, iiq, k25, kc2, kdc, mdc, mef, mos, mrw, nef, nrw, orf, pef, ptx, pxn, qtk, raf, raw, rdc, rw2, rwl, rwz, sr2, srf, srw, sti, x3f, webp, jxr, wdp, hdp
+1:47:51.553 ( -1 FPS)	Supported audio formats: wav, wave, flac, fla, ogg, aiff, aif, aifc
+1:4
