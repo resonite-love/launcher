@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::error::Error;
 use std::fs;
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 
 use crate::depotdownloader::DepotDownloader;
 use crate::profile::{GameInfo, ProfileManager};

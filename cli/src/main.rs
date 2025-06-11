@@ -1,5 +1,4 @@
 use clap::{App, Arg, SubCommand};
-use std::path::Path;
 
 use resonite_tools_lib::{
     install::{ResoniteInstall, ResoniteInstallManager},
@@ -34,11 +33,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(
                     Arg::with_name("branch")
                         .help("Branch to install: 'release' or 'prerelease' (default: release)")
+                        .takes_value(true)
                         .default_value("release"),
                 )
                 .arg(
                     Arg::with_name("path")
-                        .help("Installation path (default: exe_directory/branch_name)"),
+                        .help("Installation path (default: exe_directory/branch_name)")
+                        .takes_value(true),
                 )
                 .arg(
                     Arg::with_name("username")
@@ -68,11 +69,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(
                     Arg::with_name("branch")
                         .help("Branch to update: 'release' or 'prerelease' (default: release)")
+                        .takes_value(true)
                         .default_value("release"),
                 )
                 .arg(
                     Arg::with_name("path")
-                        .help("Installation path (default: exe_directory/branch_name)"),
+                        .help("Installation path (default: exe_directory/branch_name)")
+                        .takes_value(true),
                 )
                 .arg(
                     Arg::with_name("username")
@@ -102,11 +105,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(
                     Arg::with_name("branch")
                         .help("Branch to check: 'release' or 'prerelease' (default: release)")
+                        .takes_value(true)
                         .default_value("release"),
                 )
                 .arg(
                     Arg::with_name("path")
-                        .help("Installation path (default: exe_directory/branch_name)"),
+                        .help("Installation path (default: exe_directory/branch_name)")
+                        .takes_value(true),
                 )
                 .arg(
                     Arg::with_name("username")
@@ -163,6 +168,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .arg(
                     Arg::with_name("branch")
                         .help("Branch to launch: 'release' or 'prerelease' (default: release)")
+                        .takes_value(true)
                         .default_value("release"),
                 )
                 .arg(
@@ -179,45 +185,42 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     match matches.subcommand() {
         ("install", Some(sub_m)) => {
             let branch = sub_m.value_of("branch").unwrap_or("release").to_string();
-            let install_dir =
-                install_manager.determine_install_path(sub_m.value_of("path"), &branch);
+            let profile_name = format!("default_{}", branch);
 
             let install = ResoniteInstall::new(
-                install_dir,
+                profile_name,
                 branch,
+                None,
                 sub_m.value_of("username").map(String::from),
                 sub_m.value_of("password").map(String::from),
-                sub_m.value_of("auth_code").map(String::from),
             );
-            install.install(&depot_downloader)?;
+            install.install(&depot_downloader, &profile_manager)?;
         }
         ("update", Some(sub_m)) => {
             let branch = sub_m.value_of("branch").unwrap_or("release").to_string();
-            let install_dir =
-                install_manager.determine_install_path(sub_m.value_of("path"), &branch);
+            let profile_name = format!("default_{}", branch);
 
             let install = ResoniteInstall::new(
-                install_dir,
+                profile_name,
                 branch,
+                None,
                 sub_m.value_of("username").map(String::from),
                 sub_m.value_of("password").map(String::from),
-                sub_m.value_of("auth_code").map(String::from),
             );
-            install.update(&depot_downloader)?;
+            install.update(&depot_downloader, &profile_manager)?;
         }
         ("check", Some(sub_m)) => {
             let branch = sub_m.value_of("branch").unwrap_or("release").to_string();
-            let install_dir =
-                install_manager.determine_install_path(sub_m.value_of("path"), &branch);
+            let profile_name = format!("default_{}", branch);
 
             let install = ResoniteInstall::new(
-                install_dir,
+                profile_name,
                 branch,
+                None,
                 sub_m.value_of("username").map(String::from),
                 sub_m.value_of("password").map(String::from),
-                sub_m.value_of("auth_code").map(String::from),
             );
-            let has_updates = install.check_updates(&depot_downloader)?;
+            let has_updates = install.check_updates(&depot_downloader, &profile_manager)?;
             if has_updates {
                 println!("Updates are available for Resonite.");
             } else {
@@ -272,12 +275,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             // ブランチ名の検証
             utils::validate_branch(branch)?;
 
-            // プロファイルディレクトリを取得
-            let profiles_dir = profile_manager.get_profiles_dir();
-            let profile_dir = profiles_dir.join(profile_name);
-
             // Resoniteを起動
-            install_manager.launch_with_profile(branch, &profile_dir)?;
+            install_manager.launch_with_profile(profile_name, &profile_manager)?;
         }
         _ => {
             println!("No command specified. Use --help for usage information.");
