@@ -34,6 +34,18 @@ impl Default for AppState {
 pub struct ProfileInfo {
     pub name: String,
     pub description: String,
+    pub has_game: bool,
+    pub branch: Option<String>,
+    pub manifest_id: Option<String>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct GameInstallRequest {
+    pub profile_name: String,
+    pub branch: String,
+    pub manifest_id: Option<String>,
+    pub username: Option<String>,
+    pub password: Option<String>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -70,13 +82,10 @@ async fn initialize_app(state: State<'_, Mutex<AppState>>) -> Result<AppStatus, 
     }
 }
 
-// Install Resonite
+// Install Resonite to a profile
 #[tauri::command]
-async fn install_resonite(
-    branch: String,
-    install_path: Option<String>,
-    username: Option<String>,
-    password: Option<String>,
+async fn install_game_to_profile(
+    request: GameInstallRequest,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<String, String> {
     let app_state = state.lock().unwrap();
@@ -84,36 +93,27 @@ async fn install_resonite(
     let depot_downloader = app_state.depot_downloader.as_ref()
         .ok_or("DepotDownloader not initialized")?;
     
-    let install_manager = app_state.install_manager.as_ref()
-        .ok_or("Install manager not initialized")?;
-    
-    let install_dir = if let Some(path) = install_path {
-        path
-    } else {
-        install_manager.determine_install_path(None, &branch)
-    };
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
     
     let install = ResoniteInstall::new(
-        install_dir.clone(),
-        branch.clone(),
-        username,
-        password,
-        None, // auth_code not used with DepotDownloader
+        request.profile_name.clone(),
+        request.branch.clone(),
+        request.manifest_id.clone(),
+        request.username,
+        request.password,
     );
     
-    install.install(depot_downloader)
+    install.install(depot_downloader, profile_manager)
         .map_err(|e| format!("Installation failed: {}", e))?;
     
-    Ok(format!("Resonite {} branch installed successfully to {}", branch, install_dir))
+    Ok(format!("Resonite {} branch installed successfully to profile '{}'", request.branch, request.profile_name))
 }
 
-// Update Resonite
+// Update Resonite in a profile
 #[tauri::command]
-async fn update_resonite(
-    branch: String,
-    install_path: Option<String>,
-    username: Option<String>,
-    password: Option<String>,
+async fn update_profile_game(
+    request: GameInstallRequest,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<String, String> {
     let app_state = state.lock().unwrap();
@@ -121,36 +121,27 @@ async fn update_resonite(
     let depot_downloader = app_state.depot_downloader.as_ref()
         .ok_or("DepotDownloader not initialized")?;
     
-    let install_manager = app_state.install_manager.as_ref()
-        .ok_or("Install manager not initialized")?;
-    
-    let install_dir = if let Some(path) = install_path {
-        path
-    } else {
-        install_manager.determine_install_path(None, &branch)
-    };
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
     
     let install = ResoniteInstall::new(
-        install_dir.clone(),
-        branch.clone(),
-        username,
-        password,
-        None,
+        request.profile_name.clone(),
+        request.branch.clone(),
+        request.manifest_id.clone(),
+        request.username,
+        request.password,
     );
     
-    install.update(depot_downloader)
+    install.update(depot_downloader, profile_manager)
         .map_err(|e| format!("Update failed: {}", e))?;
     
-    Ok(format!("Resonite {} branch updated successfully", branch))
+    Ok(format!("Resonite {} branch updated successfully in profile '{}'", request.branch, request.profile_name))
 }
 
-// Check for updates
+// Check for updates in a profile
 #[tauri::command]
-async fn check_updates(
-    branch: String,
-    install_path: Option<String>,
-    username: Option<String>,
-    password: Option<String>,
+async fn check_profile_updates(
+    request: GameInstallRequest,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<bool, String> {
     let app_state = state.lock().unwrap();
@@ -158,28 +149,22 @@ async fn check_updates(
     let depot_downloader = app_state.depot_downloader.as_ref()
         .ok_or("DepotDownloader not initialized")?;
     
-    let install_manager = app_state.install_manager.as_ref()
-        .ok_or("Install manager not initialized")?;
-    
-    let install_dir = if let Some(path) = install_path {
-        path
-    } else {
-        install_manager.determine_install_path(None, &branch)
-    };
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
     
     let install = ResoniteInstall::new(
-        install_dir,
-        branch,
-        username,
-        password,
-        None,
+        request.profile_name.clone(),
+        request.branch.clone(),
+        request.manifest_id.clone(),
+        request.username,
+        request.password,
     );
     
-    install.check_updates(depot_downloader)
+    install.check_updates(depot_downloader, profile_manager)
         .map_err(|e| format!("Update check failed: {}", e))
 }
 
-// Get profiles
+// Get profiles with game info
 #[tauri::command]
 async fn get_profiles(state: State<'_, Mutex<AppState>>) -> Result<Vec<ProfileInfo>, String> {
     let app_state = state.lock().unwrap();
@@ -191,8 +176,11 @@ async fn get_profiles(state: State<'_, Mutex<AppState>>) -> Result<Vec<ProfileIn
         .map_err(|e| format!("Failed to get profiles: {}", e))?;
     
     Ok(profiles.into_iter().map(|p| ProfileInfo {
-        name: p.name,
-        description: p.description,
+        name: p.name.clone(),
+        description: p.description.clone(),
+        has_game: p.has_game_installed(),
+        branch: p.game_info.as_ref().map(|info| info.branch.clone()),
+        manifest_id: p.game_info.as_ref().and_then(|info| info.manifest_id.clone()),
     }).collect())
 }
 
@@ -225,7 +213,6 @@ async fn create_profile(
 // Launch Resonite with profile
 #[tauri::command]
 async fn launch_resonite(
-    branch: String,
     profile_name: String,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<String, String> {
@@ -237,13 +224,10 @@ async fn launch_resonite(
     let profile_manager = app_state.profile_manager.as_ref()
         .ok_or("Profile manager not initialized")?;
     
-    let profiles_dir = profile_manager.get_profiles_dir();
-    let profile_dir = profiles_dir.join(&profile_name);
-    
-    install_manager.launch_with_profile(&branch, &profile_dir)
+    install_manager.launch_with_profile(&profile_name, profile_manager)
         .map_err(|e| format!("Launch failed: {}", e))?;
     
-    Ok(format!("Resonite launched with profile '{}' on {} branch", profile_name, branch))
+    Ok(format!("Resonite launched with profile '{}'", profile_name))
 }
 
 // Interactive Steam login
@@ -268,9 +252,9 @@ fn main() {
         .manage(Mutex::new(AppState::default()))
         .invoke_handler(tauri::generate_handler![
             initialize_app,
-            install_resonite,
-            update_resonite,
-            check_updates,
+            install_game_to_profile,
+            update_profile_game,
+            check_profile_updates,
             get_profiles,
             create_profile,
             launch_resonite,

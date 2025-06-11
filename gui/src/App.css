@@ -164,7 +164,7 @@ body {
 
 .profiles-grid {
   display: grid;
-  grid-template-columns: 2fr 3fr 1fr;
+  grid-template-columns: 2fr 3fr 2fr 3fr;
   gap: 1rem;
   align-items: center;
   padding: 0.5rem 0;

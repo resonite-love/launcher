@@ -106,6 +106,7 @@ impl DepotDownloader {
         &self,
         install_dir: &str,
         branch: &str,
+        manifest_id: Option<&str>,
         username: Option<&str>,
         password: Option<&str>,
     ) -> Vec<String> {
@@ -115,26 +116,20 @@ impl DepotDownloader {
         args.push("-app".to_string());
         args.push("2519830".to_string());
 
-        // ブランチに応じたDepotIDを設定
-        // リリース版とプレリリース版で異なるDepotを指定
-        match branch {
-            "release" => {
-                // リリース版のDepotID（実際の値に変更が必要）
-                args.push("-depot".to_string());
-                args.push("2519832".to_string()); // 実際のDepotIDに要変更
-            },
-            "prerelease" => {
-                // プレリリース版のDepotID（実際の値に変更が必要）
-                args.push("-depot".to_string());
-                args.push("2519832".to_string()); // 実際のDepotIDに要変更
-                args.push("-branch".to_string());
-                args.push("prerelease".to_string()); // 実際のDepotIDに要変更
-            },
-            _ => {
-                // デフォルトはリリース版
-                args.push("-depot".to_string());
-                args.push("2519832".to_string());
-            }
+        // Depot IDを指定
+        args.push("-depot".to_string());
+        args.push("2519832".to_string());
+
+        // ブランチを指定（prereleaseの場合）
+        if branch == "prerelease" {
+            args.push("-branch".to_string());
+            args.push("prerelease".to_string());
+        }
+
+        // ManifestIDが指定されている場合は追加
+        if let Some(manifest) = manifest_id {
+            args.push("-manifest".to_string());
+            args.push(manifest.to_string());
         }
 
         // インストールディレクトリを指定
@@ -167,10 +162,11 @@ impl DepotDownloader {
         &self,
         install_dir: &str,
         branch: &str,
+        manifest_id: Option<&str>,
         username: Option<&str>,
         password: Option<&str>,
     ) -> Result<(), Box<dyn Error>> {
-        let args = self.build_resonite_args(install_dir, branch, username, password);
+        let args = self.build_resonite_args(install_dir, branch, manifest_id, username, password);
         
         let output = self.run(&args)?;
 
@@ -188,10 +184,11 @@ impl DepotDownloader {
         &self,
         install_dir: &str,
         branch: &str,
+        manifest_id: Option<&str>,
         username: Option<&str>,
         password: Option<&str>,
     ) -> Result<bool, Box<dyn Error>> {
-        let mut args = self.build_resonite_args(install_dir, branch, username, password);
+        let mut args = self.build_resonite_args(install_dir, branch, manifest_id, username, password);
         
         // manifest-onlyオプションを追加してマニフェストのみを取得
         args.push("-manifest-only".to_string());

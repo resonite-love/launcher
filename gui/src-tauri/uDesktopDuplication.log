@@ -1,0 +1,23 @@
+[uDD::Log][2025-06-11 16:35:02] Start
+[uDD::Log][2025-06-11 16:35:02] OS Version    : 10.0
+[uDD::Log][2025-06-11 16:35:02] Build Number  : 22631
+[uDD::Log][2025-06-11 16:35:02] Service Pack  : 
+[uDD::Log][2025-06-11 16:35:02] Graphics Card [0] : NVIDIA GeForce RTX 3090
+[uDD::Log][2025-06-11 16:35:02]   > Monitor[0] : \\.\DISPLAY1
+[uDD::Log][2025-06-11 16:35:02]   > Monitor[1] : \\.\DISPLAY10
+[uDD::Log][2025-06-11 16:35:02] Graphics Card [1] : AMD Radeon(TM) Graphics
+[uDD::Log][2025-06-11 16:35:02] Graphics Card [2] : NVIDIA GeForce RTX 3090
+[uDD::Log][2025-06-11 16:35:02] Graphics Card [3] : Microsoft Basic Render Driver
+[uDD::Log][2025-06-11 16:35:02] Monitor::Initialized() =>
+[uDD::Log][2025-06-11 16:35:02]     ID    : 0
+[uDD::Log][2025-06-11 16:35:02]     Size  : (1920, 1200)
+[uDD::Log][2025-06-11 16:35:02]     DPI   : (90, 90)
+[uDD::Log][2025-06-11 16:35:02]     Rot   : Landscape
+[uDD::Log][2025-06-11 16:35:02] Duplicator::Initialize() => OK.
+[uDD::Log][2025-06-11 16:35:02] Monitor::Initialized() =>
+[uDD::Log][2025-06-11 16:35:02]     ID    : 1
+[uDD::Log][2025-06-11 16:35:02]     Size  : (1920, 1080)
+[uDD::Log][2025-06-11 16:35:02]     DPI   : (92, 91)
+[uDD::Log][2025-06-11 16:35:02]     Rot   : Landscape
+[uDD::Log][2025-06-11 16:35:02] Duplicator::Initialize() => OK.
+[uDD::Log][2025-06-11 16:35:46] Stop

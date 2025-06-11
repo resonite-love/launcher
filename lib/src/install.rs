@@ -1,43 +1,46 @@
 use std::path::{Path, PathBuf};
 use std::error::Error;
 use std::fs;
+use chrono::{DateTime, Utc};
 
 use crate::depotdownloader::DepotDownloader;
+use crate::profile::{GameInfo, ProfileManager};
 
-/// Resoniteのインストール情報を保持する構造体
+/// Resoniteのプロファイルベースインストール情報を保持する構造体
 pub struct ResoniteInstall {
-    pub install_dir: String,
+    pub profile_name: String,
     pub branch: String,
+    pub manifest_id: Option<String>,
     pub username: Option<String>,
     pub password: Option<String>,
-    // auth_code は DepotDownloader では自動処理されるため不要
 }
 
 impl ResoniteInstall {
     /// 新しいResoniteInstallインスタンスを作成する
     pub fn new(
-        install_dir: String,
+        profile_name: String,
         branch: String,
+        manifest_id: Option<String>,
         username: Option<String>,
         password: Option<String>,
-        _auth_code: Option<String>, // DepotDownloaderでは未使用
     ) -> Self {
         ResoniteInstall {
-            install_dir,
+            profile_name,
             branch,
+            manifest_id,
             username,
             password,
         }
     }
 
     /// 実行可能ファイルの存在確認とパスの取得
-    pub fn get_executable_path(&self) -> Result<PathBuf, Box<dyn Error>> {
-        let path = Path::new(&self.install_dir);
-        let resonite_exe = path.join("Resonite.exe");
+    pub fn get_executable_path(&self, profile_manager: &ProfileManager) -> Result<PathBuf, Box<dyn Error>> {
+        let profile_dir = profile_manager.get_profile_dir(&self.profile_name);
+        let resonite_exe = profile_dir.join("Game").join("Resonite.exe");
 
         if !resonite_exe.exists() {
             return Err(format!(
-                "Resonite executable not found at {}. Please install it first.",
+                "Resonite executable not found at {}. Please install the game to this profile first.",
                 resonite_exe.display()
             )
             .into());
@@ -46,61 +49,74 @@ impl ResoniteInstall {
         Ok(resonite_exe)
     }
 
-    /// Resoniteをインストールする
-    pub fn install(&self, depot_downloader: &DepotDownloader) -> Result<(), Box<dyn Error>> {
+    /// プロファイルにResoniteをインストールする
+    pub fn install(&self, depot_downloader: &DepotDownloader, profile_manager: &ProfileManager) -> Result<(), Box<dyn Error>> {
         println!(
-            "Installing Resonite {} branch to {}",
-            self.branch, self.install_dir
+            "Installing Resonite {} branch to profile '{}'",
+            self.branch, self.profile_name
         );
 
-        // Create the installation directory if it doesn't exist
-        let path = Path::new(&self.install_dir);
-        if !path.exists() {
-            fs::create_dir_all(path)?;
+        // プロファイルの存在確認
+        let mut profile = profile_manager.get_profile(&self.profile_name)?;
+        let profile_dir = profile_manager.get_profile_dir(&self.profile_name);
+        let game_dir = profile_dir.join("Game");
+
+        // ゲームディレクトリを作成
+        if !game_dir.exists() {
+            fs::create_dir_all(&game_dir)?;
         }
 
-        // Use DepotDownloader to download Resonite
+        // DepotDownloaderでResoniteをダウンロード
         depot_downloader.download_resonite(
-            &self.install_dir,
+            &game_dir.to_string_lossy(),
             &self.branch,
+            self.manifest_id.as_deref(),
             self.username.as_deref(),
             self.password.as_deref(),
         )?;
+
+        // プロファイルのゲーム情報を更新
+        let game_info = GameInfo {
+            branch: self.branch.clone(),
+            manifest_id: self.manifest_id.clone(),
+            depot_id: "2519832".to_string(),
+            installed: true,
+            last_updated: Some(Utc::now().to_rfc3339()),
+        };
+        
+        profile.update_game_info(game_info);
+        profile_manager.update_profile(&profile)?;
 
         println!("Installation successful!");
         Ok(())
     }
 
-    /// Resoniteを更新する
-    pub fn update(&self, depot_downloader: &DepotDownloader) -> Result<(), Box<dyn Error>> {
+    /// プロファイルのResoniteを更新する
+    pub fn update(&self, depot_downloader: &DepotDownloader, profile_manager: &ProfileManager) -> Result<(), Box<dyn Error>> {
         println!(
-            "Updating Resonite {} branch in {}",
-            self.branch, self.install_dir
+            "Updating Resonite {} branch in profile '{}'",
+            self.branch, self.profile_name
         );
 
         // For DepotDownloader, update is the same as install
-        depot_downloader.download_resonite(
-            &self.install_dir,
-            &self.branch,
-            self.username.as_deref(),
-            self.password.as_deref(),
-        )?;
-
-        println!("Update successful!");
-        Ok(())
+        self.install(depot_downloader, profile_manager)
     }
 
-    /// アップデートがあるかチェックする
-    pub fn check_updates(&self, depot_downloader: &DepotDownloader) -> Result<bool, Box<dyn Error>> {
+    /// プロファイルのアップデートがあるかチェックする
+    pub fn check_updates(&self, depot_downloader: &DepotDownloader, profile_manager: &ProfileManager) -> Result<bool, Box<dyn Error>> {
         println!(
-            "Checking updates for Resonite {} branch in {}",
-            self.branch, self.install_dir
+            "Checking updates for Resonite {} branch in profile '{}'",
+            self.branch, self.profile_name
         );
+
+        let profile_dir = profile_manager.get_profile_dir(&self.profile_name);
+        let game_dir = profile_dir.join("Game");
 
         // Use DepotDownloader to check for updates
         depot_downloader.check_updates(
-            &self.install_dir,
+            &game_dir.to_string_lossy(),
             &self.branch,
+            self.manifest_id.as_deref(),
             self.username.as_deref(),
             self.password.as_deref(),
         )
@@ -148,34 +164,43 @@ impl ResoniteInstallManager {
         Ok(resonite_exe)
     }
 
-    /// 指定されたブランチのResoniteをプロファイルで起動する
+    /// プロファイルでResoniteを起動する
     pub fn launch_with_profile(
         &self,
-        branch: &str,
-        profile_path: &Path,
+        profile_name: &str,
+        profile_manager: &ProfileManager,
     ) -> Result<(), Box<dyn Error>> {
         use std::process::Command;
-        use crate::profile::Profile;
 
-        // Load profile
-        let profile = Profile::load(profile_path)?;
+        // プロファイルを読み込み
+        let profile = profile_manager.get_profile(profile_name)?;
+        let profile_dir = profile_manager.get_profile_dir(profile_name);
 
-        // Get Resonite executable path
-        let resonite_path = self.find_resonite_executable(branch)?;
+        // ゲームがインストールされているかチェック
+        if !profile.has_game_installed() {
+            return Err(format!("Game is not installed in profile '{}'", profile_name).into());
+        }
+
+        // Resonite実行ファイルのパスを取得
+        let resonite_path = profile.get_resonite_exe(&profile_dir);
+        if !resonite_path.exists() {
+            return Err(format!("Resonite executable not found at {}", resonite_path.display()).into());
+        }
+
+        // 起動引数を展開
+        let expanded_args = profile.expand_args(&profile_dir);
 
         println!(
-            "Launching Resonite ({} branch) with profile '{}'",
-            branch, profile.name
+            "Launching Resonite with profile '{}'",
+            profile.name
         );
         println!("Executable: {}", resonite_path.display());
-        println!("Arguments: {:?}", profile.args);
+        println!("Arguments: {:?}", expanded_args);
 
-        // Launch Resonite
-        Command::new(resonite_path).args(&profile.args).spawn()?;
+        // Resoniteを起動
+        Command::new(resonite_path).args(&expanded_args).spawn()?;
 
-        // Don't wait for Resonite to exit
         println!("Resonite launched successfully!");
-
         Ok(())
     }
 }

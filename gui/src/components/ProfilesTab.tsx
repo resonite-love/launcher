@@ -4,6 +4,17 @@ import { invoke } from '@tauri-apps/api/tauri';
 interface ProfileInfo {
   name: string;
   description: string;
+  has_game: boolean;
+  branch?: string;
+  manifest_id?: string;
+}
+
+interface GameInstallRequest {
+  profile_name: string;
+  branch: string;
+  manifest_id?: string;
+  username?: string;
+  password?: string;
 }
 
 function ProfilesTab() {
@@ -12,6 +23,14 @@ function ProfilesTab() {
   const [newProfileDescription, setNewProfileDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  
+  // ゲームインストール用の状態
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<string>('');
+  const [installBranch, setInstallBranch] = useState('release');
+  const [manifestId, setManifestId] = useState('');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     loadProfiles();
@@ -50,17 +69,78 @@ function ProfilesTab() {
     }
   };
 
-  const launchProfile = async (profileName: string, branch: string) => {
+  const launchProfile = async (profileName: string) => {
     try {
       setIsLoading(true);
       const result = await invoke<string>('launch_resonite', {
-        branch,
         profileName,
       });
       
       setMessage({ type: 'success', text: result });
     } catch (err) {
       setMessage({ type: 'error', text: `起動に失敗しました: ${err}` });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const openInstallModal = (profileName: string) => {
+    setSelectedProfile(profileName);
+    setInstallBranch('release');
+    setManifestId('');
+    setUsername('');
+    setPassword('');
+    setShowInstallModal(true);
+  };
+
+  const closeInstallModal = () => {
+    setShowInstallModal(false);
+    setSelectedProfile('');
+  };
+
+  const installGame = async () => {
+    if (!selectedProfile) return;
+
+    try {
+      setIsLoading(true);
+      const request: GameInstallRequest = {
+        profile_name: selectedProfile,
+        branch: installBranch,
+        manifest_id: manifestId || undefined,
+        username: username || undefined,
+        password: password || undefined,
+      };
+
+      const result = await invoke<string>('install_game_to_profile', { request });
+      setMessage({ type: 'success', text: result });
+      closeInstallModal();
+      await loadProfiles();
+    } catch (err) {
+      setMessage({ type: 'error', text: `ゲームのインストールに失敗しました: ${err}` });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateGame = async (profileName: string) => {
+    const profile = profiles.find(p => p.name === profileName);
+    if (!profile || !profile.has_game) return;
+
+    try {
+      setIsLoading(true);
+      const request: GameInstallRequest = {
+        profile_name: profileName,
+        branch: profile.branch || 'release',
+        manifest_id: profile.manifest_id,
+        username: username || undefined,
+        password: password || undefined,
+      };
+
+      const result = await invoke<string>('update_profile_game', { request });
+      setMessage({ type: 'success', text: result });
+      await loadProfiles();
+    } catch (err) {
+      setMessage({ type: 'error', text: `ゲームの更新に失敗しました: ${err}` });
     } finally {
       setIsLoading(false);
     }
@@ -131,6 +211,7 @@ function ProfilesTab() {
             <div className="profiles-grid header">
               <div>名前</div>
               <div>説明</div>
+              <div>ゲーム状態</div>
               <div>操作</div>
             </div>
             
@@ -139,28 +220,151 @@ function ProfilesTab() {
                 <div>{profile.name}</div>
                 <div>{profile.description || '-'}</div>
                 <div>
-                  <button
-                    className="button"
-                    onClick={() => launchProfile(profile.name, 'release')}
-                    disabled={isLoading}
-                    style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                  >
-                    リリース版で起動
-                  </button>
-                  <button
-                    className="button secondary"
-                    onClick={() => launchProfile(profile.name, 'prerelease')}
-                    disabled={isLoading}
-                    style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                  >
-                    プレリリース版で起動
-                  </button>
+                  {profile.has_game ? (
+                    <span style={{ color: '#4fd69c' }}>
+                      ✓ {profile.branch} {profile.manifest_id && `(${profile.manifest_id.slice(0, 8)}...)`}
+                    </span>
+                  ) : (
+                    <span style={{ color: '#ccc' }}>ゲーム未インストール</span>
+                  )}
+                </div>
+                <div>
+                  {profile.has_game ? (
+                    <>
+                      <button
+                        className="button"
+                        onClick={() => launchProfile(profile.name)}
+                        disabled={isLoading}
+                        style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                      >
+                        起動
+                      </button>
+                      <button
+                        className="button secondary"
+                        onClick={() => updateGame(profile.name)}
+                        disabled={isLoading}
+                        style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                      >
+                        更新
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      className="button"
+                      onClick={() => openInstallModal(profile.name)}
+                      disabled={isLoading}
+                      style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
+                    >
+                      ゲームをインストール
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* ゲームインストールモーダル */}
+      {showInstallModal && (
+        <div style={{ 
+          position: 'fixed', 
+          top: 0, 
+          left: 0, 
+          right: 0, 
+          bottom: 0, 
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: '#2d2d2d',
+            border: '1px solid #444',
+            borderRadius: '8px',
+            padding: '2rem',
+            maxWidth: '500px',
+            width: '90%'
+          }}>
+            <h3>プロファイル '{selectedProfile}' にゲームをインストール</h3>
+            
+            <div className="form-group">
+              <label>ブランチ:</label>
+              <div className="branch-selector">
+                <label>
+                  <input
+                    type="radio"
+                    value="release"
+                    checked={installBranch === 'release'}
+                    onChange={(e) => setInstallBranch(e.target.value)}
+                  />
+                  リリース版
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="prerelease"
+                    checked={installBranch === 'prerelease'}
+                    onChange={(e) => setInstallBranch(e.target.value)}
+                  />
+                  プレリリース版
+                </label>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="manifestId">マニフェストID（オプション）:</label>
+              <input
+                id="manifestId"
+                type="text"
+                value={manifestId}
+                onChange={(e) => setManifestId(e.target.value)}
+                placeholder="特定バージョンを指定する場合"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="steamUsername">Steamユーザー名（オプション）:</label>
+              <input
+                id="steamUsername"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Steamユーザー名"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="steamPassword">Steamパスワード（オプション）:</label>
+              <input
+                id="steamPassword"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Steamパスワード"
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1rem' }}>
+              <button
+                className="button secondary"
+                onClick={closeInstallModal}
+                disabled={isLoading}
+              >
+                キャンセル
+              </button>
+              <button
+                className="button"
+                onClick={installGame}
+                disabled={isLoading}
+              >
+                {isLoading ? 'インストール中...' : 'インストール'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

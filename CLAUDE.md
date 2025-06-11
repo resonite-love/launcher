@@ -73,3 +73,15 @@ This is a Rust workspace project for managing Resonite VR installations via Depo
 ### Branch Support
 - Supports both "release" and "prerelease" branches
 - Default installation paths: `<executable_dir>/<branch_name>/`
+
+## Detailed Configuration
+
+For comprehensive information about configuration, profile management, and troubleshooting:
+
+📖 **See [CONFIGURATION.md](./CONFIGURATION.md)** for detailed documentation including:
+- Directory structure and file organization
+- Profile creation and management
+- Resonite installation configuration
+- Launch options and customization
+- Troubleshooting common issues
+- Advanced configuration examples

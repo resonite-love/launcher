@@ -3,29 +3,67 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::error::Error;
 
+/// Resoniteゲーム情報
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct GameInfo {
+    pub branch: String,
+    pub manifest_id: Option<String>,
+    pub depot_id: String,
+    pub installed: bool,
+    pub last_updated: Option<String>,
+}
+
 /// Resoniteの起動プロファイルを管理するための構造体
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Profile {
     pub name: String,
     pub description: String,
+    pub game_info: Option<GameInfo>,
     pub args: Vec<String>,
 }
 
 impl Profile {
     /// 新しいプロファイルを作成する
-    pub fn new(name: &str, full_profile_path: &Path) -> Self {
-        // データパスの絶対パスを取得
-        let data_path = full_profile_path.join("DataPath");
-
+    pub fn new(name: &str, _full_profile_path: &Path) -> Self {
         Profile {
             name: name.to_string(),
             description: String::new(),
+            game_info: None, // ゲームは後でインストール
             args: vec![
                 "-SkipIntroTutorial".to_string(),
                 "-DataPath".to_string(),
-                data_path.to_string_lossy().to_string(),
+                "%PROFILE_DIR%\\DataPath".to_string(), // パス変数を使用
             ],
         }
+    }
+
+    /// プロファイルにゲームがインストールされているかチェック
+    pub fn has_game_installed(&self) -> bool {
+        self.game_info.as_ref().map_or(false, |info| info.installed)
+    }
+
+    /// プロファイルのゲームディレクトリパスを取得
+    pub fn get_game_dir(&self, profile_dir: &Path) -> PathBuf {
+        profile_dir.join("Game")
+    }
+
+    /// プロファイルのResonite実行ファイルパスを取得
+    pub fn get_resonite_exe(&self, profile_dir: &Path) -> PathBuf {
+        self.get_game_dir(profile_dir).join("Resonite.exe")
+    }
+
+    /// ゲーム情報を更新
+    pub fn update_game_info(&mut self, game_info: GameInfo) {
+        self.game_info = Some(game_info);
+    }
+
+    /// 起動引数のパス変数を展開
+    pub fn expand_args(&self, profile_dir: &Path) -> Vec<String> {
+        self.args.iter().map(|arg| {
+            arg.replace("%PROFILE_DIR%", &profile_dir.to_string_lossy())
+               .replace("%GAME_DIR%", &self.get_game_dir(profile_dir).to_string_lossy())
+               .replace("%DATA_DIR%", &profile_dir.join("DataPath").to_string_lossy())
+        }).collect()
     }
 
     /// プロファイルをJSONファイルとして保存する
@@ -83,6 +121,10 @@ impl ProfileManager {
         let data_path_dir = specific_profile_dir.join("DataPath");
         fs::create_dir_all(&data_path_dir)?;
 
+        // Create Game directory (for future game installation)
+        let game_dir = specific_profile_dir.join("Game");
+        fs::create_dir_all(&game_dir)?;
+
         // Create new profile with the full profile path
         let profile = Profile::new(name, &specific_profile_dir);
 
@@ -133,5 +175,31 @@ impl ProfileManager {
         }
 
         Profile::load(&profile_dir)
+    }
+
+    /// プロファイルのディレクトリパスを取得
+    pub fn get_profile_dir(&self, profile_name: &str) -> PathBuf {
+        self.profiles_dir.join(profile_name)
+    }
+
+    /// プロファイルを更新して保存
+    pub fn update_profile(&self, profile: &Profile) -> Result<(), Box<dyn Error>> {
+        let profile_dir = self.get_profile_dir(&profile.name);
+        profile.save(&profile_dir)
+    }
+
+    /// プロファイルのゲームがインストールされているかチェック
+    pub fn check_game_installed(&self, profile_name: &str) -> Result<bool, Box<dyn Error>> {
+        let profile = self.get_profile(profile_name)?;
+        let profile_dir = self.get_profile_dir(profile_name);
+        
+        if let Some(game_info) = &profile.game_info {
+            if game_info.installed {
+                let exe_path = profile.get_resonite_exe(&profile_dir);
+                return Ok(exe_path.exists());
+            }
+        }
+        
+        Ok(false)
     }
 }

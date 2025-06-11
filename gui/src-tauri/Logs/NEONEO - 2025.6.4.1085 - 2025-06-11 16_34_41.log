@@ -1,0 +1,657 @@
+16:34:41.260 ( -1 FPS)	[1] Detecting output device
+16:34:41.371 ( -1 FPS)	Steam API Initialized successfully.
+16:34:47.664 ( -1 FPS)	Autodetected device: SteamVR
+16:34:47.680 ( -1 FPS)	[2] Creating FrooxEngineRunner
+16:34:48.199 ( -1 FPS)	Supported Experimental Texture Formats for Sample: R8G8B8A8_SRGB, R8_UNorm, R8G8_UNorm, R8G8B8A8_UNorm, R16_UNorm, R16_SFloat, R16G16_SFloat, R16G16B16A16_SFloat, R32_SFloat, R32G32_SFloat, R32G32B32_SFloat, R32G32B32A32_SFloat, B8G8R8A8_SRGB, B8G8R8A8_UNorm, B4G4R4A4_UNormPack16, B5G6R5_UNormPack16, E5B9G9R9_UFloatPack32, RGBA_DXT1_SRGB, RGBA_DXT1_SRGB, RGBA_DXT1_UNorm, RGBA_DXT1_UNorm, RGBA_DXT3_SRGB, RGBA_DXT3_UNorm, RGBA_DXT5_SRGB, RGBA_DXT5_UNorm, R_BC4_UNorm, RG_BC5_UNorm, RGB_BC6H_UFloat, RGBA_BC7_SRGB, RGBA_BC7_UNorm
+16:34:48.199 ( -1 FPS)	[3] Initializing Engine Runner
+16:34:48.199 ( -1 FPS)	Microphone permission authorized
+16:34:48.199 ( -1 FPS)	External storage read permission authorized
+16:34:48.199 ( -1 FPS)	External storage write permission authorized
+16:34:48.200 ( -1 FPS)	DeviceName: Screen
+16:34:52.227 ( -1 FPS)	DeviceName: SteamVR
+16:34:52.241 ( -1 FPS)	AppPath: C:\Users\neo\GitHub\kokoa-resonite-tools\target\debug\profiles\test\Game
+DataPath: C:\Users\neo\GitHub\kokoa-resonite-tools\target\debug\profiles\test\DataPath
+CachePath: C:/Users/neo/AppData/Local/Temp/Yellow Dog Man Studios/Resonite
+16:34:52.266 ( -1 FPS)	Initializing App: Beta 2025.6.4.1085
+Runtime version: 4.0.30319.42000
+Platform: Windows
+HeadDevice: SteamVR
+IsAOT: False
+OS: Windows 10  (10.0.22631) 64bit
+CPU: AMD Ryzen 9 7950X3D 16-Core Processor 
+GPU: NVIDIA GeForce RTX 3090
+PhysicalCores: 
+MemoryBytes: 95.12 GB
+VRAMBytes: 23.76 GB
+MaxTextureSize: 16384
+IsGPUTexturePOTByteAligned: True
+UsingLinearSpace: True
+XR Device Name: OpenVR
+XR Device Model: Index
+StereoRenderingMode: SinglePass
+Max GC Generation: 0, IsLittleEndian: True
+System.Numerics.Vectors HW accelerated: False, Vector<float>.Count: 4
+Brotli native encoding/decoding supported: True
+16:34:52.266 ( -1 FPS)	Supported Texture Formats: Alpha8, R8, RGB24, ARGB32, RGBA32, BGRA32, RGB565, RGBAHalf, RHalf, RGHalf, RGBAFloat, RFloat, RGFloat, BC1, BC3, BC4, BC5, BC6H, BC7
+16:34:52.267 ( -1 FPS)	[4] Processing startup commands...
+16:34:52.275 ( -1 FPS)	[5] Scanning locales...
+16:34:52.279 ( -1 FPS)	Available locales: cs, de, en, en-gb, eo, es, et, fi, fr, hu, is, ja, ko, mn, nl, no, pl, pt-br, ru, sv, th, tr, uk, zh-cn, zh-tw
+16:34:52.288 ( -1 FPS)	[6] Loading Config.json...
+16:34:52.291 ( -1 FPS)	[7] Computing compatibility hash...
+16:34:52.292 ( -1 FPS)	Engine WebProxy initialization failed.
+16:34:52.293 ( -1 FPS)	[8] Initializing FrooxEngine...
+16:34:53.095 ( -1 FPS)	FreeImage Version: 3.18.1
+16:34:53.095 ( -1 FPS)	BepuPhysics Version: 2.4.0.2-ydm-0.1.7+42f333b01e49414a137ceeb41b1bb19404d7b28d
+16:34:53.098 ( -1 FPS)	FreeType Version: 2.10.4
+16:34:53.098 ( -1 FPS)	Opus Version: libopus unknown
+16:34:53.133 ( -1 FPS)	Supported 3D model formats: meshx, 3d, 3ds, 3mf, ac, ac3d, acc, amf, ase, ask, assbin, b3d, blend, bsp, bvh, cob, csm, dae, dxf, enff, fbx, glb, gltf, hmp, ifc, ifczip, iqm, irr, irrmesh, lwo, lws, lxo, md2, md3, md5anim, md5camera, md5mesh, mdc, mdl, mesh, mesh.xml, mot, ms3d, ndo, nff, obj, off, ogex, pk3, ply, pmx, prj, q3o, q3s, raw, scn, sib, smd, step, stl, stp, ter, uc, vta, x, x3d, x3db, xgl, xml, zae, zgl
+16:34:53.134 ( -1 FPS)	Supported point cloud formats: pts, las, laz
+16:34:53.134 ( -1 FPS)	Supported gaussian splat formats: frsplt, ply, spz
+16:34:53.134 ( -1 FPS)	Supported image formats: bmp, ico, jpg, jif, jpeg, jpe, jng, koa, iff, lbm, mng, pbm, pcd, pcx, pgm, png, ppm, ras, tga, targa, tif, tiff, wap, wbmp, wbm, psd, psb, cut, xbm, xpm, dds, gif, hdr, g3, sgi, rgb, rgba, bw, exr, j2k, j2c, jp2, pfm, pct, pict, pic, 3fr, arw, bay, bmq, cap, cine, cr2, crw, cs1, dc2, dcr, drf, dsc, dng, erf, fff, ia, iiq, k25, kc2, kdc, mdc, mef, mos, mrw, nef, nrw, orf, pef, ptx, pxn, qtk, raf, raw, rdc, rw2, rwl, rwz, sr2, srf, srw, sti, x3f, webp, jxr, wdp, hdp
+16:34:53.134 ( -1 FPS)	Supported audio formats: wav, wave, flac, fla, ogg, aiff, aif, aifc
+16:34:53.134 ( -1 FPS)	Supported video formats: mp4, mpeg, avi, mov, mpg, mkv, flv, webm, mts, 3gp, bik, m2v, m2s, wmv, m3u8, m3u, pls, ogv, m4a, mp3, mpeg3, aac, ac3, aif, aiff, ape, au, it, mka, mod, mp1, mp2, opus, s3m, sid, w64, wma, xm, nsf, nsfe, gbs, vgm, vgz, spc, gym
+16:34:53.134 ( -1 FPS)	Supported font formats: ttf, otf, ttc, otc, woff
+16:34:53.135 ( -1 FPS)	Supported document formats: pdf
+16:34:53.135 ( -1 FPS)	Supported subtitle formats: srt, sub, sub, ssa, ttml, vtt
+16:34:53.177 ( -1 FPS)	Scanning assemblies
+16:34:53.569 ( -1 FPS)	Data Model Assembly: Awwdio, Type Count: 1 (total: 80, Compatibility Hash: Hzv2eaXC8iH4+rN2ycyonw==, Type: Core)
+16:34:53.582 ( -1 FPS)	Data Model Assembly: FrooxEngine.Store, Type Count: 1 (total: 104, Compatibility Hash: K22/sKfODKjKTdTi7M/GnQ==, Type: Core)
+16:34:53.586 ( -1 FPS)	Data Model Assembly: SkyFrost.Base.Models, Type Count: 4 (total: 207, Compatibility Hash: pi+qiFhdImZ42rvy8ybJnQ==, Type: Core)
+16:34:53.595 ( -1 FPS)	Data Model Assembly: UnityFrooxEngineRunner, Type Count: 44 (total: 156, Compatibility Hash: vlFl+wtmxY07ZlFmw3hlpw==, Type: Optional)
+16:34:53.601 ( -1 FPS)	Data Model Assembly: PhotonDust, Type Count: 21 (total: 163, Compatibility Hash: JCoK6VvRnfkuqtpoWxhIPA==, Type: Core)
+16:34:53.627 ( -1 FPS)	Data Model Assembly: SkyFrost.Base, Type Count: 3 (total: 428, Compatibility Hash: te30htqkPqTW/nEKuspZsA==, Type: Core)
+16:34:53.638 ( -1 FPS)	Data Model Assembly: Elements.Assets, Type Count: 88 (total: 515, Compatibility Hash: bKJA3e8EB6HBa1QidkhORQ==, Type: Core)
+16:34:53.669 ( -1 FPS)	Data Model Assembly: Assembly-CSharp, Type Count: 5 (total: 768, Compatibility Hash: sTH2tK18JBne6J7jyy2W5Q==, Type: UserspaceCore)
+16:34:53.673 ( -1 FPS)	Data Model Assembly: Elements.Core, Type Count: 59 (total: 621, Compatibility Hash: Pay/WeLCyO3RsgDcAHMMsw==, Type: Core)
+16:34:53.981 ( -1 FPS)	Data Model Assembly: ProtoFlux.Nodes.FrooxEngine, Type Count: 155 (total: 798, Compatibility Hash: AZwrIVhAr+DJ9kosHmizsg==, Type: Core)
+16:34:56.241 ( -1 FPS)	Data Model Assembly: ProtoFluxBindings, Type Count: 6085 (total: 6191, Compatibility Hash: snKFfc7e2OIJ9pvmCfaBxw==, Type: Core)
+16:34:56.415 ( -1 FPS)	Data Model Assembly: ProtoFlux.Nodes.Core, Type Count: 10 (total: 2289, Compatibility Hash: XxMkLAc6ulemxNEOJo7IOQ==, Type: Core)
+16:34:56.697 ( -1 FPS)	Data Model Assembly: FrooxEngine, Type Count: 2614 (total: 11058, Compatibility Hash: vcpdgm8LERt2B7m2IXUbMQ==, Type: Core)
+16:34:57.805 ( -1 FPS)	[9] Initializing InputInterface...
+16:34:57.839 ( -1 FPS)	New setting type registered: FrooxEngine.GeneralControlsSettings
+16:34:57.841 ( -1 FPS)	New setting type registered: FrooxEngine.GeneralHapticsSettings
+16:34:57.842 ( -1 FPS)	New setting type registered: FrooxEngine.GeneralVRSettings
+16:34:57.843 ( -1 FPS)	New setting type registered: FrooxEngine.UserMetricsSettings
+16:34:57.857 ( -1 FPS)	[10] Initializing LocalDB...
+16:34:57.859 ( -1 FPS)	[11] Initializing Local Data
+16:34:57.859 ( -1 FPS)		
+16:34:58.400 ( -1 FPS)	MachineID: dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo
+16:34:58.401 ( -1 FPS)	[12] Loading LiteDB database
+16:34:58.401 ( -1 FPS)		
+16:34:58.769 ( -1 FPS)	[13] Configuring LiteDB database
+16:34:58.769 ( -1 FPS)		
+16:34:59.037 ( -1 FPS)	[14] Processing LocalDB export
+16:34:59.038 ( -1 FPS)	[15] Initializing WorkProcessor...
+16:34:59.049 ( -1 FPS)	Initialized WorkProcessor. Background Workers: 32, Priority Workers: 31
+16:34:59.049 ( -1 FPS)	[16] Initializing AudioSystem...
+16:34:59.102 ( -1 FPS)	New setting type registered: FrooxEngine.AudioInputDeviceSettings
+16:34:59.102 ( -1 FPS)	New setting type registered: FrooxEngine.AudioOutputDeviceSettings
+16:34:59.103 ( -1 FPS)	New setting type registered: FrooxEngine.AudioVolumeSettings
+16:34:59.103 ( -1 FPS)	New setting type registered: FrooxEngine.AudioAccessibilitySettings
+16:34:59.103 ( -1 FPS)	New setting type registered: FrooxEngine.AudioInputFilteringSettings
+16:34:59.104 ( -1 FPS)	New setting type registered: FrooxEngine.AudioPerformanceSettings
+16:34:59.104 ( -1 FPS)	New setting type registered: FrooxEngine.VoiceSettings
+16:34:59.104 ( -1 FPS)	Initializing CSCore Audio Input Driver
+16:34:59.128 ( -1 FPS)	DefaultCapture: CABLE Output (VB-Audio Virtual Cable), ID: {0.0.1.00000000}.{06520745-8770-466c-ba56-b7544ab50f9b}
+16:34:59.129 ( -1 FPS)	DefaultOutput: Index HMD (NVIDIA High Definition Audio), ID: {0.0.0.00000000}.{7854ecb6-ee68-4f39-bf07-b327869376eb}
+16:34:59.134 ( -1 FPS)	Initialized Audio Input MMDevice CABLE Input (VB-Audio Virtual Cable), ID: {0.0.0.00000000}.{6a1b23d2-a3b2-41fd-80a1-f34137e84987}, Format: ChannelsAvailable: 2|SampleRate: 48000|Bps: 288000|BlockAlign: 6|BitsPerSample: 24|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight, Default: False
+16:34:59.136 ( -1 FPS)	Initialized Audio Input MMDevice Yamaha (Realtek(R) Audio), ID: {0.0.0.00000000}.{6d1d0c48-660a-4315-b7b9-143a08d86b22}, Format: ChannelsAvailable: 2|SampleRate: 48000|Bps: 192000|BlockAlign: 4|BitsPerSample: 16|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight, Default: False
+16:34:59.137 ( -1 FPS)	Initialized Audio Input MMDevice Index HMD (NVIDIA High Definition Audio), ID: {0.0.0.00000000}.{7854ecb6-ee68-4f39-bf07-b327869376eb}, Format: ChannelsAvailable: 2|SampleRate: 48000|Bps: 192000|BlockAlign: 4|BitsPerSample: 16|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight, Default: True
+16:34:59.137 ( -1 FPS)	Initialized Audio Input MMDevice Line (2- Steinberg UR22mkII ), ID: {0.0.0.00000000}.{85cae7b8-d081-4694-a163-1048fd4effc8}, Format: ChannelsAvailable: 2|SampleRate: 44100|Bps: 264600|BlockAlign: 6|BitsPerSample: 24|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight, Default: False
+16:34:59.137 ( -1 FPS)	Initialized Audio Input MMDevice DELL S2721DGF (NVIDIA High Definition Audio), ID: {0.0.0.00000000}.{8fcb0df0-7274-43af-aa5d-8d59a632b2f8}, Format: ChannelsAvailable: 2|SampleRate: 48000|Bps: 192000|BlockAlign: 4|BitsPerSample: 16|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight, Default: False
+16:34:59.137 ( -1 FPS)	Initialized Audio Input MMDevice スピーカー (Steam Streaming Microphone), ID: {0.0.0.00000000}.{9efd9140-7ac3-4b9e-a334-b3a63329b06d}, Format: ChannelsAvailable: 2|SampleRate: 48000|Bps: 384000|BlockAlign: 8|BitsPerSample: 32|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight, Default: False
+16:34:59.138 ( -1 FPS)	Initialized Audio Input MMDevice スピーカー (Steam Streaming Speakers), ID: {0.0.0.00000000}.{df870a11-35b0-448c-aebc-0a40f6eb5444}, Format: ChannelsAvailable: 2|SampleRate: 48000|Bps: 288000|BlockAlign: 6|BitsPerSample: 24|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight, Default: False
+16:34:59.138 ( -1 FPS)	Initialized Audio Input MMDevice イヤホン (VR P10 Dongle), ID: {0.0.0.00000000}.{ea955c3c-b10a-4629-8b69-a1e1bfc1db8d}, Format: ChannelsAvailable: 2|SampleRate: 48000|Bps: 192000|BlockAlign: 4|BitsPerSample: 16|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight, Default: False
+16:34:59.138 ( -1 FPS)	Initialized Audio Input MMDevice CABLE In 16ch (VB-Audio Virtual Cable), ID: {0.0.0.00000000}.{f6d890a0-935e-4c6a-972e-78b4f8f58913}, Format: ChannelsAvailable: 2|SampleRate: 48000|Bps: 288000|BlockAlign: 6|BitsPerSample: 24|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight, Default: False
+16:34:59.138 ( -1 FPS)	Initialized Audio Input MMDevice CABLE Output (VB-Audio Virtual Cable), ID: {0.0.1.00000000}.{06520745-8770-466c-ba56-b7544ab50f9b}, Format: ChannelsAvailable: 2|SampleRate: 48000|Bps: 288000|BlockAlign: 6|BitsPerSample: 24|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight, Default: True
+16:34:59.138 ( -1 FPS)	Initialized Audio Input MMDevice Line (2- Steinberg UR22mkII ), ID: {0.0.1.00000000}.{288e112d-8f1d-4695-8ccf-85dd27d64c4e}, Format: ChannelsAvailable: 2|SampleRate: 44100|Bps: 264600|BlockAlign: 6|BitsPerSample: 24|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight, Default: False
+16:34:59.138 ( -1 FPS)	Initialized Audio Input MMDevice マイク (Virtual Desktop Audio), ID: {0.0.1.00000000}.{c70a41ac-0e6b-4a19-a0d1-d1feaf074489}, Format: ChannelsAvailable: 1|SampleRate: 48000|Bps: 96000|BlockAlign: 2|BitsPerSample: 16|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontCenter, Default: False
+16:34:59.139 ( -1 FPS)	Initialized Audio Input MMDevice マイク (VR P10 Dongle), ID: {0.0.1.00000000}.{d1923e73-2d8b-4707-960a-d981aa96892e}, Format: ChannelsAvailable: 1|SampleRate: 48000|Bps: 96000|BlockAlign: 2|BitsPerSample: 16|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontCenter, Default: False
+16:34:59.139 ( -1 FPS)	Initialized Audio Input MMDevice デジタル オーディオ インターフェイス (Valve VR Radio & HMD Mic), ID: {0.0.1.00000000}.{d3f3aac8-f4bf-4cc7-8beb-28ca680fd975}, Format: ChannelsAvailable: 1|SampleRate: 48000|Bps: 96000|BlockAlign: 2|BitsPerSample: 16|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontCenter, Default: False
+16:34:59.139 ( -1 FPS)	Initialized Audio Input MMDevice マイク (Steam Streaming Microphone), ID: {0.0.1.00000000}.{ed3cf494-754b-4c11-b1db-5445b36735be}, Format: ChannelsAvailable: 2|SampleRate: 48000|Bps: 384000|BlockAlign: 8|BitsPerSample: 32|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight, Default: False
+16:34:59.190 ( -1 FPS)	Initializing OVRLipSync. SampleRate: 48000, BufferSize: 1024
+16:34:59.190 ( -1 FPS)	[17] Initializing GlobalCoroutineManager...
+16:34:59.211 ( -1 FPS)	[18] Initializing WorldManager...
+16:34:59.215 ( -1 FPS)	[19] Initializing NetworkManager...
+16:34:59.218 ( -1 FPS)	New setting type registered: FrooxEngine.RealtimeNetworkingSettings
+16:34:59.219 ( -1 FPS)	New setting type registered: FrooxEngine.RelaySettings
+16:34:59.219 ( -1 FPS)	[20] Initializing SecurityManager...
+16:34:59.220 ( -1 FPS)	New setting type registered: FrooxEngine.HostAccessSettings
+16:34:59.220 ( -1 FPS)	[21] Initializing PlatformInterface...
+16:34:59.221 ( -1 FPS)		Initializing Discord Platform Interface
+16:34:59.231 ( -1 FPS)	Discord connector initialized.
+16:34:59.232 ( -1 FPS)	New setting type registered: FrooxEngine.DiscordIntegrationSettings
+16:34:59.232 ( -1 FPS)		Initializing Windows Platform Interface
+16:34:59.233 ( -1 FPS)	Initializing system helper at: C:\Users\neo\GitHub\kokoa-resonite-tools\target\debug\profiles\test\Game\RuntimeData\SystemHelper
+16:34:59.233 ( -1 FPS)	System Helper Executable: C:\Users\neo\GitHub\kokoa-resonite-tools\target\debug\profiles\test\Game\RuntimeData\SystemHelper\SystemHelperServer.exe
+16:34:59.356 ( -1 FPS)	System Helper initialized
+16:34:59.356 ( -1 FPS)	New setting type registered: FrooxEngine.WindowsSettings
+16:34:59.356 ( -1 FPS)		Initializing Steam Platform Interface
+16:34:59.362 ( -1 FPS)	Local User SteamID: 76561198262213802
+16:34:59.363 ( -1 FPS)	Steam Voice Initialized
+16:34:59.364 ( -1 FPS)	SteamAPI initialized
+16:34:59.364 ( -1 FPS)	New setting type registered: FrooxEngine.SteamIntegrationSettings
+16:34:59.364 ( -1 FPS)	Supported network protocols: lnl-nat, lnl, res-steam, tcp
+16:34:59.365 ( -1 FPS)	[22] Initializing SkyFrost Interface...
+16:35:02.492 ( -1 FPS)	Proxy configuration for skyfrost not found or failed to initialize.
+16:35:02.492 ( -1 FPS)	HttpClient AutomaticDecompressionSupported: True
+16:35:02.556 ( -1 FPS)	New setting type registered: FrooxEngine.MessagingPrivacySettings
+16:35:02.557 ( -1 FPS)	New setting type registered: FrooxEngine.OnlineStatusSettings
+16:35:02.558 ( -1 FPS)	[23] Initializing AssetManager...
+16:35:02.570 ( -1 FPS)	New setting type registered: FrooxEngine.AssetGatherSettings
+16:35:02.578 ( -1 FPS)	Graphics Device Type: Direct3D11
+16:35:02.595 ( -1 FPS)	New setting type registered: FrooxEngine.TextureQualitySettings
+16:35:02.596 ( -1 FPS)	[24] Initializing RecordManager...
+16:35:02.597 ( -1 FPS)	[25] Initializing SessionAnnouncer...
+16:35:02.636 ( -1 FPS)	[26] FrooxEngine Initialization Finished
+16:35:02.637 ( -1 FPS)	FrooxEngine Initialized in 10395.2457 ms
+16:35:02.652 ( -1 FPS)	[27] Registering drivers
+16:35:02.656 ( -1 FPS)	SteamVR Driver: Registering Events
+16:35:02.682 ( -1 FPS)	Initializing SteamVR
+16:35:02.797 ( -1 FPS)	Tracking system name: lighthouse, serial number: LHR-5B98345D, model number: Index, Type: indexhmd, Manufacturer: Valve, WirelessDongle: TrackedProp_UnknownProperty, IsWireless: False, Using native support: True
+16:35:02.797 ( -1 FPS)	SteamVR Driver: Registering Inputs
+16:35:02.797 ( -1 FPS)	SteamVR Driver: Initialization Finished
+16:35:02.800 ( -1 FPS)	New setting type registered: FrooxEngine.GamepadSettings
+16:35:02.809 ( -1 FPS)	Touch injection driver initialized
+16:35:02.930 ( -1 FPS)	Registered displays:
+Display 0, Resolution: [1920; 1200], Rate: -1.00 Hz, Orientation: Default, DPI: [90.0; 90.0],  Offset: [0; 0], Primary: True
+Display 1, Resolution: [1920; 1080], Rate: -1.00 Hz, Orientation: Default, DPI: [92.0; 91.0],  Offset: [0; -1080], Primary: False
+16:35:02.933 ( -1 FPS)	New setting type registered: FrooxEngine.ViveHandTrackingSettings
+16:35:02.938 ( -1 FPS)	Detect ViveProEye: False
+16:35:02.958 ( -1 FPS)	New setting type registered: FrooxEngine.LeapMotionSettings
+16:35:02.970 ( -1 FPS)	Initializing bHaptics...
+16:35:02.972 ( -1 FPS)	Initializing HP Omnicept Glia...
+16:35:02.973 ( -1 FPS)	Connecting to service
+16:35:02.973 ( -1 FPS)	[28] Setting up global settings
+16:35:02.973 ( -1 FPS)	New setting type registered: FrooxEngine.ResolutionSettings
+16:35:02.974 ( -1 FPS)	New setting type registered: FrooxEngine.RenderingQualitySettings
+16:35:02.974 ( -1 FPS)	New setting type registered: FrooxEngine.DesktopRenderSettings
+16:35:02.975 ( -1 FPS)	[29] Setting up Userspace
+16:35:02.975 ( -1 FPS)	Starting search for GigglePucks
+16:35:02.995 ( -1 FPS)	New setting type registered: FrooxEngine.DebugSettings
+16:35:04.317 ( -1 FPS)	Starting running world: 
+16:35:04.317 ( -1 FPS)	[30] Initialization done
+16:35:04.329 (  0 FPS)	OnDeviceConnected: 0
+16:35:04.329 (  0 FPS)	DeviceClass: HMD, error: TrackedProp_Success
+16:35:04.329 (  0 FPS)	OnDeviceConnected: 1
+16:35:04.329 (  0 FPS)	DeviceClass: TrackingReference, error: TrackedProp_Success
+16:35:04.339 (  0 FPS)	Updated: 0001/01/01 0:00:00 -> 2025/06/11 7:35:02
+16:35:04.348 (  0 FPS)	Updated: False -> True
+16:35:04.348 (  0 FPS)	Updated: 0 -> 5
+16:35:04.349 (  0 FPS)	Updated:  -> kokoa0429
+16:35:04.349 (  0 FPS)	Updated:  -> dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo
+16:35:04.370 (  0 FPS)	Device Activity Level changed from k_EDeviceActivityLevel_Unknown to k_EDeviceActivityLevel_Idle
+16:35:04.554 (  0 FPS)	Running default bootstrap
+16:35:04.554 (  0 FPS)	BOOTSTRAP: Running userspace bootstrap
+16:35:04.561 (  0 FPS)	BOOTSTRAP: Processing launch arguments
+16:35:04.562 (  0 FPS)	BOOTSTRAP: Checking auto-login
+16:35:04.566 (  0 FPS)	New setting type registered: FrooxEngine.CustomizationSettings
+16:35:04.670 (  0 FPS)	New setting type registered: FrooxEngine.UserRestrictionsSettings
+16:35:04.679 (  0 FPS)	User Joined Userspace. Username: kokoa0429, UserID: , AllocID: 0, AllocIDstart: 1,  MachineID: dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo
+16:35:04.700 (  0 FPS)	New setting type registered: FrooxEngine.MediaPrivacySettings
+16:35:04.805 (  0 FPS)	New setting type registered: FrooxEngine.PostProcessingSettings
+16:35:04.851 (  4 FPS)	BOOTSTRAP: Setting up settings
+16:35:04.856 (  4 FPS)	Loading local settings
+16:35:04.859 (  4 FPS)	Initializing SignalR: Initial Startup
+16:35:04.935 (  4 FPS)	Settings not found, scheduling conversion of legacy settings for M-dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo
+16:35:04.936 (  4 FPS)	Could not fetch record for settings for M-dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo: CloudResult<FrooxEngine.Store.Record> - State: NotFound, Attempts: 0, Content: , Entity: 
+16:35:04.936 (  4 FPS)	M-dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo settings do not exist, creating fresh
+16:35:04.960 (  4 FPS)	Instantiating new setting component: FrooxEngine.GeneralControlsSettings
+16:35:04.990 (  4 FPS)	Instantiating new setting component: FrooxEngine.GeneralHapticsSettings
+16:35:05.015 (  4 FPS)	Instantiating new setting component: FrooxEngine.GeneralVRSettings
+16:35:05.048 (  4 FPS)	Instantiating new setting component: FrooxEngine.UserMetricsSettings
+16:35:05.049 (  4 FPS)	Setting user agent to Resonite/2025.6.4.1085
+16:35:05.049 (  4 FPS)	Using alternate websocket implementation
+16:35:05.066 (  4 FPS)	Created setting switch source: DeviceIDSettingSwitchSource
+16:35:05.072 (  4 FPS)	Created setting switch source: VR_ActiveSetttingSwitchSource
+16:35:05.084 (  4 FPS)	Instantiating new setting component: FrooxEngine.AudioInputDeviceSettings
+16:35:05.108 (  4 FPS)	Instantiating new setting component: FrooxEngine.AudioOutputDeviceSettings
+16:35:05.109 (  4 FPS)	Connecting to SignalR (Initial Startup)...
+16:35:05.160 (  4 FPS)	Starting audio device: Index HMD (NVIDIA High Definition Audio) (Context: Default Output)
+Device format: ChannelsAvailable: 2|SampleRate: 48000|Bps: 192000|BlockAlign: 4|BitsPerSample: 16|Encoding: Extensible|SubFormat: 00000001-0000-0010-8000-00aa00389b71|ChannelMask: SpeakerFrontLeft, SpeakerFrontRight
+Target format: ChannelsAvailable: 2|SampleRate: 48000|Bps: 384000|BlockAlign: 8|BitsPerSample: 32|Encoding: IeeeFloat
+ActualFormat: ChannelsAvailable: 2|SampleRate: 48000|Bps: 384000|BlockAlign: 8|BitsPerSample: 32|Encoding: IeeeFloat
+16:35:05.166 (  4 FPS)	Instantiating new setting component: FrooxEngine.AudioVolumeSettings
+16:35:05.169 (  4 FPS)	Instantiating new setting component: FrooxEngine.AudioAccessibilitySettings
+16:35:05.171 (  4 FPS)	Instantiating new setting component: FrooxEngine.AudioInputFilteringSettings
+16:35:05.174 (  4 FPS)	Instantiating new setting component: FrooxEngine.AudioPerformanceSettings
+16:35:05.252 (  4 FPS)	Awwdio configuration. SimulationFrameSize: Medium1024, OutputBufferSize: VeryLarge4096 MaxVoices: 64
+16:35:05.252 (  4 FPS)	Instantiating new setting component: FrooxEngine.VoiceSettings
+16:35:05.339 (  4 FPS)	VoiceSettings OnActivated. LastActivatedUserId: , Current: M-dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo, MutePersistence: StartUnmuted
+16:35:05.339 (  4 FPS)	Instantiating new setting component: FrooxEngine.RealtimeNetworkingSettings
+16:35:05.343 (  4 FPS)	Instantiating new setting component: FrooxEngine.RelaySettings
+16:35:05.345 (  4 FPS)	Instantiating new setting component: FrooxEngine.HostAccessSettings
+16:35:05.379 (  4 FPS)	Instantiating new setting component: FrooxEngine.DiscordIntegrationSettings
+16:35:05.436 (  4 FPS)	Instantiating new setting component: FrooxEngine.WindowsSettings
+16:35:05.437 (  4 FPS)	Instantiating new setting component: FrooxEngine.SteamIntegrationSettings
+16:35:05.440 (  4 FPS)	Instantiating new setting component: FrooxEngine.MessagingPrivacySettings
+16:35:05.441 (  4 FPS)	Instantiating new setting component: FrooxEngine.OnlineStatusSettings
+16:35:05.619 (  4 FPS)	Instantiating new setting component: FrooxEngine.AssetGatherSettings
+16:35:05.621 (  4 FPS)	Instantiating new setting component: FrooxEngine.TextureQualitySettings
+16:35:05.793 (  4 FPS)	Instantiating new setting component: FrooxEngine.GamepadSettings
+16:35:05.796 (  4 FPS)	Instantiating new setting component: FrooxEngine.ViveHandTrackingSettings
+16:35:05.798 (  4 FPS)	Instantiating new setting component: FrooxEngine.LeapMotionSettings
+16:35:05.800 (  4 FPS)	Instantiating new setting component: FrooxEngine.ResolutionSettings
+16:35:05.877 (  4 FPS)	Instantiating new setting component: FrooxEngine.RenderingQualitySettings
+16:35:06.050 (  4 FPS)	bHaptics detected - Head: False, Vest: False (Front: False, Back: False), LeftForearm: False, RightForearm: False, LeftFoot: False, RightFoot: False
+16:35:06.055 (  4 FPS)	Instantiating new setting component: FrooxEngine.DesktopRenderSettings
+16:35:06.057 (  4 FPS)	Instantiating new setting component: FrooxEngine.DebugSettings
+16:35:06.065 (  4 FPS)	Instantiating new setting component: FrooxEngine.CustomizationSettings
+16:35:06.067 (  4 FPS)	Instantiating new setting component: FrooxEngine.UserRestrictionsSettings
+16:35:06.072 (  4 FPS)	Instantiating new setting component: FrooxEngine.MediaPrivacySettings
+16:35:06.078 (  4 FPS)	Instantiating new setting component: FrooxEngine.PostProcessingSettings
+16:35:06.086 (  4 FPS)	Connecting SignalR websocket to: wss://api.resonite.com/hub?id=aipD1JYnxXyoTzHZ7tXEug
+16:35:06.211 (  8 FPS)	Local settings loaded
+16:35:06.216 (  8 FPS)	New setting type registered: FrooxEngine.NamePlateSettings
+16:35:06.217 (  8 FPS)	New setting type registered: FrooxEngine.LocaleSettings
+16:35:06.218 (  8 FPS)	New setting type registered: FrooxEngine.LaserSettings
+16:35:06.219 (  8 FPS)	New setting type registered: FrooxEngine.EditSettings
+16:35:06.219 (  8 FPS)	New setting type registered: FrooxEngine.FavoritesSettings
+16:35:06.219 (  8 FPS)	New setting type registered: FrooxEngine.VideoStreamingServicesSettings
+16:35:06.220 (  8 FPS)	New setting type registered: FrooxEngine.LegacyFeatureSettings
+16:35:06.220 (  8 FPS)	Instantiating new setting component: FrooxEngine.AudioInputDeviceSettings
+16:35:06.220 (  8 FPS)	New setting type registered: FrooxEngine.GaussianSplatQualitySettings
+16:35:06.221 (  8 FPS)	New setting type registered: FrooxEngine.CursorSettings
+16:35:06.221 (  8 FPS)	Instantiating new setting component: FrooxEngine.AudioOutputDeviceSettings
+16:35:06.221 (  8 FPS)	New setting type registered: FrooxEngine.MovementSettings
+16:35:06.222 (  8 FPS)	New setting type registered: FrooxEngine.LocomotionSettings
+16:35:06.222 (  8 FPS)	Instantiating new setting component: FrooxEngine.AudioVolumeSettings
+16:35:06.222 (  8 FPS)	New setting type registered: FrooxEngine.GrabbingSettings
+16:35:06.222 (  8 FPS)	Instantiating new setting component: FrooxEngine.NamePlateSettings
+16:35:06.222 (  8 FPS)	New setting type registered: FrooxEngine.EarmuffSettings
+16:35:06.288 (  8 FPS)	Instantiating new setting component: FrooxEngine.LocaleSettings
+16:35:06.291 (  8 FPS)	Instantiating new setting component: FrooxEngine.LaserSettings
+16:35:06.294 (  8 FPS)	Instantiating new setting component: FrooxEngine.EditSettings
+16:35:06.297 (  8 FPS)	Instantiating new setting component: FrooxEngine.FavoritesSettings
+16:35:06.300 (  8 FPS)	Instantiating new setting component: FrooxEngine.VideoStreamingServicesSettings
+16:35:06.361 (  8 FPS)	Instantiating new setting component: FrooxEngine.LegacyFeatureSettings
+16:35:06.367 (  8 FPS)	Awwdio configuration. SimulationFrameSize: Medium1024, OutputBufferSize: VeryLarge4096 MaxVoices: 64
+16:35:06.373 (  8 FPS)	BOOTSTRAP: Setting up core UI
+16:35:07.408 (  8 FPS)	Connected to SignalR (Initial Startup)
+16:35:08.969 (  8 FPS)	User kokoa0429 Role: , HasFingerTracking: True, HasEyeTracking: False, HasLipTracking: False
+16:35:10.925 (  8 FPS)	Loading from record: 
+16:35:10.936 (  8 FPS)	Loading from record: 
+16:35:10.936 (  8 FPS)	Has LeftTool: True, Has RightTool: True
+16:35:11.012 (  8 FPS)	New setting type registered: FrooxEngine.DashSettings
+16:35:12.097 (  8 FPS)	New setting type registered: FrooxEngine.NotificationSettings
+16:35:12.631 (  8 FPS)	BOOTSTRAP: Loading local home
+16:35:12.633 (  8 FPS)	Fetching home world record: resrec:///M-dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo/R-Home
+16:35:12.648 (  8 FPS)	Loading from record: 
+16:35:12.649 (  8 FPS)	Loading object from record: Record G-Resonite:R-1f68577c-7e4c-444b-8672-4d6fb18ed264, Name: VR_Glove_Right, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///890630992f8896f226b23f273349ee6b679f818f9cc80fc88ef2741bac1ec81c.brson, Deleted: False
+16:35:12.650 (  8 FPS)	Source record: Record G-Resonite:R-1f68577c-7e4c-444b-8672-4d6fb18ed264, Name: VR_Glove_Right, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///890630992f8896f226b23f273349ee6b679f818f9cc80fc88ef2741bac1ec81c.brson, Deleted: False
+16:35:13.419 (  8 FPS)	Loading from record: 
+16:35:13.419 (  8 FPS)	Loading object from record: Record G-Resonite:R-bf791406-f3f4-49ff-80f4-724a920e661e, Name: VR_Glove_Left, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///9d83b3a637a5a561655e01158851b6e308b11d5d5a295c46302c90643d9d7c03.brson, Deleted: False
+16:35:13.419 (  8 FPS)	Source record: Record G-Resonite:R-bf791406-f3f4-49ff-80f4-724a920e661e, Name: VR_Glove_Left, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///9d83b3a637a5a561655e01158851b6e308b11d5d5a295c46302c90643d9d7c03.brson, Deleted: False
+16:35:13.435 (  8 FPS)	Machine Home not found, creating a new one based on the appropriate template.
+16:35:13.437 (  8 FPS)	Creating a new Machine Home from the template URL: resrec:///G-Resonite/Worlds/HomeTemplates/Local
+16:35:13.455 (  8 FPS)	Loading object from record: Record G-Resonite:R-823c5fba-ded1-474d-b22a-2652a7aabb81, Name: Keyboard, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///4931534dfd718d4ce7333ba1fdae5309746274293c9147de083bb46bb26e28a2.brson, Deleted: False
+16:35:13.455 (  8 FPS)	Source record: Record G-Resonite:R-823c5fba-ded1-474d-b22a-2652a7aabb81, Name: Keyboard, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///4931534dfd718d4ce7333ba1fdae5309746274293c9147de083bb46bb26e28a2.brson, Deleted: False
+16:35:13.839 (  8 FPS)	Loading object from record: Record G-Resonite:R-bf791406-f3f4-49ff-80f4-724a920e661e, Name: VR_Glove_Left, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///9d83b3a637a5a561655e01158851b6e308b11d5d5a295c46302c90643d9d7c03.brson, Deleted: False
+16:35:13.839 (  8 FPS)	Source record: Record G-Resonite:R-bf791406-f3f4-49ff-80f4-724a920e661e, Name: VR_Glove_Left, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///9d83b3a637a5a561655e01158851b6e308b11d5d5a295c46302c90643d9d7c03.brson, Deleted: False
+16:35:13.857 (  8 FPS)	Loading from record: 
+16:35:13.863 (  8 FPS)	Instantiating new setting component: FrooxEngine.GaussianSplatQualitySettings
+16:35:13.973 (  8 FPS)	Requesting gather for: resdb:///93e61c29cbacff950aab2994016092563c8e1a857b6e507c58788a30afa0f091.brson
+16:35:14.122 (  8 FPS)	Instantiating new setting component: FrooxEngine.CursorSettings
+16:35:14.126 (  8 FPS)	Instantiating new setting component: FrooxEngine.MovementSettings
+16:35:14.189 (  8 FPS)	Instantiating new setting component: FrooxEngine.LocomotionSettings
+16:35:14.193 (  8 FPS)	Instantiating new setting component: FrooxEngine.GrabbingSettings
+16:35:14.196 (  8 FPS)	Instantiating new setting component: FrooxEngine.EarmuffSettings
+16:35:14.198 (  8 FPS)	Instantiating new setting component: FrooxEngine.DashSettings
+16:35:14.200 (  8 FPS)	Instantiating new setting component: FrooxEngine.NotificationSettings
+16:35:14.580 (  8 FPS)	Rebuild: 308.0675 ms, Nodes: 160, Groups: 60
+16:35:14.630 (  0 FPS)	Updated:  -> Userspace
+16:35:14.633 (  0 FPS)	Could not connect to HP Omnicept Runtime: No response from HP Omnicept Runtime. Make sure HP Omnicept is installed and running.
+16:35:14.650 (  0 FPS)	Got asset at path: C:/Users/neo/AppData/Local/Temp/Yellow Dog Man Studios/Resonite\Cache\r3byy5s00n2fpot5, loading world
+16:35:14.837 (  0 FPS)	New setting type registered: FrooxEngine.FacetAnchorsSettings
+16:35:14.902 (  0 FPS)	Loading object from record: Record G-Resonite:R-9a7207d4-3abf-4346-b879-c0a19de49a46, Name: WorldLoadingIndicator, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///a2e1605a1702ce39e297ab03946f3fc10934bfae38ad75b3effd8ba6c68da09e.brson, Deleted: False
+16:35:14.902 (  0 FPS)	Source record: Record G-Resonite:R-9a7207d4-3abf-4346-b879-c0a19de49a46, Name: WorldLoadingIndicator, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///a2e1605a1702ce39e297ab03946f3fc10934bfae38ad75b3effd8ba6c68da09e.brson, Deleted: False
+16:35:15.123 (  0 FPS)	NetworkInitStart
+16:35:15.185 (  0 FPS)	LNL Listener for World  (Handle: 2. Focus: Background, State: Initializing, InitState: InitializingNetwork, FailState: None, FailReason: , IsDestroyed: False, IsAuthority: True, SyncTick: 1, StateVersion: 1, Time: 0, TimeSinceLastUpdate: 0.226111, running on 0.0.0.0, port 50518
+16:35:15.197 (  0 FPS)	LNL Listener for World  (Handle: 2. Focus: Background, State: Initializing, InitState: InitializingNetwork, FailState: None, FailReason: , IsDestroyed: False, IsAuthority: True, SyncTick: 1, StateVersion: 1, Time: 0, TimeSinceLastUpdate: 0.2385613, running on 192.168.101.101, port 50519
+16:35:15.205 (  0 FPS)	LNL Listener for World  (Handle: 2. Focus: Background, State: Initializing, InitState: InitializingNetwork, FailState: None, FailReason: , IsDestroyed: False, IsAuthority: True, SyncTick: 1, StateVersion: 1, Time: 0, TimeSinceLastUpdate: 0.2463443, running on 100.125.139.42, port 50520
+16:35:15.206 (  0 FPS)	LNL Listener for World  (Handle: 2. Focus: Background, State: Initializing, InitState: InitializingNetwork, FailState: None, FailReason: , IsDestroyed: False, IsAuthority: True, SyncTick: 1, StateVersion: 1, Time: 0, TimeSinceLastUpdate: 0.2470407, running on 192.168.0.43, port 50521
+16:35:15.206 (  0 FPS)	LNL Listener for World  (Handle: 2. Focus: Background, State: Initializing, InitState: InitializingNetwork, FailState: None, FailReason: , IsDestroyed: False, IsAuthority: True, SyncTick: 1, StateVersion: 1, Time: 0, TimeSinceLastUpdate: 0.2475511, running on 172.29.208.1, port 50522
+16:35:15.207 (  0 FPS)	LNL Listener for World  (Handle: 2. Focus: Background, State: Initializing, InitState: InitializingNetwork, FailState: None, FailReason: , IsDestroyed: False, IsAuthority: True, SyncTick: 1, StateVersion: 1, Time: 0, TimeSinceLastUpdate: 0.2482274, running on 172.21.192.1, port 50523
+16:35:15.210 (  0 FPS)	Creating Listener for host SteamID 76561198262213802, channel: 0, sessionId: S-b8276a59-f2ac-40e0-9fff-67a92fdd6b47
+16:35:15.216 (  0 FPS)	Starting running world: 
+16:35:15.558 (  0 FPS)	Instantiating new setting component: FrooxEngine.FacetAnchorsSettings
+16:35:15.599 (  0 FPS)	Rebuild: 0.0031 ms, Nodes: 0, Groups: 50
+16:35:15.722 (  0 FPS)	New setting type registered: FrooxEngine.TrackingSmoothingSettings
+16:35:15.766 (  0 FPS)	Running refresh on: OwnerId: M-dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo, Path: G-Resonite.Userspace.RadiantDash.Offset
+16:35:15.767 (  0 FPS)	Running refresh on: OwnerId: M-dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo, Path: G-Resonite.Userspace.RadiantDash.Scale
+16:35:15.767 (  0 FPS)	Running refresh on: OwnerId: M-dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo, Path: G-Resonite.Userspace.RadiantDash.Freeform
+16:35:15.769 (  0 FPS)	Loading Private/RadiantDash/Screens for 
+16:35:16.159 (  0 FPS)	Workspace Private/RadiantDash/Screens initialized to default state. Reason: Reset Dash/Anonymous user
+16:35:16.159 (  0 FPS)	Loading Private/RadiantDash/TopBar for 
+16:35:16.159 (  0 FPS)	Workspace Private/RadiantDash/TopBar initialized to default state. Reason: Reset Dash/Anonymous user
+16:35:16.203 (  0 FPS)	Loading Private/FacetAnchors/LeftHandTop/Default for 
+16:35:16.219 (  0 FPS)	Workspace Private/FacetAnchors/LeftHandTop/Default initialized to default state. Reason: Reset Dash/Anonymous user
+16:35:16.219 (  0 FPS)	Loading Private/FacetAnchors/LeftHandBottom/Default for 
+16:35:16.219 (  0 FPS)	Workspace Private/FacetAnchors/LeftHandBottom/Default initialized to default state. Reason: Reset Dash/Anonymous user
+16:35:16.219 (  0 FPS)	Loading Private/FacetAnchors/RightHandTop/Default for 
+16:35:16.219 (  0 FPS)	Workspace Private/FacetAnchors/RightHandTop/Default initialized to default state. Reason: Reset Dash/Anonymous user
+16:35:16.219 (  0 FPS)	Loading Private/FacetAnchors/RightHandBottom/Default for 
+16:35:16.219 (  0 FPS)	Workspace Private/FacetAnchors/RightHandBottom/Default initialized to default state. Reason: Reset Dash/Anonymous user
+16:35:16.219 (  0 FPS)	Loading Private/FacetAnchors/LeftForearmTop/Default for 
+16:35:16.220 (  0 FPS)	Workspace Private/FacetAnchors/LeftForearmTop/Default initialized to default state. Reason: Reset Dash/Anonymous user
+16:35:16.220 (  0 FPS)	Loading Private/FacetAnchors/LeftForearmBottom/Default for 
+16:35:16.220 (  0 FPS)	Workspace Private/FacetAnchors/LeftForearmBottom/Default initialized to default state. Reason: Reset Dash/Anonymous user
+16:35:16.220 (  0 FPS)	Loading Private/FacetAnchors/RightForearmTop/Default for 
+16:35:16.220 (  0 FPS)	Workspace Private/FacetAnchors/RightForearmTop/Default initialized to default state. Reason: Reset Dash/Anonymous user
+16:35:16.220 (  0 FPS)	Loading Private/FacetAnchors/RightForearmBottom/Default for 
+16:35:16.220 (  0 FPS)	Workspace Private/FacetAnchors/RightForearmBottom/Default initialized to default state. Reason: Reset Dash/Anonymous user
+16:35:16.220 (  0 FPS)	Loading Private/FacetAnchors/ViewFront/Default for 
+16:35:16.221 (  0 FPS)	Workspace Private/FacetAnchors/ViewFront/Default initialized to default state. Reason: Reset Dash/Anonymous user
+16:35:16.221 (  0 FPS)	Loading Private/FacetAnchors/ViewBottom/Default for 
+16:35:16.221 (  0 FPS)	Workspace Private/FacetAnchors/ViewBottom/Default initialized to default state. Reason: Reset Dash/Anonymous user
+16:35:16.385 (  1 FPS)	Updated: 0001/01/01 0:00:00 -> 2025/06/11 7:35:14
+16:35:16.385 (  1 FPS)	Updated:  -> S-b8276a59-f2ac-40e0-9fff-67a92fdd6b47
+16:35:16.385 (  1 FPS)	Updated: False -> True
+16:35:16.385 (  1 FPS)	Updated: 0 -> 5
+16:35:16.385 (  1 FPS)	Updated:  -> kokoa0429
+16:35:16.385 (  1 FPS)	Updated:  -> dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo
+16:35:16.393 (  1 FPS)	New setting type registered: FrooxEngine.DesktopViewSettings
+16:35:16.419 (  1 FPS)	Instantiating new setting component: FrooxEngine.TrackingSmoothingSettings
+16:35:16.423 (  1 FPS)	Instantiating new setting component: FrooxEngine.DesktopViewSettings
+16:35:16.518 (  1 FPS)	Source record: Record G-Resonite:R-c578f772-1bec-407e-bf35-0cafaa6dede6, Name: Local, Path: Worlds\HomeTemplates
+16:35:16.518 (  1 FPS)	Adding legacy content PhotonDust loader
+16:35:17.702 (  1 FPS)	Unresolved count: 30, Processed in: 00:00:00.0028754
+16:35:17.844 (  1 FPS)	World Local Loaded in: 00:00:01.3259878
+16:35:17.851 (  1 FPS)	User Joined Local. Username: kokoa0429, UserID: , AllocID: 0, AllocIDstart: 1,  MachineID: dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo
+16:35:17.852 (  1 FPS)	User Spawn Local. Username: kokoa0429, UserID: , MachineID: dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo
+16:35:17.852 (  1 FPS)	Default Host Role: Admin
+16:35:17.853 (  1 FPS)	Spawning User kokoa0429 (ID2E00)
+16:35:17.992 (  1 FPS)	User kokoa0429 Role: Admin, HasFingerTracking: True, HasEyeTracking: False, HasLipTracking: False
+16:35:18.212 (  1 FPS)	Loading from record: 
+16:35:18.212 (  1 FPS)	Loading from record: 
+16:35:18.212 (  1 FPS)	Loading from record: 
+16:35:18.213 (  1 FPS)	Loading from record: 
+16:35:18.274 (  1 FPS)	Rebuild: 43.2075 ms, Nodes: 30, Groups: 3
+16:35:18.538 (  1 FPS)	New setting type registered: FrooxEngine.FullBodyTrackingSettings
+16:35:18.605 (  1 FPS)	New setting type registered: FrooxEngine.PhotoCaptureSettings
+16:35:18.633 (  1 FPS)	Loading object from record: Record G-Resonite:R-bf791406-f3f4-49ff-80f4-724a920e661e, Name: VR_Glove_Left, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///9d83b3a637a5a561655e01158851b6e308b11d5d5a295c46302c90643d9d7c03.brson, Deleted: False
+16:35:18.633 (  1 FPS)	Source record: Record G-Resonite:R-bf791406-f3f4-49ff-80f4-724a920e661e, Name: VR_Glove_Left, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///9d83b3a637a5a561655e01158851b6e308b11d5d5a295c46302c90643d9d7c03.brson, Deleted: False
+16:35:18.650 (  1 FPS)	Loading from record: 
+16:35:18.650 (  1 FPS)	Loading from record: 
+16:35:18.652 (  1 FPS)	Loading from record: 
+16:35:18.658 (  1 FPS)	Loading object from record: Record G-Resonite:R-1f68577c-7e4c-444b-8672-4d6fb18ed264, Name: VR_Glove_Right, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///890630992f8896f226b23f273349ee6b679f818f9cc80fc88ef2741bac1ec81c.brson, Deleted: False
+16:35:18.658 (  1 FPS)	Source record: Record G-Resonite:R-1f68577c-7e4c-444b-8672-4d6fb18ed264, Name: VR_Glove_Right, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///890630992f8896f226b23f273349ee6b679f818f9cc80fc88ef2741bac1ec81c.brson, Deleted: False
+16:35:18.694 (  1 FPS)	Loading object from record: Record G-Resonite:R-1f68577c-7e4c-444b-8672-4d6fb18ed264, Name: VR_Glove_Right, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///890630992f8896f226b23f273349ee6b679f818f9cc80fc88ef2741bac1ec81c.brson, Deleted: False
+16:35:18.694 (  1 FPS)	Source record: Record G-Resonite:R-1f68577c-7e4c-444b-8672-4d6fb18ed264, Name: VR_Glove_Right, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///890630992f8896f226b23f273349ee6b679f818f9cc80fc88ef2741bac1ec81c.brson, Deleted: False
+16:35:18.699 (  1 FPS)	Loading from record: 
+16:35:18.699 (  1 FPS)	Loading from record: 
+16:35:18.721 (  1 FPS)	Rebuild: 16.6944 ms, Nodes: 150, Groups: 57
+16:35:18.985 (  1 FPS)	Instantiating new setting component: FrooxEngine.FullBodyTrackingSettings
+16:35:18.997 (  1 FPS)	Instantiating new setting component: FrooxEngine.PhotoCaptureSettings
+16:35:19.043 (  1 FPS)	Rebuild: 0.0568 ms, Nodes: 0, Groups: 50
+16:35:19.544 (  2 FPS)	Updated:  -> Local
+16:35:19.548 (  2 FPS)	BOOTSTRAP: Checking tutorial start. Force: False, Skip: True
+16:35:19.887 ( 15 FPS)	BOOTSTRAP: Starting platform update
+16:35:19.888 ( 15 FPS)	BOOTSTRAP: Bootstrap complete
+16:35:20.085 ( 15 FPS)	Fetching legacy settings for conversion for M-dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo
+16:35:20.092 ( 15 FPS)	Failed to fetch legacy settings for conversion for M-dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo: CloudResult<FrooxEngine.Store.Record> - State: NotFound, Attempts: 0, Content: , Entity: 
+16:35:20.771 ( 68 FPS)	Engine Ready!
+16:35:20.772 ( 68 FPS)	TotalFixedPhaseCount is wrong! Please update it to: 31
+16:35:20.772 ( 68 FPS)	EngineReady signalled. Hiding loading bar
+16:35:21.672 ( 80 FPS)	Loading object from record: Record G-Resonite:R-8a2f06cc-6dcc-43cf-9fd5-44736f1282e2, Name: ViewVisual, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///baa3af2af46e6719526d230bb860474cb311afbe0a687bfd8c7d4b4d0570615e.brson, Deleted: False
+16:35:21.672 ( 80 FPS)	Source record: Record G-Resonite:R-8a2f06cc-6dcc-43cf-9fd5-44736f1282e2, Name: ViewVisual, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///baa3af2af46e6719526d230bb860474cb311afbe0a687bfd8c7d4b4d0570615e.brson, Deleted: False
+16:35:21.927 ( 80 FPS)	Loading object from record: Record G-Resonite:R-8a2f06cc-6dcc-43cf-9fd5-44736f1282e2, Name: ViewVisual, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///baa3af2af46e6719526d230bb860474cb311afbe0a687bfd8c7d4b4d0570615e.brson, Deleted: False
+16:35:21.927 ( 80 FPS)	Source record: Record G-Resonite:R-8a2f06cc-6dcc-43cf-9fd5-44736f1282e2, Name: ViewVisual, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///baa3af2af46e6719526d230bb860474cb311afbe0a687bfd8c7d4b4d0570615e.brson, Deleted: False
+16:35:21.943 ( 80 FPS)	Loading object from record: Record G-Resonite:R-8a2f06cc-6dcc-43cf-9fd5-44736f1282e2, Name: ViewVisual, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///baa3af2af46e6719526d230bb860474cb311afbe0a687bfd8c7d4b4d0570615e.brson, Deleted: False
+16:35:21.944 ( 80 FPS)	Source record: Record G-Resonite:R-8a2f06cc-6dcc-43cf-9fd5-44736f1282e2, Name: ViewVisual, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///baa3af2af46e6719526d230bb860474cb311afbe0a687bfd8c7d4b4d0570615e.brson, Deleted: False
+16:35:21.975 ( 80 FPS)	Rebuild: 9.6618 ms, Nodes: 150, Groups: 104
+16:35:22.001 ( 39 FPS)	Rebuild: 0.0041 ms, Nodes: 0, Groups: 100
+16:35:23.029 ( 76 FPS)	Running Initializer: HomeScreenInitializer, OldVersion: -1, NewVersion: 5, Modified: False
+16:35:23.041 ( 76 FPS)	Loading facet template: UserProfile, OldVersion: , CurrentUserId: 
+16:35:23.041 ( 76 FPS)	Loading from record: 
+16:35:23.049 ( 76 FPS)	Loading facet template: OnlineStatusV2, OldVersion: , CurrentUserId: 
+16:35:23.049 ( 76 FPS)	Loading from record: 
+16:35:23.051 ( 76 FPS)	Loading facet template: CustomNameplateVisibilityV2, OldVersion: , CurrentUserId: 
+16:35:23.051 ( 76 FPS)	Loading from record: 
+16:35:23.053 ( 76 FPS)	Loading facet template: NameplateVisibilityV2, OldVersion: , CurrentUserId: 
+16:35:23.053 ( 76 FPS)	Loading from record: 
+16:35:23.055 ( 76 FPS)	Loading facet template: PasteFromClipboard, OldVersion: , CurrentUserId: 
+16:35:23.055 ( 76 FPS)	Loading from record: 
+16:35:23.057 ( 76 FPS)	Loading facet template: SeatedMode, OldVersion: , CurrentUserId: 
+16:35:23.057 ( 76 FPS)	Loading from record: 
+16:35:23.060 ( 76 FPS)	Loading facet template: FreeformDash, OldVersion: , CurrentUserId: 
+16:35:23.060 ( 76 FPS)	Loading from record: 
+16:35:23.063 ( 76 FPS)	Loading facet template: Setup2FA, OldVersion: , CurrentUserId: 
+16:35:23.063 ( 76 FPS)	Loading from record: 
+16:35:23.064 ( 76 FPS)	Loading facet template: Debug, OldVersion: , CurrentUserId: 
+16:35:23.064 ( 76 FPS)	Loading from record: 
+16:35:23.067 ( 76 FPS)	Loading facet template: FullBodyCalibrator, OldVersion: , CurrentUserId: 
+16:35:23.067 ( 76 FPS)	Loading from record: 
+16:35:23.069 ( 76 FPS)	Loading facet template: AvatarCreator, OldVersion: , CurrentUserId: 
+16:35:23.069 ( 76 FPS)	Loading from record: 
+16:35:23.071 ( 76 FPS)	Loading facet template: StreamingCamera, OldVersion: , CurrentUserId: 
+16:35:23.071 ( 76 FPS)	Loading from record: 
+16:35:23.074 ( 76 FPS)	Loading facet template: StreamAudio, OldVersion: , CurrentUserId: 
+16:35:23.074 ( 76 FPS)	Loading from record: 
+16:35:23.077 ( 76 FPS)	Loading facet template: NewWorld, OldVersion: , CurrentUserId: 
+16:35:23.077 ( 76 FPS)	Loading from record: 
+16:35:23.079 ( 76 FPS)	Loading facet template: OpenHome, OldVersion: , CurrentUserId: 
+16:35:23.079 ( 76 FPS)	Loading from record: 
+16:35:23.081 ( 76 FPS)	Loading facet template: VersionNumber, OldVersion: , CurrentUserId: 
+16:35:23.081 ( 76 FPS)	Loading from record: 
+16:35:23.087 ( 76 FPS)	Loading facet template: OnlineUserCount, OldVersion: , CurrentUserId: 
+16:35:23.087 ( 76 FPS)	Loading from record: 
+16:35:23.089 ( 76 FPS)	Loading facet template: ServerStatus, OldVersion: , CurrentUserId: 
+16:35:23.089 ( 76 FPS)	Loading from record: 
+16:35:23.091 ( 76 FPS)	Loading facet template: StorageIndicator, OldVersion: , CurrentUserId: 
+16:35:23.091 ( 76 FPS)	Loading from record: 
+16:35:23.091 ( 76 FPS)	Running Initializer: DashTopBarInitializer, OldVersion: -1, NewVersion: 4, Modified: False
+16:35:23.094 ( 76 FPS)	Loading facet template: VoiceMode, OldVersion: , CurrentUserId: 
+16:35:23.094 ( 76 FPS)	Loading from record: 
+16:35:23.096 ( 76 FPS)	Loading facet template: Time, OldVersion: , CurrentUserId: 
+16:35:23.096 ( 76 FPS)	Loading from record: 
+16:35:23.097 ( 76 FPS)	Loading facet template: FPS, OldVersion: , CurrentUserId: 
+16:35:23.097 ( 76 FPS)	Loading from record: 
+16:35:23.100 ( 76 FPS)	Loading facet template: SyncStatus, OldVersion: , CurrentUserId: 
+16:35:23.100 ( 76 FPS)	Loading from record: 
+16:35:23.102 ( 76 FPS)	Loading facet template: LeaveWorld, OldVersion: , CurrentUserId: 
+16:35:23.102 ( 76 FPS)	Loading from record: 
+16:35:24.898 ( 80 FPS)	Loading object from record: Record G-Resonite:R-1fd66ccc-18a7-4706-8a90-b4733001edad, Name: PasteFromClipboard, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///9da231694ae26d24da4af9f9352577d2301a91b0a19a7d804cff6eb85a4c95ec.brson, Deleted: False
+16:35:24.898 ( 80 FPS)	Source record: Record G-Resonite:R-1fd66ccc-18a7-4706-8a90-b4733001edad, Name: PasteFromClipboard, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///9da231694ae26d24da4af9f9352577d2301a91b0a19a7d804cff6eb85a4c95ec.brson, Deleted: False
+16:35:24.898 ( 80 FPS)	Adding legacy content PhotonDust loader
+16:35:25.322 ( 80 FPS)	Facet template fully loaded: PasteFromClipboard
+16:35:25.324 ( 80 FPS)	Loading object from record: Record G-Resonite:R-fece595e-8862-471f-b52d-2191ae343d8d, Name: AvatarCreator, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///37c265f967fc6199d0f55a5a795b349e86830fcfab1b982106b76e37f5e01277.brson, Deleted: False
+16:35:25.324 ( 80 FPS)	Source record: Record G-Resonite:R-fece595e-8862-471f-b52d-2191ae343d8d, Name: AvatarCreator, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///37c265f967fc6199d0f55a5a795b349e86830fcfab1b982106b76e37f5e01277.brson, Deleted: False
+16:35:25.324 ( 80 FPS)	Adding legacy content PhotonDust loader
+16:35:25.353 ( 80 FPS)	Facet template fully loaded: AvatarCreator
+16:35:25.353 ( 80 FPS)	Loading object from record: Record G-Resonite:R-67f49905-15dc-4c3a-9cae-488248728b7e, Name: SeatedMode, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///5e14f0de4e10e36b3ae7213ff07cbdc32e4192f6fddf779292c3a6cdb7665757.brson, Deleted: False
+16:35:25.353 ( 80 FPS)	Source record: Record G-Resonite:R-67f49905-15dc-4c3a-9cae-488248728b7e, Name: SeatedMode, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///5e14f0de4e10e36b3ae7213ff07cbdc32e4192f6fddf779292c3a6cdb7665757.brson, Deleted: False
+16:35:25.353 ( 80 FPS)	Adding legacy content PhotonDust loader
+16:35:25.388 ( 80 FPS)	Facet template fully loaded: SeatedMode
+16:35:25.451 ( 80 FPS)	Rebuild: 61.9152 ms, Nodes: 180, Groups: 18
+16:35:25.489 ( 32 FPS)	Loading object from record: Record G-Resonite:R-7190dc46-9737-4f85-9291-6516f2a9d271, Name: VersionNumber, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///3eb39a6b99652f8cfe8853a5035a03e025da249787a7089bd690816df222bd74.brson, Deleted: False
+16:35:25.489 ( 32 FPS)	Source record: Record G-Resonite:R-7190dc46-9737-4f85-9291-6516f2a9d271, Name: VersionNumber, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///3eb39a6b99652f8cfe8853a5035a03e025da249787a7089bd690816df222bd74.brson, Deleted: False
+16:35:25.489 ( 32 FPS)	Adding legacy content PhotonDust loader
+16:35:25.600 ( 32 FPS)	Facet template fully loaded: VersionNumber
+16:35:25.600 ( 32 FPS)	Loading object from record: Record G-Resonite:R-fdbef51e-32b3-4233-9d1c-af54bd1e4f78, Name: StreamAudio, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///662912e90dfbdb082d0654b8c7e0d130b0b27d2e3ff25c173b9473d3e3b5cb68.brson, Deleted: False
+16:35:25.600 ( 32 FPS)	Source record: Record G-Resonite:R-fdbef51e-32b3-4233-9d1c-af54bd1e4f78, Name: StreamAudio, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///662912e90dfbdb082d0654b8c7e0d130b0b27d2e3ff25c173b9473d3e3b5cb68.brson, Deleted: False
+16:35:25.600 ( 32 FPS)	Adding legacy content PhotonDust loader
+16:35:25.640 ( 32 FPS)	Facet template fully loaded: StreamAudio
+16:35:25.664 ( 32 FPS)	Rebuild: 23.6414 ms, Nodes: 82, Groups: 8
+16:35:25.767 ( 32 FPS)	Loading object from record: Record G-Resonite:R-bde3e18b-ac73-427d-b2ef-68aab939fade, Name: VoiceMode, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///1e4ccaee5f15345a948f937e0be045c46841efd6114633f3e22c4a7b5f563a89.brson, Deleted: False
+16:35:25.767 ( 32 FPS)	Source record: Record G-Resonite:R-bde3e18b-ac73-427d-b2ef-68aab939fade, Name: VoiceMode, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///1e4ccaee5f15345a948f937e0be045c46841efd6114633f3e22c4a7b5f563a89.brson, Deleted: False
+16:35:25.767 ( 32 FPS)	Adding legacy content PhotonDust loader
+16:35:26.077 ( 32 FPS)	Facet template fully loaded: VoiceMode
+16:35:26.077 ( 32 FPS)	Loading object from record: Record G-Resonite:R-930c9f12-0a1f-437c-b2da-f0308a0af7d5, Name: NameplateVisibilityV2, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///ff88dce5f44887c962b167d986493ea7b32649fe1873d276e7d070272f3699c1.brson, Deleted: False
+16:35:26.077 ( 32 FPS)	Source record: Record G-Resonite:R-930c9f12-0a1f-437c-b2da-f0308a0af7d5, Name: NameplateVisibilityV2, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///ff88dce5f44887c962b167d986493ea7b32649fe1873d276e7d070272f3699c1.brson, Deleted: False
+16:35:26.077 ( 32 FPS)	Adding legacy content PhotonDust loader
+16:35:26.146 ( 32 FPS)	Facet template fully loaded: NameplateVisibilityV2
+16:35:26.146 ( 32 FPS)	Loading object from record: Record G-Resonite:R-0e2acac8-1b73-4382-9e5e-229fa184d05e, Name: ServerStatus, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///1ea14e7bc00f1a94bda144693ff5fbc9bc2fb79caec1508fb07ffc414848081b.brson, Deleted: False
+16:35:26.146 ( 32 FPS)	Source record: Record G-Resonite:R-0e2acac8-1b73-4382-9e5e-229fa184d05e, Name: ServerStatus, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///1ea14e7bc00f1a94bda144693ff5fbc9bc2fb79caec1508fb07ffc414848081b.brson, Deleted: False
+16:35:26.146 ( 32 FPS)	Adding legacy content PhotonDust loader
+16:35:26.258 ( 32 FPS)	Facet template fully loaded: ServerStatus
+16:35:26.326 ( 32 FPS)	Rebuild: 66.9759 ms, Nodes: 114, Groups: 9
+16:35:26.366 (  2 FPS)	Loading object from record: Record G-Resonite:R-0d366296-f6b1-454b-86c3-d7347614a587, Name: StorageIndicator, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///f6c3ea466fe5632def02445017af7df976408047424e650fef60414fbf465c1c.brson, Deleted: False
+16:35:26.366 (  2 FPS)	Source record: Record G-Resonite:R-0d366296-f6b1-454b-86c3-d7347614a587, Name: StorageIndicator, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///f6c3ea466fe5632def02445017af7df976408047424e650fef60414fbf465c1c.brson, Deleted: False
+16:35:26.366 (  2 FPS)	Adding legacy content PhotonDust loader
+16:35:26.405 (  2 FPS)	Facet template fully loaded: StorageIndicator
+16:35:26.539 (  2 FPS)	The Value (ID1431B00 - FrooxEngine.Sync`1[Elements.Core.Rect]) element on FrooxEngine.DynamicValueVariable`1[Elements.Core.Rect] (ID1431900) is currently being driven by Drive (ID1475100 - FrooxEngine.FieldDrive`1[Elements.Core.Rect]) on FrooxEngine.ProtoFlux.CoreNodes.FieldDriveBase`1+Proxy[Elements.Core.Rect] (ID1474E00) and can be modified only through the drive reference.
+
+  at System.Environment.get_StackTrace () [0x00000] in <9577ac7a62ef43179789031239ba8798>:0 
+  at Elements.Core.UniLog.Warning (System.String message, System.Boolean stackTrace) [0x00000] in <5244c952fff14570904bd8745c113bff>:0 
+  at FrooxEngine.SyncElement.BeginModification (System.Boolean throwOnError) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.SyncField`1[T].InternalSetValue (T& value, System.Boolean sync, System.Boolean change) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.SyncField`1[T].set_Value (T value) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.Sync`1[T].set_Value (T value) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.DynamicValueVariable`1[T].set_LocalValue (T value) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.DynamicVariableBase`1[T].set_DynamicValue (T value) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.DynamicVariableSpace+ValueManager`1[T].SetValue (T value) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.DynamicVariableHandler`1[T].UpdateLinking (System.String variableName, System.Boolean hasLocalValue) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.DynamicVariableBase`1[T].UpdateLinking () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.DynamicVariableBase`1[T].OnChanges () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.ComponentBase`1[C].InternalRunApplyChanges (System.Int32 updateIndex) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.UpdateManager.ProcessChange (FrooxEngine.IUpdatable updatable) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.UpdateManager.RunQueue[T] (System.Collections.Generic.Queue`1[T] queue, System.Action`1[T] action) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.UpdateManager.RunChangeApplications () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.World.RefreshStep () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.World.Refresh () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.WorldManager.UpdateStep () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.WorldManager.RunUpdateLoop () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.Engine.UpdateStep () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.Engine.RunUpdateLoop () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at UnityFrooxEngineRunner.FrooxEngineRunner.UpdateFrooxEngine () [0x00000] in <c33a82f4d2dc4f31ac53abeee3e39e76>:0 
+  at UnityFrooxEngineRunner.FrooxEngineRunner.Update () [0x00000] in <c33a82f4d2dc4f31ac53abeee3e39e76>:0 
+16:35:26.671 (  2 FPS)	Loading object from record: Record G-Resonite:R-7d7a9936-aa26-43cb-be53-3dc43400c515, Name: NewWorld, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///60461e78450444c2ffe0bb7533d9089d4f004f895711ae6826672e0b114df9f3.brson, Deleted: False
+16:35:26.671 (  2 FPS)	Source record: Record G-Resonite:R-7d7a9936-aa26-43cb-be53-3dc43400c515, Name: NewWorld, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///60461e78450444c2ffe0bb7533d9089d4f004f895711ae6826672e0b114df9f3.brson, Deleted: False
+16:35:26.671 (  2 FPS)	Adding legacy content PhotonDust loader
+16:35:26.715 (  2 FPS)	Facet template fully loaded: NewWorld
+16:35:26.715 (  2 FPS)	Loading object from record: Record G-Resonite:R-0aa33449-d95a-4817-a636-491be16e4296, Name: FreeformDash, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///ce68b5a741bc9c384a6739069b4481277e06e09213b09108c45a5706fe46f223.brson, Deleted: False
+16:35:26.715 (  2 FPS)	Source record: Record G-Resonite:R-0aa33449-d95a-4817-a636-491be16e4296, Name: FreeformDash, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///ce68b5a741bc9c384a6739069b4481277e06e09213b09108c45a5706fe46f223.brson, Deleted: False
+16:35:26.715 (  2 FPS)	Adding legacy content PhotonDust loader
+16:35:26.754 (  2 FPS)	Facet template fully loaded: FreeformDash
+16:35:26.774 (  2 FPS)	Rebuild: 19.0169 ms, Nodes: 120, Groups: 12
+16:35:27.110 ( 34 FPS)	Loading object from record: Record G-Resonite:R-4fab24ef-b9d4-496a-a06f-913df0deb57d, Name: Time, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///1889e92a915602deedb35b58a0588f168a8f5b8b656274b690f93cf9dd1ee32b.brson, Deleted: False
+16:35:27.110 ( 34 FPS)	Source record: Record G-Resonite:R-4fab24ef-b9d4-496a-a06f-913df0deb57d, Name: Time, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///1889e92a915602deedb35b58a0588f168a8f5b8b656274b690f93cf9dd1ee32b.brson, Deleted: False
+16:35:27.110 ( 34 FPS)	Adding legacy content PhotonDust loader
+16:35:27.204 ( 34 FPS)	Facet template fully loaded: Time
+16:35:27.393 ( 63 FPS)	Loading object from record: Record G-Resonite:R-9316cdeb-a93a-424e-b9e2-d3cd3659a2de, Name: StreamingCamera, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///e3df9e06c1c9f5ba521b004105bc52c080e4e1cdcfb551e1ec32fbd09f6276cf.brson, Deleted: False
+16:35:27.393 ( 63 FPS)	Source record: Record G-Resonite:R-9316cdeb-a93a-424e-b9e2-d3cd3659a2de, Name: StreamingCamera, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///e3df9e06c1c9f5ba521b004105bc52c080e4e1cdcfb551e1ec32fbd09f6276cf.brson, Deleted: False
+16:35:27.393 ( 63 FPS)	Adding legacy content PhotonDust loader
+16:35:27.446 ( 63 FPS)	Facet template fully loaded: StreamingCamera
+16:35:27.458 ( 63 FPS)	Rebuild: 12.1850 ms, Nodes: 60, Groups: 6
+16:35:27.491 ( 63 FPS)	Loading object from record: Record G-Resonite:R-0183804c-7fa7-47e4-8107-1d495d4e3733, Name: FullBodyCalibrator, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///c8c934bad390ae069379d3cf261d844d9a42d8cfaf7b73fa9ea7a5b5daddb789.brson, Deleted: False
+16:35:27.491 ( 63 FPS)	Source record: Record G-Resonite:R-0183804c-7fa7-47e4-8107-1d495d4e3733, Name: FullBodyCalibrator, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///c8c934bad390ae069379d3cf261d844d9a42d8cfaf7b73fa9ea7a5b5daddb789.brson, Deleted: False
+16:35:27.491 ( 63 FPS)	Adding legacy content PhotonDust loader
+16:35:27.527 ( 63 FPS)	Facet template fully loaded: FullBodyCalibrator
+16:35:27.539 ( 63 FPS)	Rebuild: 11.2956 ms, Nodes: 60, Groups: 6
+16:35:27.921 ( 57 FPS)	Loading object from record: Record G-Resonite:R-a9e357c5-de9d-4cd3-8a9c-e645e170c7e0, Name: SyncStatus, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///a9edec7c0a41ea9264045c4ba5e96a08458c6081d537311bd77e87f11d116fc2.brson, Deleted: False
+16:35:27.921 ( 57 FPS)	Source record: Record G-Resonite:R-a9e357c5-de9d-4cd3-8a9c-e645e170c7e0, Name: SyncStatus, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///a9edec7c0a41ea9264045c4ba5e96a08458c6081d537311bd77e87f11d116fc2.brson, Deleted: False
+16:35:27.921 ( 57 FPS)	Adding legacy content PhotonDust loader
+16:35:28.112 ( 57 FPS)	Facet template fully loaded: SyncStatus
+16:35:28.138 ( 57 FPS)	Rebuild: 24.8961 ms, Nodes: 21, Groups: 1
+16:35:28.947 ( 80 FPS)	Loading object from record: Record G-Resonite:R-157243a8-6a68-4734-8e7f-5c70f1542af3, Name: LeaveWorld, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///0246c0f297a9a22f227228ab5a5c8ed6375ac8b6f088dd14e27cb9eee987e0a2.brson, Deleted: False
+16:35:28.947 ( 80 FPS)	Source record: Record G-Resonite:R-157243a8-6a68-4734-8e7f-5c70f1542af3, Name: LeaveWorld, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///0246c0f297a9a22f227228ab5a5c8ed6375ac8b6f088dd14e27cb9eee987e0a2.brson, Deleted: False
+16:35:28.947 ( 80 FPS)	Adding legacy content PhotonDust loader
+16:35:29.073 ( 80 FPS)	Facet template fully loaded: LeaveWorld
+16:35:29.088 ( 80 FPS)	Rebuild: 12.7358 ms, Nodes: 60, Groups: 6
+16:35:29.593 ( 57 FPS)	Loading object from record: Record G-Resonite:R-c01a8b5b-be64-4b35-aa16-a20ff5f8a030, Name: UserProfile, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///23a656f6e1f2ac24e2280f95661b5909065056abb31ab5fc3998bd6c716371fa.brson, Deleted: False
+16:35:29.593 ( 57 FPS)	Source record: Record G-Resonite:R-c01a8b5b-be64-4b35-aa16-a20ff5f8a030, Name: UserProfile, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///23a656f6e1f2ac24e2280f95661b5909065056abb31ab5fc3998bd6c716371fa.brson, Deleted: False
+16:35:29.593 ( 57 FPS)	Adding legacy content PhotonDust loader
+16:35:29.701 ( 57 FPS)	Facet template fully loaded: UserProfile
+16:35:29.714 ( 57 FPS)	Rebuild: 13.1046 ms, Nodes: 17, Groups: 2
+16:35:30.083 ( 61 FPS)	Loading object from record: Record G-Resonite:R-74d7c31c-b9e5-454e-b799-cc1217dad2ce, Name: FPS, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///30049fa034c78be0af25f8e577036dfd743ab9f437f8f83d0ac6bf6edee7c159.brson, Deleted: False
+16:35:30.083 ( 61 FPS)	Source record: Record G-Resonite:R-74d7c31c-b9e5-454e-b799-cc1217dad2ce, Name: FPS, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///30049fa034c78be0af25f8e577036dfd743ab9f437f8f83d0ac6bf6edee7c159.brson, Deleted: False
+16:35:30.083 ( 61 FPS)	Adding legacy content PhotonDust loader
+16:35:30.134 ( 61 FPS)	Facet template fully loaded: FPS
+16:35:31.098 ( 82 FPS)	Loading object from record: Record G-Resonite:R-d0dfe6dc-e049-4584-8db7-1c31c55e5c08, Name: OpenHome, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///a601a44bbe62c38cffd07e452c6356a88ee32c7f9cb6b2f556ea1a3764f84aaa.brson, Deleted: False
+16:35:31.098 ( 82 FPS)	Source record: Record G-Resonite:R-d0dfe6dc-e049-4584-8db7-1c31c55e5c08, Name: OpenHome, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///a601a44bbe62c38cffd07e452c6356a88ee32c7f9cb6b2f556ea1a3764f84aaa.brson, Deleted: False
+16:35:31.098 ( 82 FPS)	Adding legacy content PhotonDust loader
+16:35:31.140 ( 82 FPS)	Facet template fully loaded: OpenHome
+16:35:31.151 ( 82 FPS)	Rebuild: 10.0697 ms, Nodes: 60, Groups: 6
+16:35:31.335 ( 82 FPS)	Loading object from record: Record G-Resonite:R-9db0bafc-bf78-4edc-a8ae-d1fe22117c35, Name: CustomNameplateVisibilityV2, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///ddabdb6e95f40701c5884ad2f82c7fa2f86addfa55fe54dbce183642a39f3606.brson, Deleted: False
+16:35:31.335 ( 82 FPS)	Source record: Record G-Resonite:R-9db0bafc-bf78-4edc-a8ae-d1fe22117c35, Name: CustomNameplateVisibilityV2, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///ddabdb6e95f40701c5884ad2f82c7fa2f86addfa55fe54dbce183642a39f3606.brson, Deleted: False
+16:35:31.335 ( 82 FPS)	Adding legacy content PhotonDust loader
+16:35:31.385 ( 82 FPS)	Facet template fully loaded: CustomNameplateVisibilityV2
+16:35:31.398 ( 82 FPS)	Rebuild: 12.3454 ms, Nodes: 60, Groups: 6
+16:35:32.429 ( 78 FPS)	Loading object from record: Record G-Resonite:R-c605cdd7-305a-4446-87ca-3d537d9c2176, Name: OnlineStatusV2, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///fd2f46f42f66c7a583be2b8a348180ec86dcdbb7490549dd7d700e357586cb9e.brson, Deleted: False
+16:35:32.429 ( 78 FPS)	Source record: Record G-Resonite:R-c605cdd7-305a-4446-87ca-3d537d9c2176, Name: OnlineStatusV2, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///fd2f46f42f66c7a583be2b8a348180ec86dcdbb7490549dd7d700e357586cb9e.brson, Deleted: False
+16:35:32.527 ( 78 FPS)	Facet template fully loaded: OnlineStatusV2
+16:35:32.560 ( 78 FPS)	Rebuild: 31.7758 ms, Nodes: 74, Groups: 7
+16:35:32.600 ( 63 FPS)	The Value (ID1DAA300 - FrooxEngine.Sync`1[Elements.Core.Rect]) element on FrooxEngine.DynamicValueVariable`1[Elements.Core.Rect] (ID1DAA100) is currently being driven by Drive (ID1D9DA00 - FrooxEngine.FieldDrive`1[Elements.Core.Rect]) on FrooxEngine.ProtoFlux.CoreNodes.FieldDriveBase`1+Proxy[Elements.Core.Rect] (ID1D9D700) and can be modified only through the drive reference.
+
+  at System.Environment.get_StackTrace () [0x00000] in <9577ac7a62ef43179789031239ba8798>:0 
+  at Elements.Core.UniLog.Warning (System.String message, System.Boolean stackTrace) [0x00000] in <5244c952fff14570904bd8745c113bff>:0 
+  at FrooxEngine.SyncElement.BeginModification (System.Boolean throwOnError) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.SyncField`1[T].InternalSetValue (T& value, System.Boolean sync, System.Boolean change) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.SyncField`1[T].set_Value (T value) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.Sync`1[T].set_Value (T value) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.DynamicValueVariable`1[T].set_LocalValue (T value) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.DynamicVariableBase`1[T].set_DynamicValue (T value) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.DynamicVariableSpace+ValueManager`1[T].SetValue (T value) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.DynamicVariableHandler`1[T].UpdateLinking (System.String variableName, System.Boolean hasLocalValue) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.DynamicVariableBase`1[T].UpdateLinking () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.DynamicVariableBase`1[T].OnChanges () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.ComponentBase`1[C].InternalRunApplyChanges (System.Int32 updateIndex) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.UpdateManager.ProcessChange (FrooxEngine.IUpdatable updatable) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.UpdateManager.RunQueue[T] (System.Collections.Generic.Queue`1[T] queue, System.Action`1[T] action) [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.UpdateManager.RunChangeApplications () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.World.RefreshStep () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.World.Refresh () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.WorldManager.UpdateStep () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.WorldManager.RunUpdateLoop () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.Engine.UpdateStep () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at FrooxEngine.Engine.RunUpdateLoop () [0x00000] in <bf70039ca23d43a4b7627f6e0e27f7b7>:0 
+  at UnityFrooxEngineRunner.FrooxEngineRunner.UpdateFrooxEngine () [0x00000] in <c33a82f4d2dc4f31ac53abeee3e39e76>:0 
+  at UnityFrooxEngineRunner.FrooxEngineRunner.Update () [0x00000] in <c33a82f4d2dc4f31ac53abeee3e39e76>:0 
+16:35:32.623 ( 63 FPS)	Loading object from record: Record G-Resonite:R-461ec2aa-9ece-4c95-83ea-eb7cd10ed8e0, Name: Debug, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///6dbb6609811d8839c4005e195c4f2c94e049406a0227377f8bc0967499a744d5.brson, Deleted: False
+16:35:32.623 ( 63 FPS)	Source record: Record G-Resonite:R-461ec2aa-9ece-4c95-83ea-eb7cd10ed8e0, Name: Debug, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///6dbb6609811d8839c4005e195c4f2c94e049406a0227377f8bc0967499a744d5.brson, Deleted: False
+16:35:32.623 ( 63 FPS)	Adding legacy content PhotonDust loader
+16:35:32.673 ( 63 FPS)	Facet template fully loaded: Debug
+16:35:32.686 ( 63 FPS)	Rebuild: 11.4379 ms, Nodes: 60, Groups: 6
+16:35:33.323 ( 74 FPS)	Loading object from record: Record G-Resonite:R-eb29c0af-5bf8-431e-8f1f-83b53761e1e2, Name: OnlineUserCount, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///61924304538d9126db448010012cd1e92ec8b3e5efe891e66561c5c00f483e38.brson, Deleted: False
+16:35:33.323 ( 74 FPS)	Source record: Record G-Resonite:R-eb29c0af-5bf8-431e-8f1f-83b53761e1e2, Name: OnlineUserCount, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///61924304538d9126db448010012cd1e92ec8b3e5efe891e66561c5c00f483e38.brson, Deleted: False
+16:35:33.323 ( 74 FPS)	Adding legacy content PhotonDust loader
+16:35:33.394 ( 74 FPS)	Facet template fully loaded: OnlineUserCount
+16:35:33.403 ( 74 FPS)	Rebuild: 7.8509 ms, Nodes: 18, Groups: 4
+16:35:34.565 ( 81 FPS)	Loading object from record: Record G-Resonite:R-9a9d09e5-0613-4635-aca9-4e2c3812ec61, Name: VR_Headset, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///dd06db5a1274becb4474b6347cd0d95b497f7d277ed9fcb58058a8fcdf85c4af.brson, Deleted: False
+16:35:34.565 ( 81 FPS)	Source record: Record G-Resonite:R-9a9d09e5-0613-4635-aca9-4e2c3812ec61, Name: VR_Headset, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///dd06db5a1274becb4474b6347cd0d95b497f7d277ed9fcb58058a8fcdf85c4af.brson, Deleted: False
+16:35:34.782 ( 81 FPS)	PreserveWithAssets: FrooxEngine.AtlasInfo
+16:35:35.002 ( 81 FPS)	Loading object from record: Record G-Resonite:R-9a9d09e5-0613-4635-aca9-4e2c3812ec61, Name: VR_Headset, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///dd06db5a1274becb4474b6347cd0d95b497f7d277ed9fcb58058a8fcdf85c4af.brson, Deleted: False
+16:35:35.002 ( 81 FPS)	Source record: Record G-Resonite:R-9a9d09e5-0613-4635-aca9-4e2c3812ec61, Name: VR_Headset, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///dd06db5a1274becb4474b6347cd0d95b497f7d277ed9fcb58058a8fcdf85c4af.brson, Deleted: False
+16:35:35.052 ( 81 FPS)	Loading object from record: Record G-Resonite:R-9a9d09e5-0613-4635-aca9-4e2c3812ec61, Name: VR_Headset, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///dd06db5a1274becb4474b6347cd0d95b497f7d277ed9fcb58058a8fcdf85c4af.brson, Deleted: False
+16:35:35.052 ( 81 FPS)	Source record: Record G-Resonite:R-9a9d09e5-0613-4635-aca9-4e2c3812ec61, Name: VR_Headset, Type: object, Path: Inventory\SpawnObjects, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///dd06db5a1274becb4474b6347cd0d95b497f7d277ed9fcb58058a8fcdf85c4af.brson, Deleted: False
+16:35:35.155 ( 81 FPS)	Rebuild: 73.7549 ms, Nodes: 453, Groups: 301
+16:35:35.221 ( 36 FPS)	New setting type registered: FrooxEngine.InteractiveCameraAudioSettings
+16:35:35.223 ( 36 FPS)	Rebuild: 0.0129 ms, Nodes: 0, Groups: 296
+16:35:35.295 ( 36 FPS)	Instantiating new setting component: FrooxEngine.InteractiveCameraAudioSettings
+16:35:35.923 ( 66 FPS)	Loading object from record: Record G-Resonite:R-b5bbf26b-679f-443c-80be-3b15691fcb65, Name: Setup2FA, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///fe6a652cd3f440c024fed19dcc1281b472329ffea8b0b706a3c43dbe89180566.brson, Deleted: False
+16:35:35.923 ( 66 FPS)	Source record: Record G-Resonite:R-b5bbf26b-679f-443c-80be-3b15691fcb65, Name: Setup2FA, Type: object, Path: Inventory\Facets\Templates, Version: Global: 1, Local: 1, UserId: U-Ryuvi, MachineId: jzqrte3k48xuwboff9mobnemzq15cr4moruhkunjwstk8hfg8xky, AssetURI: resdb:///fe6a652cd3f440c024fed19dcc1281b472329ffea8b0b706a3c43dbe89180566.brson, Deleted: False
+16:35:35.923 ( 66 FPS)	Adding legacy content PhotonDust loader
+16:35:35.973 ( 66 FPS)	Facet template fully loaded: Setup2FA
+16:35:35.985 ( 66 FPS)	Rebuild: 10.9166 ms, Nodes: 60, Groups: 6
+16:35:46.983 ( 79 FPS)	Shutdown requested
+16:35:46.984 ( 79 FPS)	Exiting. Save Homes: True
+16:35:46.985 ( 79 FPS)	Saving all settings
+16:35:46.986 ( 79 FPS)	Saving world: Local, currently being saved: 1
+16:35:46.987 ( 79 FPS)	Saving Local Settings
+16:35:47.000 ( 79 FPS)	Starting running world: 
+16:35:47.001 ( 79 FPS)	Shutdown canceled
+16:35:47.002 ( 79 FPS)	Updated: 0001/01/01 0:00:00 -> 2025/06/11 7:35:46
+16:35:47.002 ( 79 FPS)	Updated: False -> True
+16:35:47.002 ( 79 FPS)	Updated: 0 -> 5
+16:35:47.002 ( 79 FPS)	Updated:  -> kokoa0429
+16:35:47.002 ( 79 FPS)	Updated:  -> dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo
+16:35:47.155 ( 79 FPS)	World Optimized! Deduplicated Materials: 24, Deduplicated Static Providers: 177, Cleaned Up Assets: 96
+16:35:47.302 ( 79 FPS)	Source record: 
+16:35:47.302 ( 79 FPS)	Adding legacy content PhotonDust loader
+16:35:47.320 ( 79 FPS)	World Saved! Name: Local. RecordId: M-dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo:R-Home. Local: 0, Global: 0
+16:35:47.392 ( 79 FPS)	Rebuild: 2.4579 ms, Nodes: 7, Groups: 2
+16:35:47.393 ( 79 FPS)	User Joined NEONEO World 1. Username: kokoa0429, UserID: , AllocID: 0, AllocIDstart: 1,  MachineID: dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo
+16:35:47.393 ( 79 FPS)	User Spawn NEONEO World 1. Username: kokoa0429, UserID: , MachineID: dbp81hj1xd9u4dgrp89cn7owsq7tgn5w8b9pzswxbwj336mnhwjo
+16:35:47.393 ( 79 FPS)	Spawning User kokoa0429 (ID2E00)
+16:35:47.394 ( 79 FPS)	User kokoa0429 Role: Admin, HasFingerTracking: True, HasEyeTracking: False, HasLipTracking: False
+16:35:47.396 ( 79 FPS)	Loading from record: 
+16:35:47.396 ( 79 FPS)	Loading from record: 
+16:35:47.397 ( 79 FPS)	Loading from record: 
+16:35:47.398 ( 79 FPS)	Loading from record: 
+16:35:47.438 ( 79 FPS)	Shutdown requested
+16:35:47.438 ( 79 FPS)	Shutting down
+16:35:47.440 ( 79 FPS)	Stopping audio device: Index HMD (NVIDIA High Definition Audio) (Context: Default Output)
+16:35:47.698 ( 79 FPS)	Requesting environment shutdown
+16:35:47.700 ( 79 FPS)	Shutting down
+<<< LOG END >>>
