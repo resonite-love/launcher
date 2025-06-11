@@ -441,6 +441,38 @@ async fn clear_steam_credentials(app: AppHandle) -> Result<String, String> {
     Ok("Steam credentials cleared successfully".to_string())
 }
 
+// Get profile configuration
+#[tauri::command]
+async fn get_profile_config(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Profile, String> {
+    let app_state = state.lock().unwrap();
+    
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
+    
+    profile_manager.get_profile(&profile_name)
+        .map_err(|e| format!("Failed to get profile: {}", e))
+}
+
+// Update profile configuration
+#[tauri::command]
+async fn update_profile_config(
+    profile: Profile,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let app_state = state.lock().unwrap();
+    
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
+    
+    profile_manager.update_profile(&profile)
+        .map_err(|e| format!("Failed to update profile: {}", e))?;
+    
+    Ok(format!("Profile '{}' updated successfully", profile.name))
+}
+
 fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(AppState::default()))
@@ -457,7 +489,9 @@ fn main() {
             steam_login,
             save_steam_credentials,
             load_steam_credentials,
-            clear_steam_credentials
+            clear_steam_credentials,
+            get_profile_config,
+            update_profile_config
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -18,6 +18,7 @@ import {
   Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ProfileEditModal from './ProfileEditModal';
 
 interface ProfileInfo {
   name: string;
@@ -41,6 +42,12 @@ interface SteamCredentials {
   password: string;
 }
 
+interface ProfileConfig {
+  name: string;
+  description: string;
+  args: string[];
+}
+
 function ProfilesTab() {
   const [profiles, setProfiles] = useState<ProfileInfo[]>([]);
   const [newProfileName, setNewProfileName] = useState('');
@@ -60,6 +67,10 @@ function ProfilesTab() {
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
   const [credentialsUsername, setCredentialsUsername] = useState('');
   const [credentialsPassword, setCredentialsPassword] = useState('');
+  
+  // プロファイル編集用の状態
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingProfile, setEditingProfile] = useState<ProfileConfig | null>(null);
 
   useEffect(() => {
     loadProfiles();
@@ -267,6 +278,36 @@ function ProfilesTab() {
       toast.error(`クレデンシャルの削除に失敗しました: ${err}`);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // プロファイル編集関連の関数
+  const openEditModal = async (profileName: string) => {
+    try {
+      setIsLoading(true);
+      const profile = await invoke<ProfileConfig>('get_profile_config', { profileName });
+      setEditingProfile(profile);
+      setShowEditModal(true);
+    } catch (err) {
+      toast.error(`プロファイル設定の取得に失敗しました: ${err}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const closeEditModal = () => {
+    setShowEditModal(false);
+    setEditingProfile(null);
+  };
+
+  const saveProfile = async (config: ProfileConfig) => {
+    try {
+      const result = await invoke<string>('update_profile_config', { profile: config });
+      toast.success(result);
+      await loadProfiles();
+    } catch (err) {
+      toast.error(`プロファイルの更新に失敗しました: ${err}`);
+      throw err;
     }
   };
 
@@ -504,7 +545,7 @@ function ProfilesTab() {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="btn-primary w-full flex items-center justify-center space-x-2"
+                      className="btn-primary flex-1 flex items-center justify-center space-x-2"
                       onClick={() => openInstallModal(profile.name)}
                       disabled={isLoading}
                     >
@@ -512,6 +553,18 @@ function ProfilesTab() {
                       <span>ゲームをインストール</span>
                     </motion.button>
                   )}
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="btn-secondary flex items-center space-x-2"
+                    onClick={() => openEditModal(profile.name)}
+                    disabled={isLoading}
+                    title="プロファイル設定を編集"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                    <span>編集</span>
+                  </motion.button>
                 </div>
               </motion.div>
             ))}
@@ -740,6 +793,14 @@ function ProfilesTab() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Profile Edit Modal */}
+      <ProfileEditModal
+        isOpen={showEditModal}
+        profile={editingProfile}
+        onClose={closeEditModal}
+        onSave={saveProfile}
+      />
     </div>
   );
 }
