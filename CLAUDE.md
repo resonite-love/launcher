@@ -85,3 +85,15 @@ For comprehensive information about configuration, profile management, and troub
 - Launch options and customization
 - Troubleshooting common issues
 - Advanced configuration examples
+
+## API Documentation
+
+📚 **See [TAURI_COMMANDS.md](./TAURI_COMMANDS.md)** for complete Tauri command documentation including:
+- Application initialization commands
+- Profile management functions
+- Game installation and update operations
+- Steam authentication methods
+- Event handling and error management
+- TypeScript interfaces and usage examples
+
+**Important:** When modifying Tauri commands in `gui/src-tauri/src/main.rs`, always update `TAURI_COMMANDS.md` to reflect the changes.
