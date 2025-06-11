@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Home, Settings, Loader2, AlertCircle } from 'lucide-react';
+import CustomTitlebar from './components/CustomTitlebar';
 import HomeTab from './components/HomeTab';
 import ProfilesTab from './components/ProfilesTab';
 import { useAppStore } from './store/useAppStore';
@@ -67,8 +68,10 @@ function App() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="min-h-screen bg-dark-950 flex flex-col"
+      className="h-screen bg-dark-950 flex flex-col window-frame"
     >
+      {/* Custom Titlebar */}
+      <CustomTitlebar />
       {/* DepotDownloader Warning Banner */}
       {showDepotWarning && (
         <motion.div
@@ -86,16 +89,8 @@ function App() {
       )}
 
       {/* Header */}
-      <header className="bg-dark-900/50 backdrop-blur-md border-b border-dark-700/50 p-4">
+      <header className="fixed top-8 left-0 right-0 z-40 bg-dark-900/50 backdrop-blur-md border-b border-dark-700/50 p-4">
         <div className="max-w-7xl mx-auto">
-          <motion.h1
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-2xl font-bold text-gradient mb-4"
-          >
-            Resonite Tools
-          </motion.h1>
-          
           <nav className="flex space-x-2">
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -125,7 +120,7 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-6 pt-32">
         <motion.div
           key={currentTab}
           initial={{ opacity: 0, x: 20 }}

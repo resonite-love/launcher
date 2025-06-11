@@ -39,6 +39,17 @@
       },
       "notification": {
         "all": true
+      },
+      "window": {
+        "all": false,
+        "close": true,
+        "hide": true,
+        "show": true,
+        "maximize": true,
+        "minimize": true,
+        "unmaximize": true,
+        "unminimize": true,
+        "startDragging": true
       }
     },
     "bundle": {
@@ -53,6 +64,8 @@
       {
         "fullscreen": false,
         "resizable": true,
+        "decorations": false,
+        "transparent": true,
         "title": "Resonite Tools",
         "width": 1000,
         "height": 700,
