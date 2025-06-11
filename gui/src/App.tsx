@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
+import HomeTab from './components/HomeTab';
 import ProfilesTab from './components/ProfilesTab';
-import InstallationTab from './components/InstallationTab';
-import LaunchTab from './components/LaunchTab';
 import './App.css';
 
 interface AppStatus {
@@ -11,10 +10,10 @@ interface AppStatus {
   exe_dir: string | null;
 }
 
-type Tab = 'profiles' | 'installation' | 'launch';
+type Tab = 'home' | 'profiles';
 
 function App() {
-  const [currentTab, setCurrentTab] = useState<Tab>('profiles');
+  const [currentTab, setCurrentTab] = useState<Tab>('home');
   const [appStatus, setAppStatus] = useState<AppStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,30 +70,23 @@ function App() {
         <h1>Resonite Tools</h1>
         <nav className="nav">
           <button
+            className={currentTab === 'home' ? 'active' : ''}
+            onClick={() => setCurrentTab('home')}
+          >
+            ホーム
+          </button>
+          <button
             className={currentTab === 'profiles' ? 'active' : ''}
             onClick={() => setCurrentTab('profiles')}
           >
-            プロファイル
-          </button>
-          <button
-            className={currentTab === 'installation' ? 'active' : ''}
-            onClick={() => setCurrentTab('installation')}
-          >
-            インストール
-          </button>
-          <button
-            className={currentTab === 'launch' ? 'active' : ''}
-            onClick={() => setCurrentTab('launch')}
-          >
-            起動
+            プロファイル管理
           </button>
         </nav>
       </header>
 
       <main className="main">
+        {currentTab === 'home' && <HomeTab />}
         {currentTab === 'profiles' && <ProfilesTab />}
-        {currentTab === 'installation' && <InstallationTab />}
-        {currentTab === 'launch' && <LaunchTab />}
       </main>
 
       <footer className="status-bar">
