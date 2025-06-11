@@ -89,7 +89,7 @@ function App() {
       )}
 
       {/* Header */}
-      <header className="fixed top-8 left-0 right-0 z-40 bg-dark-900/50 backdrop-blur-md border-b border-dark-700/50 p-4">
+      <header className="left-0 right-0 z-40 bg-dark-900/50 backdrop-blur-md border-b border-dark-700/50 p-4">
         <div className="max-w-7xl mx-auto">
           <nav className="flex space-x-2">
             <motion.button
@@ -120,7 +120,7 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 pt-32">
+      <main className="flex-1 p-6 overflow-y-scroll">
         <motion.div
           key={currentTab}
           initial={{ opacity: 0, x: 20 }}

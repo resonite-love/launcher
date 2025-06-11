@@ -39,7 +39,7 @@ function CustomTitlebar() {
 
   return (
     <div 
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between h-8 bg-dark-900/80 backdrop-blur-md select-none"
+      className="top-0 left-0 right-0 z-50 flex items-center justify-between h-8 bg-dark-900/80 backdrop-blur-md select-none"
       data-tauri-drag-region
     >
       {/* Left side - App title */}
