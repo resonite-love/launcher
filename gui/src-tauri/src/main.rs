@@ -3,7 +3,7 @@
 
 use std::sync::Mutex;
 use std::path::PathBuf;
-use tauri::State;
+use tauri::{State, Manager, Window};
 use resonite_tools_lib::{
     depotdownloader::DepotDownloader,
     install::{ResoniteInstall, ResoniteInstallManager},
@@ -110,11 +110,12 @@ async fn install_game_to_profile(
     Ok(format!("Resonite {} branch installed successfully to profile '{}'", request.branch, request.profile_name))
 }
 
-// Install Resonite to a profile (Interactive Mode for 2FA)
+// Install Resonite to a profile (Auto-fallback Mode)
 #[tauri::command]
 async fn install_game_to_profile_interactive(
     request: GameInstallRequest,
     state: State<'_, Mutex<AppState>>,
+    window: Window,
 ) -> Result<String, String> {
     let app_state = state.lock().unwrap();
     
@@ -131,11 +132,39 @@ async fn install_game_to_profile_interactive(
         request.username,
         request.password,
     );
+
+    let profile_name = request.profile_name.clone();
+    let branch = request.branch.clone();
+    let window_clone = window.clone();
     
-    install.install_interactive(depot_downloader, profile_manager)
-        .map_err(|e| format!("Interactive installation failed: {}", e))?;
+    // 自動フォールバック機能を使用
+    install.install_with_fallback(depot_downloader, profile_manager, move |status_message, is_complete| {
+        // ステータス更新をGUIに送信
+        let _ = window_clone.emit("installation-status", serde_json::json!({
+            "profile_name": profile_name,
+            "branch": branch,
+            "message": status_message,
+            "is_complete": is_complete
+        }));
+
+        if is_complete {
+            let success = status_message.contains("完了しました") && !status_message.contains("失敗");
+            let final_message = if success {
+                format!("Installation completed for profile '{}' ({})", profile_name, branch)
+            } else {
+                format!("Installation failed for profile '{}' ({})", profile_name, branch)
+            };
+
+            let _ = window_clone.emit("installation-completed", serde_json::json!({
+                "profile_name": profile_name,
+                "branch": branch,
+                "success": success,
+                "message": final_message
+            }));
+        }
+    }).map_err(|e| format!("Installation failed: {}", e))?;
     
-    Ok(format!("Resonite {} branch installation launched in command window for profile '{}'", request.branch, request.profile_name))
+    Ok(format!("Resonite {} branch installation started for profile '{}' (auto-fallback enabled)", request.branch, request.profile_name))
 }
 
 // Update Resonite in a profile
@@ -166,11 +195,12 @@ async fn update_profile_game(
     Ok(format!("Resonite {} branch updated successfully in profile '{}'", request.branch, request.profile_name))
 }
 
-// Update Resonite in a profile (Interactive Mode for 2FA)
+// Update Resonite in a profile (Auto-fallback Mode)
 #[tauri::command]
 async fn update_profile_game_interactive(
     request: GameInstallRequest,
     state: State<'_, Mutex<AppState>>,
+    window: Window,
 ) -> Result<String, String> {
     let app_state = state.lock().unwrap();
     
@@ -187,11 +217,39 @@ async fn update_profile_game_interactive(
         request.username,
         request.password,
     );
+
+    let profile_name = request.profile_name.clone();
+    let branch = request.branch.clone();
+    let window_clone = window.clone();
     
-    install.update_interactive(depot_downloader, profile_manager)
-        .map_err(|e| format!("Interactive update failed: {}", e))?;
+    // 自動フォールバック機能を使用
+    install.update_with_fallback(depot_downloader, profile_manager, move |status_message, is_complete| {
+        // ステータス更新をGUIに送信
+        let _ = window_clone.emit("installation-status", serde_json::json!({
+            "profile_name": profile_name,
+            "branch": branch,
+            "message": status_message,
+            "is_complete": is_complete
+        }));
+
+        if is_complete {
+            let success = status_message.contains("完了しました") && !status_message.contains("失敗");
+            let final_message = if success {
+                format!("Update completed for profile '{}' ({})", profile_name, branch)
+            } else {
+                format!("Update failed for profile '{}' ({})", profile_name, branch)
+            };
+
+            let _ = window_clone.emit("installation-completed", serde_json::json!({
+                "profile_name": profile_name,
+                "branch": branch,
+                "success": success,
+                "message": final_message
+            }));
+        }
+    }).map_err(|e| format!("Update failed: {}", e))?;
     
-    Ok(format!("Resonite {} branch update launched in command window for profile '{}'", request.branch, request.profile_name))
+    Ok(format!("Resonite {} branch update started for profile '{}' (auto-fallback enabled)", request.branch, request.profile_name))
 }
 
 // Check for updates in a profile

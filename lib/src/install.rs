@@ -119,7 +119,78 @@ impl ResoniteInstall {
 
         println!("Installation process launched in separate window!");
         println!("Please check the command prompt window for Steam 2FA prompts.");
-        println!("After installation completes, you may need to refresh the profile list.");
+        Ok(())
+    }
+
+    /// プロファイルにResoniteをインストールする（インタラクティブ、監視付き）
+    pub fn install_interactive_with_monitoring<F>(&self, depot_downloader: &DepotDownloader, profile_manager: &ProfileManager, on_complete: F) -> Result<(), Box<dyn Error>> 
+    where 
+        F: Fn(bool) + Send + 'static,
+    {
+        println!(
+            "Installing Resonite {} branch to profile '{}' (Interactive Mode with Monitoring)",
+            self.branch, self.profile_name
+        );
+
+        // プロファイルの存在確認
+        let profile = profile_manager.get_profile(&self.profile_name)?;
+        let profile_dir = profile_manager.get_profile_dir(&self.profile_name);
+        let game_dir = profile_dir.join("Game");
+
+        // ゲームディレクトリを作成
+        if !game_dir.exists() {
+            fs::create_dir_all(&game_dir)?;
+        }
+
+        let game_dir_str = game_dir.to_string_lossy().to_string();
+
+        // プロファイル更新のためのクローン
+        let profile_name_for_update = self.profile_name.clone();
+        let branch_for_update = self.branch.clone();
+        let manifest_id_for_update = self.manifest_id.clone();
+        let profile_manager_clone = profile_manager.clone();
+        
+        depot_downloader.monitor_interactive_download(
+            &game_dir_str,
+            Box::new(move |success| {
+                if success {
+                    println!("Installation completed for profile: {}", profile_name_for_update);
+                    
+                    // プロファイル情報を更新
+                    if let Ok(mut profile) = profile_manager_clone.get_profile(&profile_name_for_update) {
+                        let game_info = GameInfo {
+                            branch: branch_for_update.clone(),
+                            manifest_id: manifest_id_for_update.clone(),
+                            depot_id: "2519832".to_string(),
+                            installed: true,
+                            last_updated: Some(Utc::now().to_rfc3339()),
+                        };
+                        
+                        profile.update_game_info(game_info);
+                        
+                        if let Err(e) = profile_manager_clone.update_profile(&profile) {
+                            eprintln!("Failed to update profile after installation: {}", e);
+                        } else {
+                            println!("Profile '{}' updated successfully with game info", profile_name_for_update);
+                        }
+                    }
+                }
+                on_complete(success);
+            })
+        )?;
+
+        // DepotDownloaderでResoniteをダウンロード（インタラクティブ）
+        depot_downloader.download_resonite_interactive(
+            &game_dir_str,
+            &self.branch,
+            self.manifest_id.as_deref(),
+            self.username.as_deref(),
+            self.password.as_deref(),
+        )?;
+
+        println!("Installation process launched in separate window with monitoring!");
+        println!("Please check the command prompt window for Steam 2FA prompts.");
+        println!("You will be notified when installation completes.");
         Ok(())
     }
 
@@ -143,6 +214,106 @@ impl ResoniteInstall {
 
         // For DepotDownloader, update is the same as install
         self.install_interactive(depot_downloader, profile_manager)
+    }
+
+    /// プロファイルのResoniteを更新する（インタラクティブ、監視付き）
+    pub fn update_interactive_with_monitoring<F>(&self, depot_downloader: &DepotDownloader, profile_manager: &ProfileManager, on_complete: F) -> Result<(), Box<dyn Error>> 
+    where 
+        F: Fn(bool) + Send + 'static,
+    {
+        println!(
+            "Updating Resonite {} branch in profile '{}' (Interactive Mode with Monitoring)",
+            self.branch, self.profile_name
+        );
+
+        // For DepotDownloader, update is the same as install with monitoring
+        self.install_interactive_with_monitoring(depot_downloader, profile_manager, on_complete)
+    }
+
+    /// プロファイルにResoniteをインストールする（自動フォールバック付き）
+    /// バックグラウンドインストールを試行し、失敗したらインタラクティブモードにフォールバック
+    pub fn install_with_fallback<F>(&self, depot_downloader: &DepotDownloader, profile_manager: &ProfileManager, on_status: F) -> Result<(), Box<dyn Error>> 
+    where 
+        F: Fn(&str, bool) + Send + 'static + Clone,
+    {
+        println!(
+            "Installing Resonite {} branch to profile '{}' (Auto-fallback Mode)",
+            self.branch, self.profile_name
+        );
+
+        // プロファイルの存在確認
+        let profile = profile_manager.get_profile(&self.profile_name)?;
+        let profile_dir = profile_manager.get_profile_dir(&self.profile_name);
+        let game_dir = profile_dir.join("Game");
+
+        // ゲームディレクトリを作成
+        if !game_dir.exists() {
+            fs::create_dir_all(&game_dir)?;
+        }
+
+        // まず通常のバックグラウンドインストールを試行
+        on_status("バックグラウンドインストールを試行中...", false);
+        
+        let background_result = depot_downloader.download_resonite(
+            &game_dir.to_string_lossy(),
+            &self.branch,
+            self.manifest_id.as_deref(),
+            self.username.as_deref(),
+            self.password.as_deref(),
+        );
+
+        match background_result {
+            Ok(_) => {
+                // バックグラウンドインストールが成功
+                println!("Background installation succeeded for profile: {}", self.profile_name);
+                
+                // プロファイル情報を更新
+                let mut profile = profile_manager.get_profile(&self.profile_name)?;
+                let game_info = GameInfo {
+                    branch: self.branch.clone(),
+                    manifest_id: self.manifest_id.clone(),
+                    depot_id: "2519832".to_string(),
+                    installed: true,
+                    last_updated: Some(Utc::now().to_rfc3339()),
+                };
+                
+                profile.update_game_info(game_info);
+                profile_manager.update_profile(&profile)?;
+                
+                on_status("インストールが完了しました", true);
+                Ok(())
+            }
+            Err(e) => {
+                // バックグラウンドインストールが失敗 - インタラクティブモードにフォールバック
+                println!("Background installation failed: {}. Falling back to interactive mode.", e);
+                on_status("バックグラウンドインストールが失敗しました。Steam認証が必要な可能性があります。\nコマンドウィンドウでインタラクティブインストールを開始します...", false);
+
+                // インタラクティブモードで再試行
+                self.install_interactive_with_monitoring(depot_downloader, profile_manager, move |success| {
+                    if success {
+                        on_status("インタラクティブインストールが完了しました", true);
+                    } else {
+                        on_status("インタラクティブインストールも失敗しました", true);
+                    }
+                })?;
+
+                Ok(())
+            }
+        }
+    }
+
+    /// プロファイルのResoniteを更新する（自動フォールバック付き）
+    pub fn update_with_fallback<F>(&self, depot_downloader: &DepotDownloader, profile_manager: &ProfileManager, on_status: F) -> Result<(), Box<dyn Error>> 
+    where 
+        F: Fn(&str, bool) + Send + 'static + Clone,
+    {
+        println!(
+            "Updating Resonite {} branch in profile '{}' (Auto-fallback Mode)",
+            self.branch, self.profile_name
+        );
+
+        // For DepotDownloader, update is the same as install with fallback
+        self.install_with_fallback(depot_downloader, profile_manager, on_status)
     }
 
     /// プロファイルのアップデートがあるかチェックする

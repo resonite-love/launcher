@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
+import { listen } from '@tauri-apps/api/event';
 
 interface ProfileInfo {
   name: string;
@@ -34,6 +35,45 @@ function ProfilesTab() {
 
   useEffect(() => {
     loadProfiles();
+
+    // インストール完了イベントをリッスン
+    const unlistenCompleted = listen('installation-completed', (event) => {
+      const data = event.payload as {
+        profile_name: string;
+        branch: string;
+        success: boolean;
+        message: string;
+      };
+      
+      if (data.success) {
+        setMessage({ type: 'success', text: data.message });
+        // プロファイル一覧を自動更新
+        loadProfiles();
+      } else {
+        setMessage({ type: 'error', text: data.message });
+      }
+    });
+
+    // インストールステータス更新イベントをリッスン
+    const unlistenStatus = listen('installation-status', (event) => {
+      const data = event.payload as {
+        profile_name: string;
+        branch: string;
+        message: string;
+        is_complete: boolean;
+      };
+      
+      // リアルタイムでステータスを表示
+      if (!data.is_complete) {
+        setMessage({ type: 'info', text: data.message });
+      }
+    });
+
+    // クリーンアップ
+    return () => {
+      unlistenCompleted.then(f => f());
+      unlistenStatus.then(f => f());
+    };
   }, []);
 
   const loadProfiles = async () => {
@@ -242,7 +282,7 @@ function ProfilesTab() {
                         onClick={() => updateGame(profile.name)}
                         disabled={isLoading}
                         style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                        title="Steam 2FAが必要な場合、コマンドウィンドウが開きます"
+                        title="バックグラウンド更新を試行し、Steam認証が必要な場合は自動的にコマンドウィンドウが開きます"
                       >
                         更新
                       </button>
@@ -253,7 +293,7 @@ function ProfilesTab() {
                       onClick={() => openInstallModal(profile.name)}
                       disabled={isLoading}
                       style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}
-                      title="Steam 2FAが必要な場合、コマンドウィンドウが開きます"
+                      title="バックグラウンドインストールを試行し、Steam認証が必要な場合は自動的にコマンドウィンドウが開きます"
                     >
                       ゲームをインストール
                     </button>
@@ -290,7 +330,7 @@ function ProfilesTab() {
             <h3>プロファイル '{selectedProfile}' にゲームをインストール</h3>
             <div style={{ backgroundColor: '#444', padding: '1rem', borderRadius: '4px', marginBottom: '1rem' }}>
               <p style={{ margin: 0, fontSize: '0.9rem', color: '#ccc' }}>
-                ℹ️ Steam 2FAが必要な場合、別のコマンドウィンドウが開きます。そこで認証コードを入力してください。
+                ℹ️ 最初にバックグラウンドインストールを試行し、Steam認証が必要な場合は自動的にコマンドウィンドウが開きます。
               </p>
             </div>
             
@@ -364,7 +404,7 @@ function ProfilesTab() {
                 onClick={installGame}
                 disabled={isLoading}
               >
-                {isLoading ? 'コマンドウィンドウを起動中...' : 'インストール（Steam認証対応）'}
+                {isLoading ? 'インストール中...' : 'インストール（自動フォールバック）'}
               </button>
             </div>
           </div>

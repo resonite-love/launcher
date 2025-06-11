@@ -84,6 +84,7 @@ impl Profile {
 }
 
 /// プロファイル管理に関する機能
+#[derive(Clone)]
 pub struct ProfileManager {
     profiles_dir: PathBuf,
 }

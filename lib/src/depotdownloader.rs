@@ -255,6 +255,65 @@ impl DepotDownloader {
         Ok(())
     }
 
+    /// インタラクティブダウンロードの完了を監視する
+    pub fn monitor_interactive_download(
+        &self,
+        install_dir: &str,
+        callback: Box<dyn Fn(bool) + Send + 'static>,
+    ) -> Result<(), Box<dyn Error>> {
+        use std::thread;
+        use std::time::Duration;
+        use std::path::Path;
+
+        let install_path = Path::new(install_dir);
+        let resonite_exe = install_path.join("Resonite.exe");
+        
+        println!("Monitoring installation at: {}", resonite_exe.display());
+
+        // バックグラウンドスレッドで監視
+        thread::spawn(move || {
+            let mut last_exists = resonite_exe.exists();
+            let mut last_size = if last_exists {
+                std::fs::metadata(&resonite_exe).map(|m| m.len()).unwrap_or(0)
+            } else {
+                0
+            };
+
+            loop {
+                thread::sleep(Duration::from_secs(2));
+
+                let current_exists = resonite_exe.exists();
+                let current_size = if current_exists {
+                    std::fs::metadata(&resonite_exe).map(|m| m.len()).unwrap_or(0)
+                } else {
+                    0
+                };
+
+                // ファイルが新しく作成されたか、サイズが安定した場合に完了と判定
+                if current_exists && (!last_exists || (current_size > 0 && current_size == last_size)) {
+                    // さらに2秒待ってサイズが変わらないことを確認
+                    thread::sleep(Duration::from_secs(2));
+                    let final_size = if resonite_exe.exists() {
+                        std::fs::metadata(&resonite_exe).map(|m| m.len()).unwrap_or(0)
+                    } else {
+                        0
+                    };
+
+                    if final_size == current_size && final_size > 0 {
+                        println!("Installation completed! Resonite.exe detected at: {}", resonite_exe.display());
+                        callback(true);
+                        break;
+                    }
+                }
+
+                last_exists = current_exists;
+                last_size = current_size;
+            }
+        });
+
+        Ok(())
+    }
+
     /// アップデート確認（DepotDownloaderでは直接的な確認方法はないため、manifest-onlyを使用）
     pub fn check_updates(
         &self,
