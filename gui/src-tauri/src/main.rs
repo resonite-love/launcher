@@ -9,7 +9,7 @@ use resonite_tools_lib::{
     install::{ResoniteInstall, ResoniteInstallManager},
     profile::{Profile, ProfileManager},
     mod_loader::{ModLoader, ModLoaderInfo},
-    mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease},
+    mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease},
     utils,
 };
 
@@ -761,6 +761,110 @@ async fn uninstall_mod(
     Ok(format!("Successfully uninstalled mod: {}", mod_name))
 }
 
+// Get all available versions for a MOD
+#[tauri::command]
+async fn get_mod_versions(
+    profile_name: String,
+    mod_info: ModInfo,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<ModRelease>, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    };
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.get_mod_versions(&mod_info).await
+        .map_err(|e| format!("Failed to get mod versions: {}", e))
+}
+
+// Update MOD to a specific version
+#[tauri::command]
+async fn update_mod(
+    profile_name: String,
+    mod_name: String,
+    target_version: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<InstalledMod, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    };
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.update_mod(&mod_name, &target_version).await
+        .map_err(|e| format!("Failed to update mod: {}", e))
+}
+
+// Downgrade MOD to a specific version
+#[tauri::command]
+async fn downgrade_mod(
+    profile_name: String,
+    mod_name: String,
+    target_version: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<InstalledMod, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    };
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.downgrade_mod(&mod_name, &target_version).await
+        .map_err(|e| format!("Failed to downgrade mod: {}", e))
+}
+
+// Upgrade MOD to latest or specific version
+#[tauri::command]
+async fn upgrade_mod(
+    profile_name: String,
+    mod_name: String,
+    target_version: Option<String>,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<InstalledMod, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    };
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.upgrade_mod(&mod_name, target_version.as_deref()).await
+        .map_err(|e| format!("Failed to upgrade mod: {}", e))
+}
+
+// Get all releases for a GitHub repository
+#[tauri::command]
+async fn get_all_github_releases(
+    repo_url: String,
+    _state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<GitHubRelease>, String> {
+    let temp_dir = std::env::temp_dir();
+    let mod_manager = ModManager::new(temp_dir);
+    
+    mod_manager.get_all_releases(&repo_url).await
+        .map_err(|e| format!("Failed to get releases: {}", e))
+}
+
 // Get latest release info from GitHub repository
 #[tauri::command]
 async fn get_github_release_info(
@@ -815,6 +919,11 @@ fn main() {
             install_mod_from_cache,
             install_mod_from_github,
             uninstall_mod,
+            get_mod_versions,
+            update_mod,
+            downgrade_mod,
+            upgrade_mod,
+            get_all_github_releases,
             get_github_release_info
         ])
         .run(tauri::generate_context!())

@@ -16,10 +16,22 @@ import {
   Download,
   ExternalLink,
   Search,
-  Github
+  Github,
+  Edit
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ModRiskWarningModal from './ModRiskWarningModal';
+import { ModVersionSelector } from './ModVersionSelector';
+import { 
+  useModManifest, 
+  useInstalledMods, 
+  useModVersions,
+  useInstallMod,
+  useUninstallMod,
+  useUpdateMod,
+  useDowngradeMod,
+  useUpgradeMod
+} from '../hooks/useQueries';
 
 interface ProfileConfig {
   id: string;
@@ -89,13 +101,26 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [showModRiskModal, setShowModRiskModal] = useState(false);
   
   // MOD管理用の状態
-  const [availableMods, setAvailableMods] = useState<ModInfo[]>([]);
-  const [installedMods, setInstalledMods] = useState<InstalledMod[]>([]);
   const [isLoadingMods, setIsLoadingMods] = useState(false);
   const [modSearchQuery, setModSearchQuery] = useState('');
   const [customRepoUrl, setCustomRepoUrl] = useState('');
   const [isInstallingMod, setIsInstallingMod] = useState<string | null>(null);
   const [selectedVersions, setSelectedVersions] = useState<{[modUrl: string]: string}>({});
+  const [selectedModForVersions, setSelectedModForVersions] = useState<InstalledMod | null>(null);
+
+  // React Query hooks
+  const { data: availableMods = [], isLoading: modsLoading } = useModManifest(profileName);
+  const { data: installedMods = [], isLoading: installedModsLoading, refetch: refetchInstalledMods } = useInstalledMods(profileName);
+  const { data: modVersions = [], isLoading: versionsLoading } = useModVersions(
+    profileName, 
+    selectedModForVersions ? availableMods.find(m => m.name === selectedModForVersions.name || m.source_location === selectedModForVersions.source_location) || null : null
+  );
+  
+  const installModMutation = useInstallMod();
+  const uninstallModMutation = useUninstallMod();
+  const updateModMutation = useUpdateMod();
+  const downgradeModMutation = useDowngradeMod();
+  const upgradeModMutation = useUpgradeMod();
 
   const tabs = [
     { id: 'info' as TabType, label: 'プロファイル情報', icon: User },
@@ -107,8 +132,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   useEffect(() => {
     loadProfile();
     loadModLoaderInfo();
-    loadInstalledMods();
-  }, [profileName]);
+    if (activeTab === 'mods') {
+      loadAvailableMods();
+    }
+  }, [profileName, activeTab]);
 
   const loadProfile = async () => {
     try {
@@ -207,54 +234,49 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
   // MOD関連の関数
   const loadAvailableMods = async () => {
-    try {
-      setIsLoadingMods(true);
-      const mods = await invoke<ModInfo[]>('fetch_mod_manifest', { profileName });
-      setAvailableMods(mods);
-    } catch (err) {
-      toast.error(`MOD一覧の取得に失敗しました: ${err}`);
-    } finally {
-      setIsLoadingMods(false);
-    }
-  };
-
-  const loadInstalledMods = async () => {
-    try {
-      const mods = await invoke<InstalledMod[]>('get_installed_mods', { profileName });
-      setInstalledMods(mods);
-    } catch (err) {
-      console.error('Failed to load installed mods:', err);
-    }
+    // React Query handles this automatically now
+    setIsLoadingMods(false);
   };
 
   const installMod = async (modInfo: ModInfo, version?: string) => {
+    const selectedVersion = selectedVersions[modInfo.source_location] || version;
+    await installModMutation.mutateAsync({
+      profileName,
+      modInfo,
+      version: selectedVersion
+    });
+  };
+
+  const handleVersionChange = async (mod: InstalledMod, targetVersion: string) => {
+    const currentVersion = mod.installed_version;
+    
     try {
-      setIsInstallingMod(modInfo.source_location);
+      // Compare versions to determine if it's an upgrade or downgrade
+      const isUpgrade = compareVersions(targetVersion, currentVersion) > 0;
       
-      // キャッシュ情報を使用してインストール
-      if (modInfo.releases.length > 0) {
-        const result = await invoke<InstalledMod>('install_mod_from_cache', {
+      if (isUpgrade) {
+        await upgradeModMutation.mutateAsync({
           profileName,
-          modInfo,
-          version: version || null
+          modName: mod.name,
+          targetVersion
         });
-        toast.success(`MOD "${result.name}" v${result.installed_version} をインストールしました`);
       } else {
-        // フォールバック: GitHubから直接インストール
-        const result = await invoke<InstalledMod>('install_mod_from_github', {
+        await downgradeModMutation.mutateAsync({
           profileName,
-          repoUrl: modInfo.source_location,
-          version: version || null
+          modName: mod.name,
+          targetVersion
         });
-        toast.success(`MOD "${result.name}" をインストールしました`);
       }
-      
-      await loadInstalledMods();
     } catch (err) {
-      toast.error(`MODのインストールに失敗しました: ${err}`);
-    } finally {
-      setIsInstallingMod(null);
+      toast.error(`バージョン変更に失敗しました: ${err}`);
     }
+  };
+
+  // Simple version comparison (basic implementation)
+  const compareVersions = (a: string, b: string): number => {
+    const cleanA = a.replace(/^v/, '');
+    const cleanB = b.replace(/^v/, '');
+    return cleanA.localeCompare(cleanB, undefined, { numeric: true, sensitivity: 'base' });
   };
 
   const installModFromUrl = async (repoUrl: string, version?: string) => {
@@ -275,16 +297,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   };
 
   const uninstallMod = async (modName: string) => {
-    try {
-      const result = await invoke<string>('uninstall_mod', {
-        profileName,
-        modName
-      });
-      toast.success(result);
-      await loadInstalledMods();
-    } catch (err) {
-      toast.error(`MODのアンインストールに失敗しました: ${err}`);
-    }
+    await uninstallModMutation.mutateAsync({ profileName, modName });
   };
 
   const installCustomMod = async () => {
@@ -639,7 +652,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                   )}
 
                   <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {isLoadingMods ? (
+                    {modsLoading ? (
                       <div className="text-center py-8">
                         <Loader2 className="w-8 h-8 text-resonite-blue animate-spin mx-auto mb-4" />
                         <p className="text-gray-400">MOD一覧を取得中...</p>
@@ -648,7 +661,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                       <div className="text-center py-8">
                         <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                         <p className="text-gray-400 mb-2">利用可能なMODはありません</p>
-                        <p className="text-gray-500 text-sm">「MOD一覧を取得」ボタンを押してください</p>
+                        <p className="text-gray-500 text-sm">MODローダーを有効にしてください</p>
                       </div>
                     ) : (
                       availableMods
@@ -688,9 +701,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                   whileTap={{ scale: 0.98 }}
                                   className="btn-primary text-xs flex items-center space-x-1"
                                   onClick={() => installMod(mod, selectedVersions[mod.source_location])}
-                                  disabled={isInstallingMod !== null || mod.releases.length === 0}
+                                  disabled={installModMutation.isPending || mod.releases.length === 0}
                                 >
-                                  {isInstallingMod === mod.source_location ? (
+                                  {installModMutation.isPending ? (
                                     <Loader2 className="w-3 h-3 animate-spin" />
                                   ) : (
                                     <Download className="w-3 h-3" />
@@ -776,8 +789,20 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                               <motion.button
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
+                                className="btn-secondary text-xs flex items-center space-x-1"
+                                onClick={() => setSelectedModForVersions(mod)}
+                                disabled={versionsLoading}
+                              >
+                                <Edit className="w-3 h-3" />
+                                <span>バージョン変更</span>
+                              </motion.button>
+                              
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
                                 className="btn-danger text-xs flex items-center space-x-1"
                                 onClick={() => uninstallMod(mod.name)}
+                                disabled={uninstallModMutation.isPending}
                               >
                                 <Trash2 className="w-3 h-3" />
                                 <span>削除</span>
@@ -787,6 +812,38 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                           
                           {mod.description && (
                             <p className="text-gray-300 text-sm">{mod.description}</p>
+                          )}
+                          
+                          {/* バージョン選択UI */}
+                          {selectedModForVersions?.name === mod.name && (
+                            <div className="mt-4 p-3 bg-dark-600/30 border border-dark-500/30 rounded-lg">
+                              <h5 className="text-white font-medium mb-2">バージョン選択</h5>
+                              {versionsLoading ? (
+                                <div className="flex items-center space-x-2">
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  <span className="text-gray-400">バージョン情報を取得中...</span>
+                                </div>
+                              ) : modVersions.length > 0 ? (
+                                <ModVersionSelector
+                                  mod={mod}
+                                  availableVersions={modVersions}
+                                  onVersionSelect={(version) => handleVersionChange(mod, version)}
+                                  isLoading={updateModMutation.isPending || downgradeModMutation.isPending || upgradeModMutation.isPending}
+                                />
+                              ) : (
+                                <p className="text-gray-400 text-sm">利用可能なバージョンがありません</p>
+                              )}
+                              <div className="mt-2 flex justify-end">
+                                <motion.button
+                                  whileHover={{ scale: 1.02 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  className="btn-secondary text-xs"
+                                  onClick={() => setSelectedModForVersions(null)}
+                                >
+                                  閉じる
+                                </motion.button>
+                              </div>
+                            </div>
                           )}
                         </motion.div>
                       ))

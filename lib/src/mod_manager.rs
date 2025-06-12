@@ -213,6 +213,61 @@ impl ModManager {
         Ok((Some(release.tag_name), download_url))
     }
 
+    /// GitHubリポジトリから全てのリリース一覧を取得
+    pub async fn get_all_releases(&self, repo_url: &str) -> Result<Vec<GitHubRelease>, Box<dyn Error + Send + Sync>> {
+        let api_url = self.github_repo_to_api_url(repo_url)?;
+        
+        let response = self.client
+            .get(&format!("{}/releases", api_url))
+            .header("User-Agent", "resonite-tools")
+            .send()
+            .await?;
+            
+        if !response.status().is_success() {
+            return Err(format!("GitHub API request failed: {}", response.status()).into());
+        }
+        
+        let response_text = response.text().await?;
+        let releases: Vec<GitHubRelease> = serde_json::from_str(&response_text)
+            .map_err(|e| format!("Failed to parse GitHub releases JSON: {}", e))?;
+        
+        Ok(releases)
+    }
+
+    /// 指定されたMODの全バージョン情報を取得
+    pub async fn get_mod_versions(&self, mod_info: &ModInfo) -> Result<Vec<ModRelease>, Box<dyn Error + Send + Sync>> {
+        // キャッシュされたリリース情報がある場合はそれを使用
+        if !mod_info.releases.is_empty() {
+            return Ok(mod_info.releases.clone());
+        }
+        
+        // フォールバック: GitHubから直接取得
+        let github_releases = self.get_all_releases(&mod_info.source_location).await?;
+        
+        let mut mod_releases = Vec::new();
+        for release in github_releases {
+            // DLLファイルを含むアセットを探す
+            let dll_asset = release.assets.iter()
+                .find(|asset| asset.name.ends_with(".dll"));
+            
+            if let Some(asset) = dll_asset {
+                mod_releases.push(ModRelease {
+                    version: release.tag_name.clone(),
+                    download_url: Some(asset.browser_download_url.clone()),
+                    release_url: format!("{}/releases/tag/{}", mod_info.source_location, release.tag_name),
+                    published_at: release.published_at.unwrap_or_default(),
+                    prerelease: release.prerelease.unwrap_or(false),
+                    draft: release.draft.unwrap_or(false),
+                    changelog: release.body.clone(),
+                    file_name: Some(asset.name.clone()),
+                    file_size: asset.size,
+                });
+            }
+        }
+        
+        Ok(mod_releases)
+    }
+
     /// MODをインストール（キャッシュ情報を活用）
     pub async fn install_mod_from_cache(&self, mod_info: &ModInfo, version: Option<&str>) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
         // 指定されたバージョンまたは最新バージョンのリリース情報を取得
@@ -332,6 +387,61 @@ impl ModManager {
         Ok(mods.into_iter()
             .filter(|mod_info| mod_info.dll_path.exists())
             .collect())
+    }
+
+    /// MODを更新（バージョン変更）
+    pub async fn update_mod(&self, mod_name: &str, target_version: &str) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
+        // 既存のMOD情報を取得
+        let installed_mods = self.get_installed_mods()?;
+        let existing_mod = installed_mods.iter()
+            .find(|m| m.name == mod_name)
+            .ok_or(format!("MOD '{}' is not installed", mod_name))?;
+        
+        // MODマニフェストから情報を取得
+        let all_mods = self.fetch_mod_manifest().await?;
+        let mod_info = all_mods.iter()
+            .find(|m| m.name == mod_name || m.source_location == existing_mod.source_location)
+            .ok_or(format!("MOD '{}' not found in manifest", mod_name))?;
+        
+        // 既存のMODをアンインストール
+        self.uninstall_mod(mod_name)?;
+        
+        // 指定されたバージョンをインストール
+        self.install_mod_from_cache(mod_info, Some(target_version)).await
+    }
+
+    /// MODのダウングレード
+    pub async fn downgrade_mod(&self, mod_name: &str, target_version: &str) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
+        self.update_mod(mod_name, target_version).await
+    }
+
+    /// MODのアップグレード
+    pub async fn upgrade_mod(&self, mod_name: &str, target_version: Option<&str>) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
+        // 既存のMOD情報を取得
+        let installed_mods = self.get_installed_mods()?;
+        let existing_mod = installed_mods.iter()
+            .find(|m| m.name == mod_name)
+            .ok_or(format!("MOD '{}' is not installed", mod_name))?;
+        
+        // MODマニフェストから情報を取得
+        let all_mods = self.fetch_mod_manifest().await?;
+        let mod_info = all_mods.iter()
+            .find(|m| m.name == mod_name || m.source_location == existing_mod.source_location)
+            .ok_or(format!("MOD '{}' not found in manifest", mod_name))?;
+        
+        // ターゲットバージョンを決定（指定されない場合は最新）
+        let upgrade_version = if let Some(version) = target_version {
+            version
+        } else {
+            mod_info.latest_version.as_deref()
+                .ok_or("No latest version available")?
+        };
+        
+        // 既存のMODをアンインストール
+        self.uninstall_mod(mod_name)?;
+        
+        // 新しいバージョンをインストール
+        self.install_mod_from_cache(mod_info, Some(upgrade_version)).await
     }
 
     /// MODをアンインストール
