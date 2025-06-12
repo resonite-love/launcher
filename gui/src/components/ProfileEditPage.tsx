@@ -321,6 +321,17 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     return cleanA.localeCompare(cleanB, undefined, { numeric: true, sensitivity: 'base' });
   };
 
+  // 新しいバージョンが利用可能かチェック
+  const hasNewerVersion = (mod: InstalledMod): boolean => {
+    const manifestMod = availableMods.find(m => 
+      m.name === mod.name || m.source_location === mod.source_location
+    );
+    
+    if (!manifestMod || !manifestMod.latest_version) return false;
+    
+    return compareVersions(manifestMod.latest_version, mod.installed_version) > 0;
+  };
+
   // 手動インストールMODのバージョン一覧を取得
   const loadManualModVersions = async (mod: InstalledMod) => {
     try {
@@ -1044,8 +1055,28 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                             >
                               <div className="flex items-start justify-between mb-2">
                                 <div className="flex-1">
-                                  <h4 className="text-white font-medium">{mod.name}</h4>
-                                  <p className="text-gray-400 text-sm">バージョン: {mod.installed_version}</p>
+                                  <div className="flex items-center space-x-2 mb-1">
+                                    <h4 className="text-white font-medium">{mod.name}</h4>
+                                    {hasNewerVersion(mod) && (
+                                      <span className="inline-flex items-center text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-full">
+                                        <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
+                                        更新可能
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-gray-400 text-sm">
+                                    バージョン: {mod.installed_version}
+                                    {hasNewerVersion(mod) && (() => {
+                                      const manifestMod = availableMods.find(m => 
+                                        m.name === mod.name || m.source_location === mod.source_location
+                                      );
+                                      return manifestMod?.latest_version && (
+                                        <span className="text-blue-300 ml-2">
+                                          → {manifestMod.latest_version} が利用可能
+                                        </span>
+                                      );
+                                    })()}
+                                  </p>
                                   <p className="text-gray-500 text-xs">インストール日: {mod.installed_date}</p>
                                 </div>
                                 
@@ -1062,9 +1093,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                   <motion.button
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="btn-secondary text-xs flex items-center space-x-1"
+                                    className={`text-xs flex items-center space-x-1 ${
+                                      hasNewerVersion(mod) 
+                                        ? 'btn-primary border-blue-500/50' 
+                                        : 'btn-secondary'
+                                    }`}
                                     onClick={() => handleVersionChangeClick(mod)}
                                     disabled={versionsLoading || loadingManualVersions === mod.name}
+                                    title={hasNewerVersion(mod) ? '新しいバージョンが利用可能です' : 'バージョンを変更'}
                                   >
                                     {loadingManualVersions === mod.name ? (
                                       <Loader2 className="w-3 h-3 animate-spin" />
@@ -1072,6 +1108,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       <Edit className="w-3 h-3" />
                                     )}
                                     <span>バージョン変更</span>
+                                    {hasNewerVersion(mod) && (
+                                      <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                                    )}
                                   </motion.button>
                                   
                                   <motion.button
@@ -1221,6 +1260,25 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           >
             <FolderOpen className="w-4 h-4" />
             <span>フォルダを開く</span>
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="btn-secondary flex items-center space-x-2"
+            onClick={() => {
+              refetchInstalledMods();
+              refetchUnmanagedMods();
+            }}
+            disabled={installedModsLoading || unmanagedModsLoading}
+            title="MODフォルダの変更を反映"
+          >
+            {installedModsLoading || unmanagedModsLoading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+            <span>リロード</span>
           </motion.button>
           
           <motion.button
