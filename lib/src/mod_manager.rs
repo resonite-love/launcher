@@ -176,7 +176,7 @@ impl ModManager {
     /// キャッシュされたMOD一覧を取得
     pub async fn fetch_mod_manifest(&self) -> Result<Vec<ModInfo>, Box<dyn Error + Send + Sync>> {
         // キャッシュされたMOD情報を取得
-        let cache_url = "https://raw.githubusercontent.com/YOUR_USERNAME/resonite-mod-cache/main/cache/mods.json";
+        let cache_url = "https://raw.githubusercontent.com/resonite-love/resonite-mod-cache/main/cache/mods.json";
         
         let response = self.client.get(cache_url).send().await?;
         let mods_text = response.text().await?;
