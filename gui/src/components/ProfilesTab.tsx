@@ -50,9 +50,15 @@ interface ProfileConfig {
 
 function ProfilesTab() {
   const [profiles, setProfiles] = useState<ProfileInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // プロファイル作成モーダル用の状態
+  const [showCreateProfileModal, setShowCreateProfileModal] = useState(false);
   const [newProfileName, setNewProfileName] = useState('');
   const [newProfileDescription, setNewProfileDescription] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [createWithGame, setCreateWithGame] = useState(false);
+  const [createGameBranch, setCreateGameBranch] = useState('release');
+  const [createManifestId, setCreateManifestId] = useState('');
   
   // ゲームインストール用の状態
   const [showInstallModal, setShowInstallModal] = useState(false);
@@ -123,6 +129,24 @@ function ProfilesTab() {
     }
   };
 
+  const openCreateProfileModal = () => {
+    setNewProfileName('');
+    setNewProfileDescription('');
+    setCreateWithGame(false);
+    setCreateGameBranch('release');
+    setCreateManifestId('');
+    setShowCreateProfileModal(true);
+  };
+
+  const closeCreateProfileModal = () => {
+    setShowCreateProfileModal(false);
+    setNewProfileName('');
+    setNewProfileDescription('');
+    setCreateWithGame(false);
+    setCreateGameBranch('release');
+    setCreateManifestId('');
+  };
+
   const createProfile = async () => {
     if (!newProfileName.trim()) {
       toast.error('プロファイル名を入力してください');
@@ -137,8 +161,26 @@ function ProfilesTab() {
       });
       
       toast.success(result);
-      setNewProfileName('');
-      setNewProfileDescription('');
+      
+      // ゲームもインストールする場合
+      if (createWithGame) {
+        const request: GameInstallRequest = {
+          profile_name: newProfileName.trim(),
+          branch: createGameBranch,
+          manifest_id: createManifestId || undefined,
+          username: savedCredentials?.username || undefined,
+          password: savedCredentials?.password || undefined,
+        };
+
+        try {
+          const installResult = await invoke<string>('install_game_to_profile_interactive', { request });
+          toast.success(installResult);
+        } catch (installErr) {
+          toast.error(`ゲームのインストールに失敗しました: ${installErr}`);
+        }
+      }
+      
+      closeCreateProfileModal();
       await loadProfiles();
     } catch (err) {
       toast.error(`プロファイルの作成に失敗しました: ${err}`);
@@ -379,69 +421,12 @@ function ProfilesTab() {
         </div>
       </motion.div>
 
-      {/* Create Profile Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="card"
-      >
-        <div className="flex items-center space-x-3 mb-6">
-          <Plus className="w-6 h-6 text-resonite-blue" />
-          <h2 className="text-2xl font-bold text-white">新規プロファイル作成</h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              プロファイル名 *
-            </label>
-            <input
-              type="text"
-              value={newProfileName}
-              onChange={(e) => setNewProfileName(e.target.value)}
-              placeholder="例: メインプロファイル"
-              className="input-primary w-full"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              説明（オプション）
-            </label>
-            <input
-              type="text"
-              value={newProfileDescription}
-              onChange={(e) => setNewProfileDescription(e.target.value)}
-              placeholder="例: 日常使用のプロファイル"
-              className="input-primary w-full"
-            />
-          </div>
-        </div>
-        
-        <div className="mt-6">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="btn-primary flex items-center space-x-2"
-            onClick={createProfile}
-            disabled={isLoading || !newProfileName.trim()}
-          >
-            {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Plus className="w-4 h-4" />
-            )}
-            <span>プロファイルを作成</span>
-          </motion.button>
-        </div>
-      </motion.div>
 
       {/* Profiles List Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.1 }}
         className="card"
       >
         <div className="flex items-center justify-between mb-6">
@@ -450,15 +435,27 @@ function ProfilesTab() {
             <h2 className="text-2xl font-bold text-white">プロファイル一覧</h2>
           </div>
           
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="btn-secondary flex items-center space-x-2"
-            onClick={loadProfiles}
-          >
-            <RefreshCw className="w-4 h-4" />
-            <span>更新</span>
-          </motion.button>
+          <div className="flex items-center space-x-2">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="btn-primary flex items-center space-x-2"
+              onClick={openCreateProfileModal}
+            >
+              <Plus className="w-4 h-4" />
+              <span>新規作成</span>
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="btn-secondary flex items-center space-x-2"
+              onClick={loadProfiles}
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>更新</span>
+            </motion.button>
+          </div>
         </div>
 
         {profiles.length === 0 ? (
@@ -490,7 +487,7 @@ function ProfilesTab() {
                   <div className="flex items-center space-x-2">
                     {profile.has_game ? (
                       <span className="status-success">
-                        ✓ ゲーム済
+                        ✓ インストール済
                       </span>
                     ) : (
                       <span className="status-error">
@@ -787,6 +784,165 @@ function ProfilesTab() {
                     <Check className="w-4 h-4" />
                   )}
                   <span>保存</span>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Create Profile Modal */}
+      <AnimatePresence>
+        {showCreateProfileModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+            onClick={closeCreateProfileModal}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-dark-900 border border-dark-600 rounded-xl p-6 max-w-lg w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <Plus className="w-6 h-6 text-resonite-blue" />
+                  <h3 className="text-xl font-bold text-white">
+                    新規プロファイル作成
+                  </h3>
+                </div>
+                <button
+                  onClick={closeCreateProfileModal}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    プロファイル名 *
+                  </label>
+                  <input
+                    type="text"
+                    value={newProfileName}
+                    onChange={(e) => setNewProfileName(e.target.value)}
+                    placeholder="例: メインプロファイル"
+                    className="input-primary w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    説明（オプション）
+                  </label>
+                  <input
+                    type="text"
+                    value={newProfileDescription}
+                    onChange={(e) => setNewProfileDescription(e.target.value)}
+                    placeholder="例: 日常使用のプロファイル"
+                    className="input-primary w-full"
+                  />
+                </div>
+
+                <div className="border-t border-dark-600 pt-4">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <input
+                      type="checkbox"
+                      id="createWithGame"
+                      checked={createWithGame}
+                      onChange={(e) => setCreateWithGame(e.target.checked)}
+                      className="w-4 h-4 text-resonite-blue bg-dark-800 border-dark-600 rounded focus:ring-resonite-blue focus:ring-2"
+                    />
+                    <label htmlFor="createWithGame" className="text-white font-medium">
+                      ゲームも同時にインストールする
+                    </label>
+                  </div>
+
+                  {createWithGame && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-4 ml-7"
+                    >
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          ブランチ
+                        </label>
+                        <div className="flex space-x-4">
+                          <label className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              value="release"
+                              checked={createGameBranch === 'release'}
+                              onChange={(e) => setCreateGameBranch(e.target.value)}
+                              className="text-resonite-blue"
+                            />
+                            <span className="text-white">リリース版</span>
+                          </label>
+                          <label className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              value="prerelease"
+                              checked={createGameBranch === 'prerelease'}
+                              onChange={(e) => setCreateGameBranch(e.target.value)}
+                              className="text-resonite-blue"
+                            />
+                            <span className="text-white">プレリリース版</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          マニフェストID（オプション）
+                        </label>
+                        <input
+                          type="text"
+                          value={createManifestId}
+                          onChange={(e) => setCreateManifestId(e.target.value)}
+                          placeholder="特定バージョンを指定"
+                          className="input-primary w-full"
+                        />
+                      </div>
+
+                      {!savedCredentials && (
+                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                          <p className="text-sm text-yellow-400">
+                            ⚠️ Steamクレデンシャルが設定されていません。ゲームのインストールが失敗する可能性があります。
+                          </p>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex space-x-3 mt-6">
+                <button
+                  className="btn-secondary flex-1"
+                  onClick={closeCreateProfileModal}
+                  disabled={isLoading}
+                >
+                  キャンセル
+                </button>
+                <button
+                  className="btn-primary flex-1 flex items-center justify-center space-x-2"
+                  onClick={createProfile}
+                  disabled={isLoading || !newProfileName.trim()}
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Plus className="w-4 h-4" />
+                  )}
+                  <span>{createWithGame ? 'プロファイル作成＆ゲームインストール' : 'プロファイル作成'}</span>
                 </button>
               </div>
             </motion.div>
