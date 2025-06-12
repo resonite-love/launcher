@@ -1,0 +1,445 @@
+import { useState, useEffect } from 'react';
+import { invoke } from '@tauri-apps/api/tauri';
+import { motion } from 'framer-motion';
+import { 
+  ArrowLeft,
+  Save,
+  Settings,
+  User,
+  Terminal,
+  Plus,
+  Trash2,
+  Loader2,
+  Info,
+  Package
+} from 'lucide-react';
+import toast from 'react-hot-toast';
+
+interface ProfileConfig {
+  name: string;
+  description: string;
+  args: string[];
+}
+
+interface ProfileEditPageProps {
+  profileName: string;
+  onBack: () => void;
+}
+
+type TabType = 'info' | 'launch' | 'mods' | 'other';
+
+function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
+  const [profile, setProfile] = useState<ProfileConfig | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('info');
+  
+  // フォーム状態
+  const [description, setDescription] = useState('');
+  const [args, setArgs] = useState<string[]>([]);
+  const [newArg, setNewArg] = useState('');
+
+  const tabs = [
+    { id: 'info' as TabType, label: 'プロファイル情報', icon: User },
+    { id: 'launch' as TabType, label: '起動オプション', icon: Terminal },
+    { id: 'mods' as TabType, label: 'MOD管理', icon: Package },
+    { id: 'other' as TabType, label: 'その他', icon: Settings },
+  ];
+
+  useEffect(() => {
+    loadProfile();
+  }, [profileName]);
+
+  const loadProfile = async () => {
+    try {
+      setIsLoading(true);
+      const profileConfig = await invoke<ProfileConfig>('get_profile_config', { profileName });
+      setProfile(profileConfig);
+      setDescription(profileConfig.description);
+      setArgs([...profileConfig.args]);
+    } catch (err) {
+      toast.error(`プロファイル設定の取得に失敗しました: ${err}`);
+      onBack();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveProfile = async () => {
+    if (!profile) return;
+
+    try {
+      setIsSaving(true);
+      const updatedProfile: ProfileConfig = {
+        ...profile,
+        description,
+        args: [...args]
+      };
+
+      await invoke<string>('update_profile_config', { profile: updatedProfile });
+      toast.success('プロファイル設定を保存しました');
+      setProfile(updatedProfile);
+    } catch (err) {
+      toast.error(`プロファイルの更新に失敗しました: ${err}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const addArg = () => {
+    if (!newArg.trim()) return;
+    
+    setArgs([...args, newArg.trim()]);
+    setNewArg('');
+  };
+
+  const removeArg = (index: number) => {
+    setArgs(args.filter((_, i) => i !== index));
+  };
+
+  const updateArg = (index: number, value: string) => {
+    const updatedArgs = [...args];
+    updatedArgs[index] = value;
+    setArgs(updatedArgs);
+  };
+
+  const hasChanges = profile && (
+    description !== profile.description ||
+    JSON.stringify(args) !== JSON.stringify(profile.args)
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center space-y-4"
+        >
+          <Loader2 className="w-8 h-8 text-resonite-blue animate-spin" />
+          <p className="text-gray-300 text-lg">プロファイル設定を読み込み中...</p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <User className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+          <p className="text-gray-400 text-lg">プロファイルが見つかりません</p>
+          <button className="btn-secondary mt-4" onClick={onBack}>
+            戻る
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'info':
+        return (
+          <motion.div
+            key="info"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="card"
+          >
+            <div className="flex items-center space-x-3 mb-6">
+              <User className="w-6 h-6 text-resonite-blue" />
+              <h2 className="text-2xl font-bold text-white">プロファイル情報</h2>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  プロファイル名
+                </label>
+                <input
+                  type="text"
+                  value={profile.name}
+                  disabled
+                  className="input-primary w-full bg-dark-800/50 text-gray-400 cursor-not-allowed"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  プロファイル名は変更できません
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  説明
+                </label>
+                <input
+                  type="text"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="プロファイルの説明を入力"
+                  className="input-primary w-full"
+                />
+              </div>
+            </div>
+          </motion.div>
+        );
+
+      case 'launch':
+        return (
+          <motion.div
+            key="launch"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="card"
+          >
+            <div className="flex items-center space-x-3 mb-6">
+              <Terminal className="w-6 h-6 text-resonite-blue" />
+              <h2 className="text-2xl font-bold text-white">起動引数</h2>
+            </div>
+
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
+              <div className="flex items-start space-x-3">
+                <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="text-white font-medium mb-2">起動引数について</h4>
+                  <ul className="text-sm text-gray-300 space-y-1">
+                    <li>• Resonite起動時に渡されるコマンドライン引数を設定できます</li>
+                    <li>• 各引数は自動的に適切にエスケープされます</li>
+                    <li>• 一般的な引数: <code className="bg-dark-800 px-1 rounded">-SkipIntroTutorial</code>, <code className="bg-dark-800 px-1 rounded">-DataPath &quot;path&quot;</code></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {/* Add new argument */}
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={newArg}
+                  onChange={(e) => setNewArg(e.target.value)}
+                  placeholder="新しい引数を入力 (例: -SkipIntroTutorial)"
+                  className="input-primary flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addArg();
+                    }
+                  }}
+                />
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="btn-primary flex items-center space-x-2"
+                  onClick={addArg}
+                  disabled={!newArg.trim()}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>追加</span>
+                </motion.button>
+              </div>
+
+              {/* Arguments list */}
+              {args.length === 0 ? (
+                <div className="text-center py-8">
+                  <Terminal className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                  <p className="text-gray-400">起動引数が設定されていません</p>
+                  <p className="text-gray-500 text-sm">上のフィールドから引数を追加してください</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {args.map((arg, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      className="flex items-center space-x-2 p-3 bg-dark-800/30 border border-dark-600/30 rounded-lg"
+                    >
+                      <Terminal className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                      <input
+                        type="text"
+                        value={arg}
+                        onChange={(e) => updateArg(index, e.target.value)}
+                        className="input-primary flex-1"
+                      />
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="btn-danger flex items-center space-x-2"
+                        onClick={() => removeArg(index)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </motion.button>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        );
+
+      case 'mods':
+        return (
+          <motion.div
+            key="mods"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="card"
+          >
+            <div className="flex items-center space-x-3 mb-6">
+              <Package className="w-6 h-6 text-resonite-blue" />
+              <h2 className="text-2xl font-bold text-white">MOD管理</h2>
+            </div>
+
+            <div className="bg-dark-800/30 rounded-lg p-8 text-center">
+              <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-400 text-lg mb-2">MOD管理機能</p>
+              <p className="text-gray-500">今後実装予定です</p>
+            </div>
+          </motion.div>
+        );
+
+      case 'other':
+        return (
+          <motion.div
+            key="other"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="card"
+          >
+            <div className="flex items-center space-x-3 mb-6">
+              <Settings className="w-6 h-6 text-resonite-blue" />
+              <h2 className="text-2xl font-bold text-white">その他の設定</h2>
+            </div>
+
+            <div className="bg-dark-800/30 rounded-lg p-8 text-center">
+              <Settings className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-400 text-lg mb-2">詳細設定</p>
+              <p className="text-gray-500">今後、詳細設定項目がここに追加される予定です</p>
+            </div>
+          </motion.div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="space-y-6 p-4 h-full overflow-y-scroll">
+      {/* Header with breadcrumb */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center space-x-4">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="btn-secondary flex items-center space-x-2"
+            onClick={onBack}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>戻る</span>
+          </motion.button>
+          
+          <div className="flex items-center space-x-2 text-sm text-gray-400">
+            <span>プロファイル管理</span>
+            <span>/</span>
+            <span className="text-white font-medium">{profile.name}</span>
+          </div>
+        </div>
+        
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="btn-primary flex items-center space-x-2"
+          onClick={saveProfile}
+          disabled={isSaving || !hasChanges}
+        >
+          {isSaving ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Save className="w-4 h-4" />
+          )}
+          <span>保存</span>
+        </motion.button>
+      </motion.div>
+
+      {/* Tab Navigation */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="flex space-x-1 bg-dark-800/30 p-1 rounded-lg"
+      >
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <motion.button
+              key={tab.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-md transition-colors duration-200 ${
+                activeTab === tab.id
+                  ? 'bg-resonite-blue text-white shadow-lg'
+                  : 'text-gray-400 hover:text-white hover:bg-dark-700/50'
+              }`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <Icon className="w-4 h-4" />
+              <span className="font-medium">{tab.label}</span>
+            </motion.button>
+          );
+        })}
+      </motion.div>
+
+      {/* Tab Content */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        {renderTabContent()}
+      </motion.div>
+
+      {/* Save reminder */}
+      {hasChanges && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="fixed bottom-6 right-6 bg-yellow-600/20 border border-yellow-600/30 rounded-lg p-4 backdrop-blur-sm"
+        >
+          <div className="flex items-center space-x-3">
+            <Info className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+            <div>
+              <p className="text-white font-medium">未保存の変更があります</p>
+              <p className="text-gray-300 text-sm">変更を保存することを忘れずに</p>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="btn-primary"
+              onClick={saveProfile}
+              disabled={isSaving}
+            >
+              保存
+            </motion.button>
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+export default ProfileEditPage;

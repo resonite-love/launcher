@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ProfileEditModal from './ProfileEditModal';
+import ProfileEditPage from './ProfileEditPage';
+import { useAppStore } from '../store/useAppStore';
 
 interface ProfileInfo {
   name: string;
@@ -49,6 +51,13 @@ interface ProfileConfig {
 }
 
 function ProfilesTab() {
+  const { 
+    profilesPage, 
+    editingProfileName, 
+    navigateToProfileEdit, 
+    navigateToProfileList 
+  } = useAppStore();
+  
   const [profiles, setProfiles] = useState<ProfileInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -301,6 +310,16 @@ function ProfilesTab() {
     }
   };
 
+  // プロファイル編集ページの表示
+  if (profilesPage === 'edit' && editingProfileName) {
+    return (
+      <ProfileEditPage
+        profileName={editingProfileName}
+        onBack={navigateToProfileList}
+      />
+    );
+  }
+
   return (
     <div className="space-y-8 p-4 h-full overflow-y-scroll"> { /*  scrollbar-hide */ }
 
@@ -442,7 +461,7 @@ function ProfilesTab() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="btn-secondary flex items-center space-x-2"
-                  onClick={() => openEditModal(profile.name)}
+                  onClick={() => navigateToProfileEdit(profile.name)}
                   disabled={isLoading}
                   title="プロファイル設定を編集"
                 >

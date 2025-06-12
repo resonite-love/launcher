@@ -37,6 +37,10 @@ interface AppState {
   // UI State
   currentTab: 'home' | 'profiles' | 'settings';
   
+  // Profile management page navigation
+  profilesPage: 'list' | 'edit';
+  editingProfileName: string | null;
+  
   // Loading states
   isLaunching: boolean;
   isInstalling: boolean;
@@ -53,6 +57,12 @@ interface AppState {
   setSteamCredentials: (credentials: SteamCredentials | null) => void;
   
   setCurrentTab: (tab: 'home' | 'profiles' | 'settings') => void;
+  
+  // Profile page navigation
+  setProfilesPage: (page: 'list' | 'edit') => void;
+  setEditingProfileName: (name: string | null) => void;
+  navigateToProfileEdit: (profileName: string) => void;
+  navigateToProfileList: () => void;
   
   setIsLaunching: (loading: boolean) => void;
   setIsInstalling: (loading: boolean) => void;
@@ -78,6 +88,9 @@ export const useAppStore = create<AppState>()(
       steamCredentials: null,
       
       currentTab: 'home',
+      
+      profilesPage: 'list',
+      editingProfileName: null,
       
       isLaunching: false,
       isInstalling: false,
@@ -109,6 +122,24 @@ export const useAppStore = create<AppState>()(
       
       setCurrentTab: (tab) => set({ currentTab: tab }),
       
+      // Profile page navigation
+      setProfilesPage: (page) => set({ profilesPage: page }),
+      setEditingProfileName: (name) => set({ editingProfileName: name }),
+      
+      navigateToProfileEdit: (profileName) => {
+        set({ 
+          profilesPage: 'edit',
+          editingProfileName: profileName
+        });
+      },
+      
+      navigateToProfileList: () => {
+        set({ 
+          profilesPage: 'list',
+          editingProfileName: null
+        });
+      },
+      
       setIsLaunching: (loading) => set({ isLaunching: loading }),
       setIsInstalling: (loading) => set({ isInstalling: loading }),
       setIsUpdating: (loading) => set({ isUpdating: loading }),
@@ -123,10 +154,11 @@ export const useAppStore = create<AppState>()(
     {
       name: 'resonite-tools-storage',
       storage: createJSONStorage(() => localStorage),
-      // Only persist certain fields
+      // Only persist certain fields  
       partialize: (state) => ({
         selectedProfile: state.selectedProfile,
-        currentTab: state.currentTab,
+        // Don't persist currentTab to always start from home
+        // profilesPage is not persisted to always start from list view
       }),
     }
   )

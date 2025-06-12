@@ -90,43 +90,70 @@ function App() {
       )}
 
       {/* Header */}
-      <header className="left-0 right-0 z-40 bg-dark-900/50 backdrop-blur-md border-b border-dark-700/50 p-4">
+      <header className="left-0 right-0 z-40 bg-dark-900/70 backdrop-blur-md border-b border-dark-700/30 px-6 py-2">
         <div className="max-w-7xl mx-auto">
-          <nav className="flex space-x-2">
+          <nav className="flex items-center space-x-1">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`nav-button flex items-center space-x-2 ${
-                currentTab === 'home' ? 'nav-button-active' : 'text-gray-300 hover:text-white'
+              className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                currentTab === 'home' 
+                  ? 'text-white bg-resonite-blue/20 border border-resonite-blue/30 shadow-lg' 
+                  : 'text-gray-400 hover:text-white hover:bg-dark-800/50'
               }`}
               onClick={() => setCurrentTab('home')}
             >
               <Home className="w-4 h-4" />
               <span>ホーム</span>
+              {currentTab === 'home' && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute inset-0 bg-resonite-blue/10 rounded-lg border border-resonite-blue/20"
+                  style={{ zIndex: -1 }}
+                />
+              )}
             </motion.button>
             
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`nav-button flex items-center space-x-2 ${
-                currentTab === 'profiles' ? 'nav-button-active' : 'text-gray-300 hover:text-white'
+              className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                currentTab === 'profiles' 
+                  ? 'text-white bg-resonite-blue/20 border border-resonite-blue/30 shadow-lg' 
+                  : 'text-gray-400 hover:text-white hover:bg-dark-800/50'
               }`}
               onClick={() => setCurrentTab('profiles')}
             >
               <User className="w-4 h-4" />
               <span>プロファイル管理</span>
+              {currentTab === 'profiles' && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute inset-0 bg-resonite-blue/10 rounded-lg border border-resonite-blue/20"
+                  style={{ zIndex: -1 }}
+                />
+              )}
             </motion.button>
             
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`nav-button flex items-center space-x-2 ${
-                currentTab === 'settings' ? 'nav-button-active' : 'text-gray-300 hover:text-white'
+              className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                currentTab === 'settings' 
+                  ? 'text-white bg-resonite-blue/20 border border-resonite-blue/30 shadow-lg' 
+                  : 'text-gray-400 hover:text-white hover:bg-dark-800/50'
               }`}
               onClick={() => setCurrentTab('settings')}
             >
               <Settings className="w-4 h-4" />
               <span>設定</span>
+              {currentTab === 'settings' && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute inset-0 bg-resonite-blue/10 rounded-lg border border-resonite-blue/20"
+                  style={{ zIndex: -1 }}
+                />
+              )}
             </motion.button>
           </nav>
         </div>
