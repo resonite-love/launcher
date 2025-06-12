@@ -9,7 +9,7 @@ use resonite_tools_lib::{
     install::{ResoniteInstall, ResoniteInstallManager},
     profile::{Profile, ProfileManager},
     mod_loader::{ModLoader, ModLoaderInfo},
-    mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease},
+    mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease, UnmanagedMod},
     utils,
 };
 
@@ -865,6 +865,78 @@ async fn get_all_github_releases(
         .map_err(|e| format!("Failed to get releases: {}", e))
 }
 
+// Scan for unmanaged MODs in rml_mods folder
+#[tauri::command]
+async fn scan_unmanaged_mods(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<UnmanagedMod>, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    };
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    // MODフォルダをスキャン
+    let unmanaged_mods = mod_manager.scan_mod_folder()
+        .map_err(|e| format!("Failed to scan mod folder: {}", e))?;
+    
+    // マニフェストとのマッチングを試行
+    let matched_mods = mod_manager.match_unmanaged_mods(unmanaged_mods).await
+        .map_err(|e| format!("Failed to match unmanaged mods: {}", e))?;
+    
+    Ok(matched_mods)
+}
+
+// Add single unmanaged MOD to management system
+#[tauri::command]
+async fn add_unmanaged_mod_to_system(
+    profile_name: String,
+    unmanaged_mod: UnmanagedMod,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<InstalledMod, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    };
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.add_unmanaged_mod_to_system(&unmanaged_mod).await
+        .map_err(|e| format!("Failed to add unmanaged mod: {}", e))
+}
+
+// Add all unmanaged MODs to management system
+#[tauri::command]
+async fn add_all_unmanaged_mods_to_system(
+    profile_name: String,
+    unmanaged_mods: Vec<UnmanagedMod>,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<InstalledMod>, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    };
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.add_multiple_unmanaged_mods(&unmanaged_mods).await
+        .map_err(|e| format!("Failed to add unmanaged mods: {}", e))
+}
+
 // Get latest release info from GitHub repository
 #[tauri::command]
 async fn get_github_release_info(
@@ -924,6 +996,9 @@ fn main() {
             downgrade_mod,
             upgrade_mod,
             get_all_github_releases,
+            scan_unmanaged_mods,
+            add_unmanaged_mod_to_system,
+            add_all_unmanaged_mods_to_system,
             get_github_release_info
         ])
         .run(tauri::generate_context!())

@@ -69,6 +69,17 @@ interface InstalledMod {
   dll_path: string;
 }
 
+interface UnmanagedMod {
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  modified_time: string;
+  dll_name: string;
+  matched_mod_info?: ModInfo;
+  calculated_sha256?: string;
+  detected_version?: string;
+}
+
 // Query Keys
 export const queryKeys = {
   appStatus: ['appStatus'] as const,
@@ -77,6 +88,7 @@ export const queryKeys = {
   modManifest: (profileName: string) => ['modManifest', profileName] as const,
   installedMods: (profileName: string) => ['installedMods', profileName] as const,
   modVersions: (profileName: string, modName: string) => ['modVersions', profileName, modName] as const,
+  unmanagedMods: (profileName: string) => ['unmanagedMods', profileName] as const,
 };
 
 // App Status
@@ -258,7 +270,7 @@ export const useModManifest = (profileName: string) => {
     queryFn: async (): Promise<ModInfo[]> => {
       return await invoke<ModInfo[]>('fetch_mod_manifest', { profileName });
     },
-    enabled: !!profileName,
+    enabled: false, // Disable auto-fetch
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 };
@@ -305,6 +317,7 @@ export const useInstallMod = () => {
     onSuccess: (result, variables) => {
       toast.success(`MOD「${result.name}」をインストールしました`);
       queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(variables.profileName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unmanagedMods(variables.profileName) });
     },
     onError: (error) => {
       toast.error(`MODのインストールに失敗しました: ${error}`);
@@ -322,6 +335,7 @@ export const useUninstallMod = () => {
     onSuccess: (result, variables) => {
       toast.success(result);
       queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(variables.profileName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unmanagedMods(variables.profileName) });
     },
     onError: (error) => {
       toast.error(`MODのアンインストールに失敗しました: ${error}`);
@@ -343,6 +357,7 @@ export const useUpdateMod = () => {
     onSuccess: (result, variables) => {
       toast.success(`MOD「${result.name}」をバージョン${result.installed_version}に更新しました`);
       queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(variables.profileName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unmanagedMods(variables.profileName) });
     },
     onError: (error) => {
       toast.error(`MODの更新に失敗しました: ${error}`);
@@ -364,6 +379,7 @@ export const useDowngradeMod = () => {
     onSuccess: (result, variables) => {
       toast.success(`MOD「${result.name}」をバージョン${result.installed_version}にダウングレードしました`);
       queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(variables.profileName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unmanagedMods(variables.profileName) });
     },
     onError: (error) => {
       toast.error(`MODのダウングレードに失敗しました: ${error}`);
@@ -385,9 +401,73 @@ export const useUpgradeMod = () => {
     onSuccess: (result, variables) => {
       toast.success(`MOD「${result.name}」をバージョン${result.installed_version}にアップグレードしました`);
       queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(variables.profileName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unmanagedMods(variables.profileName) });
     },
     onError: (error) => {
       toast.error(`MODのアップグレードに失敗しました: ${error}`);
+    },
+  });
+};
+
+// Unmanaged MODs Query
+export const useUnmanagedMods = (profileName: string) => {
+  return useQuery({
+    queryKey: queryKeys.unmanagedMods(profileName),
+    queryFn: async (): Promise<UnmanagedMod[]> => {
+      return await invoke<UnmanagedMod[]>('scan_unmanaged_mods', { profileName });
+    },
+    enabled: !!profileName,
+    staleTime: 30 * 1000, // 30 seconds
+  });
+};
+
+// Add single unmanaged MOD to system
+export const useAddUnmanagedMod = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ profileName, unmanagedMod }: { 
+      profileName: string; 
+      unmanagedMod: UnmanagedMod 
+    }) => {
+      return await invoke<InstalledMod>('add_unmanaged_mod_to_system', { 
+        profileName, 
+        unmanagedMod 
+      });
+    },
+    onSuccess: (result, variables) => {
+      toast.success(`「${result.name}」を管理システムに追加しました`);
+      queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(variables.profileName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unmanagedMods(variables.profileName) });
+    },
+    onError: (error) => {
+      toast.error(`MODの追加に失敗しました: ${error}`);
+    },
+  });
+};
+
+// Add all unmanaged MODs to system
+export const useAddAllUnmanagedMods = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ profileName, unmanagedMods }: { 
+      profileName: string; 
+      unmanagedMods: UnmanagedMod[] 
+    }) => {
+      return await invoke<InstalledMod[]>('add_all_unmanaged_mods_to_system', { 
+        profileName, 
+        unmanagedMods 
+      });
+    },
+    onSuccess: (result, variables) => {
+      const count = result.length;
+      toast.success(`${count}個のMODを管理システムに追加しました`);
+      queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(variables.profileName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unmanagedMods(variables.profileName) });
+    },
+    onError: (error) => {
+      toast.error(`MODの一括追加に失敗しました: ${error}`);
     },
   });
 };

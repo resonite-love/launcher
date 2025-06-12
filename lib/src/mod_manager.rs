@@ -4,6 +4,7 @@ use std::error::Error;
 use std::path::PathBuf;
 use std::fs;
 use reqwest;
+use sha2::{Sha256, Digest};
 
 /// MODマニフェストから取得したMOD情報
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -33,6 +34,7 @@ pub struct ModRelease {
     pub changelog: Option<String>,
     pub file_name: Option<String>,
     pub file_size: Option<u64>,
+    pub sha256: Option<String>,
 }
 
 /// インストール済みMOD情報
@@ -44,6 +46,31 @@ pub struct InstalledMod {
     pub installed_version: String,
     pub installed_date: String,
     pub dll_path: PathBuf,
+}
+
+/// 未管理MOD情報（手動で追加されたMOD）
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UnmanagedMod {
+    pub file_name: String,
+    pub file_path: PathBuf,
+    pub file_size: u64,
+    pub modified_time: String,
+    pub dll_name: String,
+    pub matched_mod_info: Option<ModInfo>,
+    pub calculated_sha256: Option<String>,
+    pub detected_version: Option<String>,
+}
+
+/// ハッシュルックアップエントリ
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HashLookupEntry {
+    pub mod_name: String,
+    pub mod_source: String,
+    pub version: String,
+    pub file_name: String,
+    pub file_size: Option<u64>,
+    pub published_at: String,
+    pub download_url: Option<String>,
 }
 
 /// GitHubリリース情報
@@ -261,6 +288,7 @@ impl ModManager {
                     changelog: release.body.clone(),
                     file_name: Some(asset.name.clone()),
                     file_size: asset.size,
+                    sha256: None, // キャッシュから取得される場合のみ設定
                 });
             }
         }
@@ -389,6 +417,160 @@ impl ModManager {
             .collect())
     }
 
+    /// rml_modsフォルダをスキャンして全MODファイルを検出
+    pub fn scan_mod_folder(&self) -> Result<Vec<UnmanagedMod>, Box<dyn Error + Send + Sync>> {
+        if !self.mods_dir.exists() {
+            return Ok(Vec::new());
+        }
+
+        let mut unmanaged_mods = Vec::new();
+        let known_mods = self.get_installed_mods().unwrap_or_default();
+        
+        // rml_modsフォルダ内の全.dllファイルを取得
+        for entry in fs::read_dir(&self.mods_dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            
+            if path.is_file() && path.extension().map_or(false, |ext| ext == "dll") {
+                let file_name = path.file_name()
+                    .and_then(|name| name.to_str())
+                    .unwrap_or_default()
+                    .to_string();
+                
+                // 既知のMODリストに含まれているかチェック
+                let is_managed = known_mods.iter().any(|known_mod| {
+                    known_mod.dll_path == path
+                });
+                
+                if !is_managed {
+                    // ファイル情報を取得
+                    let metadata = fs::metadata(&path)?;
+                    let file_size = metadata.len();
+                    let modified_time = metadata.modified()
+                        .map(|time| {
+                            let datetime: chrono::DateTime<chrono::Utc> = time.into();
+                            datetime.format("%Y-%m-%d %H:%M:%S").to_string()
+                        })
+                        .unwrap_or_default();
+                    
+                    unmanaged_mods.push(UnmanagedMod {
+                        file_name: file_name.clone(),
+                        file_path: path,
+                        file_size,
+                        modified_time,
+                        dll_name: file_name.trim_end_matches(".dll").to_string(),
+                        matched_mod_info: None, // 後でマッチングを行う
+                        calculated_sha256: None, // 後でハッシュを計算
+                        detected_version: None, // 後でバージョンを検出
+                    });
+                }
+            }
+        }
+        
+        Ok(unmanaged_mods)
+    }
+
+    /// 未管理MODとマニフェストMODのマッチングを試行
+    pub async fn match_unmanaged_mods(&self, mut unmanaged_mods: Vec<UnmanagedMod>) -> Result<Vec<UnmanagedMod>, Box<dyn Error + Send + Sync>> {
+        let manifest_mods = self.fetch_mod_manifest().await.unwrap_or_default();
+        
+        for unmanaged_mod in &mut unmanaged_mods {
+            // ファイルのSHA256ハッシュを計算
+            let file_hash = self.calculate_file_sha256(&unmanaged_mod.file_path)?;
+            unmanaged_mod.calculated_sha256 = Some(file_hash.clone());
+            
+            // ハッシュベースでのマッチングを最初に試行
+            let hash_match = self.find_mod_by_hash(&file_hash).await;
+            
+            if let Some(hash_entry) = hash_match {
+                // ハッシュマッチが見つかった場合、バージョンを設定
+                unmanaged_mod.detected_version = Some(hash_entry.version.clone());
+                
+                // 対応するMOD情報を探す
+                let matched_mod = manifest_mods.iter().find(|manifest_mod| {
+                    manifest_mod.source_location == hash_entry.mod_source
+                });
+                
+                if let Some(matched_mod) = matched_mod {
+                    unmanaged_mod.matched_mod_info = Some(matched_mod.clone());
+                    continue;
+                }
+            }
+            
+            // ハッシュでマッチしない場合は従来のファイル名ベースマッチング
+            let potential_match = manifest_mods.iter().find(|manifest_mod| {
+                // MOD名がファイル名に含まれているかチェック
+                let mod_name_normalized = manifest_mod.name.to_lowercase().replace(" ", "").replace("-", "").replace("_", "");
+                let file_name_normalized = unmanaged_mod.dll_name.to_lowercase().replace(" ", "").replace("-", "").replace("_", "");
+                
+                file_name_normalized.contains(&mod_name_normalized) || 
+                mod_name_normalized.contains(&file_name_normalized) ||
+                // より柔軟なマッチング
+                manifest_mod.name.to_lowercase().split_whitespace().any(|word| 
+                    file_name_normalized.contains(&word.to_lowercase())
+                )
+            });
+            
+            if let Some(matched_mod) = potential_match {
+                unmanaged_mod.matched_mod_info = Some(matched_mod.clone());
+            }
+        }
+        
+        Ok(unmanaged_mods)
+    }
+
+    /// 未管理MODを管理システムに追加
+    pub async fn add_unmanaged_mod_to_system(&self, unmanaged_mod: &UnmanagedMod) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
+        // ハッシュベースでバージョンを検出
+        let detected_version = if let Some(hash) = &unmanaged_mod.calculated_sha256 {
+            if let Some(hash_entry) = self.find_mod_by_hash(hash).await {
+                Some(hash_entry.version)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+        
+        // InstallModの情報を構築
+        let installed_mod = InstalledMod {
+            name: unmanaged_mod.dll_name.clone(),
+            description: unmanaged_mod.matched_mod_info
+                .as_ref()
+                .map(|info| info.description.clone())
+                .unwrap_or_else(|| format!("手動で追加されたMOD: {}", unmanaged_mod.dll_name)),
+            source_location: unmanaged_mod.matched_mod_info
+                .as_ref()
+                .map(|info| info.source_location.clone())
+                .unwrap_or_else(|| format!("file://{}", unmanaged_mod.file_path.display())),
+            installed_version: detected_version.unwrap_or_else(|| "unknown".to_string()),
+            installed_date: unmanaged_mod.modified_time.clone(),
+            dll_path: unmanaged_mod.file_path.clone(),
+        };
+
+        // インストール済みMOD一覧に追加
+        self.add_to_installed_mods(&installed_mod)?;
+        
+        Ok(installed_mod)
+    }
+
+    /// 複数の未管理MODを一括で管理システムに追加
+    pub async fn add_multiple_unmanaged_mods(&self, unmanaged_mods: &[UnmanagedMod]) -> Result<Vec<InstalledMod>, Box<dyn Error + Send + Sync>> {
+        let mut added_mods = Vec::new();
+        
+        for unmanaged_mod in unmanaged_mods {
+            match self.add_unmanaged_mod_to_system(unmanaged_mod).await {
+                Ok(installed_mod) => added_mods.push(installed_mod),
+                Err(e) => {
+                    eprintln!("Failed to add mod {}: {}", unmanaged_mod.dll_name, e);
+                    // エラーがあっても他のMODの処理を続行
+                }
+            }
+        }
+        
+        Ok(added_mods)
+    }
+
     /// MODを更新（バージョン変更）
     pub async fn update_mod(&self, mod_name: &str, target_version: &str) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
         // 既存のMOD情報を取得
@@ -495,5 +677,47 @@ impl ModManager {
         let content = serde_json::to_string_pretty(mods)?;
         fs::write(&self.installed_mods_file, content)?;
         Ok(())
+    }
+    
+    /// ファイルのSHA256ハッシュを計算
+    pub fn calculate_file_sha256(&self, file_path: &std::path::Path) -> Result<String, Box<dyn Error + Send + Sync>> {
+        let file_content = fs::read(file_path)?;
+        let mut hasher = Sha256::new();
+        hasher.update(&file_content);
+        let hash = hasher.finalize();
+        Ok(format!("{:x}", hash))
+    }
+    
+    /// ハッシュルックアップテーブルを取得
+    pub async fn fetch_hash_lookup_table(&self) -> Result<HashMap<String, Vec<HashLookupEntry>>, Box<dyn Error + Send + Sync>> {
+        let cache_url = "https://raw.githubusercontent.com/resonite-love/resonite-mod-cache/refs/heads/master/cache/hash-lookup.json";
+        
+        let response = self.client.get(cache_url).send().await?;
+        let lookup_text = response.text().await?;
+        let lookup_table: HashMap<String, Vec<HashLookupEntry>> = serde_json::from_str(&lookup_text)?;
+        
+        Ok(lookup_table)
+    }
+    
+    /// SHA256ハッシュから対応するMOD情報を検索
+    pub async fn find_mod_by_hash(&self, hash: &str) -> Option<HashLookupEntry> {
+        match self.fetch_hash_lookup_table().await {
+            Ok(lookup_table) => {
+                lookup_table.get(hash)
+                    .and_then(|entries| entries.first())
+                    .cloned()
+            }
+            Err(_) => None
+        }
+    }
+    
+    /// 未管理MODのバージョンをハッシュベースで検出
+    pub async fn detect_mod_version_by_hash(&self, unmanaged_mod: &UnmanagedMod) -> Option<String> {
+        if let Some(hash) = &unmanaged_mod.calculated_sha256 {
+            if let Some(hash_entry) = self.find_mod_by_hash(hash).await {
+                return Some(hash_entry.version);
+            }
+        }
+        None
     }
 }

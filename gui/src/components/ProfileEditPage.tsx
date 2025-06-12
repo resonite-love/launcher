@@ -17,7 +17,9 @@ import {
   ExternalLink,
   Search,
   Github,
-  Edit
+  Edit,
+  RefreshCw,
+  UserPlus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ModRiskWarningModal from './ModRiskWarningModal';
@@ -30,7 +32,10 @@ import {
   useUninstallMod,
   useUpdateMod,
   useDowngradeMod,
-  useUpgradeMod
+  useUpgradeMod,
+  useUnmanagedMods,
+  useAddUnmanagedMod,
+  useAddAllUnmanagedMods
 } from '../hooks/useQueries';
 
 interface ProfileConfig {
@@ -81,6 +86,32 @@ interface ModRelease {
   file_size?: number;
 }
 
+interface GitHubAsset {
+  name: string;
+  browser_download_url: string;
+  size?: number;
+}
+
+interface GitHubRelease {
+  tag_name: string;
+  body?: string;
+  published_at?: string;
+  prerelease?: boolean;
+  draft?: boolean;
+  assets?: GitHubAsset[];
+}
+
+interface UnmanagedMod {
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  modified_time: string;
+  dll_name: string;
+  matched_mod_info?: ModInfo;
+  calculated_sha256?: string;
+  detected_version?: string;
+}
+
 type TabType = 'info' | 'launch' | 'mods' | 'other';
 
 function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
@@ -108,9 +139,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [selectedVersions, setSelectedVersions] = useState<{[modUrl: string]: string}>({});
   const [selectedModForVersions, setSelectedModForVersions] = useState<InstalledMod | null>(null);
 
-  // React Query hooks
-  const { data: availableMods = [], isLoading: modsLoading } = useModManifest(profileName);
+  // React Query hooks - disable auto-fetch for available mods
+  const { data: availableMods = [], isLoading: modsLoading, refetch: refetchMods } = useModManifest(profileName);
   const { data: installedMods = [], isLoading: installedModsLoading, refetch: refetchInstalledMods } = useInstalledMods(profileName);
+  const { data: unmanagedMods = [], isLoading: unmanagedModsLoading, refetch: refetchUnmanagedMods } = useUnmanagedMods(profileName);
+  // MODバージョン取得用のstate
+  const [manualModVersions, setManualModVersions] = useState<{[modName: string]: ModRelease[]}>({});
+  const [loadingManualVersions, setLoadingManualVersions] = useState<string | null>(null);
+
   const { data: modVersions = [], isLoading: versionsLoading } = useModVersions(
     profileName, 
     selectedModForVersions ? availableMods.find(m => m.name === selectedModForVersions.name || m.source_location === selectedModForVersions.source_location) || null : null
@@ -121,6 +157,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const updateModMutation = useUpdateMod();
   const downgradeModMutation = useDowngradeMod();
   const upgradeModMutation = useUpgradeMod();
+  const addUnmanagedModMutation = useAddUnmanagedMod();
+  const addAllUnmanagedModsMutation = useAddAllUnmanagedMods();
 
   const tabs = [
     { id: 'info' as TabType, label: 'プロファイル情報', icon: User },
@@ -132,10 +170,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   useEffect(() => {
     loadProfile();
     loadModLoaderInfo();
-    if (activeTab === 'mods') {
-      loadAvailableMods();
-    }
-  }, [profileName, activeTab]);
+  }, [profileName]);
 
   const loadProfile = async () => {
     try {
@@ -234,8 +269,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
   // MOD関連の関数
   const loadAvailableMods = async () => {
-    // React Query handles this automatically now
-    setIsLoadingMods(false);
+    refetchMods();
   };
 
   const installMod = async (modInfo: ModInfo, version?: string) => {
@@ -279,6 +313,65 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     return cleanA.localeCompare(cleanB, undefined, { numeric: true, sensitivity: 'base' });
   };
 
+  // 手動インストールMODのバージョン一覧を取得
+  const loadManualModVersions = async (mod: InstalledMod) => {
+    try {
+      setLoadingManualVersions(mod.name);
+      
+      // GitHubの全リリース情報を取得
+      const releases = await invoke<GitHubRelease[]>('get_all_github_releases', { 
+        repoUrl: mod.source_location 
+      });
+      
+      // ModRelease形式に変換
+      const modReleases: ModRelease[] = releases
+        .filter(release => release.assets && release.assets.length > 0)
+        .map(release => {
+          const dllAsset = release.assets?.find(asset => asset.name.endsWith('.dll'));
+          return {
+            version: release.tag_name,
+            download_url: dllAsset?.browser_download_url,
+            release_url: `${mod.source_location}/releases/tag/${release.tag_name}`,
+            published_at: release.published_at || '',
+            prerelease: release.prerelease || false,
+            draft: release.draft || false,
+            changelog: release.body,
+            file_name: dllAsset?.name,
+            file_size: dllAsset?.size
+          };
+        })
+        .filter(release => release.download_url); // DLLがあるもののみ
+      
+      setManualModVersions(prev => ({
+        ...prev,
+        [mod.name]: modReleases
+      }));
+      
+    } catch (err) {
+      toast.error(`バージョン情報の取得に失敗しました: ${err}`);
+    } finally {
+      setLoadingManualVersions(null);
+    }
+  };
+
+  // MODがマニフェストに含まれているかチェック
+  const isModInManifest = (mod: InstalledMod): boolean => {
+    return availableMods.some(availableMod => 
+      availableMod.name === mod.name || 
+      availableMod.source_location === mod.source_location
+    );
+  };
+
+  // バージョン変更ボタンクリック時の処理
+  const handleVersionChangeClick = async (mod: InstalledMod) => {
+    setSelectedModForVersions(mod);
+    
+    // マニフェストに含まれていない場合は手動でバージョン情報を取得
+    if (!isModInManifest(mod) && !manualModVersions[mod.name]) {
+      await loadManualModVersions(mod);
+    }
+  };
+
   const installModFromUrl = async (repoUrl: string, version?: string) => {
     try {
       setIsInstallingMod(repoUrl);
@@ -288,7 +381,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         version: version || null
       });
       toast.success(`MOD "${result.name}" をインストールしました`);
-      await loadInstalledMods();
+      refetchInstalledMods();
     } catch (err) {
       toast.error(`MODのインストールに失敗しました: ${err}`);
     } finally {
@@ -628,9 +721,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                       whileTap={{ scale: 0.98 }}
                       className="btn-secondary flex items-center space-x-2"
                       onClick={loadAvailableMods}
-                      disabled={isLoadingMods}
+                      disabled={modsLoading}
                     >
-                      {isLoadingMods ? (
+                      {modsLoading ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
                         <Search className="w-4 h-4" />
@@ -660,8 +753,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     ) : availableMods.length === 0 ? (
                       <div className="text-center py-8">
                         <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                        <p className="text-gray-400 mb-2">利用可能なMODはありません</p>
-                        <p className="text-gray-500 text-sm">MODローダーを有効にしてください</p>
+                        <p className="text-gray-400 mb-2">MOD一覧を取得してください</p>
+                        <p className="text-gray-500 text-sm">上の「MOD一覧を取得」ボタンを押してください</p>
                       </div>
                     ) : (
                       availableMods
@@ -790,10 +883,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 className="btn-secondary text-xs flex items-center space-x-1"
-                                onClick={() => setSelectedModForVersions(mod)}
-                                disabled={versionsLoading}
+                                onClick={() => handleVersionChangeClick(mod)}
+                                disabled={versionsLoading || loadingManualVersions === mod.name}
                               >
-                                <Edit className="w-3 h-3" />
+                                {loadingManualVersions === mod.name ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <Edit className="w-3 h-3" />
+                                )}
                                 <span>バージョン変更</span>
                               </motion.button>
                               
@@ -818,21 +915,45 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                           {selectedModForVersions?.name === mod.name && (
                             <div className="mt-4 p-3 bg-dark-600/30 border border-dark-500/30 rounded-lg">
                               <h5 className="text-white font-medium mb-2">バージョン選択</h5>
-                              {versionsLoading ? (
+                              {(versionsLoading || loadingManualVersions === mod.name) ? (
                                 <div className="flex items-center space-x-2">
                                   <Loader2 className="w-4 h-4 animate-spin" />
                                   <span className="text-gray-400">バージョン情報を取得中...</span>
                                 </div>
-                              ) : modVersions.length > 0 ? (
-                                <ModVersionSelector
-                                  mod={mod}
-                                  availableVersions={modVersions}
-                                  onVersionSelect={(version) => handleVersionChange(mod, version)}
-                                  isLoading={updateModMutation.isPending || downgradeModMutation.isPending || upgradeModMutation.isPending}
-                                />
-                              ) : (
-                                <p className="text-gray-400 text-sm">利用可能なバージョンがありません</p>
-                              )}
+                              ) : (() => {
+                                const availableVersions = isModInManifest(mod) 
+                                  ? modVersions 
+                                  : manualModVersions[mod.name] || [];
+                                
+                                return availableVersions.length > 0 ? (
+                                  <ModVersionSelector
+                                    mod={mod}
+                                    availableVersions={availableVersions}
+                                    onVersionSelect={(version) => handleVersionChange(mod, version)}
+                                    isLoading={updateModMutation.isPending || downgradeModMutation.isPending || upgradeModMutation.isPending}
+                                  />
+                                ) : (
+                                  <div className="space-y-2">
+                                    <p className="text-gray-400 text-sm">利用可能なバージョンがありません</p>
+                                    {!isModInManifest(mod) && (
+                                      <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="btn-secondary text-xs flex items-center space-x-1"
+                                        onClick={() => loadManualModVersions(mod)}
+                                        disabled={loadingManualVersions === mod.name}
+                                      >
+                                        {loadingManualVersions === mod.name ? (
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                        ) : (
+                                          <Github className="w-3 h-3" />
+                                        )}
+                                        <span>GitHubから取得</span>
+                                      </motion.button>
+                                    )}
+                                  </div>
+                                );
+                              })()}
                               <div className="mt-2 flex justify-end">
                                 <motion.button
                                   whileHover={{ scale: 1.02 }}
@@ -850,6 +971,144 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     )}
                   </div>
                 </div>
+
+                {/* 未管理MOD（手動で追加されたMOD） */}
+                {unmanagedMods.length > 0 && (
+                  <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-orange-400">検出された未管理MOD</h3>
+                      <div className="flex items-center space-x-2">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="btn-primary text-xs flex items-center space-x-1"
+                          onClick={() => addAllUnmanagedModsMutation.mutate({ 
+                            profileName, 
+                            unmanagedMods 
+                          })}
+                          disabled={addAllUnmanagedModsMutation.isPending || unmanagedMods.length === 0}
+                        >
+                          {addAllUnmanagedModsMutation.isPending ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <UserPlus className="w-3 h-3" />
+                          )}
+                          <span>すべて管理システムに追加</span>
+                        </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="btn-secondary text-xs flex items-center space-x-1"
+                          onClick={() => refetchUnmanagedMods()}
+                          disabled={unmanagedModsLoading}
+                        >
+                          {unmanagedModsLoading ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <RefreshCw className="w-3 h-3" />
+                          )}
+                          <span>再スキャン</span>
+                        </motion.button>
+                      </div>
+                    </div>
+                    
+                    <div className="mb-4 p-3 bg-orange-500/10 border border-orange-500/20 rounded">
+                      <p className="text-orange-300 text-sm">
+                        ⚠️ これらのMODはrml_modsフォルダに手動で追加されたファイルです。
+                        管理システムに追加すると、バージョン管理が可能になります。
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {unmanagedMods.map((mod, index) => (
+                        <motion.div
+                          key={mod.file_path}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="bg-dark-700/30 border border-orange-500/20 rounded-lg p-4"
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <h4 className="text-orange-200 font-medium">{mod.dll_name}</h4>
+                              <p className="text-gray-400 text-sm">ファイル: {mod.file_name}</p>
+                              <p className="text-gray-500 text-xs">
+                                サイズ: {(mod.file_size / 1024 / 1024).toFixed(2)}MB | 
+                                更新: {mod.modified_time}
+                              </p>
+                              {mod.calculated_sha256 && (
+                                <p className="text-gray-500 text-xs font-mono">
+                                  SHA256: {mod.calculated_sha256.substring(0, 16)}...
+                                </p>
+                              )}
+                            </div>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              className="btn-primary text-xs flex items-center space-x-1"
+                              onClick={() => addUnmanagedModMutation.mutate({ 
+                                profileName, 
+                                unmanagedMod: mod 
+                              })}
+                              disabled={addUnmanagedModMutation.isPending}
+                            >
+                              {addUnmanagedModMutation.isPending ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <Plus className="w-3 h-3" />
+                              )}
+                              <span>追加</span>
+                            </motion.button>
+                          </div>
+                          
+                          {/* ハッシュベースのバージョン検出情報 */}
+                          {mod.detected_version && (
+                            <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded">
+                              <p className="text-blue-300 text-sm">
+                                🔍 検出バージョン: <span className="font-mono">{mod.detected_version}</span>
+                              </p>
+                              <p className="text-blue-200 text-xs mt-1">
+                                このMODは管理システムに追加時、検出されたバージョンで登録されます
+                              </p>
+                            </div>
+                          )}
+                          
+                          {mod.matched_mod_info ? (
+                            <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h5 className="text-green-400 font-medium">マッチしたMOD情報</h5>
+                                  <p className="text-green-300 text-sm">{mod.matched_mod_info.name}</p>
+                                  <p className="text-green-200 text-xs">{mod.matched_mod_info.description}</p>
+                                  <p className="text-green-200 text-xs">作者: {mod.matched_mod_info.author}</p>
+                                  {mod.matched_mod_info.latest_version && (
+                                    <p className="text-green-200 text-xs">最新バージョン: {mod.matched_mod_info.latest_version}</p>
+                                  )}
+                                </div>
+                                <div className="flex space-x-2">
+                                  <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="btn-secondary text-xs"
+                                    onClick={() => window.open(mod.matched_mod_info!.source_location, '_blank')}
+                                  >
+                                    <ExternalLink className="w-3 h-3" />
+                                  </motion.button>
+                                </div>
+                              </div>
+                            </div>
+                          ) : !mod.detected_version && (
+                            <div className="mt-3 p-3 bg-gray-500/10 border border-gray-500/30 rounded">
+                              <p className="text-gray-400 text-sm">
+                                📦 マニフェストに該当するMODが見つかりませんでした
+                              </p>
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </motion.div>
