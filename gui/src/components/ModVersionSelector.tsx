@@ -39,10 +39,8 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
   const [selectedVersion, setSelectedVersion] = useState(mod.installed_version);
 
   const handleVersionSelect = (version: string) => {
-    if (version !== mod.installed_version) {
-      setSelectedVersion(version);
-      onVersionSelect(version);
-    }
+    setSelectedVersion(version);
+    onVersionSelect(version);
     setIsOpen(false);
   };
 
@@ -72,7 +70,7 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
         {isLoading ? (
           <Loader2 className="w-4 h-4 animate-spin" />
         ) : (
-          <span>v{mod.installed_version}</span>
+          <span>{selectedVersion || "バージョンを選択"}</span>
         )}
         {availableVersions.length > 0 && (
           <ChevronDown 
@@ -103,7 +101,7 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">v{release.version}</span>
+                    <span className="font-medium">{release.version}</span>
                     {release.version === mod.installed_version && (
                       <span className="text-xs bg-blue-600 px-2 py-0.5 rounded">
                         インストール済み

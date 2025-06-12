@@ -138,6 +138,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [isInstallingMod, setIsInstallingMod] = useState<string | null>(null);
   const [selectedVersions, setSelectedVersions] = useState<{[modUrl: string]: string}>({});
   const [selectedModForVersions, setSelectedModForVersions] = useState<InstalledMod | null>(null);
+  const [selectedAvailableModForVersions, setSelectedAvailableModForVersions] = useState<ModInfo | null>(null);
+  const [selectedInstallVersion, setSelectedInstallVersion] = useState<string>('');
 
   // React Query hooks - disable auto-fetch for available mods
   const { data: availableMods = [], isLoading: modsLoading, refetch: refetchMods } = useModManifest(profileName);
@@ -150,6 +152,11 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const { data: modVersions = [], isLoading: versionsLoading } = useModVersions(
     profileName, 
     selectedModForVersions ? availableMods.find(m => m.name === selectedModForVersions.name || m.source_location === selectedModForVersions.source_location) || null : null
+  );
+  
+  const { data: availableModVersions = [], isLoading: availableVersionsLoading } = useModVersions(
+    profileName,
+    selectedAvailableModForVersions
   );
   
   const installModMutation = useInstallMod();
@@ -369,6 +376,24 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     // マニフェストに含まれていない場合は手動でバージョン情報を取得
     if (!isModInManifest(mod) && !manualModVersions[mod.name]) {
       await loadManualModVersions(mod);
+    }
+  };
+
+  // 利用可能なMODのインストールボタンクリック
+  const handleAvailableModInstallClick = (mod: ModInfo) => {
+    setSelectedAvailableModForVersions(mod);
+    setSelectedInstallVersion(''); // リセット
+  };
+
+  const handleAvailableModVersionSelect = (version: string) => {
+    setSelectedInstallVersion(version);
+  };
+
+  const handleInstallButtonClick = async () => {
+    if (selectedAvailableModForVersions && selectedInstallVersion) {
+      await installMod(selectedAvailableModForVersions, selectedInstallVersion);
+      setSelectedAvailableModForVersions(null);
+      setSelectedInstallVersion('');
     }
   };
 
@@ -770,21 +795,29 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
-                            className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-4"
+                            className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-3"
                           >
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="flex-1">
-                                <h4 className="text-white font-medium">{mod.name}</h4>
-                                <p className="text-gray-400 text-sm">by {mod.author}</p>
-                                <p className="text-gray-500 text-xs">{mod.releases.length} リリース</p>
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center space-x-2 mb-1">
+                                  <h4 className="text-white font-medium text-sm truncate">{mod.name}</h4>
+                                  {mod.category && (
+                                    <span className="inline-block bg-resonite-blue/20 text-resonite-blue text-xs px-1.5 py-0.5 rounded shrink-0">
+                                      {mod.category}
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-gray-400 text-xs">by {mod.author} • {mod.releases.length} リリース</p>
+                                <p className="text-gray-300 text-xs truncate">{mod.description}</p>
                               </div>
                               
-                              <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-2 ml-3">
                                 <motion.button
                                   whileHover={{ scale: 1.02 }}
                                   whileTap={{ scale: 0.98 }}
-                                  className="btn-secondary text-xs"
+                                  className="btn-secondary text-xs p-1.5"
                                   onClick={() => window.open(mod.source_location, '_blank')}
+                                  title="GitHubで開く"
                                 >
                                   <ExternalLink className="w-3 h-3" />
                                 </motion.button>
@@ -792,9 +825,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                 <motion.button
                                   whileHover={{ scale: 1.02 }}
                                   whileTap={{ scale: 0.98 }}
-                                  className="btn-primary text-xs flex items-center space-x-1"
-                                  onClick={() => installMod(mod, selectedVersions[mod.source_location])}
+                                  className="btn-primary text-xs flex items-center space-x-1 px-3 py-1.5"
+                                  onClick={() => handleAvailableModInstallClick(mod)}
                                   disabled={installModMutation.isPending || mod.releases.length === 0}
+                                  title="バージョンを選択してインストール"
                                 >
                                   {installModMutation.isPending ? (
                                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -805,42 +839,12 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                 </motion.button>
                               </div>
                             </div>
-                            
-                            {/* バージョン選択 */}
-                            {mod.releases.length > 0 && (
-                              <div className="mb-2">
-                                <select
-                                  value={selectedVersions[mod.source_location] || ''}
-                                  onChange={(e) => setSelectedVersions(prev => ({
-                                    ...prev,
-                                    [mod.source_location]: e.target.value
-                                  }))}
-                                  className="select-primary text-xs w-full"
-                                >
-                                  <option value="">最新バージョン ({mod.releases[0]?.version})</option>
-                                  {mod.releases.map((release, idx) => (
-                                    <option key={release.version} value={release.version}>
-                                      {release.version} 
-                                      {release.prerelease && ' (プレリリース)'}
-                                      {idx === 0 && ' (最新)'}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                            )}
-                            
-                            <p className="text-gray-300 text-sm mb-2">{mod.description}</p>
-                            
-                            {mod.category && (
-                              <span className="inline-block bg-resonite-blue/20 text-resonite-blue text-xs px-2 py-1 rounded">
-                                {mod.category}
-                              </span>
-                            )}
                           </motion.div>
                         ))
                     )}
                   </div>
                 </div>
+
 
                 {/* インストール済みMOD */}
                 <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
@@ -1266,6 +1270,79 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         onConfirm={handleModRiskConfirm}
         title="MODローダーのインストール"
       />
+
+      {/* 利用可能なMODのバージョン選択モーダル */}
+      {selectedAvailableModForVersions && (
+        <div 
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4"
+          onClick={() => setSelectedAvailableModForVersions(null)}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-dark-800 border border-dark-600 rounded-lg p-6 w-full max-w-4xl max-h-[85vh] overflow-y-auto shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-white">
+                {selectedAvailableModForVersions.name} - インストール
+              </h3>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="btn-secondary text-sm"
+                onClick={() => setSelectedAvailableModForVersions(null)}
+              >
+                閉じる
+              </motion.button>
+            </div>
+            
+            {availableVersionsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-resonite-blue" />
+                <span className="ml-2 text-gray-400">バージョン情報を取得中...</span>
+              </div>
+            ) : availableModVersions.length > 0 ? (
+              <div className="space-y-4">
+                <ModVersionSelector
+                  mod={{
+                    name: selectedAvailableModForVersions.name,
+                    description: selectedAvailableModForVersions.description,
+                    source_location: selectedAvailableModForVersions.source_location,
+                    installed_version: '',
+                    installed_date: new Date().toISOString(),
+                    dll_path: ''
+                  }}
+                  availableVersions={availableModVersions}
+                  onVersionSelect={handleAvailableModVersionSelect}
+                  isLoading={installModMutation.isPending}
+                />
+                
+                <div className="flex justify-end">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="btn-primary flex items-center space-x-2"
+                    onClick={handleInstallButtonClick}
+                    disabled={installModMutation.isPending || !selectedInstallVersion}
+                  >
+                    {installModMutation.isPending ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4" />
+                    )}
+                    <span>インストール</span>
+                  </motion.button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-400">利用可能なバージョンがありません</p>
+              </div>
+            )}
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
