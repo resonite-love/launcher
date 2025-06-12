@@ -81,7 +81,7 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
 
       {isOpen && availableVersions.length > 0 && (
         <div className="absolute top-full left-0 mt-1 bg-gray-800 border border-gray-600 
-                        rounded-md shadow-lg z-50 min-w-80 max-h-96 overflow-y-auto">
+                        rounded-md shadow-lg z-[70] min-w-80 max-h-96 overflow-y-auto">
           <div className="p-2 border-b border-gray-600">
             <h4 className="text-sm font-medium text-gray-300">
               {mod.name} - バージョン選択

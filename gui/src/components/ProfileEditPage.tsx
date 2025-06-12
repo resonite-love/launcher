@@ -1280,7 +1280,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-dark-800 border border-dark-600 rounded-lg p-6 w-full max-w-4xl max-h-[85vh] overflow-y-auto shadow-2xl"
+            className="bg-dark-800 border border-dark-600 rounded-lg p-6 w-full max-w-4xl min-h-[500px] max-h-[85vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
