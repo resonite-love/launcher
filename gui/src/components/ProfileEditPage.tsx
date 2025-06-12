@@ -305,6 +305,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     <li>• Resonite起動時に渡されるコマンドライン引数を設定できます</li>
                     <li>• 各引数は自動的に適切にエスケープされます</li>
                     <li>• 一般的な引数: <code className="bg-dark-800 px-1 rounded">-SkipIntroTutorial</code>, <code className="bg-dark-800 px-1 rounded">-DataPath &quot;path&quot;</code></li>
+                    <li>• パス変数が使用可能: <code className="bg-dark-800 px-1 rounded">%PROFILE_DIR%</code>, <code className="bg-dark-800 px-1 rounded">%GAME_DIR%</code>, <code className="bg-dark-800 px-1 rounded">%DATA_DIR%</code></li>
+                    <li>• 例: <code className="bg-dark-800 px-1 rounded">-DataPath &quot;%DATA_DIR%&quot;</code> → プロファイルのDataPathフォルダ</li>
                   </ul>
                 </div>
               </div>
