@@ -660,7 +660,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                         )
                         .map((mod, index) => (
                           <motion.div
-                            key={mod.source_location}
+                            key={`${mod.source_location}-${mod.name}-${index}`}
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
