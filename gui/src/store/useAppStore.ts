@@ -35,7 +35,7 @@ interface AppState {
   steamCredentials: SteamCredentials | null;
   
   // UI State
-  currentTab: 'home' | 'profiles';
+  currentTab: 'home' | 'profiles' | 'settings';
   
   // Loading states
   isLaunching: boolean;
@@ -52,7 +52,7 @@ interface AppState {
   
   setSteamCredentials: (credentials: SteamCredentials | null) => void;
   
-  setCurrentTab: (tab: 'home' | 'profiles') => void;
+  setCurrentTab: (tab: 'home' | 'profiles' | 'settings') => void;
   
   setIsLaunching: (loading: boolean) => void;
   setIsInstalling: (loading: boolean) => void;

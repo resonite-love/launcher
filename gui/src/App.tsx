@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Home, Settings, Loader2, AlertCircle } from 'lucide-react';
+import { Home, User, Settings, Loader2, AlertCircle } from 'lucide-react';
 import CustomTitlebar from './components/CustomTitlebar';
 import HomeTab from './components/HomeTab';
 import ProfilesTab from './components/ProfilesTab';
+import SettingsTab from './components/SettingsTab';
 import { useAppStore } from './store/useAppStore';
 import { useAppStatus } from './hooks/useQueries';
 
@@ -112,8 +113,20 @@ function App() {
               }`}
               onClick={() => setCurrentTab('profiles')}
             >
-              <Settings className="w-4 h-4" />
+              <User className="w-4 h-4" />
               <span>プロファイル管理</span>
+            </motion.button>
+            
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`nav-button flex items-center space-x-2 ${
+                currentTab === 'settings' ? 'nav-button-active' : 'text-gray-300 hover:text-white'
+              }`}
+              onClick={() => setCurrentTab('settings')}
+            >
+              <Settings className="w-4 h-4" />
+              <span>設定</span>
             </motion.button>
           </nav>
         </div>
@@ -131,6 +144,7 @@ function App() {
         >
           {currentTab === 'home' && <HomeTab />}
           {currentTab === 'profiles' && <ProfilesTab />}
+          {currentTab === 'settings' && <SettingsTab />}
         </motion.div>
       </main>
 
