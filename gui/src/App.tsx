@@ -120,14 +120,14 @@ function App() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-y-scroll">
+      <main className="flex-1 overflow-y-hidden">
         <motion.div
           key={currentTab}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.2 }}
-          className="max-w-7xl mx-auto"
+          className="max-w-7xl mx-auto h-full"
         >
           {currentTab === 'home' && <HomeTab />}
           {currentTab === 'profiles' && <ProfilesTab />}
@@ -135,8 +135,8 @@ function App() {
       </main>
 
       {/* Status Bar */}
-      <footer className="bg-dark-900/30 backdrop-blur-sm border-t border-dark-700/30 p-3">
-        <div className="max-w-7xl mx-auto flex items-center justify-between text-sm">
+      <footer className="bg-dark-900/30 backdrop-blur-sm border-t border-dark-700/30">
+        <div className="max-w-7xl mx-auto flex items-center justify-between text-xs">
           <div className="flex items-center space-x-4">
             {appStatus?.exe_dir && (
               <span className="text-gray-400">
@@ -145,7 +145,7 @@ function App() {
             )}
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center px-2">
             {appStatus?.depot_downloader_available ? (
               <span className="status-success">
                 ✓ DepotDownloader

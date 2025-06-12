@@ -46,7 +46,7 @@ function CustomTitlebar() {
       <div className="flex items-center px-4" data-tauri-drag-region>
         <div className="flex items-center space-x-2">
           <div className="w-4 h-4 rounded-full bg-gradient-to-br from-resonite-blue to-resonite-purple flex-shrink-0" />
-          <span className="text-sm font-medium text-white">Resonite Tools</span>
+          <span className="text-sm font-medium text-white">KOKOA Resonite Launcher&nbsp; <span className="text-xs">powered by resonite.love</span></span>
         </div>
       </div>
 

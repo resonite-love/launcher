@@ -312,7 +312,7 @@ function ProfilesTab() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-4 h-full overflow-y-scroll"> { /*  scrollbar-hide */ }
       {/* Steam Settings Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

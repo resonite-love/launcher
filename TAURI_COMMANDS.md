@@ -64,6 +64,36 @@ const result = await invoke<string>('create_profile', {
 });
 ```
 
+### `get_profile_config`
+指定されたプロファイルの設定を取得します。
+
+**パラメータ:**
+- `profile_name: string` - プロファイル名
+
+**戻り値:** `Profile` - プロファイル設定オブジェクト
+
+**使用例:**
+```typescript
+const profile = await invoke<Profile>('get_profile_config', {
+  profileName: 'MyProfile'
+});
+```
+
+### `update_profile_config`
+プロファイルの設定を更新します。
+
+**パラメータ:**
+- `profile: Profile` - 更新するプロファイル設定オブジェクト
+
+**戻り値:** `string` - 成功メッセージ
+
+**使用例:**
+```typescript
+const result = await invoke<string>('update_profile_config', {
+  profile: modifiedProfile
+});
+```
+
 ## ゲームインストール・更新
 
 ### `install_game_to_profile`
