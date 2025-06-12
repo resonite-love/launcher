@@ -3025,6 +3025,7 @@ dependencies = [
 name = "resonite-tools-tauri"
 version = "0.1.0"
 dependencies = [
+ "reqwest",
  "resonite-tools-lib",
  "serde",
  "serde_json",

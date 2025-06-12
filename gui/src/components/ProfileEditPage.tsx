@@ -35,7 +35,9 @@ import {
   useUpgradeMod,
   useUnmanagedMods,
   useAddUnmanagedMod,
-  useAddAllUnmanagedMods
+  useAddAllUnmanagedMods,
+  useYtDlpStatus,
+  useUpdateYtDlp
 } from '../hooks/useQueries';
 
 interface ProfileConfig {
@@ -167,6 +169,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const upgradeModMutation = useUpgradeMod();
   const addUnmanagedModMutation = useAddUnmanagedMod();
   const addAllUnmanagedModsMutation = useAddAllUnmanagedMods();
+  
+  // yt-dlp管理用のクエリ
+  const { data: ytDlpInfo, isLoading: ytDlpLoading, refetch: refetchYtDlp } = useYtDlpStatus(profileName);
+  const updateYtDlpMutation = useUpdateYtDlp();
 
   const tabs = [
     { id: 'info' as TabType, label: 'プロファイル情報', icon: User },
@@ -1211,10 +1217,80 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               <h2 className="text-2xl font-bold text-white">その他の設定</h2>
             </div>
 
-            <div className="bg-dark-800/30 rounded-lg p-8 text-center">
-              <Settings className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400 text-lg mb-2">詳細設定</p>
-              <p className="text-gray-500">今後、詳細設定項目がここに追加される予定です</p>
+            <div className="space-y-6">
+              {/* yt-dlp管理 */}
+              <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                  <Download className="w-5 h-5 text-resonite-blue" />
+                  <span>yt-dlp管理</span>
+                </h3>
+                
+                {ytDlpLoading ? (
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span className="text-gray-400">yt-dlpの状態を確認中...</span>
+                  </div>
+                ) : ytDlpInfo ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-dark-700/30 border border-dark-600/30 rounded-lg">
+                      <div>
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h4 className="text-white font-medium">yt-dlp.exe</h4>
+                        </div>
+                        <p className="text-gray-400 text-sm">
+                          バージョン: {ytDlpInfo.version || '不明'}
+                        </p>
+                        {ytDlpInfo.path && (
+                          <p className="text-gray-500 text-xs">
+                            パス: Game/RuntimeData/yt-dlp.exe
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="btn-secondary text-xs flex items-center space-x-1"
+                          onClick={() => refetchYtDlp()}
+                          disabled={ytDlpLoading}
+                        >
+                          <RefreshCw className={`w-3 h-3 ${ytDlpLoading ? 'animate-spin' : ''}`} />
+                          <span>更新確認</span>
+                        </motion.button>
+                        
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="btn-primary text-xs flex items-center space-x-1"
+                          onClick={() => updateYtDlpMutation.mutate(profileName)}
+                          disabled={updateYtDlpMutation.isPending}
+                        >
+                          {updateYtDlpMutation.isPending ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Download className="w-3 h-3" />
+                          )}
+                          <span>
+                            {ytDlpInfo.installed ? 'アップデート' : 'インストール'}
+                          </span>
+                        </motion.button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-4">
+                    <p className="text-gray-400">yt-dlpの状態を取得できませんでした</p>
+                  </div>
+                )}
+              </div>
+
+              {/* その他の設定エリア */}
+              <div className="bg-dark-800/30 rounded-lg p-8 text-center">
+                <Settings className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-400 text-lg mb-2">詳細設定</p>
+                <p className="text-gray-500">今後、詳細設定項目がここに追加される予定です</p>
+              </div>
             </div>
           </motion.div>
         );

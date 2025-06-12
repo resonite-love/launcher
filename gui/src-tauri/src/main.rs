@@ -12,6 +12,7 @@ use resonite_tools_lib::{
     mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease, UnmanagedMod},
     utils,
 };
+use std::process::Command;
 
 // Application state
 struct AppState {
@@ -69,6 +70,13 @@ pub struct AppStatus {
 pub struct SteamCredentials {
     pub username: String,
     pub password: String,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct YtDlpInfo {
+    pub installed: bool,
+    pub version: Option<String>,
+    pub path: Option<String>,
 }
 
 // Initialize the application
@@ -963,6 +971,157 @@ async fn get_github_release_info(
     })
 }
 
+// Get yt-dlp status for a profile
+#[tauri::command]
+async fn get_yt_dlp_status(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<YtDlpInfo, String> {
+    let app_state = state.lock().unwrap();
+    
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
+    
+    let profile_dir = profile_manager.get_profile_dir(&profile_name);
+    let game_path = find_game_path(&profile_dir)?;
+    let yt_dlp_path = game_path.join("RuntimeData").join("yt-dlp.exe");
+    
+    if !yt_dlp_path.exists() {
+        return Ok(YtDlpInfo {
+            installed: false,
+            version: None,
+            path: None,
+        });
+    }
+    
+    // Get version by running yt-dlp --version
+    let version = match Command::new(&yt_dlp_path)
+        .arg("--version")
+        .output()
+    {
+        Ok(output) => {
+            if output.status.success() {
+                Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
+            } else {
+                None
+            }
+        }
+        Err(_) => None,
+    };
+    
+    Ok(YtDlpInfo {
+        installed: true,
+        version,
+        path: Some(yt_dlp_path.to_string_lossy().to_string()),
+    })
+}
+
+// Download yt-dlp using ModManager
+async fn download_yt_dlp(yt_dlp_path: &std::path::Path) -> Result<(), String> {
+    let temp_dir = std::env::temp_dir();
+    let mod_manager = ModManager::new(temp_dir);
+    
+    // Create a temporary HTTP client through ModManager
+    let client = reqwest::Client::new();
+    let download_url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe";
+    
+    let response = client.get(download_url)
+        .send()
+        .await
+        .map_err(|e| format!("Failed to download yt-dlp: {}", e))?;
+    
+    if !response.status().is_success() {
+        return Err(format!("Failed to download yt-dlp: HTTP {}", response.status()));
+    }
+    
+    let content = response.bytes()
+        .await
+        .map_err(|e| format!("Failed to read yt-dlp content: {}", e))?;
+    
+    std::fs::write(yt_dlp_path, content)
+        .map_err(|e| format!("Failed to write yt-dlp.exe: {}", e))?;
+    
+    Ok(())
+}
+
+// Update yt-dlp to the latest version using yt-dlp -U
+#[tauri::command]
+async fn update_yt_dlp(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let (profile_dir, game_path) = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        let profile_dir = profile_manager.get_profile_dir(&profile_name);
+        let game_path = find_game_path(&profile_dir)?;
+        
+        (profile_dir, game_path)
+    }; // MutexGuard is dropped here
+    
+    let runtime_data_path = game_path.join("RuntimeData");
+    let yt_dlp_path = runtime_data_path.join("yt-dlp.exe");
+    
+    if !yt_dlp_path.exists() {
+        // If yt-dlp doesn't exist, download it first
+        std::fs::create_dir_all(&runtime_data_path)
+            .map_err(|e| format!("Failed to create RuntimeData directory: {}", e))?;
+        
+        download_yt_dlp(&yt_dlp_path).await?;
+        
+        let version = match Command::new(&yt_dlp_path)
+            .arg("--version")
+            .output()
+        {
+            Ok(output) => {
+                if output.status.success() {
+                    String::from_utf8_lossy(&output.stdout).trim().to_string()
+                } else {
+                    "unknown".to_string()
+                }
+            }
+            Err(_) => "unknown".to_string(),
+        };
+        
+        return Ok(format!("yt-dlp installed successfully (version {})", version));
+    }
+    
+    // Use yt-dlp's built-in update functionality
+    let output = Command::new(&yt_dlp_path)
+        .arg("-U")
+        .output()
+        .map_err(|e| format!("Failed to run yt-dlp update: {}", e))?;
+    
+    if !output.status.success() {
+        let error_msg = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("yt-dlp update failed: {}", error_msg));
+    }
+    
+    // Get the updated version
+    let version_output = Command::new(&yt_dlp_path)
+        .arg("--version")
+        .output()
+        .map_err(|e| format!("Failed to get yt-dlp version: {}", e))?;
+    
+    let version = if version_output.status.success() {
+        String::from_utf8_lossy(&version_output.stdout).trim().to_string()
+    } else {
+        "unknown".to_string()
+    };
+    
+    let update_msg = String::from_utf8_lossy(&output.stdout);
+    
+    // Check if update was needed
+    if update_msg.contains("already up to date") || update_msg.contains("up-to-date") {
+        Ok(format!("yt-dlp is already up to date (version {})", version))
+    } else {
+        Ok(format!("yt-dlp updated successfully to version {}", version))
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(AppState::default()))
@@ -999,7 +1158,9 @@ fn main() {
             scan_unmanaged_mods,
             add_unmanaged_mod_to_system,
             add_all_unmanaged_mods_to_system,
-            get_github_release_info
+            get_github_release_info,
+            get_yt_dlp_status,
+            update_yt_dlp
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

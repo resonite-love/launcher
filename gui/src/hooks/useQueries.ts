@@ -80,6 +80,12 @@ interface UnmanagedMod {
   detected_version?: string;
 }
 
+interface YtDlpInfo {
+  installed: boolean;
+  version?: string;
+  path?: string;
+}
+
 // Query Keys
 export const queryKeys = {
   appStatus: ['appStatus'] as const,
@@ -89,6 +95,7 @@ export const queryKeys = {
   installedMods: (profileName: string) => ['installedMods', profileName] as const,
   modVersions: (profileName: string, modName: string) => ['modVersions', profileName, modName] as const,
   unmanagedMods: (profileName: string) => ['unmanagedMods', profileName] as const,
+  ytDlpStatus: (profileName: string) => ['ytDlpStatus', profileName] as const,
 };
 
 // App Status
@@ -468,6 +475,36 @@ export const useAddAllUnmanagedMods = () => {
     },
     onError: (error) => {
       toast.error(`MODの一括追加に失敗しました: ${error}`);
+    },
+  });
+};
+
+// yt-dlp Status Query
+export const useYtDlpStatus = (profileName: string) => {
+  return useQuery({
+    queryKey: queryKeys.ytDlpStatus(profileName),
+    queryFn: async (): Promise<YtDlpInfo> => {
+      return await invoke<YtDlpInfo>('get_yt_dlp_status', { profileName });
+    },
+    enabled: !!profileName,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+};
+
+// yt-dlp Update Mutation
+export const useUpdateYtDlp = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (profileName: string) => {
+      return await invoke<string>('update_yt_dlp', { profileName });
+    },
+    onSuccess: (result, profileName) => {
+      toast.success(result);
+      queryClient.invalidateQueries({ queryKey: queryKeys.ytDlpStatus(profileName) });
+    },
+    onError: (error) => {
+      toast.error(`yt-dlpの更新に失敗しました: ${error}`);
     },
   });
 };

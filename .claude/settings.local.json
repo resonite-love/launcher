@@ -13,7 +13,8 @@
       "Bash(sed:*)",
       "Bash(awk:*)",
       "Bash(rg:*)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(find:*)"
     ],
     "deny": []
   }
