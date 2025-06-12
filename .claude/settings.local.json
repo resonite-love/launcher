@@ -14,7 +14,9 @@
       "Bash(awk:*)",
       "Bash(rg:*)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(chmod:*)",
+      "Bash(python:*)"
     ],
     "deny": []
   }
