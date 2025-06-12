@@ -15,8 +15,24 @@ pub struct ModInfo {
     pub author: String,
     pub latest_version: Option<String>,
     pub latest_download_url: Option<String>,
+    pub releases: Vec<ModRelease>,
     pub tags: Option<Vec<String>>,
     pub flags: Option<Vec<String>>,
+    pub last_updated: Option<String>,
+}
+
+/// MODの個別リリース情報
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ModRelease {
+    pub version: String,
+    pub download_url: Option<String>,
+    pub release_url: String,
+    pub published_at: String,
+    pub prerelease: bool,
+    pub draft: bool,
+    pub changelog: Option<String>,
+    pub file_name: Option<String>,
+    pub file_size: Option<u64>,
 }
 
 /// インストール済みMOD情報
@@ -157,40 +173,14 @@ impl ModManager {
         }
     }
 
-    /// MODマニフェストからMOD一覧を取得
+    /// キャッシュされたMOD一覧を取得
     pub async fn fetch_mod_manifest(&self) -> Result<Vec<ModInfo>, Box<dyn Error + Send + Sync>> {
-        let manifest_url = "https://raw.githubusercontent.com/resonite-modding-group/resonite-mod-manifest/main/manifest.json";
+        // キャッシュされたMOD情報を取得
+        let cache_url = "https://raw.githubusercontent.com/YOUR_USERNAME/resonite-mod-cache/main/cache/mods.json";
         
-        let response = self.client.get(manifest_url).send().await?;
-        let manifest_text = response.text().await?;
-        let manifest: ModManifest = serde_json::from_str(&manifest_text)?;
-        
-        let mut mods = Vec::new();
-        
-        for (author_key, author_entry) in manifest.objects {
-            // authorマップから最初の作者情報を取得
-            let author_name = author_entry.author.keys().next()
-                .unwrap_or(&author_key)
-                .clone();
-                
-            for (mod_key, mod_entry) in author_entry.entries {
-                // GitHubリポジトリから最新リリース情報を取得
-                let (latest_version, latest_download_url) = self.get_latest_release_info(&mod_entry.source_location).await
-                    .unwrap_or((None, None));
-                
-                mods.push(ModInfo {
-                    name: mod_entry.name,
-                    description: mod_entry.description,
-                    category: Some(mod_entry.category),
-                    source_location: mod_entry.source_location,
-                    author: author_name.clone(),
-                    latest_version,
-                    latest_download_url,
-                    tags: mod_entry.tags,
-                    flags: mod_entry.flags,
-                });
-            }
-        }
+        let response = self.client.get(cache_url).send().await?;
+        let mods_text = response.text().await?;
+        let mods: Vec<ModInfo> = serde_json::from_str(&mods_text)?;
         
         Ok(mods)
     }
@@ -223,7 +213,56 @@ impl ModManager {
         Ok((Some(release.tag_name), download_url))
     }
 
-    /// GitHubリポジトリからMODをインストール
+    /// MODをインストール（キャッシュ情報を活用）
+    pub async fn install_mod_from_cache(&self, mod_info: &ModInfo, version: Option<&str>) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
+        // 指定されたバージョンまたは最新バージョンのリリース情報を取得
+        let release = if let Some(target_version) = version {
+            mod_info.releases.iter()
+                .find(|r| r.version == target_version)
+                .ok_or(format!("Version {} not found", target_version))?
+        } else {
+            mod_info.releases.first()
+                .ok_or("No releases available")?
+        };
+        
+        let download_url = release.download_url.as_ref()
+            .ok_or("No download URL available for this release")?;
+        
+        // ファイル名を取得
+        let file_name = release.file_name.as_ref()
+            .or_else(|| download_url.split('/').last())
+            .ok_or("Cannot determine file name")?;
+        
+        if !file_name.ends_with(".dll") {
+            return Err("Downloaded file is not a DLL".into());
+        }
+        
+        // MODsディレクトリを作成
+        fs::create_dir_all(&self.mods_dir)?;
+        
+        // ファイルをダウンロード
+        let dll_response = self.client.get(download_url).send().await?;
+        let dll_content = dll_response.bytes().await?;
+        
+        let dll_path = self.mods_dir.join(file_name);
+        fs::write(&dll_path, dll_content)?;
+        
+        let installed_mod = InstalledMod {
+            name: mod_info.name.clone(),
+            description: release.changelog.clone().unwrap_or_else(|| mod_info.description.clone()),
+            source_location: mod_info.source_location.clone(),
+            installed_version: release.version.clone(),
+            installed_date: chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+            dll_path,
+        };
+        
+        // インストール済みMOD一覧に追加
+        self.add_to_installed_mods(&installed_mod)?;
+        
+        Ok(installed_mod)
+    }
+
+    /// GitHubリポジトリからMODをインストール（フォールバック）
     pub async fn install_mod_from_github(&self, repo_url: &str, version: Option<&str>) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
         let api_url = self.github_repo_to_api_url(repo_url)?;
         

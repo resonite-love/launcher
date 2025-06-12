@@ -42,8 +42,10 @@ interface ModInfo {
   author: string;
   latest_version?: string;
   latest_download_url?: string;
+  releases: ModRelease[];
   tags?: string[];
   flags?: string[];
+  last_updated?: string;
 }
 
 interface InstalledMod {
@@ -53,6 +55,18 @@ interface InstalledMod {
   installed_version: string;
   installed_date: string;
   dll_path: string;
+}
+
+interface ModRelease {
+  version: string;
+  download_url?: string;
+  release_url: string;
+  published_at: string;
+  prerelease: boolean;
+  draft: boolean;
+  changelog?: string;
+  file_name?: string;
+  file_size?: number;
 }
 
 type TabType = 'info' | 'launch' | 'mods' | 'other';
@@ -81,6 +95,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [modSearchQuery, setModSearchQuery] = useState('');
   const [customRepoUrl, setCustomRepoUrl] = useState('');
   const [isInstallingMod, setIsInstallingMod] = useState<string | null>(null);
+  const [selectedVersions, setSelectedVersions] = useState<{[modUrl: string]: string}>({});
 
   const tabs = [
     { id: 'info' as TabType, label: 'プロファイル情報', icon: User },
@@ -212,7 +227,37 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     }
   };
 
-  const installMod = async (repoUrl: string, version?: string) => {
+  const installMod = async (modInfo: ModInfo, version?: string) => {
+    try {
+      setIsInstallingMod(modInfo.source_location);
+      
+      // キャッシュ情報を使用してインストール
+      if (modInfo.releases.length > 0) {
+        const result = await invoke<InstalledMod>('install_mod_from_cache', {
+          profileName,
+          modInfo,
+          version: version || null
+        });
+        toast.success(`MOD "${result.name}" v${result.installed_version} をインストールしました`);
+      } else {
+        // フォールバック: GitHubから直接インストール
+        const result = await invoke<InstalledMod>('install_mod_from_github', {
+          profileName,
+          repoUrl: modInfo.source_location,
+          version: version || null
+        });
+        toast.success(`MOD "${result.name}" をインストールしました`);
+      }
+      
+      await loadInstalledMods();
+    } catch (err) {
+      toast.error(`MODのインストールに失敗しました: ${err}`);
+    } finally {
+      setIsInstallingMod(null);
+    }
+  };
+
+  const installModFromUrl = async (repoUrl: string, version?: string) => {
     try {
       setIsInstallingMod(repoUrl);
       const result = await invoke<InstalledMod>('install_mod_from_github', {
@@ -253,7 +298,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       return;
     }
 
-    await installMod(customRepoUrl.trim());
+    await installModFromUrl(customRepoUrl.trim());
     setCustomRepoUrl('');
   };
 
@@ -625,9 +670,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                               <div className="flex-1">
                                 <h4 className="text-white font-medium">{mod.name}</h4>
                                 <p className="text-gray-400 text-sm">by {mod.author}</p>
-                                {mod.latest_version && (
-                                  <p className="text-gray-500 text-xs">最新: {mod.latest_version}</p>
-                                )}
+                                <p className="text-gray-500 text-xs">{mod.releases.length} リリース</p>
                               </div>
                               
                               <div className="flex items-center space-x-2">
@@ -644,8 +687,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                   whileHover={{ scale: 1.02 }}
                                   whileTap={{ scale: 0.98 }}
                                   className="btn-primary text-xs flex items-center space-x-1"
-                                  onClick={() => installMod(mod.source_location)}
-                                  disabled={isInstallingMod !== null}
+                                  onClick={() => installMod(mod, selectedVersions[mod.source_location])}
+                                  disabled={isInstallingMod !== null || mod.releases.length === 0}
                                 >
                                   {isInstallingMod === mod.source_location ? (
                                     <Loader2 className="w-3 h-3 animate-spin" />
@@ -656,6 +699,29 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                 </motion.button>
                               </div>
                             </div>
+                            
+                            {/* バージョン選択 */}
+                            {mod.releases.length > 0 && (
+                              <div className="mb-2">
+                                <select
+                                  value={selectedVersions[mod.source_location] || ''}
+                                  onChange={(e) => setSelectedVersions(prev => ({
+                                    ...prev,
+                                    [mod.source_location]: e.target.value
+                                  }))}
+                                  className="select-primary text-xs w-full"
+                                >
+                                  <option value="">最新バージョン ({mod.releases[0]?.version})</option>
+                                  {mod.releases.map((release, idx) => (
+                                    <option key={release.version} value={release.version}>
+                                      {release.version} 
+                                      {release.prerelease && ' (プレリリース)'}
+                                      {idx === 0 && ' (最新)'}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
                             
                             <p className="text-gray-300 text-sm mb-2">{mod.description}</p>
                             

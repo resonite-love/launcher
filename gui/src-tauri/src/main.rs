@@ -691,7 +691,30 @@ async fn get_installed_mods(
         .map_err(|e| format!("Failed to get installed mods: {}", e))
 }
 
-// Install MOD from GitHub repository
+// Install MOD from cache information
+#[tauri::command]
+async fn install_mod_from_cache(
+    profile_name: String,
+    mod_info: ModInfo,
+    version: Option<String>,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<InstalledMod, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    }; // MutexGuard is dropped here
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.install_mod_from_cache(&mod_info, version.as_deref()).await
+        .map_err(|e| format!("Failed to install mod: {}", e))
+}
+
+// Install MOD from GitHub repository (fallback)
 #[tauri::command]
 async fn install_mod_from_github(
     profile_name: String,
@@ -789,6 +812,7 @@ fn main() {
             open_profile_folder,
             fetch_mod_manifest,
             get_installed_mods,
+            install_mod_from_cache,
             install_mod_from_github,
             uninstall_mod,
             get_github_release_info
