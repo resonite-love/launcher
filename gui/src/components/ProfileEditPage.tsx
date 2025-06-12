@@ -140,6 +140,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [selectedModForVersions, setSelectedModForVersions] = useState<InstalledMod | null>(null);
   const [selectedAvailableModForVersions, setSelectedAvailableModForVersions] = useState<ModInfo | null>(null);
   const [selectedInstallVersion, setSelectedInstallVersion] = useState<string>('');
+  const [modActiveTab, setModActiveTab] = useState<'install' | 'manage'>('install');
 
   // React Query hooks - disable auto-fetch for available mods
   const { data: availableMods = [], isLoading: modsLoading, refetch: refetchMods } = useModManifest(profileName);
@@ -701,415 +702,454 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             ) : (
               /* MOD管理メニュー */
               <div className="space-y-6">
-                {/* 手動MODインストール */}
-                <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-                    <Github className="w-5 h-5" />
-                    <span>手動MODインストール</span>
-                  </h3>
-                  
-                  <div className="flex space-x-3 mb-4">
-                    <input
-                      type="text"
-                      value={customRepoUrl}
-                      onChange={(e) => setCustomRepoUrl(e.target.value)}
-                      placeholder="https://github.com/author/mod-name"
-                      className="input-primary flex-1"
-                    />
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="btn-primary flex items-center space-x-2"
-                      onClick={installCustomMod}
-                      disabled={isInstallingMod !== null || !customRepoUrl.trim()}
-                    >
-                      {isInstallingMod === customRepoUrl ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Download className="w-4 h-4" />
-                      )}
-                      <span>インストール</span>
-                    </motion.button>
-                  </div>
-                  
-                  <p className="text-gray-400 text-sm">
-                    GitHubリポジトリのURLを入力してMODを直接インストールできます。
-                  </p>
+                {/* MODサブタブ */}
+                <div className="flex space-x-1 bg-dark-800/30 p-1 rounded-lg">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md transition-colors duration-200 ${
+                      modActiveTab === 'install'
+                        ? 'bg-resonite-blue text-white shadow-lg'
+                        : 'text-gray-400 hover:text-white hover:bg-dark-700/50'
+                    }`}
+                    onClick={() => setModActiveTab('install')}
+                  >
+                    <Download className="w-4 h-4" />
+                    <span className="font-medium">インストール</span>
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`flex-1 flex items-center justify-center space-x-2 px-4 py-2 rounded-md transition-colors duration-200 ${
+                      modActiveTab === 'manage'
+                        ? 'bg-resonite-blue text-white shadow-lg'
+                        : 'text-gray-400 hover:text-white hover:bg-dark-700/50'
+                    }`}
+                    onClick={() => setModActiveTab('manage')}
+                  >
+                    <Package className="w-4 h-4" />
+                    <span className="font-medium">管理</span>
+                  </motion.button>
                 </div>
 
-                {/* 利用可能なMOD一覧 */}
-                <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-white">利用可能なMOD</h3>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="btn-secondary flex items-center space-x-2"
-                      onClick={loadAvailableMods}
-                      disabled={modsLoading}
-                    >
-                      {modsLoading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Search className="w-4 h-4" />
-                      )}
-                      <span>MOD一覧を取得</span>
-                    </motion.button>
-                  </div>
-
-                  {availableMods.length > 0 && (
-                    <div className="mb-4">
-                      <input
-                        type="text"
-                        value={modSearchQuery}
-                        onChange={(e) => setModSearchQuery(e.target.value)}
-                        placeholder="MODを検索..."
-                        className="input-primary w-full"
-                      />
-                    </div>
-                  )}
-
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {modsLoading ? (
-                      <div className="text-center py-8">
-                        <Loader2 className="w-8 h-8 text-resonite-blue animate-spin mx-auto mb-4" />
-                        <p className="text-gray-400">MOD一覧を取得中...</p>
-                      </div>
-                    ) : availableMods.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                        <p className="text-gray-400 mb-2">MOD一覧を取得してください</p>
-                        <p className="text-gray-500 text-sm">上の「MOD一覧を取得」ボタンを押してください</p>
-                      </div>
-                    ) : (
-                      availableMods
-                        .filter(mod => 
-                          !modSearchQuery || 
-                          mod.name.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
-                          mod.description.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
-                          mod.author.toLowerCase().includes(modSearchQuery.toLowerCase())
-                        )
-                        .map((mod, index) => (
-                          <motion.div
-                            key={`${mod.source_location}-${mod.name}-${index}`}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-3"
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center space-x-2 mb-1">
-                                  <h4 className="text-white font-medium text-sm truncate">{mod.name}</h4>
-                                  {mod.category && (
-                                    <span className="inline-block bg-resonite-blue/20 text-resonite-blue text-xs px-1.5 py-0.5 rounded shrink-0">
-                                      {mod.category}
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-gray-400 text-xs">by {mod.author} • {mod.releases.length} リリース</p>
-                                <p className="text-gray-300 text-xs truncate">{mod.description}</p>
-                              </div>
-                              
-                              <div className="flex items-center space-x-2 ml-3">
-                                <motion.button
-                                  whileHover={{ scale: 1.02 }}
-                                  whileTap={{ scale: 0.98 }}
-                                  className="btn-secondary text-xs p-1.5"
-                                  onClick={() => window.open(mod.source_location, '_blank')}
-                                  title="GitHubで開く"
-                                >
-                                  <ExternalLink className="w-3 h-3" />
-                                </motion.button>
-                                
-                                <motion.button
-                                  whileHover={{ scale: 1.02 }}
-                                  whileTap={{ scale: 0.98 }}
-                                  className="btn-primary text-xs flex items-center space-x-1 px-3 py-1.5"
-                                  onClick={() => handleAvailableModInstallClick(mod)}
-                                  disabled={installModMutation.isPending || mod.releases.length === 0}
-                                  title="バージョンを選択してインストール"
-                                >
-                                  {installModMutation.isPending ? (
-                                    <Loader2 className="w-3 h-3 animate-spin" />
-                                  ) : (
-                                    <Download className="w-3 h-3" />
-                                  )}
-                                  <span>インストール</span>
-                                </motion.button>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))
-                    )}
-                  </div>
-                </div>
-
-
-                {/* インストール済みMOD */}
-                <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">インストール済みMOD</h3>
-                  
-                  <div className="space-y-3">
-                    {installedMods.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                        <p className="text-gray-400 mb-2">インストール済みMODはありません</p>
-                        <p className="text-gray-500 text-sm">上記からMODをインストールしてください</p>
-                      </div>
-                    ) : (
-                      installedMods.map((mod, index) => (
-                        <motion.div
-                          key={mod.name}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-4"
-                        >
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
-                              <h4 className="text-white font-medium">{mod.name}</h4>
-                              <p className="text-gray-400 text-sm">バージョン: {mod.installed_version}</p>
-                              <p className="text-gray-500 text-xs">インストール日: {mod.installed_date}</p>
-                            </div>
-                            
-                            <div className="flex items-center space-x-2">
-                              <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="btn-secondary text-xs"
-                                onClick={() => window.open(mod.source_location, '_blank')}
-                              >
-                                <ExternalLink className="w-3 h-3" />
-                              </motion.button>
-                              
-                              <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="btn-secondary text-xs flex items-center space-x-1"
-                                onClick={() => handleVersionChangeClick(mod)}
-                                disabled={versionsLoading || loadingManualVersions === mod.name}
-                              >
-                                {loadingManualVersions === mod.name ? (
-                                  <Loader2 className="w-3 h-3 animate-spin" />
-                                ) : (
-                                  <Edit className="w-3 h-3" />
-                                )}
-                                <span>バージョン変更</span>
-                              </motion.button>
-                              
-                              <motion.button
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="btn-danger text-xs flex items-center space-x-1"
-                                onClick={() => uninstallMod(mod.name)}
-                                disabled={uninstallModMutation.isPending}
-                              >
-                                <Trash2 className="w-3 h-3" />
-                                <span>削除</span>
-                              </motion.button>
-                            </div>
-                          </div>
-                          
-                          {mod.description && (
-                            <p className="text-gray-300 text-sm">{mod.description}</p>
-                          )}
-                          
-                          {/* バージョン選択UI */}
-                          {selectedModForVersions?.name === mod.name && (
-                            <div className="mt-4 p-3 bg-dark-600/30 border border-dark-500/30 rounded-lg">
-                              <h5 className="text-white font-medium mb-2">バージョン選択</h5>
-                              {(versionsLoading || loadingManualVersions === mod.name) ? (
-                                <div className="flex items-center space-x-2">
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                  <span className="text-gray-400">バージョン情報を取得中...</span>
-                                </div>
-                              ) : (() => {
-                                const availableVersions = isModInManifest(mod) 
-                                  ? modVersions 
-                                  : manualModVersions[mod.name] || [];
-                                
-                                return availableVersions.length > 0 ? (
-                                  <ModVersionSelector
-                                    mod={mod}
-                                    availableVersions={availableVersions}
-                                    onVersionSelect={(version) => handleVersionChange(mod, version)}
-                                    isLoading={updateModMutation.isPending || downgradeModMutation.isPending || upgradeModMutation.isPending}
-                                  />
-                                ) : (
-                                  <div className="space-y-2">
-                                    <p className="text-gray-400 text-sm">利用可能なバージョンがありません</p>
-                                    {!isModInManifest(mod) && (
-                                      <motion.button
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="btn-secondary text-xs flex items-center space-x-1"
-                                        onClick={() => loadManualModVersions(mod)}
-                                        disabled={loadingManualVersions === mod.name}
-                                      >
-                                        {loadingManualVersions === mod.name ? (
-                                          <Loader2 className="w-3 h-3 animate-spin" />
-                                        ) : (
-                                          <Github className="w-3 h-3" />
-                                        )}
-                                        <span>GitHubから取得</span>
-                                      </motion.button>
-                                    )}
-                                  </div>
-                                );
-                              })()}
-                              <div className="mt-2 flex justify-end">
-                                <motion.button
-                                  whileHover={{ scale: 1.02 }}
-                                  whileTap={{ scale: 0.98 }}
-                                  className="btn-secondary text-xs"
-                                  onClick={() => setSelectedModForVersions(null)}
-                                >
-                                  閉じる
-                                </motion.button>
-                              </div>
-                            </div>
-                          )}
-                        </motion.div>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                {/* 未管理MOD（手動で追加されたMOD） */}
-                {unmanagedMods.length > 0 && (
-                  <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-orange-400">検出された未管理MOD</h3>
-                      <div className="flex items-center space-x-2">
+                {/* インストールタブのコンテンツ */}
+                {modActiveTab === 'install' && (
+                  <div className="space-y-6">
+                    {/* 手動MODインストール */}
+                    <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                        <Github className="w-5 h-5" />
+                        <span>手動MODインストール</span>
+                      </h3>
+                      
+                      <div className="flex space-x-3 mb-4">
+                        <input
+                          type="text"
+                          value={customRepoUrl}
+                          onChange={(e) => setCustomRepoUrl(e.target.value)}
+                          placeholder="https://github.com/author/mod-name"
+                          className="input-primary flex-1"
+                        />
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          className="btn-primary text-xs flex items-center space-x-1"
-                          onClick={() => addAllUnmanagedModsMutation.mutate({ 
-                            profileName, 
-                            unmanagedMods 
-                          })}
-                          disabled={addAllUnmanagedModsMutation.isPending || unmanagedMods.length === 0}
+                          className="btn-primary flex items-center space-x-2"
+                          onClick={installCustomMod}
+                          disabled={isInstallingMod !== null || !customRepoUrl.trim()}
                         >
-                          {addAllUnmanagedModsMutation.isPending ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
+                          {isInstallingMod === customRepoUrl ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
-                            <UserPlus className="w-3 h-3" />
+                            <Download className="w-4 h-4" />
                           )}
-                          <span>すべて管理システムに追加</span>
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className="btn-secondary text-xs flex items-center space-x-1"
-                          onClick={() => refetchUnmanagedMods()}
-                          disabled={unmanagedModsLoading}
-                        >
-                          {unmanagedModsLoading ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <RefreshCw className="w-3 h-3" />
-                          )}
-                          <span>再スキャン</span>
+                          <span>インストール</span>
                         </motion.button>
                       </div>
-                    </div>
-                    
-                    <div className="mb-4 p-3 bg-orange-500/10 border border-orange-500/20 rounded">
-                      <p className="text-orange-300 text-sm">
-                        ⚠️ これらのMODはrml_modsフォルダに手動で追加されたファイルです。
-                        管理システムに追加すると、バージョン管理が可能になります。
+                      
+                      <p className="text-gray-400 text-sm">
+                        GitHubリポジトリのURLを入力してMODを直接インストールできます。
                       </p>
                     </div>
-                    
-                    <div className="space-y-3">
-                      {unmanagedMods.map((mod, index) => (
-                        <motion.div
-                          key={mod.file_path}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          className="bg-dark-700/30 border border-orange-500/20 rounded-lg p-4"
+
+                    {/* 利用可能なMOD一覧 */}
+                    <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white">利用可能なMOD</h3>
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="btn-secondary flex items-center space-x-2"
+                          onClick={loadAvailableMods}
+                          disabled={modsLoading}
                         >
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
-                              <h4 className="text-orange-200 font-medium">{mod.dll_name}</h4>
-                              <p className="text-gray-400 text-sm">ファイル: {mod.file_name}</p>
-                              <p className="text-gray-500 text-xs">
-                                サイズ: {(mod.file_size / 1024 / 1024).toFixed(2)}MB | 
-                                更新: {mod.modified_time}
-                              </p>
-                              {mod.calculated_sha256 && (
-                                <p className="text-gray-500 text-xs font-mono">
-                                  SHA256: {mod.calculated_sha256.substring(0, 16)}...
-                                </p>
-                              )}
-                            </div>
+                          {modsLoading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Search className="w-4 h-4" />
+                          )}
+                          <span>MOD一覧を取得</span>
+                        </motion.button>
+                      </div>
+
+                      {availableMods.length > 0 && (
+                        <div className="mb-4">
+                          <input
+                            type="text"
+                            value={modSearchQuery}
+                            onChange={(e) => setModSearchQuery(e.target.value)}
+                            placeholder="MODを検索..."
+                            className="input-primary w-full"
+                          />
+                        </div>
+                      )}
+
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {modsLoading ? (
+                          <div className="text-center py-8">
+                            <Loader2 className="w-8 h-8 text-resonite-blue animate-spin mx-auto mb-4" />
+                            <p className="text-gray-400">MOD一覧を取得中...</p>
+                          </div>
+                        ) : availableMods.length === 0 ? (
+                          <div className="text-center py-8">
+                            <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                            <p className="text-gray-400 mb-2">MOD一覧を取得してください</p>
+                            <p className="text-gray-500 text-sm">上の「MOD一覧を取得」ボタンを押してください</p>
+                          </div>
+                        ) : (
+                          availableMods
+                            .filter(mod => 
+                              !modSearchQuery || 
+                              mod.name.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
+                              mod.description.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
+                              mod.author.toLowerCase().includes(modSearchQuery.toLowerCase())
+                            )
+                            .map((mod, index) => (
+                              <motion.div
+                                key={`${mod.source_location}-${mod.name}-${index}`}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-3"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center space-x-2 mb-1">
+                                      <h4 className="text-white font-medium text-sm truncate">{mod.name}</h4>
+                                      {mod.category && (
+                                        <span className="inline-block bg-resonite-blue/20 text-resonite-blue text-xs px-1.5 py-0.5 rounded shrink-0">
+                                          {mod.category}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-gray-400 text-xs">by {mod.author} • {mod.releases.length} リリース</p>
+                                    <p className="text-gray-300 text-xs truncate">{mod.description}</p>
+                                  </div>
+                                  
+                                  <div className="flex items-center space-x-2 ml-3">
+                                    <motion.button
+                                      whileHover={{ scale: 1.02 }}
+                                      whileTap={{ scale: 0.98 }}
+                                      className="btn-secondary text-xs p-1.5"
+                                      onClick={() => window.open(mod.source_location, '_blank')}
+                                      title="GitHubで開く"
+                                    >
+                                      <ExternalLink className="w-3 h-3" />
+                                    </motion.button>
+                                    
+                                    <motion.button
+                                      whileHover={{ scale: 1.02 }}
+                                      whileTap={{ scale: 0.98 }}
+                                      className="btn-primary text-xs flex items-center space-x-1 px-3 py-1.5"
+                                      onClick={() => handleAvailableModInstallClick(mod)}
+                                      disabled={installModMutation.isPending || mod.releases.length === 0}
+                                      title="バージョンを選択してインストール"
+                                    >
+                                      {installModMutation.isPending ? (
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                      ) : (
+                                        <Download className="w-3 h-3" />
+                                      )}
+                                      <span>インストール</span>
+                                    </motion.button>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            ))
+                        )}
+                      </div>
+                    </div>
+
+                    {/* 未管理MOD（手動で追加されたMOD） */}
+                    {unmanagedMods.length > 0 && (
+                      <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-lg font-semibold text-orange-400">検出された未管理MOD</h3>
+                          <div className="flex items-center space-x-2">
                             <motion.button
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
                               className="btn-primary text-xs flex items-center space-x-1"
-                              onClick={() => addUnmanagedModMutation.mutate({ 
+                              onClick={() => addAllUnmanagedModsMutation.mutate({ 
                                 profileName, 
-                                unmanagedMod: mod 
+                                unmanagedMods 
                               })}
-                              disabled={addUnmanagedModMutation.isPending}
+                              disabled={addAllUnmanagedModsMutation.isPending || unmanagedMods.length === 0}
                             >
-                              {addUnmanagedModMutation.isPending ? (
+                              {addAllUnmanagedModsMutation.isPending ? (
                                 <Loader2 className="w-3 h-3 animate-spin" />
                               ) : (
-                                <Plus className="w-3 h-3" />
+                                <UserPlus className="w-3 h-3" />
                               )}
-                              <span>追加</span>
+                              <span>すべて管理システムに追加</span>
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              className="btn-secondary text-xs flex items-center space-x-1"
+                              onClick={() => refetchUnmanagedMods()}
+                              disabled={unmanagedModsLoading}
+                            >
+                              {unmanagedModsLoading ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                <RefreshCw className="w-3 h-3" />
+                              )}
+                              <span>再スキャン</span>
                             </motion.button>
                           </div>
-                          
-                          {/* ハッシュベースのバージョン検出情報 */}
-                          {mod.detected_version && (
-                            <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded">
-                              <p className="text-blue-300 text-sm">
-                                🔍 検出バージョン: <span className="font-mono">{mod.detected_version}</span>
-                              </p>
-                              <p className="text-blue-200 text-xs mt-1">
-                                このMODは管理システムに追加時、検出されたバージョンで登録されます
-                              </p>
-                            </div>
-                          )}
-                          
-                          {mod.matched_mod_info ? (
-                            <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded">
-                              <div className="flex items-start justify-between">
+                        </div>
+                        
+                        <div className="mb-4 p-3 bg-orange-500/10 border border-orange-500/20 rounded">
+                          <p className="text-orange-300 text-sm">
+                            ⚠️ これらのMODはrml_modsフォルダに手動で追加されたファイルです。
+                            管理システムに追加すると、バージョン管理が可能になります。
+                          </p>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          {unmanagedMods.map((mod, index) => (
+                            <motion.div
+                              key={mod.file_path}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="bg-dark-700/30 border border-orange-500/20 rounded-lg p-4"
+                            >
+                              <div className="flex items-start justify-between mb-2">
                                 <div className="flex-1">
-                                  <h5 className="text-green-400 font-medium">マッチしたMOD情報</h5>
-                                  <p className="text-green-300 text-sm">{mod.matched_mod_info.name}</p>
-                                  <p className="text-green-200 text-xs">{mod.matched_mod_info.description}</p>
-                                  <p className="text-green-200 text-xs">作者: {mod.matched_mod_info.author}</p>
-                                  {mod.matched_mod_info.latest_version && (
-                                    <p className="text-green-200 text-xs">最新バージョン: {mod.matched_mod_info.latest_version}</p>
+                                  <h4 className="text-orange-200 font-medium">{mod.dll_name}</h4>
+                                  <p className="text-gray-400 text-sm">ファイル: {mod.file_name}</p>
+                                  <p className="text-gray-500 text-xs">
+                                    サイズ: {(mod.file_size / 1024 / 1024).toFixed(2)}MB | 
+                                    更新: {mod.modified_time}
+                                  </p>
+                                  {mod.calculated_sha256 && (
+                                    <p className="text-gray-500 text-xs font-mono">
+                                      SHA256: {mod.calculated_sha256.substring(0, 16)}...
+                                    </p>
                                   )}
                                 </div>
-                                <div className="flex space-x-2">
+                                <motion.button
+                                  whileHover={{ scale: 1.02 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  className="btn-primary text-xs flex items-center space-x-1"
+                                  onClick={() => addUnmanagedModMutation.mutate({ 
+                                    profileName, 
+                                    unmanagedMod: mod 
+                                  })}
+                                  disabled={addUnmanagedModMutation.isPending}
+                                >
+                                  {addUnmanagedModMutation.isPending ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    <Plus className="w-3 h-3" />
+                                  )}
+                                  <span>追加</span>
+                                </motion.button>
+                              </div>
+                              
+                              {/* ハッシュベースのバージョン検出情報 */}
+                              {mod.detected_version && (
+                                <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded">
+                                  <p className="text-blue-300 text-sm">
+                                    🔍 検出バージョン: <span className="font-mono">{mod.detected_version}</span>
+                                  </p>
+                                  <p className="text-blue-200 text-xs mt-1">
+                                    このMODは管理システムに追加時、検出されたバージョンで登録されます
+                                  </p>
+                                </div>
+                              )}
+                              
+                              {mod.matched_mod_info ? (
+                                <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded">
+                                  <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                      <h5 className="text-green-400 font-medium">マッチしたMOD情報</h5>
+                                      <p className="text-green-300 text-sm">{mod.matched_mod_info.name}</p>
+                                      <p className="text-green-200 text-xs">{mod.matched_mod_info.description}</p>
+                                      <p className="text-green-200 text-xs">作者: {mod.matched_mod_info.author}</p>
+                                      {mod.matched_mod_info.latest_version && (
+                                        <p className="text-green-200 text-xs">最新バージョン: {mod.matched_mod_info.latest_version}</p>
+                                      )}
+                                    </div>
+                                    <div className="flex space-x-2">
+                                      <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="btn-secondary text-xs"
+                                        onClick={() => window.open(mod.matched_mod_info!.source_location, '_blank')}
+                                      >
+                                        <ExternalLink className="w-3 h-3" />
+                                      </motion.button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : !mod.detected_version && (
+                                <div className="mt-3 p-3 bg-gray-500/10 border border-gray-500/30 rounded">
+                                  <p className="text-gray-400 text-sm">
+                                    📦 マニフェストに該当するMODが見つかりませんでした
+                                  </p>
+                                </div>
+                              )}
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 管理タブのコンテンツ */}
+                {modActiveTab === 'manage' && (
+                  <div className="space-y-6">
+                    {/* インストール済みMOD */}
+                    <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
+                      <h3 className="text-lg font-semibold text-white mb-4">インストール済みMOD</h3>
+                      
+                      <div className="space-y-3">
+                        {installedMods.length === 0 ? (
+                          <div className="text-center py-8">
+                            <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                            <p className="text-gray-400 mb-2">インストール済みMODはありません</p>
+                            <p className="text-gray-500 text-sm">インストールタブからMODをインストールしてください</p>
+                          </div>
+                        ) : (
+                          installedMods.map((mod, index) => (
+                            <motion.div
+                              key={mod.name}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.05 }}
+                              className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-4"
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1">
+                                  <h4 className="text-white font-medium">{mod.name}</h4>
+                                  <p className="text-gray-400 text-sm">バージョン: {mod.installed_version}</p>
+                                  <p className="text-gray-500 text-xs">インストール日: {mod.installed_date}</p>
+                                </div>
+                                
+                                <div className="flex items-center space-x-2">
                                   <motion.button
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     className="btn-secondary text-xs"
-                                    onClick={() => window.open(mod.matched_mod_info!.source_location, '_blank')}
+                                    onClick={() => window.open(mod.source_location, '_blank')}
                                   >
                                     <ExternalLink className="w-3 h-3" />
                                   </motion.button>
+                                  
+                                  <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="btn-secondary text-xs flex items-center space-x-1"
+                                    onClick={() => handleVersionChangeClick(mod)}
+                                    disabled={versionsLoading || loadingManualVersions === mod.name}
+                                  >
+                                    {loadingManualVersions === mod.name ? (
+                                      <Loader2 className="w-3 h-3 animate-spin" />
+                                    ) : (
+                                      <Edit className="w-3 h-3" />
+                                    )}
+                                    <span>バージョン変更</span>
+                                  </motion.button>
+                                  
+                                  <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="btn-danger text-xs flex items-center space-x-1"
+                                    onClick={() => uninstallMod(mod.name)}
+                                    disabled={uninstallModMutation.isPending}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                    <span>削除</span>
+                                  </motion.button>
                                 </div>
                               </div>
-                            </div>
-                          ) : !mod.detected_version && (
-                            <div className="mt-3 p-3 bg-gray-500/10 border border-gray-500/30 rounded">
-                              <p className="text-gray-400 text-sm">
-                                📦 マニフェストに該当するMODが見つかりませんでした
-                              </p>
-                            </div>
-                          )}
-                        </motion.div>
-                      ))}
+                              
+                              {mod.description && (
+                                <p className="text-gray-300 text-sm">{mod.description}</p>
+                              )}
+                              
+                              {/* バージョン選択UI */}
+                              {selectedModForVersions?.name === mod.name && (
+                                <div className="mt-4 p-3 bg-dark-600/30 border border-dark-500/30 rounded-lg">
+                                  <h5 className="text-white font-medium mb-2">バージョン選択</h5>
+                                  {(versionsLoading || loadingManualVersions === mod.name) ? (
+                                    <div className="flex items-center space-x-2">
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                      <span className="text-gray-400">バージョン情報を取得中...</span>
+                                    </div>
+                                  ) : (() => {
+                                    const availableVersions = isModInManifest(mod) 
+                                      ? modVersions 
+                                      : manualModVersions[mod.name] || [];
+                                    
+                                    return availableVersions.length > 0 ? (
+                                      <ModVersionSelector
+                                        mod={mod}
+                                        availableVersions={availableVersions}
+                                        onVersionSelect={(version) => handleVersionChange(mod, version)}
+                                        isLoading={updateModMutation.isPending || downgradeModMutation.isPending || upgradeModMutation.isPending}
+                                      />
+                                    ) : (
+                                      <div className="space-y-2">
+                                        <p className="text-gray-400 text-sm">利用可能なバージョンがありません</p>
+                                        {!isModInManifest(mod) && (
+                                          <motion.button
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
+                                            className="btn-secondary text-xs flex items-center space-x-1"
+                                            onClick={() => loadManualModVersions(mod)}
+                                            disabled={loadingManualVersions === mod.name}
+                                          >
+                                            {loadingManualVersions === mod.name ? (
+                                              <Loader2 className="w-3 h-3 animate-spin" />
+                                            ) : (
+                                              <Github className="w-3 h-3" />
+                                            )}
+                                            <span>GitHubから取得</span>
+                                          </motion.button>
+                                        )}
+                                      </div>
+                                    );
+                                  })()}
+                                  <div className="mt-2 flex justify-end">
+                                    <motion.button
+                                      whileHover={{ scale: 1.02 }}
+                                      whileTap={{ scale: 0.98 }}
+                                      className="btn-secondary text-xs"
+                                      onClick={() => setSelectedModForVersions(null)}
+                                    >
+                                      閉じる
+                                    </motion.button>
+                                  </div>
+                                </div>
+                              )}
+                            </motion.div>
+                          ))
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
