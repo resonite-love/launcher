@@ -68,9 +68,10 @@
         "transparent": true,
         "title": "Resonite Tools",
         "width": 1080,
-        "height": 700,
+        "height": 800,
         "minWidth": 1000,
-        "minHeight": 600
+        "minHeight": 600,
+        "maxHeight": 2000
       }
     ]
   }

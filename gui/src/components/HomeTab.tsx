@@ -54,11 +54,11 @@ function HomeTab() {
   // Auto-select first profile if none selected
   useEffect(() => {
     if (profiles.length > 0 && !selectedProfile) {
-      setSelectedProfile(profiles[0].name);
+      setSelectedProfile(profiles[0].id);
     }
   }, [profiles, selectedProfile, setSelectedProfile]);
 
-  const selectedProfileData = profiles.find(p => p.name === selectedProfile);
+  const selectedProfileData = profiles.find(p => p.id === selectedProfile);
 
   const handleLaunch = async () => {
     if (!selectedProfile) {
@@ -174,8 +174,8 @@ function HomeTab() {
                       {profiles.length === 0 ? 'プロファイルがありません' : 'プロファイルを選択...'}
                     </option>
                     {profiles.map((profile) => (
-                      <option key={profile.name} value={profile.name}>
-                        {profile.name}
+                      <option key={profile.id} value={profile.id}>
+                        {profile.display_name}
                       </option>
                     ))}
                   </select>

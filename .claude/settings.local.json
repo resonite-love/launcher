@@ -11,7 +11,8 @@
       "Bash(npx tailwindcss init:*)",
       "Bash(grep:*)",
       "Bash(sed:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   }

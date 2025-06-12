@@ -17,6 +17,12 @@ pub struct GameInfo {
 /// Resoniteの起動プロファイルを管理するための構造体
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Profile {
+    /// フォルダ名として使用される内部ID（ASCII文字のみ）
+    pub id: String,
+    /// ユーザーに表示される名前（日本語可）
+    pub display_name: String,
+    /// 旧フィールド（互換性のため残す）
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub name: String,
     pub description: String,
     pub game_info: Option<GameInfo>,
@@ -25,9 +31,11 @@ pub struct Profile {
 
 impl Profile {
     /// 新しいプロファイルを作成する
-    pub fn new(name: &str, _full_profile_path: &Path) -> Self {
+    pub fn new(id: &str, display_name: &str, _full_profile_path: &Path) -> Self {
         Profile {
-            name: name.to_string(),
+            id: id.to_string(),
+            display_name: display_name.to_string(),
+            name: String::new(), // 互換性のため
             description: String::new(),
             game_info: None, // ゲームは後でインストール
             args: vec![
@@ -36,6 +44,59 @@ impl Profile {
                 "-DataPath".to_string(),
                 "%PROFILE_DIR%\\DataPath".to_string(), // パス変数を使用
             ],
+        }
+    }
+    
+    /// プロファイルIDを生成（ASCII文字のみ）
+    pub fn generate_id(display_name: &str, existing_ids: &[String]) -> String {
+        // 基本的なASCII変換
+        let base_id = display_name
+            .chars()
+            .filter_map(|c| {
+                match c {
+                    'a'..='z' | 'A'..='Z' | '0'..='9' => Some(c.to_ascii_lowercase()),
+                    ' ' | '-' | '_' => Some('_'),
+                    _ => None, // 日本語文字などは除去
+                }
+            })
+            .collect::<String>()
+            .trim_matches('_')
+            .to_string();
+        
+        // 空の場合は"profile"をベースにする
+        let base_id = if base_id.is_empty() {
+            "profile".to_string()
+        } else {
+            base_id
+        };
+        
+        // 重複を避けるため番号を追加
+        let mut id = base_id.clone();
+        let mut counter = 1;
+        
+        while existing_ids.contains(&id) {
+            id = format!("{}{}", base_id, counter);
+            counter += 1;
+        }
+        
+        id
+    }
+    
+    /// 表示用の名前を取得（互換性のため）
+    pub fn get_display_name(&self) -> &str {
+        if !self.display_name.is_empty() {
+            &self.display_name
+        } else {
+            &self.name // 旧フォーマット対応
+        }
+    }
+    
+    /// フォルダ名として使用するIDを取得
+    pub fn get_folder_name(&self) -> &str {
+        if !self.id.is_empty() {
+            &self.id
+        } else {
+            &self.name // 旧フォーマット対応
         }
     }
 
@@ -117,12 +178,20 @@ impl ProfileManager {
     }
 
     /// 新しいプロファイルを作成する
-    pub fn create_profile(&self, name: &str) -> Result<Profile, Box<dyn Error>> {
-        let specific_profile_dir = self.profiles_dir.join(name);
+    pub fn create_profile(&self, display_name: &str) -> Result<Profile, Box<dyn Error>> {
+        // 既存のID一覧を取得
+        let existing_profiles = self.list_profiles().unwrap_or_default();
+        let existing_ids: Vec<String> = existing_profiles.iter()
+            .map(|p| p.get_folder_name().to_string())
+            .collect();
+        
+        // 新しいIDを生成
+        let profile_id = Profile::generate_id(display_name, &existing_ids);
+        let specific_profile_dir = self.profiles_dir.join(&profile_id);
 
-        // Check if profile already exists
+        // Check if profile directory already exists (should not happen with unique ID)
         if specific_profile_dir.exists() {
-            return Err(format!("Profile '{}' already exists", name).into());
+            return Err(format!("Profile directory '{}' already exists", profile_id).into());
         }
 
         // Create profile directory
@@ -136,8 +205,8 @@ impl ProfileManager {
         let game_dir = specific_profile_dir.join("Game");
         fs::create_dir_all(&game_dir)?;
 
-        // Create new profile with the full profile path
-        let profile = Profile::new(name, &specific_profile_dir);
+        // Create new profile with ID and display name
+        let profile = Profile::new(&profile_id, display_name, &specific_profile_dir);
 
         // Save profile to JSON file
         profile.save(&specific_profile_dir)?;
@@ -177,25 +246,52 @@ impl ProfileManager {
         Ok(profiles)
     }
 
-    /// 指定した名前のプロファイルを取得する
-    pub fn get_profile(&self, name: &str) -> Result<Profile, Box<dyn Error>> {
-        let profile_dir = self.profiles_dir.join(name);
+    /// 特定のプロファイルを取得する
+    /// profile_identifierは表示名でもIDでも可
+    pub fn get_profile(&self, profile_identifier: &str) -> Result<Profile, Box<dyn Error>> {
+        let profile_dir = self.get_profile_dir(profile_identifier);
 
         if !profile_dir.exists() {
-            return Err(format!("Profile '{}' not found", name).into());
+            return Err(format!("Profile '{}' not found", profile_identifier).into());
         }
 
-        Profile::load(&profile_dir)
+        let mut profile = Profile::load(&profile_dir)?;
+        
+        // 旧フォーマットのマイグレーション
+        if profile.id.is_empty() && !profile.name.is_empty() {
+            // 旧フォーマット: nameをidとdisplay_nameにコピー
+            profile.id = profile.name.clone();
+            profile.display_name = profile.name.clone();
+        }
+        
+        Ok(profile)
     }
 
-    /// プロファイルのディレクトリパスを取得
-    pub fn get_profile_dir(&self, profile_name: &str) -> PathBuf {
-        self.profiles_dir.join(profile_name)
+    /// 特定のプロファイルのディレクトリパスを取得する
+    /// profile_identifierは表示名でもIDでも可
+    pub fn get_profile_dir(&self, profile_identifier: &str) -> PathBuf {
+        // まず直接IDとして探す
+        let id_path = self.profiles_dir.join(profile_identifier);
+        if id_path.exists() {
+            return id_path;
+        }
+        
+        // 表示名からIDを探す
+        if let Ok(profiles) = self.list_profiles() {
+            for profile in profiles {
+                if profile.get_display_name() == profile_identifier {
+                    return self.profiles_dir.join(profile.get_folder_name());
+                }
+            }
+        }
+        
+        // 見つからない場合はそのまま返す（旧仕様対応）
+        self.profiles_dir.join(profile_identifier)
     }
 
     /// プロファイルを更新して保存
     pub fn update_profile(&self, profile: &Profile) -> Result<(), Box<dyn Error>> {
-        let profile_dir = self.get_profile_dir(&profile.name);
+        let profile_dir = self.get_profile_dir(profile.get_folder_name());
         profile.save(&profile_dir)
     }
 

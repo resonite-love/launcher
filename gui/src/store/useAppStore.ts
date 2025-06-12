@@ -8,12 +8,15 @@ interface AppStatus {
 }
 
 interface Profile {
-  name: string;
+  id: string;
+  display_name: string;
+  name?: string; // 互換性のため
   description: string;
   has_game: boolean;
   branch?: string;
   manifest_id?: string;
   version?: string;
+  has_mod_loader: boolean;
 }
 
 interface SteamCredentials {
@@ -106,12 +109,12 @@ export const useAppStore = create<AppState>()(
         // Auto-select first profile if none selected
         const current = get();
         if (!current.selectedProfile && profiles.length > 0) {
-          set({ selectedProfile: profiles[0].name });
+          set({ selectedProfile: profiles[0].id });
         }
         
         // Clear selection if selected profile no longer exists
-        if (current.selectedProfile && !profiles.find(p => p.name === current.selectedProfile)) {
-          set({ selectedProfile: profiles.length > 0 ? profiles[0].name : '' });
+        if (current.selectedProfile && !profiles.find(p => p.id === current.selectedProfile)) {
+          set({ selectedProfile: profiles.length > 0 ? profiles[0].id : '' });
         }
       },
       
@@ -147,7 +150,7 @@ export const useAppStore = create<AppState>()(
       // Computed
       hasAvailableProfiles: () => get().profiles.length > 0,
       
-      getProfileByName: (name) => get().profiles.find(p => p.name === name),
+      getProfileByName: (name) => get().profiles.find(p => p.id === name || p.display_name === name),
       
       getInstalledProfiles: () => get().profiles.filter(p => p.has_game),
     }),

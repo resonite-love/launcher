@@ -11,12 +11,16 @@ import {
   Trash2,
   Loader2,
   Info,
-  Package
+  Package,
+  FolderOpen
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import ModRiskWarningModal from './ModRiskWarningModal';
 
 interface ProfileConfig {
-  name: string;
+  id: string;
+  display_name: string;
+  name?: string; // 互換性のため
   description: string;
   args: string[];
 }
@@ -35,9 +39,15 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [activeTab, setActiveTab] = useState<TabType>('info');
   
   // フォーム状態
+  const [displayName, setDisplayName] = useState('');
   const [description, setDescription] = useState('');
   const [args, setArgs] = useState<string[]>([]);
   const [newArg, setNewArg] = useState('');
+  
+  // MODローダー用の状態
+  const [modLoaderInfo, setModLoaderInfo] = useState<any>(null);
+  const [isLoadingModLoader, setIsLoadingModLoader] = useState(false);
+  const [showModRiskModal, setShowModRiskModal] = useState(false);
 
   const tabs = [
     { id: 'info' as TabType, label: 'プロファイル情報', icon: User },
@@ -48,6 +58,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
   useEffect(() => {
     loadProfile();
+    loadModLoaderInfo();
   }, [profileName]);
 
   const loadProfile = async () => {
@@ -55,6 +66,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       setIsLoading(true);
       const profileConfig = await invoke<ProfileConfig>('get_profile_config', { profileName });
       setProfile(profileConfig);
+      setDisplayName(profileConfig.display_name);
       setDescription(profileConfig.description);
       setArgs([...profileConfig.args]);
     } catch (err) {
@@ -72,6 +84,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       setIsSaving(true);
       const updatedProfile: ProfileConfig = {
         ...profile,
+        display_name: displayName,
         description,
         args: [...args]
       };
@@ -103,7 +116,71 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     setArgs(updatedArgs);
   };
 
+  const loadModLoaderInfo = async () => {
+    try {
+      setIsLoadingModLoader(true);
+      const info = await invoke<any>('get_mod_loader_status', { profileName });
+      setModLoaderInfo(info);
+    } catch (err) {
+      console.error('Failed to load mod loader info:', err);
+      setModLoaderInfo({ installed: false });
+    } finally {
+      setIsLoadingModLoader(false);
+    }
+  };
+
+  const showModLoaderInstallWarning = () => {
+    setShowModRiskModal(true);
+  };
+
+  const installModLoader = async () => {
+    try {
+      setIsLoadingModLoader(true);
+      const result = await invoke<string>('install_mod_loader', { profileName });
+      toast.success(result);
+      await loadModLoaderInfo();
+      await loadProfile(); // 起動引数が更新される可能性がある
+    } catch (err) {
+      toast.error(`MODローダーのインストールに失敗しました: ${err}`);
+    } finally {
+      setIsLoadingModLoader(false);
+    }
+  };
+
+  const handleModRiskConfirm = async () => {
+    setShowModRiskModal(false);
+    await installModLoader();
+  };
+
+  const handleModRiskCancel = () => {
+    setShowModRiskModal(false);
+  };
+
+  const openProfileFolder = async () => {
+    try {
+      await invoke('open_profile_folder', { profileName });
+      toast.success('プロファイルフォルダを開きました');
+    } catch (err) {
+      toast.error(`フォルダを開けませんでした: ${err}`);
+    }
+  };
+
+  const uninstallModLoader = async () => {
+    try {
+      setIsLoadingModLoader(true);
+      const result = await invoke<string>('uninstall_mod_loader', { profileName });
+      toast.success(result);
+      await loadModLoaderInfo();
+      await loadProfile(); // 起動引数が更新される可能性がある
+    } catch (err) {
+      toast.error(`MODローダーのアンインストールに失敗しました: ${err}`);
+    } finally {
+      setIsLoadingModLoader(false);
+    }
+  };
+
   const hasChanges = profile && (
+    displayName !== profile.display_name ||
     description !== profile.description ||
     JSON.stringify(args) !== JSON.stringify(profile.args)
   );
@@ -160,16 +237,32 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  プロファイル名
+                  表示名
                 </label>
                 <input
                   type="text"
-                  value={profile.name}
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="プロファイルの表示名を入力"
+                  className="input-primary w-full"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  プロファイル一覧で表示される名前です（日本語使用可能）
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  プロファイルID
+                </label>
+                <input
+                  type="text"
+                  value={profile.id}
                   disabled
                   className="input-primary w-full bg-dark-800/50 text-gray-400 cursor-not-allowed"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  プロファイル名は変更できません
+                  フォルダ名として使用される内部ID（変更不可）
                 </p>
               </div>
 
@@ -299,10 +392,77 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               <h2 className="text-2xl font-bold text-white">MOD管理</h2>
             </div>
 
-            <div className="bg-dark-800/30 rounded-lg p-8 text-center">
-              <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400 text-lg mb-2">MOD管理機能</p>
-              <p className="text-gray-500">今後実装予定です</p>
+            {/* ResoniteModLoaderセクション */}
+            <div className="space-y-6">
+              <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <Package className="w-5 h-5 text-resonite-blue" />
+                    <h3 className="text-lg font-semibold text-white">ResoniteModLoader</h3>
+                  </div>
+                  
+                  {modLoaderInfo && (
+                    <div className={`status-${modLoaderInfo.installed ? 'success' : 'error'}`}>
+                      {modLoaderInfo.installed ? '✓ インストール済' : '✗ 未インストール'}
+                    </div>
+                  )}
+                </div>
+                
+                <p className="text-gray-300 text-sm mb-4">
+                  ResoniteModLoaderを使用することで、ResoniteにMODをインストールできます。
+                </p>
+                
+                {modLoaderInfo && modLoaderInfo.version && (
+                  <p className="text-gray-400 text-sm mb-4">
+                    バージョン: {modLoaderInfo.version}
+                  </p>
+                )}
+                
+                <div className="flex space-x-3">
+                  {modLoaderInfo?.installed ? (
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="btn-danger flex items-center space-x-2"
+                      onClick={uninstallModLoader}
+                      disabled={isLoadingModLoader}
+                    >
+                      {isLoadingModLoader ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
+                      <span>アンインストール</span>
+                    </motion.button>
+                  ) : (
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="btn-primary flex items-center space-x-2"
+                      onClick={showModLoaderInstallWarning}
+                      disabled={isLoadingModLoader}
+                    >
+                      {isLoadingModLoader ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Package className="w-4 h-4" />
+                      )}
+                      <span>インストール</span>
+                    </motion.button>
+                  )}
+                </div>
+              </div>
+              
+              {/* MODリストセクション */}
+              <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">インストール済みMOD</h3>
+                
+                <div className="bg-dark-800/30 rounded-lg p-8 text-center">
+                  <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 text-lg mb-2">MODリスト機能</p>
+                  <p className="text-gray-500">今後実装予定です</p>
+                </div>
+              </div>
             </div>
           </motion.div>
         );
@@ -356,24 +516,37 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           <div className="flex items-center space-x-2 text-sm text-gray-400">
             <span>プロファイル管理</span>
             <span>/</span>
-            <span className="text-white font-medium">{profile.name}</span>
+            <span className="text-white font-medium">{profile.display_name}</span>
           </div>
         </div>
         
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="btn-primary flex items-center space-x-2"
-          onClick={saveProfile}
-          disabled={isSaving || !hasChanges}
-        >
-          {isSaving ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Save className="w-4 h-4" />
-          )}
-          <span>保存</span>
-        </motion.button>
+        <div className="flex items-center space-x-3">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="btn-secondary flex items-center space-x-2"
+            onClick={openProfileFolder}
+            title="プロファイルフォルダを開く"
+          >
+            <FolderOpen className="w-4 h-4" />
+            <span>フォルダを開く</span>
+          </motion.button>
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="btn-primary flex items-center space-x-2"
+            onClick={saveProfile}
+            disabled={isSaving || !hasChanges}
+          >
+            {isSaving ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            <span>保存</span>
+          </motion.button>
+        </div>
       </motion.div>
 
       {/* Tab Navigation */}
@@ -438,6 +611,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           </div>
         </motion.div>
       )}
+      
+      {/* MOD Risk Warning Modal */}
+      <ModRiskWarningModal
+        isOpen={showModRiskModal}
+        onClose={handleModRiskCancel}
+        onConfirm={handleModRiskConfirm}
+        title="MODローダーのインストール"
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ use resonite_tools_lib::{
     depotdownloader::DepotDownloader,
     install::{ResoniteInstall, ResoniteInstallManager},
     profile::{Profile, ProfileManager},
+    mod_loader::{ModLoader, ModLoaderInfo},
     utils,
 };
 
@@ -32,12 +33,19 @@ impl Default for AppState {
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct ProfileInfo {
+    /// フォルダ名として使用される内部ID
+    pub id: String,
+    /// ユーザーに表示される名前
+    pub display_name: String,
+    /// 互換性のための旧フィールド
+    #[serde(default, skip_serializing_if = "String::is_empty")]
     pub name: String,
     pub description: String,
     pub has_game: bool,
     pub branch: Option<String>,
     pub manifest_id: Option<String>,
     pub version: Option<String>,
+    pub has_mod_loader: bool,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -297,20 +305,32 @@ async fn get_profiles(state: State<'_, Mutex<AppState>>) -> Result<Vec<ProfileIn
         .map_err(|e| format!("Failed to get profiles: {}", e))?;
     
     Ok(profiles.into_iter().map(|p| {
-        let profile_dir = profile_manager.get_profile_dir(&p.name);
+        let profile_dir = profile_manager.get_profile_dir(p.get_folder_name());
         let current_version = if p.has_game_installed() {
             p.get_game_version(&profile_dir)
         } else {
             None
         };
         
+        // MODローダーの状態をチェック
+        let has_mod_loader = if p.has_game_installed() {
+            let game_dir = p.get_game_dir(&profile_dir);
+            let mod_loader = ModLoader::new(game_dir);
+            mod_loader.get_status().map(|info| info.installed).unwrap_or(false)
+        } else {
+            false
+        };
+        
         ProfileInfo {
-            name: p.name.clone(),
+            id: p.get_folder_name().to_string(),
+            display_name: p.get_display_name().to_string(),
+            name: p.name.clone(), // 互換性のため
             description: p.description.clone(),
             has_game: p.has_game_installed(),
             branch: p.game_info.as_ref().map(|info| info.branch.clone()),
             manifest_id: p.game_info.as_ref().and_then(|info| info.manifest_id.clone()),
             version: current_version,
+            has_mod_loader,
         }
     }).collect())
 }
@@ -332,8 +352,7 @@ async fn create_profile(
     
     profile.description = description;
     
-    let profiles_dir = profile_manager.get_profiles_dir();
-    let profile_dir = profiles_dir.join(&name);
+    let profile_dir = profile_manager.get_profile_dir(profile.get_folder_name());
     
     profile.save(&profile_dir)
         .map_err(|e| format!("Failed to save profile: {}", e))?;
@@ -473,6 +492,162 @@ async fn update_profile_config(
     Ok(format!("Profile '{}' updated successfully", profile.name))
 }
 
+// Helper function to find the game installation path for a profile
+fn find_game_path(profile_dir: &std::path::Path) -> Result<std::path::PathBuf, String> {
+    println!("Searching for game in profile dir: {:?}", profile_dir);
+    
+    let release_path = profile_dir.join("Game");
+    let release_exe = release_path.join("Resonite.exe");
+    println!("Checking release path: {:?}, exe exists: {}", release_path, release_exe.exists());
+    
+    if release_path.exists() && release_exe.exists() {
+        println!("Found game in: {:?}", release_path);
+        return Ok(release_path);
+    }
+    
+    Err(format!("Game not installed in this profile. Searched in: {:?}", profile_dir))
+}
+
+// Get mod loader status for a profile
+#[tauri::command]
+async fn get_mod_loader_status(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<ModLoaderInfo, String> {
+    let app_state = state.lock().unwrap();
+    
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
+    
+    let profile_dir = profile_manager.get_profile_dir(&profile_name);
+    let game_path = find_game_path(&profile_dir)?;
+    
+    let mod_loader = ModLoader::new(game_path);
+    mod_loader.get_status()
+        .map_err(|e| format!("Failed to get mod loader status: {}", e))
+}
+
+// Install mod loader to a profile
+#[tauri::command]
+async fn install_mod_loader(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let game_path = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        let profile_dir = profile_manager.get_profile_dir(&profile_name);
+        find_game_path(&profile_dir)?
+    };
+    
+    let mod_loader = ModLoader::new(game_path);
+    let result = mod_loader.install().await
+        .map_err(|e| format!("Failed to install mod loader: {}", e))?;
+    
+    // プロファイルの起動引数も更新
+    {
+        let app_state = state.lock().unwrap();
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+            
+        let mut profile = profile_manager.get_profile(&profile_name)
+            .map_err(|e| format!("Failed to get profile: {}", e))?;
+        
+        mod_loader.add_launch_args(&mut profile.args);
+        
+        profile_manager.update_profile(&profile)
+            .map_err(|e| format!("Failed to update profile args: {}", e))?;
+    }
+    
+    Ok(result)
+}
+
+// Uninstall mod loader from a profile
+#[tauri::command]
+async fn uninstall_mod_loader(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let game_path = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        let profile_dir = profile_manager.get_profile_dir(&profile_name);
+        find_game_path(&profile_dir)?
+    };
+    
+    let mod_loader = ModLoader::new(game_path);
+    let result = mod_loader.uninstall()
+        .map_err(|e| format!("Failed to uninstall mod loader: {}", e))?;
+    
+    // プロファイルの起動引数からも削除
+    {
+        let app_state = state.lock().unwrap();
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+            
+        let mut profile = profile_manager.get_profile(&profile_name)
+            .map_err(|e| format!("Failed to get profile: {}", e))?;
+        
+        mod_loader.remove_launch_args(&mut profile.args);
+        
+        profile_manager.update_profile(&profile)
+            .map_err(|e| format!("Failed to update profile args: {}", e))?;
+    }
+    
+    Ok(result)
+}
+
+// Open profile folder in system file explorer
+#[tauri::command]
+async fn open_profile_folder(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let app_state = state.lock().unwrap();
+    
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
+    
+    let profile_dir = profile_manager.get_profile_dir(&profile_name);
+    
+    if !profile_dir.exists() {
+        return Err(format!("Profile directory '{}' does not exist", profile_name));
+    }
+    
+    // Open folder in system file explorer
+    #[cfg(target_os = "windows")]
+    {
+        std::process::Command::new("explorer")
+            .arg(&profile_dir)
+            .spawn()
+            .map_err(|e| format!("Failed to open folder: {}", e))?;
+    }
+    
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg(&profile_dir)
+            .spawn()
+            .map_err(|e| format!("Failed to open folder: {}", e))?;
+    }
+    
+    #[cfg(target_os = "linux")]
+    {
+        std::process::Command::new("xdg-open")
+            .arg(&profile_dir)
+            .spawn()
+            .map_err(|e| format!("Failed to open folder: {}", e))?;
+    }
+    
+    Ok(format!("Opened profile folder: {}", profile_dir.display()))
+}
+
 fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(AppState::default()))
@@ -491,7 +666,11 @@ fn main() {
             load_steam_credentials,
             clear_steam_credentials,
             get_profile_config,
-            update_profile_config
+            update_profile_config,
+            get_mod_loader_status,
+            install_mod_loader,
+            uninstall_mod_loader,
+            open_profile_folder
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

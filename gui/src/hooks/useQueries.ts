@@ -10,12 +10,15 @@ interface AppStatus {
 }
 
 interface Profile {
-  name: string;
+  id: string;
+  display_name: string;
+  name?: string; // 互換性のため
   description: string;
   has_game: boolean;
   branch?: string;
   manifest_id?: string;
   version?: string;
+  has_mod_loader: boolean;
 }
 
 interface SteamCredentials {

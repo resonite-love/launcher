@@ -419,10 +419,11 @@ impl ResoniteInstallManager {
         println!("Executable: {}", resonite_path.display());
         println!("Arguments: {:?}", expanded_args);
 
-        // Resoniteを起動（プロファイルディレクトリをカレントディレクトリに設定）
+        // Resoniteを起動（Gameディレクトリをカレントディレクトリに設定）
+        let game_dir = profile_dir.join("Game");
         Command::new(resonite_path)
             .args(&expanded_args)
-            .current_dir(&profile_dir)
+            .current_dir(&game_dir)
             .spawn()?;
 
         println!("Resonite launched successfully!");

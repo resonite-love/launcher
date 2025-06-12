@@ -20,15 +20,20 @@ import {
 import toast from 'react-hot-toast';
 import ProfileEditModal from './ProfileEditModal';
 import ProfileEditPage from './ProfileEditPage';
+import ModRiskWarningModal from './ModRiskWarningModal';
+import GameUpdateModal from './GameUpdateModal';
 import { useAppStore } from '../store/useAppStore';
 
 interface ProfileInfo {
-  name: string;
+  id: string;
+  display_name: string;
+  name?: string; // 互換性のため
   description: string;
   has_game: boolean;
   branch?: string;
   manifest_id?: string;
   version?: string;
+  has_mod_loader: boolean;
 }
 
 interface GameInstallRequest {
@@ -68,6 +73,7 @@ function ProfilesTab() {
   const [createWithGame, setCreateWithGame] = useState(false);
   const [createGameBranch, setCreateGameBranch] = useState('release');
   const [createManifestId, setCreateManifestId] = useState('');
+  const [createWithModLoader, setCreateWithModLoader] = useState(false);
   
   // ゲームインストール用の状態
   const [showInstallModal, setShowInstallModal] = useState(false);
@@ -83,6 +89,20 @@ function ProfilesTab() {
   // プロファイル編集用の状態
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState<ProfileConfig | null>(null);
+  
+  // MODリスク警告モーダル用の状態
+  const [showModRiskModal, setShowModRiskModal] = useState(false);
+  const [pendingProfileData, setPendingProfileData] = useState<{
+    name: string;
+    description: string;
+    withGame: boolean;
+    branch: string;
+    manifestId: string;
+  } | null>(null);
+  
+  // ゲームアップデートモーダル用の状態
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [selectedUpdateProfile, setSelectedUpdateProfile] = useState<ProfileInfo | null>(null);
 
   useEffect(() => {
     loadProfiles();
@@ -141,6 +161,7 @@ function ProfilesTab() {
     setCreateWithGame(false);
     setCreateGameBranch('release');
     setCreateManifestId('');
+    setCreateWithModLoader(false);
     setShowCreateProfileModal(true);
   };
 
@@ -151,6 +172,7 @@ function ProfilesTab() {
     setCreateWithGame(false);
     setCreateGameBranch('release');
     setCreateManifestId('');
+    setCreateWithModLoader(false);
   };
 
   const createProfile = async () => {
@@ -159,21 +181,54 @@ function ProfilesTab() {
       return;
     }
 
+    // MODローダーをインストールする場合は警告モーダルを表示
+    if (createWithGame && createWithModLoader) {
+      setPendingProfileData({
+        name: newProfileName.trim(),
+        description: newProfileDescription.trim(),
+        withGame: createWithGame,
+        branch: createGameBranch,
+        manifestId: createManifestId
+      });
+      setShowModRiskModal(true);
+      return;
+    }
+
+    // MODローダーなしの場合は直接作成
+    await executeProfileCreation({
+      name: newProfileName.trim(),
+      description: newProfileDescription.trim(),
+      withGame: createWithGame,
+      branch: createGameBranch,
+      manifestId: createManifestId
+    }, false);
+  };
+
+  const executeProfileCreation = async (
+    profileData: {
+      name: string;
+      description: string;
+      withGame: boolean;
+      branch: string;
+      manifestId: string;
+    },
+    installModLoader: boolean
+  ) => {
     try {
       setIsLoading(true);
       const result = await invoke<string>('create_profile', {
-        name: newProfileName.trim(),
-        description: newProfileDescription.trim(),
+        name: profileData.name,
+        description: profileData.description,
       });
       
       toast.success(result);
       
       // ゲームもインストールする場合
-      if (createWithGame) {
+      if (profileData.withGame) {
         const request: GameInstallRequest = {
-          profile_name: newProfileName.trim(),
-          branch: createGameBranch,
-          manifest_id: createManifestId || undefined,
+          profile_name: profileData.name,
+          branch: profileData.branch,
+          manifest_id: profileData.manifestId || undefined,
           username: savedCredentials?.username || undefined,
           password: savedCredentials?.password || undefined,
         };
@@ -181,6 +236,18 @@ function ProfilesTab() {
         try {
           const installResult = await invoke<string>('install_game_to_profile_interactive', { request });
           toast.success(installResult);
+          
+          // MODローダーもインストールする場合
+          if (installModLoader) {
+            try {
+              const modLoaderResult = await invoke<string>('install_mod_loader', { 
+                profileName: profileData.name
+              });
+              toast.success(modLoaderResult);
+            } catch (modErr) {
+              toast.error(`MODローダーのインストールに失敗しました: ${modErr}`);
+            }
+          }
         } catch (installErr) {
           toast.error(`ゲームのインストールに失敗しました: ${installErr}`);
         }
@@ -193,6 +260,19 @@ function ProfilesTab() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleModRiskConfirm = async () => {
+    setShowModRiskModal(false);
+    if (pendingProfileData) {
+      await executeProfileCreation(pendingProfileData, true);
+      setPendingProfileData(null);
+    }
+  };
+
+  const handleModRiskCancel = () => {
+    setShowModRiskModal(false);
+    setPendingProfileData(null);
   };
 
   const launchProfile = async (profileName: string) => {
@@ -247,22 +327,36 @@ function ProfilesTab() {
     }
   };
 
-  const updateGame = async (profileName: string) => {
-    const profile = profiles.find(p => p.name === profileName);
+  const openUpdateModal = (profileId: string) => {
+    const profile = profiles.find(p => p.id === profileId);
     if (!profile || !profile.has_game) return;
+    
+    setSelectedUpdateProfile(profile);
+    setShowUpdateModal(true);
+  };
+
+  const closeUpdateModal = () => {
+    setShowUpdateModal(false);
+    setSelectedUpdateProfile(null);
+  };
+
+  const updateGame = async (manifestId?: string) => {
+    if (!selectedUpdateProfile) return;
 
     try {
       setIsLoading(true);
       const request: GameInstallRequest = {
-        profile_name: profileName,
-        branch: profile.branch || 'release',
-        manifest_id: profile.manifest_id,
+        profile_name: selectedUpdateProfile.id,
+        branch: selectedUpdateProfile.branch || 'release',
+        manifest_id: manifestId || selectedUpdateProfile.manifest_id,
         username: savedCredentials?.username || undefined,
         password: savedCredentials?.password || undefined,
       };
 
       const result = await invoke<string>('update_profile_game_interactive', { request });
       toast.success(result);
+      closeUpdateModal();
+      await loadProfiles(); // プロファイル一覧を更新
     } catch (err) {
       toast.error(`ゲームの更新に失敗しました: ${err}`);
     } finally {
@@ -374,7 +468,7 @@ function ProfilesTab() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {profiles.map((profile, index) => (
             <motion.div
-              key={profile.name}
+              key={profile.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
@@ -383,7 +477,7 @@ function ProfilesTab() {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-1">
-                    {profile.name}
+                    {profile.display_name}
                   </h3>
                   <p className="text-gray-400 text-sm">
                     {profile.description || '説明なし'}
@@ -398,6 +492,12 @@ function ProfilesTab() {
                   ) : (
                     <span className="status-error">
                       未インストール
+                    </span>
+                  )}
+                  
+                  {profile.has_game && profile.has_mod_loader && (
+                    <span className="status-success text-xs">
+                      RML
                     </span>
                   )}
                 </div>
@@ -425,7 +525,7 @@ function ProfilesTab() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="btn-primary flex-1 flex items-center justify-center space-x-2"
-                      onClick={() => launchProfile(profile.name)}
+                      onClick={() => launchProfile(profile.id)}
                       disabled={isLoading}
                     >
                       <Play className="w-4 h-4" />
@@ -436,7 +536,7 @@ function ProfilesTab() {
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className="btn-secondary flex items-center space-x-2"
-                      onClick={() => updateGame(profile.name)}
+                      onClick={() => openUpdateModal(profile.id)}
                       disabled={isLoading}
                       title="ゲームを最新版に更新"
                     >
@@ -449,7 +549,7 @@ function ProfilesTab() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="btn-primary flex-1 flex items-center justify-center space-x-2"
-                    onClick={() => openInstallModal(profile.name)}
+                    onClick={() => openInstallModal(profile.id)}
                     disabled={isLoading}
                   >
                     <Download className="w-4 h-4" />
@@ -461,7 +561,7 @@ function ProfilesTab() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="btn-secondary flex items-center space-x-2"
-                  onClick={() => navigateToProfileEdit(profile.name)}
+                  onClick={() => navigateToProfileEdit(profile.id)}
                   disabled={isLoading}
                   title="プロファイル設定を編集"
                 >
@@ -726,6 +826,29 @@ function ProfilesTab() {
                         />
                       </div>
 
+                      <div>
+                        <div className="flex items-center space-x-3 mb-4">
+                          <input
+                            type="checkbox"
+                            id="createWithModLoader"
+                            checked={createWithModLoader}
+                            onChange={(e) => setCreateWithModLoader(e.target.checked)}
+                            className="w-4 h-4 text-resonite-blue bg-dark-800 border-dark-600 rounded focus:ring-resonite-blue focus:ring-2"
+                          />
+                          <label htmlFor="createWithModLoader" className="text-white font-medium">
+                            ResoniteModLoaderもインストールする
+                          </label>
+                        </div>
+                        
+                        {createWithModLoader && (
+                          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
+                            <p className="text-sm text-blue-400">
+                              📝 ResoniteModLoaderがゲームと同時にインストールされ、MODを使用できるようになります。
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                      
                       {!savedCredentials && (
                         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
                           <p className="text-sm text-yellow-400">
@@ -756,7 +879,14 @@ function ProfilesTab() {
                   ) : (
                     <Plus className="w-4 h-4" />
                   )}
-                  <span>{createWithGame ? 'プロファイル作成＆ゲームインストール' : 'プロファイル作成'}</span>
+                  <span>
+                    {createWithGame && createWithModLoader 
+                      ? 'プロファイル作成＆ゲーム＆MODローダーインストール'
+                      : createWithGame 
+                      ? 'プロファイル作成＆ゲームインストール' 
+                      : 'プロファイル作成'
+                    }
+                  </span>
                 </button>
               </div>
             </motion.div>
@@ -770,6 +900,25 @@ function ProfilesTab() {
         profile={editingProfile}
         onClose={closeEditModal}
         onSave={saveProfile}
+      />
+      
+      {/* MOD Risk Warning Modal */}
+      <ModRiskWarningModal
+        isOpen={showModRiskModal}
+        onClose={handleModRiskCancel}
+        onConfirm={handleModRiskConfirm}
+        title="MODローダー付きプロファイル作成"
+      />
+      
+      {/* Game Update Modal */}
+      <GameUpdateModal
+        isOpen={showUpdateModal}
+        onClose={closeUpdateModal}
+        onUpdate={updateGame}
+        profileName={selectedUpdateProfile?.display_name || ''}
+        currentVersion={selectedUpdateProfile?.version}
+        currentBranch={selectedUpdateProfile?.branch}
+        isLoading={isLoading}
       />
     </div>
   );
