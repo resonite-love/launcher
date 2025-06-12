@@ -12,7 +12,8 @@
       "Bash(grep:*)",
       "Bash(sed:*)",
       "Bash(awk:*)",
-      "Bash(rg:*)"
+      "Bash(rg:*)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": []
   }

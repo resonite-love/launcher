@@ -35,18 +35,30 @@ pub struct InstalledMod {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GitHubRelease {
     pub tag_name: String,
+    #[serde(default)]
     pub name: Option<String>,
+    #[serde(default)]
     pub body: Option<String>,
+    #[serde(default)]
     pub assets: Vec<GitHubAsset>,
-    pub published_at: String,
+    #[serde(default)]
+    pub published_at: Option<String>,
+    #[serde(default)]
+    pub draft: Option<bool>,
+    #[serde(default)]
+    pub prerelease: Option<bool>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GitHubAsset {
     pub name: String,
     pub browser_download_url: String,
-    pub content_type: String,
-    pub size: u64,
+    #[serde(default)]
+    pub content_type: Option<String>,
+    #[serde(default)]
+    pub size: Option<u64>,
+    #[serde(default)]
+    pub download_count: Option<u64>,
 }
 
 /// MODマニフェストの構造
@@ -57,23 +69,26 @@ struct ModManifest {
 
 #[derive(Debug, Deserialize)]
 struct AuthorEntry {
-    author: Author,
+    author: HashMap<String, Author>,
     entries: HashMap<String, ModEntry>,
 }
 
 #[derive(Debug, Deserialize)]
 struct Author {
-    name: String,
+    url: String,
     #[serde(default)]
-    url: Option<String>,
+    icon: Option<String>,
+    #[serde(default)]
+    support: Option<String>,
+    #[serde(default)]
+    website: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 struct ModEntry {
     name: String,
     description: String,
-    #[serde(default)]
-    category: Option<String>,
+    category: String, // 必須フィールドに変更
     #[serde(rename = "sourceLocation")]
     source_location: String,
     #[serde(default)]
@@ -82,14 +97,36 @@ struct ModEntry {
     flags: Option<Vec<String>>,
     #[serde(default)]
     versions: Option<HashMap<String, ModVersion>>,
+    #[serde(default)]
+    platforms: Option<Vec<String>>,
+    #[serde(default)]
+    dependencies: Option<HashMap<String, DependencyInfo>>,
+    #[serde(default)]
+    conflicts: Option<HashMap<String, ConflictInfo>>,
+    #[serde(rename = "additionalAuthors", default)]
+    additional_authors: Option<HashMap<String, HashMap<String, Author>>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct DependencyInfo {
+    version: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct ConflictInfo {
+    version: String,
 }
 
 #[derive(Debug, Deserialize)]
 struct ModVersion {
     #[serde(default)]
-    artifacts: Option<HashMap<String, Artifact>>,
+    artifacts: Option<Vec<Artifact>>,
     #[serde(rename = "releaseUrl", default)]
     release_url: Option<String>,
+    #[serde(default)]
+    changelog: Option<String>,
+    #[serde(default)]
+    dependencies: Option<HashMap<String, DependencyInfo>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -132,6 +169,11 @@ impl ModManager {
         let mut mods = Vec::new();
         
         for (author_key, author_entry) in manifest.objects {
+            // authorマップから最初の作者情報を取得
+            let author_name = author_entry.author.keys().next()
+                .unwrap_or(&author_key)
+                .clone();
+                
             for (mod_key, mod_entry) in author_entry.entries {
                 // GitHubリポジトリから最新リリース情報を取得
                 let (latest_version, latest_download_url) = self.get_latest_release_info(&mod_entry.source_location).await
@@ -140,9 +182,9 @@ impl ModManager {
                 mods.push(ModInfo {
                     name: mod_entry.name,
                     description: mod_entry.description,
-                    category: mod_entry.category,
+                    category: Some(mod_entry.category),
                     source_location: mod_entry.source_location,
-                    author: author_entry.author.name.clone(),
+                    author: author_name.clone(),
                     latest_version,
                     latest_download_url,
                     tags: mod_entry.tags,
@@ -169,7 +211,9 @@ impl ModManager {
             return Ok((None, None));
         }
         
-        let release: GitHubRelease = response.json().await?;
+        let response_text = response.text().await?;
+        let release: GitHubRelease = serde_json::from_str(&response_text)
+            .map_err(|e| format!("Failed to parse GitHub release JSON: {}", e))?;
         
         // .dllファイルを含むアセットを探す
         let dll_asset = release.assets.iter()
@@ -197,7 +241,15 @@ impl ModManager {
             .send()
             .await?;
             
-        let release: GitHubRelease = response.json().await?;
+        if !response.status().is_success() {
+            return Err(format!("GitHub API request failed: {}", response.status()).into());
+        }
+        
+        // レスポンステキストを取得してデバッグ
+        let response_text = response.text().await?;
+        
+        let release: GitHubRelease = serde_json::from_str(&response_text)
+            .map_err(|e| format!("Failed to parse GitHub release JSON: {}. Response: {}", e, &response_text[..200.min(response_text.len())]))?;
         
         // .dllファイルを探す
         let dll_asset = release.assets.iter()

@@ -3,7 +3,7 @@
 
 use std::sync::Mutex;
 use std::path::PathBuf;
-use tauri::{State, Manager, Window, AppHandle};
+use tauri::{State, Window, AppHandle};
 use resonite_tools_lib::{
     depotdownloader::DepotDownloader,
     install::{ResoniteInstall, ResoniteInstallManager},
@@ -758,7 +758,9 @@ async fn get_github_release_info(
         name: None,
         body: None,
         assets: vec![],
-        published_at: String::new(),
+        published_at: None,
+        draft: None,
+        prerelease: None,
     })
 }
 
