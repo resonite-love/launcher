@@ -176,7 +176,7 @@ impl ModManager {
     /// キャッシュされたMOD一覧を取得
     pub async fn fetch_mod_manifest(&self) -> Result<Vec<ModInfo>, Box<dyn Error + Send + Sync>> {
         // キャッシュされたMOD情報を取得
-        let cache_url = "https://raw.githubusercontent.com/resonite-love/resonite-mod-cache/main/cache/mods.json";
+        let cache_url = "https://raw.githubusercontent.com/resonite-love/resonite-mod-cache/refs/heads/master/cache/mods.json";
         
         let response = self.client.get(cache_url).send().await?;
         let mods_text = response.text().await?;
@@ -229,7 +229,7 @@ impl ModManager {
             .ok_or("No download URL available for this release")?;
         
         // ファイル名を取得
-        let file_name = release.file_name.as_ref()
+        let file_name = release.file_name.as_deref()
             .or_else(|| download_url.split('/').last())
             .ok_or("Cannot determine file name")?;
         

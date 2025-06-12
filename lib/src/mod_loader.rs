@@ -191,11 +191,11 @@ impl ModLoader {
     async fn download_harmony(&self, rml_libs_path: &Path) -> Result<()> {
         // 簡易実装：事前にビルドされた0Harmony.dllを直接ダウンロード
         // 実際の実装では、NuGetパッケージを展開する必要がある
-        let harmony_dll_url = "https://github.com/pardeike/Harmony/releases/download/v2.3.3.0/Harmony.2.3.3.0.zip";
+        let _harmony_dll_url = "https://github.com/pardeike/Harmony/releases/download/v2.3.3.0/Harmony.2.3.3.0.zip";
         
         // 一時的な解決策として、既知の直接URLを使用
         // 実際の実装では、zipファイルをダウンロードして展開する
-        let harmony_direct_url = "https://www.nuget.org/api/v2/package/Lib.Harmony/2.3.3";
+        let _harmony_direct_url = "https://www.nuget.org/api/v2/package/Lib.Harmony/2.3.3";
         
         // とりあえず簡単な実装として、Harmonyの公開されているDLLを使用
         // 本来はNuGetパッケージから抽出する必要がある
