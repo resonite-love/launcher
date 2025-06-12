@@ -2,7 +2,6 @@ use std::path::{Path, PathBuf};
 use std::fs;
 use reqwest;
 use serde::{Deserialize, Serialize};
-use serde_json;
 use anyhow::{Result, anyhow};
 
 #[derive(Debug, Serialize, Deserialize)]

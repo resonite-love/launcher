@@ -1,10 +1,9 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::error::Error;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::fs;
 use reqwest;
-use tokio;
 
 /// MODマニフェストから取得したMOD情報
 #[derive(Debug, Clone, Serialize, Deserialize)]

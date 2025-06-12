@@ -189,7 +189,7 @@ impl DepotDownloader {
 
             println!("Executing command: cmd /c {}", command_line);
 
-            let mut cmd = Command::new("cmd")
+            let cmd = Command::new("cmd")
                 .args(&["/c", &command_line])
                 .spawn()?;
             // startコマンドは即座に戻るので、waitしない

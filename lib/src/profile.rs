@@ -321,7 +321,7 @@ impl ProfileManager {
 
     /// プロファイルの保存されたゲーム情報を取得（バージョン含む）
     pub fn get_game_info_with_version(&self, profile_name: &str) -> Result<Option<GameInfo>, Box<dyn Error>> {
-        let mut profile = self.get_profile(profile_name)?;
+        let profile = self.get_profile(profile_name)?;
         let profile_dir = self.get_profile_dir(profile_name);
         
         // ゲーム情報が存在し、インストールされている場合は最新バージョンで更新
