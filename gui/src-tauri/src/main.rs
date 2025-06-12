@@ -9,6 +9,7 @@ use resonite_tools_lib::{
     install::{ResoniteInstall, ResoniteInstallManager},
     profile::{Profile, ProfileManager},
     mod_loader::{ModLoader, ModLoaderInfo},
+    mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease},
     utils,
 };
 
@@ -648,6 +649,119 @@ async fn open_profile_folder(
     Ok(format!("Opened profile folder: {}", profile_dir.display()))
 }
 
+// Fetch available MODs from manifest
+#[tauri::command]
+async fn fetch_mod_manifest(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<ModInfo>, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    }; // MutexGuard is dropped here
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.fetch_mod_manifest().await
+        .map_err(|e| format!("Failed to fetch mod manifest: {}", e))
+}
+
+// Get installed MODs for a profile
+#[tauri::command]
+async fn get_installed_mods(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<InstalledMod>, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    }; // MutexGuard is dropped here
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.get_installed_mods()
+        .map_err(|e| format!("Failed to get installed mods: {}", e))
+}
+
+// Install MOD from GitHub repository
+#[tauri::command]
+async fn install_mod_from_github(
+    profile_name: String,
+    repo_url: String,
+    version: Option<String>,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<InstalledMod, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    }; // MutexGuard is dropped here
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.install_mod_from_github(&repo_url, version.as_deref()).await
+        .map_err(|e| format!("Failed to install mod: {}", e))
+}
+
+// Uninstall a MOD
+#[tauri::command]
+async fn uninstall_mod(
+    profile_name: String,
+    mod_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    }; // MutexGuard is dropped here
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.uninstall_mod(&mod_name)
+        .map_err(|e| format!("Failed to uninstall mod: {}", e))?;
+    
+    Ok(format!("Successfully uninstalled mod: {}", mod_name))
+}
+
+// Get latest release info from GitHub repository
+#[tauri::command]
+async fn get_github_release_info(
+    repo_url: String,
+    _state: State<'_, Mutex<AppState>>,
+) -> Result<GitHubRelease, String> {
+    // 任意のプロファイルディレクトリを使用（API呼び出しのみなので実際のパスは不要）
+    let temp_dir = std::env::temp_dir();
+    
+    let mod_manager = ModManager::new(temp_dir);
+    
+    let (version, download_url) = mod_manager.get_latest_release_info(&repo_url).await
+        .map_err(|e| format!("Failed to get release info: {}", e))?;
+    
+    // 簡易的なGitHubRelease構造体を作成
+    Ok(GitHubRelease {
+        tag_name: version.unwrap_or_default(),
+        name: None,
+        body: None,
+        assets: vec![],
+        published_at: String::new(),
+    })
+}
+
 fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(AppState::default()))
@@ -670,7 +784,12 @@ fn main() {
             get_mod_loader_status,
             install_mod_loader,
             uninstall_mod_loader,
-            open_profile_folder
+            open_profile_folder,
+            fetch_mod_manifest,
+            get_installed_mods,
+            install_mod_from_github,
+            uninstall_mod,
+            get_github_release_info
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

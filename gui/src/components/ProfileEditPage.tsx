@@ -12,7 +12,11 @@ import {
   Loader2,
   Info,
   Package,
-  FolderOpen
+  FolderOpen,
+  Download,
+  ExternalLink,
+  Search,
+  Github
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ModRiskWarningModal from './ModRiskWarningModal';
@@ -28,6 +32,27 @@ interface ProfileConfig {
 interface ProfileEditPageProps {
   profileName: string;
   onBack: () => void;
+}
+
+interface ModInfo {
+  name: string;
+  description: string;
+  category?: string;
+  source_location: string;
+  author: string;
+  latest_version?: string;
+  latest_download_url?: string;
+  tags?: string[];
+  flags?: string[];
+}
+
+interface InstalledMod {
+  name: string;
+  description: string;
+  source_location: string;
+  installed_version: string;
+  installed_date: string;
+  dll_path: string;
 }
 
 type TabType = 'info' | 'launch' | 'mods' | 'other';
@@ -48,6 +73,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [modLoaderInfo, setModLoaderInfo] = useState<any>(null);
   const [isLoadingModLoader, setIsLoadingModLoader] = useState(false);
   const [showModRiskModal, setShowModRiskModal] = useState(false);
+  
+  // MOD管理用の状態
+  const [availableMods, setAvailableMods] = useState<ModInfo[]>([]);
+  const [installedMods, setInstalledMods] = useState<InstalledMod[]>([]);
+  const [isLoadingMods, setIsLoadingMods] = useState(false);
+  const [modSearchQuery, setModSearchQuery] = useState('');
+  const [customRepoUrl, setCustomRepoUrl] = useState('');
+  const [isInstallingMod, setIsInstallingMod] = useState<string | null>(null);
 
   const tabs = [
     { id: 'info' as TabType, label: 'プロファイル情報', icon: User },
@@ -59,6 +92,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   useEffect(() => {
     loadProfile();
     loadModLoaderInfo();
+    loadInstalledMods();
   }, [profileName]);
 
   const loadProfile = async () => {
@@ -154,6 +188,73 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
   const handleModRiskCancel = () => {
     setShowModRiskModal(false);
+  };
+
+  // MOD関連の関数
+  const loadAvailableMods = async () => {
+    try {
+      setIsLoadingMods(true);
+      const mods = await invoke<ModInfo[]>('fetch_mod_manifest', { profileName });
+      setAvailableMods(mods);
+    } catch (err) {
+      toast.error(`MOD一覧の取得に失敗しました: ${err}`);
+    } finally {
+      setIsLoadingMods(false);
+    }
+  };
+
+  const loadInstalledMods = async () => {
+    try {
+      const mods = await invoke<InstalledMod[]>('get_installed_mods', { profileName });
+      setInstalledMods(mods);
+    } catch (err) {
+      console.error('Failed to load installed mods:', err);
+    }
+  };
+
+  const installMod = async (repoUrl: string, version?: string) => {
+    try {
+      setIsInstallingMod(repoUrl);
+      const result = await invoke<InstalledMod>('install_mod_from_github', {
+        profileName,
+        repoUrl,
+        version: version || null
+      });
+      toast.success(`MOD "${result.name}" をインストールしました`);
+      await loadInstalledMods();
+    } catch (err) {
+      toast.error(`MODのインストールに失敗しました: ${err}`);
+    } finally {
+      setIsInstallingMod(null);
+    }
+  };
+
+  const uninstallMod = async (modName: string) => {
+    try {
+      const result = await invoke<string>('uninstall_mod', {
+        profileName,
+        modName
+      });
+      toast.success(result);
+      await loadInstalledMods();
+    } catch (err) {
+      toast.error(`MODのアンインストールに失敗しました: ${err}`);
+    }
+  };
+
+  const installCustomMod = async () => {
+    if (!customRepoUrl.trim()) {
+      toast.error('GitHubリポジトリURLを入力してください');
+      return;
+    }
+
+    if (!customRepoUrl.includes('github.com')) {
+      toast.error('有効なGitHubリポジトリURLを入力してください');
+      return;
+    }
+
+    await installMod(customRepoUrl.trim());
+    setCustomRepoUrl('');
   };
 
   const openProfileFolder = async () => {
@@ -394,49 +495,16 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               <h2 className="text-2xl font-bold text-white">MOD管理</h2>
             </div>
 
-            {/* ResoniteModLoaderセクション */}
-            <div className="space-y-6">
-              <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <Package className="w-5 h-5 text-resonite-blue" />
-                    <h3 className="text-lg font-semibold text-white">ResoniteModLoader</h3>
-                  </div>
-                  
-                  {modLoaderInfo && (
-                    <div className={`status-${modLoaderInfo.installed ? 'success' : 'error'}`}>
-                      {modLoaderInfo.installed ? '✓ インストール済' : '✗ 未インストール'}
-                    </div>
-                  )}
-                </div>
-                
-                <p className="text-gray-300 text-sm mb-4">
-                  ResoniteModLoaderを使用することで、ResoniteにMODをインストールできます。
-                </p>
-                
-                {modLoaderInfo && modLoaderInfo.version && (
-                  <p className="text-gray-400 text-sm mb-4">
-                    バージョン: {modLoaderInfo.version}
-                  </p>
-                )}
-                
-                <div className="flex space-x-3">
-                  {modLoaderInfo?.installed ? (
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="btn-danger flex items-center space-x-2"
-                      onClick={uninstallModLoader}
-                      disabled={isLoadingModLoader}
-                    >
-                      {isLoadingModLoader ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-4 h-4" />
-                      )}
-                      <span>アンインストール</span>
-                    </motion.button>
-                  ) : (
+            {!modLoaderInfo?.installed ? (
+              /* MODローダー未インストール時の警告 */
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6 mb-6">
+                <div className="flex items-start space-x-3">
+                  <Info className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-yellow-400 font-medium mb-2">ResoniteModLoaderが必要です</h4>
+                    <p className="text-yellow-200 text-sm mb-4">
+                      MODを使用するにはResoniteModLoaderをインストールする必要があります。
+                    </p>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -449,23 +517,218 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                       ) : (
                         <Package className="w-4 h-4" />
                       )}
+                      <span>ResoniteModLoaderをインストール</span>
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* MOD管理メニュー */
+              <div className="space-y-6">
+                {/* 手動MODインストール */}
+                <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                    <Github className="w-5 h-5" />
+                    <span>手動MODインストール</span>
+                  </h3>
+                  
+                  <div className="flex space-x-3 mb-4">
+                    <input
+                      type="text"
+                      value={customRepoUrl}
+                      onChange={(e) => setCustomRepoUrl(e.target.value)}
+                      placeholder="https://github.com/author/mod-name"
+                      className="input-primary flex-1"
+                    />
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="btn-primary flex items-center space-x-2"
+                      onClick={installCustomMod}
+                      disabled={isInstallingMod !== null || !customRepoUrl.trim()}
+                    >
+                      {isInstallingMod === customRepoUrl ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4" />
+                      )}
                       <span>インストール</span>
                     </motion.button>
+                  </div>
+                  
+                  <p className="text-gray-400 text-sm">
+                    GitHubリポジトリのURLを入力してMODを直接インストールできます。
+                  </p>
+                </div>
+
+                {/* 利用可能なMOD一覧 */}
+                <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">利用可能なMOD</h3>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="btn-secondary flex items-center space-x-2"
+                      onClick={loadAvailableMods}
+                      disabled={isLoadingMods}
+                    >
+                      {isLoadingMods ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Search className="w-4 h-4" />
+                      )}
+                      <span>MOD一覧を取得</span>
+                    </motion.button>
+                  </div>
+
+                  {availableMods.length > 0 && (
+                    <div className="mb-4">
+                      <input
+                        type="text"
+                        value={modSearchQuery}
+                        onChange={(e) => setModSearchQuery(e.target.value)}
+                        placeholder="MODを検索..."
+                        className="input-primary w-full"
+                      />
+                    </div>
                   )}
+
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {isLoadingMods ? (
+                      <div className="text-center py-8">
+                        <Loader2 className="w-8 h-8 text-resonite-blue animate-spin mx-auto mb-4" />
+                        <p className="text-gray-400">MOD一覧を取得中...</p>
+                      </div>
+                    ) : availableMods.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                        <p className="text-gray-400 mb-2">利用可能なMODはありません</p>
+                        <p className="text-gray-500 text-sm">「MOD一覧を取得」ボタンを押してください</p>
+                      </div>
+                    ) : (
+                      availableMods
+                        .filter(mod => 
+                          !modSearchQuery || 
+                          mod.name.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
+                          mod.description.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
+                          mod.author.toLowerCase().includes(modSearchQuery.toLowerCase())
+                        )
+                        .map((mod, index) => (
+                          <motion.div
+                            key={mod.source_location}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-4"
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <h4 className="text-white font-medium">{mod.name}</h4>
+                                <p className="text-gray-400 text-sm">by {mod.author}</p>
+                                {mod.latest_version && (
+                                  <p className="text-gray-500 text-xs">最新: {mod.latest_version}</p>
+                                )}
+                              </div>
+                              
+                              <div className="flex items-center space-x-2">
+                                <motion.button
+                                  whileHover={{ scale: 1.02 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  className="btn-secondary text-xs"
+                                  onClick={() => window.open(mod.source_location, '_blank')}
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                </motion.button>
+                                
+                                <motion.button
+                                  whileHover={{ scale: 1.02 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  className="btn-primary text-xs flex items-center space-x-1"
+                                  onClick={() => installMod(mod.source_location)}
+                                  disabled={isInstallingMod !== null}
+                                >
+                                  {isInstallingMod === mod.source_location ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    <Download className="w-3 h-3" />
+                                  )}
+                                  <span>インストール</span>
+                                </motion.button>
+                              </div>
+                            </div>
+                            
+                            <p className="text-gray-300 text-sm mb-2">{mod.description}</p>
+                            
+                            {mod.category && (
+                              <span className="inline-block bg-resonite-blue/20 text-resonite-blue text-xs px-2 py-1 rounded">
+                                {mod.category}
+                              </span>
+                            )}
+                          </motion.div>
+                        ))
+                    )}
+                  </div>
+                </div>
+
+                {/* インストール済みMOD */}
+                <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">インストール済みMOD</h3>
+                  
+                  <div className="space-y-3">
+                    {installedMods.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                        <p className="text-gray-400 mb-2">インストール済みMODはありません</p>
+                        <p className="text-gray-500 text-sm">上記からMODをインストールしてください</p>
+                      </div>
+                    ) : (
+                      installedMods.map((mod, index) => (
+                        <motion.div
+                          key={mod.name}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-4"
+                        >
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <h4 className="text-white font-medium">{mod.name}</h4>
+                              <p className="text-gray-400 text-sm">バージョン: {mod.installed_version}</p>
+                              <p className="text-gray-500 text-xs">インストール日: {mod.installed_date}</p>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="btn-secondary text-xs"
+                                onClick={() => window.open(mod.source_location, '_blank')}
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </motion.button>
+                              
+                              <motion.button
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="btn-danger text-xs flex items-center space-x-1"
+                                onClick={() => uninstallMod(mod.name)}
+                              >
+                                <Trash2 className="w-3 h-3" />
+                                <span>削除</span>
+                              </motion.button>
+                            </div>
+                          </div>
+                          
+                          {mod.description && (
+                            <p className="text-gray-300 text-sm">{mod.description}</p>
+                          )}
+                        </motion.div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
-              
-              {/* MODリストセクション */}
-              <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">インストール済みMOD</h3>
-                
-                <div className="bg-dark-800/30 rounded-lg p-8 text-center">
-                  <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                  <p className="text-gray-400 text-lg mb-2">MODリスト機能</p>
-                  <p className="text-gray-500">今後実装予定です</p>
-                </div>
-              </div>
-            </div>
+            )}
           </motion.div>
         );
 
