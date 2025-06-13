@@ -7,6 +7,13 @@
 
 ## [Unreleased]
 
+## [v0.0.3] - 2025-06-13
+
+### 修正
+- GitHub Actions ワークフローでポータブル版バイナリ作成を改善
+- Tauri ビルドでの実行ファイル検出ロジックを強化
+- ポータブル版リリースの信頼性を向上
+
 ## [v0.0.2] - 2025-06-13
 
 ### 追加
@@ -60,6 +67,7 @@
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.2...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.3...HEAD
+[v0.0.3]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.2...v0.0.3
 [v0.0.2]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.1...v0.0.2
 [v0.0.1]: https://github.com/kokoa-love/kokoa-resonite-tools/releases/tag/v0.0.1
