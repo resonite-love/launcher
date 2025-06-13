@@ -7,6 +7,13 @@
 
 ## [Unreleased]
 
+## [v0.0.8] - 2025-06-13
+
+### 改善
+- GitHub Actions のデバッグ出力をさらに詳細化
+- 作業ディレクトリとビルド成果物の場所を正確に特定するログを追加
+- cargo build の成功確認とファイルサイズ出力を追加
+
 ## [v0.0.7] - 2025-06-13
 
 ### 追加
@@ -100,7 +107,8 @@
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.7...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.8...HEAD
+[v0.0.8]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.7...v0.0.8
 [v0.0.7]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.6...v0.0.7
 [v0.0.6]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.5...v0.0.6
 [v0.0.5]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.4...v0.0.5

@@ -58,38 +58,66 @@ jobs:
       # Build raw executable for portable version
       - name: Build GUI executable (for portable)
         run: |
+          Write-Host "Current directory before cd:"
+          Get-Location
+          
           cd gui/src-tauri
+          
+          Write-Host "Current directory after cd:"
+          Get-Location
+          
+          Write-Host "Building with cargo..."
           cargo build --release --features custom-protocol
+          
+          Write-Host "`nChecking if build succeeded:"
+          if (Test-Path "target\release\resonite-tools-tauri.exe") {
+            Write-Host "SUCCESS: Found resonite-tools-tauri.exe"
+            Write-Host "File size: $((Get-Item "target\release\resonite-tools-tauri.exe").Length) bytes"
+          } else {
+            Write-Host "WARNING: resonite-tools-tauri.exe not found after build"
+            Write-Host "Checking what files exist in target/release:"
+            if (Test-Path "target\release") {
+              Get-ChildItem "target\release" -Filter "*.exe" | ForEach-Object {
+                Write-Host "  Found: $($_.Name)"
+              }
+            }
+          }
           
       # Debug: Check target/release directory contents
       - name: Debug - List target/release contents
         run: |
-          Write-Host "=== Checking gui/src-tauri/target/release directory ==="
-          if (Test-Path ".\gui\src-tauri\target\release") {
-            Write-Host "Directory exists. Contents:"
-            Get-ChildItem ".\gui\src-tauri\target\release" -Force | ForEach-Object {
-              Write-Host "$($_.Mode) $($_.Length.ToString().PadLeft(10)) $($_.LastWriteTime) $($_.Name)"
-            }
-            
-            Write-Host "`n=== EXE files in release directory ==="
-            Get-ChildItem ".\gui\src-tauri\target\release\*.exe" -Force | ForEach-Object {
-              Write-Host "Found EXE: $($_.FullName) (Size: $($_.Length) bytes)"
-            }
-            
-            Write-Host "`n=== DLL files in release directory ==="
-            Get-ChildItem ".\gui\src-tauri\target\release\*.dll" -Force | ForEach-Object {
-              Write-Host "Found DLL: $($_.Name)"
-            }
-          } else {
-            Write-Host "Directory does not exist: .\gui\src-tauri\target\release"
+          Write-Host "=== Current working directory ==="
+          Get-Location
+          
+          Write-Host "`n=== Looking for target directories ==="
+          Get-ChildItem -Path . -Filter "target" -Recurse -Directory -ErrorAction SilentlyContinue | Select-Object -First 10 | ForEach-Object {
+            Write-Host "Found target at: $($_.FullName)"
           }
           
-          Write-Host "`n=== Checking for bundle directory ==="
-          if (Test-Path ".\gui\src-tauri\target\release\bundle") {
-            Write-Host "Bundle directory exists"
-            Get-ChildItem ".\gui\src-tauri\target\release\bundle" -Directory | ForEach-Object {
-              Write-Host "Bundle type: $($_.Name)"
+          Write-Host "`n=== Checking various possible locations ==="
+          $paths = @(
+            ".\gui\src-tauri\target\release",
+            ".\target\release",
+            ".\gui\target\release",
+            "gui\src-tauri\target\release",
+            "target\release"
+          )
+          
+          foreach ($path in $paths) {
+            Write-Host "`nChecking: $path"
+            if (Test-Path $path) {
+              Write-Host "  EXISTS - Contents:"
+              Get-ChildItem $path -Force | Where-Object { $_.Extension -in ".exe", ".dll", "" } | ForEach-Object {
+                Write-Host "    $($_.Name) ($($_.Length) bytes)"
+              }
+            } else {
+              Write-Host "  NOT FOUND"
             }
+          }
+          
+          Write-Host "`n=== Looking for any EXE files ==="
+          Get-ChildItem -Path . -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -like "*target*release*" } | Select-Object -First 10 | ForEach-Object {
+            Write-Host "Found EXE: $($_.FullName)"
           }
         shell: pwsh
         
