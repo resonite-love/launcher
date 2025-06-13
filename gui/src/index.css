@@ -160,12 +160,25 @@
     color: white;
     border-radius: 0.5rem;
     padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .select-primary:hover:not(:disabled) {
+    border-color: var(--color-dark-500);
+    background-color: var(--color-dark-700);
   }
   
   .select-primary:focus {
     outline: none;
     border-color: var(--color-resonite-blue);
     box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+  }
+  
+  .select-primary:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    background-color: var(--color-dark-900);
   }
   
   /* Status indicators */

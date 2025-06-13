@@ -9,6 +9,7 @@ import {
   Info,
   AlertTriangle
 } from 'lucide-react';
+import GameVersionSelector from './GameVersionSelector';
 
 interface GameUpdateModalProps {
   isOpen: boolean;
@@ -164,19 +165,12 @@ function GameUpdateModal({
                   exit={{ opacity: 0, height: 0 }}
                   className="ml-7 space-y-3"
                 >
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      マニフェストID
-                    </label>
-                    <input
-                      type="text"
-                      value={manifestId}
-                      onChange={(e) => setManifestId(e.target.value)}
-                      placeholder="例: 1234567890123456789"
-                      className="input-primary w-full"
-                      disabled={isLoading}
-                    />
-                  </div>
+                  <GameVersionSelector
+                    branch={currentBranch}
+                    selectedVersion={manifestId || null}
+                    onVersionSelect={(version) => setManifestId(version || '')}
+                    disabled={isLoading}
+                  />
                   
                   <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
                     <div className="flex items-start space-x-2">

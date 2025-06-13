@@ -22,6 +22,7 @@ import ProfileEditModal from './ProfileEditModal';
 import ProfileEditPage from './ProfileEditPage';
 import ModRiskWarningModal from './ModRiskWarningModal';
 import GameUpdateModal from './GameUpdateModal';
+import GameVersionSelector from './GameVersionSelector';
 import { useAppStore } from '../store/useAppStore';
 
 interface ProfileInfo {
@@ -638,18 +639,12 @@ function ProfilesTab() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    マニフェストID（オプション）
-                  </label>
-                  <input
-                    type="text"
-                    value={manifestId}
-                    onChange={(e) => setManifestId(e.target.value)}
-                    placeholder="特定バージョンを指定"
-                    className="input-primary w-full"
-                  />
-                </div>
+                <GameVersionSelector
+                  branch={installBranch}
+                  selectedVersion={manifestId || null}
+                  onVersionSelect={(version) => setManifestId(version || '')}
+                  disabled={isLoading}
+                />
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -813,18 +808,12 @@ function ProfilesTab() {
                         </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          マニフェストID（オプション）
-                        </label>
-                        <input
-                          type="text"
-                          value={createManifestId}
-                          onChange={(e) => setCreateManifestId(e.target.value)}
-                          placeholder="特定バージョンを指定"
-                          className="input-primary w-full"
-                        />
-                      </div>
+                      <GameVersionSelector
+                        branch={createGameBranch}
+                        selectedVersion={createManifestId || null}
+                        onVersionSelect={(version) => setCreateManifestId(version || '')}
+                        disabled={isLoading}
+                      />
 
                       <div>
                         <div className="flex items-center space-x-3 mb-4">

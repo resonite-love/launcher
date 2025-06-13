@@ -211,6 +211,22 @@ interface SteamCredentials {
 
 **戻り値:** `string` - 成功メッセージ
 
+## バージョン情報
+
+### `get_game_versions`
+利用可能なゲームバージョンの一覧を取得します。
+
+**パラメータ:** なし
+
+**戻り値:** `any` - resonite-version-monitorからのJSONデータ
+
+**使用例:**
+```typescript
+const versions = await invoke('get_game_versions');
+// versions.versions に各バージョン情報の配列が含まれる
+// 各要素: { gameVersion: string, manifestId: string, date: string, branch: string }
+```
+
 ## イベント
 
 ### `installation-status`
