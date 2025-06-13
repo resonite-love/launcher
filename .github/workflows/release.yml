@@ -60,6 +60,38 @@ jobs:
         run: |
           cd gui/src-tauri
           cargo build --release --features custom-protocol
+          
+      # Debug: Check target/release directory contents
+      - name: Debug - List target/release contents
+        run: |
+          Write-Host "=== Checking gui/src-tauri/target/release directory ==="
+          if (Test-Path ".\gui\src-tauri\target\release") {
+            Write-Host "Directory exists. Contents:"
+            Get-ChildItem ".\gui\src-tauri\target\release" -Force | ForEach-Object {
+              Write-Host "$($_.Mode) $($_.Length.ToString().PadLeft(10)) $($_.LastWriteTime) $($_.Name)"
+            }
+            
+            Write-Host "`n=== EXE files in release directory ==="
+            Get-ChildItem ".\gui\src-tauri\target\release\*.exe" -Force | ForEach-Object {
+              Write-Host "Found EXE: $($_.FullName) (Size: $($_.Length) bytes)"
+            }
+            
+            Write-Host "`n=== DLL files in release directory ==="
+            Get-ChildItem ".\gui\src-tauri\target\release\*.dll" -Force | ForEach-Object {
+              Write-Host "Found DLL: $($_.Name)"
+            }
+          } else {
+            Write-Host "Directory does not exist: .\gui\src-tauri\target\release"
+          }
+          
+          Write-Host "`n=== Checking for bundle directory ==="
+          if (Test-Path ".\gui\src-tauri\target\release\bundle") {
+            Write-Host "Bundle directory exists"
+            Get-ChildItem ".\gui\src-tauri\target\release\bundle" -Directory | ForEach-Object {
+              Write-Host "Bundle type: $($_.Name)"
+            }
+          }
+        shell: pwsh
         
       # Build GUI with Tauri
       - name: Build GUI (release)

@@ -7,6 +7,15 @@
 
 ## [Unreleased]
 
+## [v0.0.7] - 2025-06-13
+
+### 追加
+- GitHub Actions に target/release ディレクトリの内容をダンプするデバッグステップを追加
+- ビルド成果物の詳細な情報を出力（ファイルサイズ、作成日時、権限など）
+
+### デバッグ
+- ポータブル版実行ファイルが見つからない問題を調査するためのログ出力を強化
+
 ## [v0.0.6] - 2025-06-13
 
 ### 修正
@@ -91,7 +100,8 @@
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.6...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.7...HEAD
+[v0.0.7]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.6...v0.0.7
 [v0.0.6]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.5...v0.0.6
 [v0.0.5]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.4...v0.0.5
 [v0.0.4]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.3...v0.0.4
