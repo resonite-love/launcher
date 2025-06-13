@@ -52,9 +52,15 @@ jobs:
       # Build raw executable first for portable version
       - name: Build GUI executable (for portable)
         run: |
-          cd gui
-          npm run tauri build -- --no-bundle --release
+          cd gui/src-tauri
+          cargo build --release --features custom-protocol
         
+      # Build frontend before Tauri build
+      - name: Build frontend
+        run: |
+          cd gui
+          npm run build
+          
       # Build GUI with Tauri
       - name: Build GUI (release)
         uses: tauri-apps/tauri-action@v0
@@ -117,10 +123,41 @@ jobs:
         
       - name: Create GUI Portable Binary
         run: |
-          # Copy the built Tauri executable as portable version
-          if (Test-Path ".\gui\src-tauri\target\release\Kokoa Resonite Tools.exe") {
-            cp ".\gui\src-tauri\target\release\Kokoa Resonite Tools.exe" .\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe
+          # Check multiple possible locations for the Tauri executable
+          $exeName = "resonite-tools-tauri.exe"
+          $paths = @(
+            ".\gui\src-tauri\target\release\$exeName",
+            ".\gui\src-tauri\target\release\Kokoa Resonite Tools.exe"
+          )
+          
+          $foundExe = $null
+          foreach ($path in $paths) {
+            if (Test-Path $path) {
+              $foundExe = $path
+              Write-Host "Found executable at: $path"
+              break
+            }
+          }
+          
+          if ($foundExe) {
+            # Copy the executable
+            cp $foundExe ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe"
+            
+            # Also copy the WebView2Loader.dll if it exists
+            $webview2Path = ".\gui\src-tauri\target\release\WebView2Loader.dll"
+            if (Test-Path $webview2Path) {
+              cp $webview2Path ".\WebView2Loader.dll"
+              Write-Host "Copied WebView2Loader.dll"
+            }
+            
+            # Create a zip file with both files if WebView2Loader exists
+            if (Test-Path ".\WebView2Loader.dll") {
+              Compress-Archive -Path ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe", ".\WebView2Loader.dll" -DestinationPath ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.zip" -Force
+              Write-Host "Created portable zip with executable and WebView2Loader.dll"
+            }
           } else {
+            Write-Host "Checking available files in target/release directory:"
+            Get-ChildItem ".\gui\src-tauri\target\release\" -Filter "*.exe" | ForEach-Object { Write-Host $_.Name }
             Write-Warning "GUI executable not found, skipping portable version"
           }
         shell: pwsh
@@ -131,6 +168,7 @@ jobs:
           files: |
             ./resonite-manager-${{ github.ref_name }}-windows.exe
             ./kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe
+            ./kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.zip
           tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

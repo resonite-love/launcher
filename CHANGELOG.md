@@ -7,6 +7,14 @@
 
 ## [Unreleased]
 
+## [v0.0.5] - 2025-06-13
+
+### 改善
+- GitHub Actions でポータブル版の作成プロセスを完全に再構築
+- 直接 cargo build を使用して実行ファイルを生成
+- WebView2Loader.dll を含むZIPファイルも作成
+- ビルドプロセスのデバッグ情報を強化
+
 ## [v0.0.4] - 2025-06-13
 
 ### 修正
@@ -73,7 +81,8 @@
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.4...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.5...HEAD
+[v0.0.5]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.4...v0.0.5
 [v0.0.4]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.3...v0.0.4
 [v0.0.3]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.2...v0.0.3
 [v0.0.2]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.1...v0.0.2
