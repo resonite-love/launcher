@@ -171,20 +171,6 @@ function GameUpdateModal({
                     onVersionSelect={(version) => setManifestId(version || '')}
                     disabled={isLoading}
                   />
-                  
-                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-                    <div className="flex items-start space-x-2">
-                      <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm">
-                        <p className="text-blue-400 font-medium mb-1">マニフェストIDについて</p>
-                        <ul className="text-blue-200 space-y-1">
-                          <li>• SteamDBなどで特定のバージョンのIDを確認できます</li>
-                          <li>• 古いバージョンへのダウングレードも可能です</li>
-                          <li>• 無効なIDの場合はエラーになります</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
                 </motion.div>
               )}
             </div>

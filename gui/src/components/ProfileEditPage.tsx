@@ -23,6 +23,9 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ModRiskWarningModal from './ModRiskWarningModal';
+import GameVersionSelector from './GameVersionSelector';
+import GameUpdateModal from './GameUpdateModal';
+import GameInstallModal from './GameInstallModal';
 import { ModVersionSelector } from './ModVersionSelector';
 import { 
   useModManifest, 
@@ -46,6 +49,10 @@ interface ProfileConfig {
   name?: string; // 互換性のため
   description: string;
   args: string[];
+  game_info?: {
+    branch: string;
+    manifest_id?: string;
+  };
 }
 
 interface ProfileEditPageProps {
@@ -173,6 +180,16 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   // yt-dlp管理用のクエリ
   const { data: ytDlpInfo, isLoading: ytDlpLoading, refetch: refetchYtDlp } = useYtDlpStatus(profileName);
   const updateYtDlpMutation = useUpdateYtDlp();
+  
+  // ゲーム情報用の状態
+  const [profileInfo, setProfileInfo] = useState<any>(null);
+  const [showGameUpdateModal, setShowGameUpdateModal] = useState(false);
+  const [hasGame, setHasGame] = useState(false);
+  const [currentGameVersion, setCurrentGameVersion] = useState<string | null>(null);
+  const [currentBranch, setCurrentBranch] = useState<string>('release');
+  const [showGameInstallModal, setShowGameInstallModal] = useState(false);
+  const [isInstallingGame, setIsInstallingGame] = useState(false);
+  const [gameVersions, setGameVersions] = useState<any>(null);
 
   const tabs = [
     { id: 'info' as TabType, label: 'プロファイル情報', icon: User },
@@ -184,6 +201,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   useEffect(() => {
     loadProfile();
     loadModLoaderInfo();
+    loadProfileInfo();
+    loadGameVersions();
   }, [profileName]);
 
   const loadProfile = async () => {
@@ -251,6 +270,30 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       setModLoaderInfo({ installed: false });
     } finally {
       setIsLoadingModLoader(false);
+    }
+  };
+  
+  const loadProfileInfo = async () => {
+    try {
+      const profiles = await invoke<any[]>('get_profiles');
+      const info = profiles.find(p => p.id === profileName);
+      if (info) {
+        setProfileInfo(info);
+        setHasGame(info.has_game || false);
+        setCurrentGameVersion(info.version || null);
+        setCurrentBranch(info.branch || 'release');
+      }
+    } catch (err) {
+      console.error('Failed to load profile info:', err);
+    }
+  };
+  
+  const loadGameVersions = async () => {
+    try {
+      const versions = await invoke<any>('get_game_versions');
+      setGameVersions(versions);
+    } catch (err) {
+      console.error('Failed to load game versions:', err);
     }
   };
 
@@ -479,6 +522,116 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     description !== profile.description ||
     JSON.stringify(args) !== JSON.stringify(profile.args)
   );
+  
+  const handleGameUpdate = async (manifestId?: string) => {
+    try {
+      const request = {
+        profile_name: profileName,
+        branch: currentBranch,
+        manifest_id: manifestId,
+      };
+      
+      const result = await invoke<string>('update_profile_game_interactive', { request });
+      toast.success(result);
+      
+      // 更新後に情報を再読み込み
+      await loadProfileInfo();
+      setShowGameUpdateModal(false);
+    } catch (err) {
+      toast.error(`ゲームの更新に失敗しました: ${err}`);
+    }
+  };
+  
+  const handleGameInstall = async (branch: string, manifestId?: string) => {
+    try {
+      setIsInstallingGame(true);
+      const request = {
+        profile_name: profileName,
+        branch: branch,
+        manifest_id: manifestId,
+      };
+      
+      const result = await invoke<string>('install_game_to_profile_interactive', { request });
+      toast.success(result);
+      
+      // インストール後に情報を再読み込み
+      await loadProfileInfo();
+      await loadModLoaderInfo();
+      setShowGameInstallModal(false);
+    } catch (err) {
+      toast.error(`ゲームのインストールに失敗しました: ${err}`);
+    } finally {
+      setIsInstallingGame(false);
+    }
+  };
+  
+  // ゲームの新しいバージョンが利用可能かチェック
+  const hasNewerGameVersion = (): boolean => {
+    if (!gameVersions || !hasGame || !currentBranch || !currentGameVersion) {
+      return false;
+    }
+    
+    const branchVersions = gameVersions[currentBranch];
+    if (!branchVersions || branchVersions.length === 0) {
+      return false;
+    }
+    
+    // タイムスタンプでソートして最新のバージョンを取得
+    const sortedVersions = [...branchVersions].sort((a, b) => {
+      const timestampA = new Date(a.timestamp).getTime();
+      const timestampB = new Date(b.timestamp).getTime();
+      return timestampB - timestampA; // 降順（新しい順）
+    });
+    
+    const latestVersion = sortedVersions[0];
+    if (!latestVersion) {
+      return false;
+    }
+    
+    // 特定のマニフェストIDが指定されている場合はマニフェストIDで比較
+    if (profileInfo?.manifest_id) {
+      return latestVersion.manifestId !== profileInfo.manifest_id;
+    }
+    
+    // プロファイルの現在のバージョンに対応するエントリを探す
+    const currentVersionEntry = branchVersions.find(v => v.gameVersion === currentGameVersion);
+    if (!currentVersionEntry) {
+      // 現在のバージョンが見つからない場合は更新なしと判断（古すぎるか無効）
+      return false;
+    }
+    
+    // 現在のバージョンが最新バージョンと同じ場合は更新なし
+    if (currentVersionEntry.manifestId === latestVersion.manifestId) {
+      return false;
+    }
+    
+    // タイムスタンプで比較
+    const currentTimestamp = new Date(currentVersionEntry.timestamp).getTime();
+    const latestTimestamp = new Date(latestVersion.timestamp).getTime();
+    
+    return latestTimestamp > currentTimestamp;
+  };
+  
+  // ゲームの最新バージョン情報を取得
+  const getLatestGameVersionInfo = () => {
+    if (!gameVersions || !currentBranch) {
+      return null;
+    }
+    
+    const branchVersions = gameVersions[currentBranch];
+    if (!branchVersions || branchVersions.length === 0) {
+      return null;
+    }
+    
+    // タイムスタンプでソートして最新のバージョンを取得
+    const sortedVersions = [...branchVersions].sort((a, b) => {
+      const timestampA = new Date(a.timestamp).getTime();
+      const timestampB = new Date(b.timestamp).getTime();
+      return timestampB - timestampA; // 降順（新しい順）
+    });
+    
+    return sortedVersions[0];
+  };
 
   if (isLoading) {
     return (
@@ -574,6 +727,139 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 />
               </div>
             </div>
+            
+            {/* ゲーム情報カード */}
+            {hasGame ? (
+              <div className="mt-6 bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-white flex items-center space-x-2">
+                    <Package className="w-5 h-5 text-resonite-blue" />
+                    <span>ゲーム情報</span>
+                  </h3>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="btn-primary flex items-center space-x-2"
+                    onClick={() => setShowGameUpdateModal(true)}
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>バージョン変更</span>
+                  </motion.button>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-dark-600/50">
+                    <span className="text-gray-400">ブランチ</span>
+                    <span className="text-white font-medium">{currentBranch}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-center py-2 border-b border-dark-600/50">
+                    <span className="text-gray-400">現在のバージョン</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-white font-mono text-sm">
+                        {currentGameVersion || '不明'}
+                      </span>
+                      {hasNewerGameVersion() && (() => {
+                        const latestVersion = getLatestGameVersionInfo();
+                        return latestVersion && (
+                          <span className="text-blue-300 text-xs">
+                            → v{latestVersion.gameVersion}
+                          </span>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  
+                  {profileInfo?.manifest_id && (
+                    <div className="flex justify-between items-center py-2 border-b border-dark-600/50">
+                      <span className="text-gray-400">マニフェストID</span>
+                      <span className="text-gray-300 font-mono text-xs">
+                        {profileInfo.manifest_id}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-400">状態</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="status-success">インストール済み</span>
+                      {hasNewerGameVersion() && (
+                        <span className="status-info text-xs flex items-center space-x-1">
+                          <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span>
+                          <span>更新可能</span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                {hasNewerGameVersion() && (
+                  <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <div className="flex items-start space-x-2">
+                      <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="text-blue-300 font-medium mb-1">新しいバージョンが利用可能です</p>
+                        <p className="text-blue-200">
+                          「バージョン変更」から最新版への更新や特定バージョンへの変更が可能です。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {!hasNewerGameVersion() && (
+                  <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <div className="flex items-start space-x-2">
+                      <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="text-blue-300">
+                          「バージョン変更」から最新版への更新や特定バージョンへの変更が可能です。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* ゲーム未インストール時の表示 */
+              <div className="mt-6 bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-orange-400 flex items-center space-x-2">
+                    <Package className="w-5 h-5" />
+                    <span>ゲーム未インストール</span>
+                  </h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-start space-x-3">
+                    <Info className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-orange-200 mb-2">
+                        このプロファイルにはResoniteがインストールされていません。
+                      </p>
+                      <p className="text-orange-200 text-sm">
+                        ゲームをインストールすると、起動オプションやMOD管理機能が利用可能になります。
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="btn-primary w-full flex items-center justify-center space-x-2"
+                    onClick={() => setShowGameInstallModal(true)}
+                    disabled={isInstallingGame}
+                  >
+                    {isInstallingGame ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Download className="w-5 h-5" />
+                    )}
+                    <span>Resoniteをインストール</span>
+                  </motion.button>
+                </div>
+              </div>
+            )}
           </motion.div>
         );
 
@@ -590,22 +876,38 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               <Terminal className="w-6 h-6 text-resonite-blue" />
               <h2 className="text-2xl font-bold text-white">起動引数</h2>
             </div>
-
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
-              <div className="flex items-start space-x-3">
-                <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-white font-medium mb-2">起動引数について</h4>
-                  <ul className="text-sm text-gray-300 space-y-1">
-                    <li>• Resonite起動時に渡されるコマンドライン引数を設定できます</li>
-                    <li>• 各引数は自動的に適切にエスケープされます</li>
-                    <li>• 一般的な引数: <code className="bg-dark-800 px-1 rounded">-SkipIntroTutorial</code>, <code className="bg-dark-800 px-1 rounded">-DataPath &quot;path&quot;</code></li>
-                    <li>• パス変数が使用可能: <code className="bg-dark-800 px-1 rounded">%PROFILE_DIR%</code>, <code className="bg-dark-800 px-1 rounded">%GAME_DIR%</code>, <code className="bg-dark-800 px-1 rounded">%DATA_DIR%</code></li>
-                    <li>• 例: <code className="bg-dark-800 px-1 rounded">-DataPath &quot;%DATA_DIR%&quot;</code> → プロファイルのDataPathフォルダ</li>
-                  </ul>
+            
+            {!hasGame ? (
+              /* ゲーム未インストール時の警告 */
+              <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
+                <div className="flex items-start space-x-3">
+                  <Info className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-orange-400 font-medium mb-2">ゲームがインストールされていません</h4>
+                    <p className="text-orange-200 text-sm">
+                      起動引数を設定するには、まずResoniteをインストールしてください。
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <>
+                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
+                  <div className="flex items-start space-x-3">
+                    <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-white font-medium mb-2">起動引数について</h4>
+                      <ul className="text-sm text-gray-300 space-y-1">
+                        <li>• Resonite起動時に渡されるコマンドライン引数を設定できます</li>
+                        <li>• 各引数は自動的に適切にエスケープされます</li>
+                        <li>• 一般的な引数: <code className="bg-dark-800 px-1 rounded">-SkipIntroTutorial</code>, <code className="bg-dark-800 px-1 rounded">-DataPath "path"</code></li>
+                        <li>• パス変数が使用可能: <code className="bg-dark-800 px-1 rounded">%PROFILE_DIR%</code>, <code className="bg-dark-800 px-1 rounded">%GAME_DIR%</code>, <code className="bg-dark-800 px-1 rounded">%DATA_DIR%</code></li>
+                        <li>• 例: <code className="bg-dark-800 px-1 rounded">-DataPath "%DATA_DIR%"</code> → プロファイルのDataPathフォルダ</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
 
             <div className="space-y-4">
               {/* Add new argument */}
@@ -672,6 +974,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 </div>
               )}
             </div>
+              </>
+            )}
           </motion.div>
         );
 
@@ -689,7 +993,20 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               <h2 className="text-2xl font-bold text-white">MOD管理</h2>
             </div>
 
-            {!modLoaderInfo?.installed ? (
+            {!hasGame ? (
+              /* ゲーム未インストール時の警告 */
+              <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
+                <div className="flex items-start space-x-3">
+                  <Info className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-orange-400 font-medium mb-2">ゲームがインストールされていません</h4>
+                    <p className="text-orange-200 text-sm">
+                      MOD管理機能を使用するには、まずResoniteをインストールしてください。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : !modLoaderInfo?.installed ? (
               /* MODローダー未インストール時の警告 */
               <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6 mb-6">
                 <div className="flex items-start space-x-3">
@@ -1217,7 +1534,21 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               <h2 className="text-2xl font-bold text-white">その他の設定</h2>
             </div>
 
-            <div className="space-y-6">
+            {!hasGame ? (
+              /* ゲーム未インストール時の警告 */
+              <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
+                <div className="flex items-start space-x-3">
+                  <Info className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-orange-400 font-medium mb-2">ゲームがインストールされていません</h4>
+                    <p className="text-orange-200 text-sm">
+                      その他の設定を利用するには、まずResoniteをインストールしてください。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
               {/* yt-dlp管理 */}
               <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
@@ -1292,6 +1623,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 <p className="text-gray-500">今後、詳細設定項目がここに追加される予定です</p>
               </div>
             </div>
+            )}
           </motion.div>
         );
 
@@ -1383,20 +1715,31 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       >
         {tabs.map((tab) => {
           const Icon = tab.icon;
+          const isDisabled = !hasGame && (tab.id === 'launch' || tab.id === 'mods' || tab.id === 'other');
+          
           return (
             <motion.button
               key={tab.id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: isDisabled ? 1 : 1.02 }}
+              whileTap={{ scale: isDisabled ? 1 : 0.98 }}
               className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-md transition-colors duration-200 ${
                 activeTab === tab.id
                   ? 'bg-resonite-blue text-white shadow-lg'
+                  : isDisabled
+                  ? 'text-gray-600 cursor-not-allowed bg-dark-800/30'
                   : 'text-gray-400 hover:text-white hover:bg-dark-700/50'
               }`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => !isDisabled && setActiveTab(tab.id)}
+              disabled={isDisabled}
+              title={isDisabled ? 'ゲームをインストールしてください' : undefined}
             >
               <Icon className="w-4 h-4" />
               <span className="font-medium">{tab.label}</span>
+              {isDisabled && (
+                <span className="ml-1 text-orange-400">
+                  <Info className="w-3 h-3" />
+                </span>
+              )}
             </motion.button>
           );
         })}
@@ -1443,6 +1786,26 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         onClose={handleModRiskCancel}
         onConfirm={handleModRiskConfirm}
         title="MODローダーのインストール"
+      />
+      
+      {/* Game Update Modal */}
+      <GameUpdateModal
+        isOpen={showGameUpdateModal}
+        onClose={() => setShowGameUpdateModal(false)}
+        onUpdate={handleGameUpdate}
+        profileName={profile?.display_name || profileName}
+        currentVersion={currentGameVersion || undefined}
+        currentBranch={currentBranch}
+        isLoading={false}
+      />
+      
+      {/* Game Install Modal */}
+      <GameInstallModal
+        isOpen={showGameInstallModal}
+        onClose={() => setShowGameInstallModal(false)}
+        onInstall={handleGameInstall}
+        profileName={profile?.display_name || profileName}
+        isLoading={isInstallingGame}
       />
 
       {/* 利用可能なMODのバージョン選択モーダル */}

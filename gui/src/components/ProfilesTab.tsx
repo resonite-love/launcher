@@ -104,10 +104,15 @@ function ProfilesTab() {
   // ゲームアップデートモーダル用の状態
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedUpdateProfile, setSelectedUpdateProfile] = useState<ProfileInfo | null>(null);
+  
+  // バージョン情報管理
+  const [gameVersions, setGameVersions] = useState<any>(null);
+  const [loadingVersions, setLoadingVersions] = useState(false);
 
   useEffect(() => {
     loadProfiles();
     loadSavedCredentials();
+    loadGameVersions();
 
     // インストール完了イベントをリッスン
     const unlistenCompleted = listen('installation-completed', (event) => {
@@ -153,6 +158,18 @@ function ProfilesTab() {
       setProfiles(profileList);
     } catch (err) {
       toast.error(`プロファイルの取得に失敗しました: ${err}`);
+    }
+  };
+  
+  const loadGameVersions = async () => {
+    try {
+      setLoadingVersions(true);
+      const versions = await invoke<any>('get_game_versions');
+      setGameVersions(versions);
+    } catch (err) {
+      console.error('Failed to load game versions:', err);
+    } finally {
+      setLoadingVersions(false);
     }
   };
 
@@ -274,6 +291,79 @@ function ProfilesTab() {
   const handleModRiskCancel = () => {
     setShowModRiskModal(false);
     setPendingProfileData(null);
+  };
+  
+  // 新しいバージョンが利用可能かチェック
+  const hasNewerVersion = (profile: ProfileInfo): boolean => {
+    if (!gameVersions || !profile.has_game || !profile.branch) {
+      return false;
+    }
+    
+    const branchVersions = gameVersions[profile.branch];
+    if (!branchVersions || branchVersions.length === 0) {
+      return false;
+    }
+    
+    // 特定のマニフェストIDが指定されている場合はマニフェストIDで比較
+    if (profile.manifest_id) {
+      const latestVersion = branchVersions[0];
+      return latestVersion && latestVersion.manifestId !== profile.manifest_id;
+    }
+    
+    if (!profile.version) {
+      return false;
+    }
+    
+    // プロファイルの現在のバージョンに対応するエントリを探す
+    const currentVersionEntry = branchVersions.find(v => v.gameVersion === profile.version);
+    if (!currentVersionEntry) {
+      // 現在のバージョンが見つからない場合は更新なしと判断（古すぎるか無効）
+      return false;
+    }
+    
+    // タイムスタンプでソートして最新のバージョンを取得
+    const sortedVersions = [...branchVersions].sort((a, b) => {
+      const timestampA = new Date(a.timestamp).getTime();
+      const timestampB = new Date(b.timestamp).getTime();
+      return timestampB - timestampA; // 降順（新しい順）
+    });
+    
+    const latestVersion = sortedVersions[0];
+    if (!latestVersion) {
+      return false;
+    }
+    
+    // 現在のバージョンが最新バージョンと同じ場合は更新なし
+    if (currentVersionEntry.manifestId === latestVersion.manifestId) {
+      return false;
+    }
+    
+    // タイムスタンプで比較
+    const currentTimestamp = new Date(currentVersionEntry.timestamp).getTime();
+    const latestTimestamp = new Date(latestVersion.timestamp).getTime();
+    
+    return latestTimestamp > currentTimestamp;
+  };
+  
+  // 最新バージョン情報を取得
+  const getLatestVersionInfo = (profile: ProfileInfo) => {
+    if (!gameVersions || !profile.branch) {
+      return null;
+    }
+    
+    const branchVersions = gameVersions[profile.branch];
+    if (!branchVersions || branchVersions.length === 0) {
+      return null;
+    }
+    
+    // タイムスタンプでソートして最新のバージョンを取得
+    const sortedVersions = [...branchVersions].sort((a, b) => {
+      const timestampA = new Date(a.timestamp).getTime();
+      const timestampB = new Date(b.timestamp).getTime();
+      return timestampB - timestampA; // 降順（新しい順）
+    });
+    
+    return sortedVersions[0];
   };
 
   const launchProfile = async (profileName: string) => {
@@ -496,6 +586,13 @@ function ProfilesTab() {
                     </span>
                   )}
                   
+                  {profile.has_game && hasNewerVersion(profile) && (
+                    <span className="status-info text-xs flex items-center space-x-1">
+                      <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span>
+                      <span>更新可能</span>
+                    </span>
+                  )}
+                  
                   {profile.has_game && profile.has_mod_loader && (
                     <span className="status-success text-xs">
                       RML
@@ -513,7 +610,28 @@ function ProfilesTab() {
                   {profile.version && (
                     <div className="flex justify-between">
                       <span className="text-gray-400">バージョン:</span>
-                      <span className="text-white">v{profile.version}</span>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-white">v{profile.version}</span>
+                        {hasNewerVersion(profile) && (() => {
+                          const latestVersion = getLatestVersionInfo(profile);
+                          return latestVersion && (
+                            <span className="text-blue-300 text-xs">
+                              → v{latestVersion.gameVersion}
+                            </span>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {hasNewerVersion(profile) && (
+                    <div className="mt-2 p-2 bg-blue-500/10 border border-blue-500/30 rounded text-xs">
+                      <div className="flex items-center space-x-2">
+                        <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                        <span className="text-blue-300">
+                          新しいバージョンが利用可能です
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -536,13 +654,23 @@ function ProfilesTab() {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="btn-secondary flex items-center space-x-2"
+                      className={`flex items-center space-x-2 ${
+                        hasNewerVersion(profile)
+                          ? 'btn-primary border-blue-500/50 shadow-blue-500/20'
+                          : 'btn-secondary'
+                      }`}
                       onClick={() => openUpdateModal(profile.id)}
                       disabled={isLoading}
-                      title="ゲームを最新版に更新"
+                      title={hasNewerVersion(profile) 
+                        ? '新しいバージョンが利用可能です' 
+                        : 'ゲームを最新版に更新'
+                      }
                     >
-                      <RefreshCw className="w-4 h-4" />
+                      <RefreshCw className={`w-4 h-4 ${hasNewerVersion(profile) ? 'text-white' : ''}`} />
                       <span>更新</span>
+                      {hasNewerVersion(profile) && (
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                      )}
                     </motion.button>
                   </>
                 ) : (

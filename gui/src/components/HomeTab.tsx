@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Play, ChevronDown, Info, Calendar, Loader2, RefreshCw } from 'lucide-react';
+import { Play, ChevronDown, Info, Calendar, Loader2, RefreshCw, Construction } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { useProfiles, useLaunchResonite } from '../hooks/useQueries';
 
@@ -25,31 +25,7 @@ function HomeTab() {
 
   const launchMutation = useLaunchResonite();
 
-  const [updateNotes] = useState<UpdateNote[]>([
-    {
-      version: "2025.6.4.1085",
-      date: "2025-6-4 3:24",
-      notes: [
-        "Hello everyone! I got another build for you! This is mostly a cleanup build, fixing up some stuff with Awwdio, giving you more control over voice reverb, merging in some cool additions by @gawdl3y and updates to the pride badges (including adding Graysexual flag) thanks to community contributions by brecert! ...",
-      ]
-    },
-    {
-      version: "2025.6.3.724",
-      date: "2025-6-3 3:24",
-      notes: [
-        "Another patch, fixing another case of skinned meshes not rendering!Compatible with previous, but update recommended again (if there are users in the session with older build, they might disable the skinned mesh in some cases)."
-      ]
-    },
-    {
-      version: "2025.6.3.701",
-      date: "2025-06-03",
-      notes: [
-        "プレリリース版",
-        "新機能のテスト実装",
-        "ユーザーインターフェース改善"
-      ]
-    }
-  ]);
+  const [updateNotes] = useState<UpdateNote[]>([]);
 
   // Auto-select first profile if none selected
   useEffect(() => {
@@ -104,40 +80,70 @@ function HomeTab() {
           </div>
           
           <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide space-y-4">
-            {updateNotes.map((update, index) => (
+            {updateNotes.length === 0 ? (
+              /* 未実装状態の表示 */
               <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-dark-800/50 border border-dark-600/30 rounded-lg p-4 hover:border-resonite-blue/30 transition-colors duration-200"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center justify-center h-full text-center py-12"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-lg font-semibold text-resonite-blue">
-                    {update.version}
-                  </span>
-                  <div className="flex items-center space-x-2 text-gray-400 text-sm">
-                    <Calendar className="w-4 h-4" />
-                    <span>{update.date}</span>
+                <Construction className="w-16 h-16 text-yellow-500 mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">アップデート情報機能</h3>
+                <p className="text-gray-400 mb-1">この機能はまだ実装されていません</p>
+                <p className="text-gray-500 text-sm">
+                  将来のバージョンでResoniteの最新アップデート情報を自動取得する予定です
+                </p>
+                
+                <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg max-w-md">
+                  <div className="flex items-start space-x-3">
+                    <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-left">
+                      <p className="text-blue-300 font-medium mb-1">予定している機能</p>
+                      <ul className="text-blue-200 space-y-1">
+                        <li>• Resonite公式のアップデート情報を自動取得</li>
+                        <li>• バージョン履歴とチェンジログの表示</li>
+                        <li>• 新バージョンの通知機能</li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
-                
-                <ul className="space-y-2">
-                  {update.notes.map((note, noteIndex) => (
-                    <motion.li
-                      key={noteIndex}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: (index * 0.1) + (noteIndex * 0.05) }}
-                      className="flex items-start space-x-3 text-gray-300"
-                    >
-                      <div className="w-1.5 h-1.5 bg-resonite-blue rounded-full mt-2 flex-shrink-0" />
-                      <span>{note}</span>
-                    </motion.li>
-                  ))}
-                </ul>
               </motion.div>
-            ))}
+            ) : (
+              updateNotes.map((update, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-dark-800/50 border border-dark-600/30 rounded-lg p-4 hover:border-resonite-blue/30 transition-colors duration-200"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-lg font-semibold text-resonite-blue">
+                      {update.version}
+                    </span>
+                    <div className="flex items-center space-x-2 text-gray-400 text-sm">
+                      <Calendar className="w-4 h-4" />
+                      <span>{update.date}</span>
+                    </div>
+                  </div>
+                  
+                  <ul className="space-y-2">
+                    {update.notes.map((note, noteIndex) => (
+                      <motion.li
+                        key={noteIndex}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: (index * 0.1) + (noteIndex * 0.05) }}
+                        className="flex items-start space-x-3 text-gray-300"
+                      >
+                        <div className="w-1.5 h-1.5 bg-resonite-blue rounded-full mt-2 flex-shrink-0" />
+                        <span>{note}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
+                </motion.div>
+              ))
+            )}
           </div>
         </motion.div>
       </div>
