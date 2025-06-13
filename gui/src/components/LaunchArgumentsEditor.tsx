@@ -369,12 +369,35 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
   }, [updateArgs]);
 
   const togglePreset = (presetId: string) => {
+    const preset = argumentPresets.find(p => p.id === presetId);
+    if (!preset) return;
+    
     const newActivePresets = new Set(activePresets);
-    if (newActivePresets.has(presetId)) {
-      newActivePresets.delete(presetId);
+    
+    // ハードウェア/VRカテゴリの場合は排他的選択
+    if (preset.category === 'hardware') {
+      // 同じカテゴリの他のプリセットを全て無効化
+      argumentPresets.forEach(p => {
+        if (p.category === 'hardware' && p.id !== presetId) {
+          newActivePresets.delete(p.id);
+        }
+      });
+      
+      // 選択されたプリセットをトグル
+      if (newActivePresets.has(presetId)) {
+        newActivePresets.delete(presetId);
+      } else {
+        newActivePresets.add(presetId);
+      }
     } else {
-      newActivePresets.add(presetId);
+      // その他のカテゴリは通常通りトグル
+      if (newActivePresets.has(presetId)) {
+        newActivePresets.delete(presetId);
+      } else {
+        newActivePresets.add(presetId);
+      }
     }
+    
     setActivePresets(newActivePresets);
   };
 
@@ -453,11 +476,12 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
               key={preset.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`border rounded-lg p-4 transition-all duration-200 ${
+              className={`border rounded-lg p-4 transition-all duration-200 cursor-pointer ${
                 isActive
                   ? 'border-resonite-blue bg-resonite-blue/10'
                   : 'border-dark-600 bg-dark-800/30 hover:border-dark-500'
               }`}
+              onClick={() => togglePreset(preset.id)}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-start space-x-3 flex-1">
@@ -487,7 +511,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
                   </div>
                 </div>
                 
-                <motion.button
+                <motion.div
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   className={`w-6 h-6 rounded-full border-2 transition-colors ${
@@ -495,7 +519,10 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
                       ? 'border-resonite-blue bg-resonite-blue'
                       : 'border-gray-500 hover:border-gray-400'
                   }`}
-                  onClick={() => togglePreset(preset.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePreset(preset.id);
+                  }}
                 >
                   {isActive && (
                     <motion.div
@@ -506,7 +533,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
                       <div className="w-2 h-2 bg-white rounded-full" />
                     </motion.div>
                   )}
-                </motion.button>
+                </motion.div>
               </div>
 
               {/* 値入力フィールド */}
@@ -522,7 +549,8 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
                     value={presetValues[preset.id] || ''}
                     onChange={(e) => updatePresetValue(preset.id, e.target.value)}
                     placeholder={preset.placeholder}
-                    className="input-primary w-full text-sm"
+                    className="input-primary w-full text-sm select-text"
+                    onClick={(e) => e.stopPropagation()}
                   />
                 </motion.div>
               )}
@@ -551,7 +579,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
             value={newCustomArg}
             onChange={(e) => setNewCustomArg(e.target.value)}
             placeholder="例: -CustomArgument value"
-            className="input-primary flex-1"
+            className="input-primary flex-1 select-text"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 e.preventDefault();
@@ -591,7 +619,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
                   type="text"
                   value={arg}
                   onChange={(e) => updateCustomArg(index, e.target.value)}
-                  className="input-primary flex-1"
+                  className="input-primary flex-1 select-text"
                 />
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -614,7 +642,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
             <FileText className="w-5 h-5 text-blue-400" />
             <h3 className="text-lg font-semibold text-white">現在の起動引数</h3>
           </div>
-          <div className="bg-dark-900 rounded-lg p-3 font-mono text-sm">
+          <div className="bg-dark-900 rounded-lg p-3 font-mono text-sm select-text">
             <div className="text-gray-300 break-all">
               {args.join(' ')}
             </div>
