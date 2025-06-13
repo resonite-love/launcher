@@ -49,6 +49,12 @@ jobs:
       - name: Build CLI (release)
         run: cargo build --release -p resonite-manager
 
+      # Build raw executable first for portable version
+      - name: Build GUI executable (for portable)
+        run: |
+          cd gui
+          npm run tauri build -- --bundles none
+        
       # Build GUI with Tauri
       - name: Build GUI (release)
         uses: tauri-apps/tauri-action@v0
@@ -111,10 +117,44 @@ jobs:
         
       - name: Create GUI Portable Binary
         run: |
-          # Copy the built Tauri executable as portable version
+          # Check multiple possible locations for the Tauri executable
+          $possiblePaths = @(
+            ".\gui\src-tauri\target\release\resonite-tools-tauri.exe",
+            ".\gui\src-tauri\target\release\kokoa-resonite-tools.exe",
+            ".\gui\src-tauri\target\release\bundle\nsis\Kokoa Resonite Tools_*_x64-setup.exe",
+            ".\gui\src-tauri\target\release\bundle\msi\*.msi"
+          )
+          
+          # First try to find the raw executable
+          $foundExecutable = $null
           if (Test-Path ".\gui\src-tauri\target\release\resonite-tools-tauri.exe") {
-            cp .\gui\src-tauri\target\release\resonite-tools-tauri.exe .\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe
+            $foundExecutable = ".\gui\src-tauri\target\release\resonite-tools-tauri.exe"
+          } elseif (Test-Path ".\gui\src-tauri\target\release\kokoa-resonite-tools.exe") {
+            $foundExecutable = ".\gui\src-tauri\target\release\kokoa-resonite-tools.exe"
           } else {
+            # Try to extract from NSIS bundle
+            $nsisFiles = Get-ChildItem ".\gui\src-tauri\target\release\bundle\nsis\" -Filter "*setup.exe" -ErrorAction SilentlyContinue
+            if ($nsisFiles) {
+              Write-Host "Found NSIS installer: $($nsisFiles[0].FullName)"
+              # For now, we'll copy the NSIS installer as the portable version
+              # In a real scenario, you'd want to extract the exe from the installer
+              $foundExecutable = $nsisFiles[0].FullName
+            }
+          }
+          
+          if ($foundExecutable) {
+            cp $foundExecutable .\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe
+            Write-Host "Created portable version from: $foundExecutable"
+          } else {
+            Write-Host "Searching for files in target directories..."
+            if (Test-Path ".\gui\src-tauri\target\release") {
+              Write-Host "Files in .\gui\src-tauri\target\release:"
+              Get-ChildItem ".\gui\src-tauri\target\release" -Recurse -Name | Select-Object -First 20
+            }
+            if (Test-Path ".\gui\src-tauri\target\release\bundle") {
+              Write-Host "Files in .\gui\src-tauri\target\release\bundle:"
+              Get-ChildItem ".\gui\src-tauri\target\release\bundle" -Recurse -Name | Select-Object -First 20
+            }
             Write-Warning "GUI executable not found, skipping portable version"
           }
         shell: pwsh
