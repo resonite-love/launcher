@@ -53,7 +53,7 @@ jobs:
       - name: Build GUI executable (for portable)
         run: |
           cd gui
-          npm run tauri build
+          npm run tauri build -- --no-bundle --release
         
       # Build GUI with Tauri
       - name: Build GUI (release)

@@ -1,6 +1,6 @@
 [package]
 name = "resonite-tools-lib"
-version = "0.0.3"
+version = "0.0.4"
 edition = "2021"
 authors = ["kokoa-love"]
 description = "Kokoa Resonite Tools - Core library for Resonite management"
