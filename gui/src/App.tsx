@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Home, User, Settings, Loader2, AlertCircle } from 'lucide-react';
 import CustomTitlebar from './components/CustomTitlebar';
 import HomeTab from './components/HomeTab';
 import ProfilesTab from './components/ProfilesTab';
 import SettingsTab from './components/SettingsTab';
+import FirstRunSetupModal from './components/FirstRunSetupModal';
 import { useAppStore } from './store/useAppStore';
 import { useAppStatus } from './hooks/useQueries';
 
@@ -17,6 +18,8 @@ function App() {
     setIsInitializing 
   } = useAppStore();
 
+  const [showFirstRunSetup, setShowFirstRunSetup] = useState(false);
+
   const { 
     data: statusData, 
     isLoading: isLoadingStatus, 
@@ -27,6 +30,12 @@ function App() {
   useEffect(() => {
     setIsInitializing(isLoadingStatus);
   }, [isLoadingStatus, setIsInitializing]);
+
+  useEffect(() => {
+    if (statusData && statusData.is_first_run) {
+      setShowFirstRunSetup(true);
+    }
+  }, [statusData]);
 
   if (isInitializing) {
     return (
@@ -199,6 +208,15 @@ function App() {
           </div>
         </div>
       </footer>
+
+      {/* First Run Setup Modal */}
+      <FirstRunSetupModal
+        isOpen={showFirstRunSetup}
+        onComplete={() => {
+          setShowFirstRunSetup(false);
+          refetchStatus(); // アプリステータスを再取得
+        }}
+      />
     </motion.div>
   );
 }

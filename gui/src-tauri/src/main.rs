@@ -64,6 +64,7 @@ pub struct AppStatus {
     pub initialized: bool,
     pub depot_downloader_available: bool,
     pub exe_dir: Option<String>,
+    pub is_first_run: bool,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
@@ -79,6 +80,19 @@ pub struct YtDlpInfo {
     pub path: Option<String>,
 }
 
+// Check if this is the first run
+fn is_first_run(exe_dir: &std::path::Path) -> bool {
+    let first_run_marker = exe_dir.join(".first_run_complete");
+    !first_run_marker.exists()
+}
+
+// Mark first run as complete
+fn mark_first_run_complete(exe_dir: &std::path::Path) -> Result<(), String> {
+    let first_run_marker = exe_dir.join(".first_run_complete");
+    std::fs::write(first_run_marker, "")
+        .map_err(|e| format!("Failed to mark first run complete: {}", e))
+}
+
 // Initialize the application
 #[tauri::command]
 async fn initialize_app(state: State<'_, Mutex<AppState>>) -> Result<AppStatus, String> {
@@ -87,6 +101,9 @@ async fn initialize_app(state: State<'_, Mutex<AppState>>) -> Result<AppStatus, 
     match utils::get_executable_directory() {
         Ok(dir) => {
             app_state.exe_dir = Some(dir.clone());
+            
+            // Check if this is the first run
+            let is_first_run = is_first_run(&dir);
             
             // Initialize DepotDownloader
             let depot_downloader = DepotDownloader::with_default_path(&dir);
@@ -100,6 +117,7 @@ async fn initialize_app(state: State<'_, Mutex<AppState>>) -> Result<AppStatus, 
                 initialized: true,
                 depot_downloader_available: depot_available,
                 exe_dir: Some(dir.to_string_lossy().to_string()),
+                is_first_run,
             })
         }
         Err(e) => Err(format!("Failed to initialize: {}", e)),
@@ -1185,6 +1203,81 @@ async fn update_yt_dlp(
     }
 }
 
+// Download and setup DepotDownloader
+#[tauri::command]
+async fn download_depot_downloader(state: State<'_, Mutex<AppState>>) -> Result<String, String> {
+    let exe_dir = {
+        let app_state = state.lock().unwrap();
+        app_state.exe_dir.as_ref()
+            .ok_or("Application not initialized")?
+            .clone()
+    };
+    
+    let depot_path = std::path::Path::new(&exe_dir).join("DepotDownloader.exe");
+    
+    // Download DepotDownloader from GitHub releases
+    let client = reqwest::Client::new();
+    let download_url = "https://github.com/SteamRE/DepotDownloader/releases/latest/download/DepotDownloader-windows-x64.zip";
+    
+    let response = client.get(download_url)
+        .send()
+        .await
+        .map_err(|e| format!("Failed to download DepotDownloader: {}", e))?;
+    
+    if !response.status().is_success() {
+        return Err(format!("Failed to download DepotDownloader: HTTP {}", response.status()));
+    }
+    
+    let content = response.bytes()
+        .await
+        .map_err(|e| format!("Failed to read DepotDownloader content: {}", e))?;
+    
+    // Extract ZIP file
+    let mut archive = zip::ZipArchive::new(std::io::Cursor::new(content))
+        .map_err(|e| format!("Failed to open DepotDownloader ZIP: {}", e))?;
+    
+    // Extract DepotDownloader.exe
+    for i in 0..archive.len() {
+        let mut file = archive.by_index(i)
+            .map_err(|e| format!("Failed to read ZIP entry: {}", e))?;
+        
+        if file.name() == "DepotDownloader.exe" {
+            let mut out_file = std::fs::File::create(&depot_path)
+                .map_err(|e| format!("Failed to create DepotDownloader.exe: {}", e))?;
+            
+            std::io::copy(&mut file, &mut out_file)
+                .map_err(|e| format!("Failed to extract DepotDownloader.exe: {}", e))?;
+            
+            // Update state
+            {
+                let mut app_state = state.lock().unwrap();
+                if let Some(depot_downloader) = &mut app_state.depot_downloader {
+                    *depot_downloader = DepotDownloader::with_default_path(&std::path::PathBuf::from(&exe_dir));
+                }
+            }
+            
+            return Ok("DepotDownloader downloaded and extracted successfully".to_string());
+        }
+    }
+    
+    Err("DepotDownloader.exe not found in the downloaded ZIP file".to_string())
+}
+
+// Complete first run setup
+#[tauri::command]
+async fn complete_first_run_setup(state: State<'_, Mutex<AppState>>) -> Result<String, String> {
+    let exe_dir = {
+        let app_state = state.lock().unwrap();
+        app_state.exe_dir.as_ref()
+            .ok_or("Application not initialized")?
+            .clone()
+    };
+    
+    mark_first_run_complete(&std::path::PathBuf::from(&exe_dir))?;
+    
+    Ok("First run setup completed successfully".to_string())
+}
+
 fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(AppState::default()))
@@ -1224,7 +1317,9 @@ fn main() {
             get_github_release_info,
             get_game_versions,
             get_yt_dlp_status,
-            update_yt_dlp
+            update_yt_dlp,
+            download_depot_downloader,
+            complete_first_run_setup
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

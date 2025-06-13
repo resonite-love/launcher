@@ -7,6 +7,7 @@ interface AppStatus {
   initialized: boolean;
   depot_downloader_available: boolean;
   exe_dir: string | null;
+  is_first_run: boolean;
 }
 
 interface Profile {
