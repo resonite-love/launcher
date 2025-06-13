@@ -7,6 +7,18 @@
 
 ## [Unreleased]
 
+## [v0.0.9] - 2025-06-14
+
+### 修正
+- GitHub Actions でポータブル版実行ファイルの正しいパスを使用するよう修正
+- 実行ファイルが `./target/release/` に生成されることを確認
+- デバッグステップを削除してワークフローをクリーンアップ
+
+### 改善
+- ポータブル版のファイルサイズを表示
+- WebView2Loader.dll の検索を改善
+- エラーハンドリングを強化
+
 ## [v0.0.8] - 2025-06-13
 
 ### 改善
@@ -107,7 +119,8 @@
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.8...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.9...HEAD
+[v0.0.9]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.8...v0.0.9
 [v0.0.8]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.7...v0.0.8
 [v0.0.7]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.6...v0.0.7
 [v0.0.6]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.5...v0.0.6

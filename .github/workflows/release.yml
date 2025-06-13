@@ -82,44 +82,6 @@ jobs:
               }
             }
           }
-          
-      # Debug: Check target/release directory contents
-      - name: Debug - List target/release contents
-        run: |
-          Write-Host "=== Current working directory ==="
-          Get-Location
-          
-          Write-Host "`n=== Looking for target directories ==="
-          Get-ChildItem -Path . -Filter "target" -Recurse -Directory -ErrorAction SilentlyContinue | Select-Object -First 10 | ForEach-Object {
-            Write-Host "Found target at: $($_.FullName)"
-          }
-          
-          Write-Host "`n=== Checking various possible locations ==="
-          $paths = @(
-            ".\gui\src-tauri\target\release",
-            ".\target\release",
-            ".\gui\target\release",
-            "gui\src-tauri\target\release",
-            "target\release"
-          )
-          
-          foreach ($path in $paths) {
-            Write-Host "`nChecking: $path"
-            if (Test-Path $path) {
-              Write-Host "  EXISTS - Contents:"
-              Get-ChildItem $path -Force | Where-Object { $_.Extension -in ".exe", ".dll", "" } | ForEach-Object {
-                Write-Host "    $($_.Name) ($($_.Length) bytes)"
-              }
-            } else {
-              Write-Host "  NOT FOUND"
-            }
-          }
-          
-          Write-Host "`n=== Looking for any EXE files ==="
-          Get-ChildItem -Path . -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -like "*target*release*" } | Select-Object -First 10 | ForEach-Object {
-            Write-Host "Found EXE: $($_.FullName)"
-          }
-        shell: pwsh
         
       # Build GUI with Tauri
       - name: Build GUI (release)
@@ -183,42 +145,45 @@ jobs:
         
       - name: Create GUI Portable Binary
         run: |
-          # Check multiple possible locations for the Tauri executable
-          $exeName = "resonite-tools-tauri.exe"
-          $paths = @(
-            ".\gui\src-tauri\target\release\$exeName",
-            ".\gui\src-tauri\target\release\Kokoa Resonite Tools.exe"
-          )
+          # The executable is in the root target/release directory
+          $exePath = ".\target\release\resonite-tools-tauri.exe"
           
-          $foundExe = $null
-          foreach ($path in $paths) {
-            if (Test-Path $path) {
-              $foundExe = $path
-              Write-Host "Found executable at: $path"
-              break
-            }
-          }
-          
-          if ($foundExe) {
-            # Copy the executable
-            cp $foundExe ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe"
+          if (Test-Path $exePath) {
+            Write-Host "Found executable at: $exePath"
+            $fileSize = (Get-Item $exePath).Length / 1MB
+            Write-Host "File size: $([math]::Round($fileSize, 2)) MB"
             
-            # Also copy the WebView2Loader.dll if it exists
-            $webview2Path = ".\gui\src-tauri\target\release\WebView2Loader.dll"
-            if (Test-Path $webview2Path) {
-              cp $webview2Path ".\WebView2Loader.dll"
-              Write-Host "Copied WebView2Loader.dll"
+            # Copy the executable
+            cp $exePath ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe"
+            Write-Host "Created portable executable: kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe"
+            
+            # Check for WebView2Loader.dll in various locations
+            $webview2Paths = @(
+              ".\target\release\WebView2Loader.dll",
+              ".\gui\src-tauri\target\release\WebView2Loader.dll"
+            )
+            
+            $webview2Found = $false
+            foreach ($path in $webview2Paths) {
+              if (Test-Path $path) {
+                cp $path ".\WebView2Loader.dll"
+                Write-Host "Copied WebView2Loader.dll from: $path"
+                $webview2Found = $true
+                break
+              }
             }
             
             # Create a zip file with both files if WebView2Loader exists
-            if (Test-Path ".\WebView2Loader.dll") {
+            if ($webview2Found) {
               Compress-Archive -Path ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe", ".\WebView2Loader.dll" -DestinationPath ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.zip" -Force
-              Write-Host "Created portable zip with executable and WebView2Loader.dll"
+              Write-Host "Created portable ZIP with executable and WebView2Loader.dll"
+            } else {
+              Write-Host "WebView2Loader.dll not found, creating ZIP with executable only"
+              Compress-Archive -Path ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe" -DestinationPath ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.zip" -Force
             }
           } else {
-            Write-Host "Checking available files in target/release directory:"
-            Get-ChildItem ".\gui\src-tauri\target\release\" -Filter "*.exe" | ForEach-Object { Write-Host $_.Name }
-            Write-Warning "GUI executable not found, skipping portable version"
+            Write-Error "GUI executable not found at expected location: $exePath"
+            exit 1
           }
         shell: pwsh
         
