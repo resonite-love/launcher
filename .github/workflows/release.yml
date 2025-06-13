@@ -170,14 +170,14 @@ jobs:
           Write-Host "=== Verifying GUI executable location ==="
           Write-Host "Current directory: $(Get-Location)"
           
-          if (Test-Path ".\target\release\resonite-tools-tauri.exe") {
-            Write-Host "SUCCESS: Found resonite-tools-tauri.exe in expected location"
-            $item = Get-Item ".\target\release\resonite-tools-tauri.exe"
+          if (Test-Path ".\target\release\Kokoa Resonite Tools.exe") {
+            Write-Host "SUCCESS: Found 'Kokoa Resonite Tools.exe' in expected location"
+            $item = Get-Item ".\target\release\Kokoa Resonite Tools.exe"
             Write-Host "  Full path: $($item.FullName)"
             Write-Host "  Size: $($item.Length) bytes"
             Write-Host "  Last write time: $($item.LastWriteTime)"
           } else {
-            Write-Host "ERROR: resonite-tools-tauri.exe not found in .\target\release\"
+            Write-Host "ERROR: 'Kokoa Resonite Tools.exe' not found in .\target\release\"
             Write-Host "`nChecking alternative locations:"
             
             $locations = @(
@@ -200,8 +200,8 @@ jobs:
         
       - name: Create GUI Portable Binary
         run: |
-          # The executable is in the root target/release directory
-          $exePath = ".\target\release\resonite-tools-tauri.exe"
+          # The executable is named "Kokoa Resonite Tools.exe" with spaces
+          $exePath = ".\target\release\Kokoa Resonite Tools.exe"
           
           if (Test-Path $exePath) {
             Write-Host "Found executable at: $exePath"

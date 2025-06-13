@@ -7,6 +7,13 @@
 
 ## [Unreleased]
 
+## [v0.1.1] - 2025-06-14
+
+### 修正
+- **重要**: 実行ファイル名が `Kokoa Resonite Tools.exe`（スペース付き）であることを発見
+- GitHub Actions でポータブル版作成時の正しい実行ファイル名を使用
+- 検証ステップも正しいファイル名に更新
+
 ## [v0.1.0] - 2025-06-14
 
 ### 改善
@@ -130,7 +137,8 @@
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.1.1...HEAD
+[v0.1.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.1.0...v0.1.1
 [v0.1.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.9...v0.1.0
 [v0.0.9]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.8...v0.0.9
 [v0.0.8]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.7...v0.0.8
