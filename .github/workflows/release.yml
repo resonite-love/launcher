@@ -58,30 +58,51 @@ jobs:
       # Build raw executable for portable version
       - name: Build GUI executable (for portable)
         run: |
-          Write-Host "Current directory before cd:"
-          Get-Location
+          Write-Host "=== Building GUI executable for portable version ==="
+          Write-Host "Current directory: $(Get-Location)"
+          
+          # Set CARGO_TARGET_DIR to ensure consistent output location
+          $env:CARGO_TARGET_DIR = "$PWD\target"
+          Write-Host "CARGO_TARGET_DIR set to: $env:CARGO_TARGET_DIR"
           
           cd gui/src-tauri
+          Write-Host "Changed to directory: $(Get-Location)"
           
-          Write-Host "Current directory after cd:"
-          Get-Location
-          
-          Write-Host "Building with cargo..."
+          Write-Host "`nBuilding with cargo..."
           cargo build --release --features custom-protocol
           
-          Write-Host "`nChecking if build succeeded:"
-          if (Test-Path "target\release\resonite-tools-tauri.exe") {
-            Write-Host "SUCCESS: Found resonite-tools-tauri.exe"
-            Write-Host "File size: $((Get-Item "target\release\resonite-tools-tauri.exe").Length) bytes"
-          } else {
-            Write-Host "WARNING: resonite-tools-tauri.exe not found after build"
-            Write-Host "Checking what files exist in target/release:"
-            if (Test-Path "target\release") {
-              Get-ChildItem "target\release" -Filter "*.exe" | ForEach-Object {
-                Write-Host "  Found: $($_.Name)"
-              }
+          Write-Host "`n=== Build complete, checking outputs ==="
+          
+          # Check multiple possible locations
+          $possiblePaths = @(
+            "$env:CARGO_TARGET_DIR\release\resonite-tools-tauri.exe",
+            "..\..\target\release\resonite-tools-tauri.exe",
+            "target\release\resonite-tools-tauri.exe"
+          )
+          
+          $foundPath = $null
+          foreach ($path in $possiblePaths) {
+            Write-Host "Checking: $path"
+            if (Test-Path $path) {
+              $foundPath = $path
+              $fullPath = (Resolve-Path $path).Path
+              Write-Host "  FOUND at: $fullPath"
+              Write-Host "  Size: $((Get-Item $path).Length) bytes"
+              break
+            } else {
+              Write-Host "  Not found"
             }
           }
+          
+          if (-not $foundPath) {
+            Write-Host "`nListing all EXE files in current tree:"
+            Get-ChildItem -Path . -Filter "*.exe" -Recurse | Select-Object -First 20 | ForEach-Object {
+              Write-Host "  $($_.FullName)"
+            }
+          }
+          
+          # Return to root directory
+          cd ..\..
         
       # Build GUI with Tauri
       - name: Build GUI (release)
@@ -142,6 +163,40 @@ jobs:
       - name: Create CLI Release Asset
         run: |
           cp ./target/release/resonite-manager.exe ./resonite-manager-${{ github.ref_name }}-windows.exe
+        
+      # Verify executable exists before creating portable
+      - name: Verify GUI executable
+        run: |
+          Write-Host "=== Verifying GUI executable location ==="
+          Write-Host "Current directory: $(Get-Location)"
+          
+          if (Test-Path ".\target\release\resonite-tools-tauri.exe") {
+            Write-Host "SUCCESS: Found resonite-tools-tauri.exe in expected location"
+            $item = Get-Item ".\target\release\resonite-tools-tauri.exe"
+            Write-Host "  Full path: $($item.FullName)"
+            Write-Host "  Size: $($item.Length) bytes"
+            Write-Host "  Last write time: $($item.LastWriteTime)"
+          } else {
+            Write-Host "ERROR: resonite-tools-tauri.exe not found in .\target\release\"
+            Write-Host "`nChecking alternative locations:"
+            
+            $locations = @(
+              ".\gui\src-tauri\target\release\resonite-tools-tauri.exe",
+              ".\gui\target\release\resonite-tools-tauri.exe"
+            )
+            
+            foreach ($loc in $locations) {
+              if (Test-Path $loc) {
+                Write-Host "  Found at: $loc"
+              }
+            }
+            
+            Write-Host "`nAll files in target\release:"
+            if (Test-Path ".\target\release") {
+              Get-ChildItem ".\target\release" | Select-Object Mode, Length, Name | Format-Table
+            }
+          }
+        shell: pwsh
         
       - name: Create GUI Portable Binary
         run: |

@@ -7,6 +7,17 @@
 
 ## [Unreleased]
 
+## [v0.1.0] - 2025-06-14
+
+### 改善
+- GitHub Actions のビルドプロセスを大幅に改善
+- `CARGO_TARGET_DIR` を明示的に設定してビルド出力の一貫性を確保
+- ビルド前後の詳細な検証ステップを追加
+
+### デバッグ
+- 実行ファイルの検証ステップを追加
+- ビルド出力の詳細なログを提供
+
 ## [v0.0.9] - 2025-06-14
 
 ### 修正
@@ -119,7 +130,8 @@
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.9...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.1.0...HEAD
+[v0.1.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.9...v0.1.0
 [v0.0.9]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.8...v0.0.9
 [v0.0.8]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.7...v0.0.8
 [v0.0.7]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.6...v0.0.7
