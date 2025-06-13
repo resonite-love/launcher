@@ -167,10 +167,25 @@ impl DepotDownloader {
         println!("Using DepotDownloader path: {}", self.path.display());
         println!("Running with args: {:?}", args);
 
-        // Run DepotDownloader with the provided arguments
-        let output = Command::new(&self.path).args(args).output()?;
+        // リリースビルドではウィンドウを非表示にしてDepotDownloaderを実行
+        #[cfg(all(target_os = "windows", not(debug_assertions)))]
+        {
+            use std::os::windows::process::CommandExt;
+            
+            let output = Command::new(&self.path)
+                .args(args)
+                .creation_flags(0x08000000) // CREATE_NO_WINDOW
+                .output()?;
+            
+            Ok(output)
+        }
 
-        Ok(output)
+        // デバッグビルドまたはWindows以外では通常通り実行
+        #[cfg(any(not(target_os = "windows"), debug_assertions))]
+        {
+            let output = Command::new(&self.path).args(args).output()?;
+            Ok(output)
+        }
     }
 
     /// 指定された引数でDepotDownloaderを別のコマンドウィンドウで実行する（2FA対応）
@@ -180,20 +195,39 @@ impl DepotDownloader {
 
         #[cfg(target_os = "windows")]
         {
-            // Windowsでは新しいコマンドプロンプトウィンドウを開く
-            let depot_path = self.path.to_string_lossy();
-            let args_str = args.join(" ");
+            use std::os::windows::process::CommandExt;
+            
+            // リリースビルドではウィンドウを非表示にする
+            // #[cfg(not(debug_assertions))]
+            // {
+            //     // バックグラウンドで実行（ウィンドウなし）
+            //     let _child = Command::new(&self.path)
+            //         .args(args)
+            //         .creation_flags(0x08000000) // CREATE_NO_WINDOW
+            //         .stdin(Stdio::null())
+            //         .stdout(Stdio::null())
+            //         .stderr(Stdio::null())
+            //         .spawn()?;
+            //     println!("DepotDownloader launched in background (no window)");
+            // }
+            
+            // デバッグビルドでは従来通りウィンドウを表示
+            // #[cfg(debug_assertions)]
+            // {
+                let depot_path = self.path.to_string_lossy();
+                let args_str = args.join(" ");
 
-            // startコマンドで新しいウィンドウを開き、/kでコマンド実行後もウィンドウを保持
-            let command_line = format!("start  cmd /c {} {}", depot_path, args_str);
+                // startコマンドで新しいウィンドウを開き、/kでコマンド実行後もウィンドウを保持
+                let command_line = format!("start  cmd /c {} {}", depot_path, args_str);
 
-            println!("Executing command: cmd /c {}", command_line);
+                println!("Executing command: cmd /c {}", command_line);
 
-            let cmd = Command::new("cmd")
-                .args(&["/c", &command_line])
-                .spawn()?;
-            // startコマンドは即座に戻るので、waitしない
-            println!("DepotDownloader launched in new window");
+                let _cmd = Command::new("cmd")
+                    .args(&["/c", &command_line])
+                    .spawn()?;
+                // startコマンドは即座に戻るので、waitしない
+                println!("DepotDownloader launched in new window");
+            // }
         }
 
         #[cfg(not(target_os = "windows"))]

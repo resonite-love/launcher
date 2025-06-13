@@ -24,6 +24,8 @@ import ModRiskWarningModal from './ModRiskWarningModal';
 import GameUpdateModal from './GameUpdateModal';
 import GameVersionSelector from './GameVersionSelector';
 import { useAppStore } from '../store/useAppStore';
+import { useProfiles, useCreateProfile } from '../hooks/useQueries';
+import { BranchInfo } from './ProfileEditPage';
 
 interface ProfileInfo {
   id: string;
@@ -64,7 +66,11 @@ function ProfilesTab() {
     navigateToProfileList 
   } = useAppStore();
   
-  const [profiles, setProfiles] = useState<ProfileInfo[]>([]);
+  // React Query hooks
+  const { data: profiles = [], isLoading: profilesLoading, refetch: refetchProfiles } = useProfiles();
+  const createProfileMutation = useCreateProfile();
+  
+  // ローカルローディング状態（ゲームインストールなど）
   const [isLoading, setIsLoading] = useState(false);
   
   // プロファイル作成モーダル用の状態
@@ -106,11 +112,10 @@ function ProfilesTab() {
   const [selectedUpdateProfile, setSelectedUpdateProfile] = useState<ProfileInfo | null>(null);
   
   // バージョン情報管理
-  const [gameVersions, setGameVersions] = useState<any>(null);
+  const [gameVersions, setGameVersions] = useState<BranchInfo>({});
   const [loadingVersions, setLoadingVersions] = useState(false);
 
   useEffect(() => {
-    loadProfiles();
     loadSavedCredentials();
     loadGameVersions();
 
@@ -125,7 +130,7 @@ function ProfilesTab() {
       
       if (data.success) {
         toast.success(data.message);
-        loadProfiles();
+        refetchProfiles(); // React Query を使用
       } else {
         toast.error(data.message);
       }
@@ -150,16 +155,8 @@ function ProfilesTab() {
       unlistenCompleted.then(f => f());
       unlistenStatus.then(f => f());
     };
-  }, []);
+  }, [refetchProfiles]);
 
-  const loadProfiles = async () => {
-    try {
-      const profileList = await invoke<ProfileInfo[]>('get_profiles');
-      setProfiles(profileList);
-    } catch (err) {
-      toast.error(`プロファイルの取得に失敗しました: ${err}`);
-    }
-  };
   
   const loadGameVersions = async () => {
     try {
@@ -233,13 +230,11 @@ function ProfilesTab() {
     installModLoader: boolean
   ) => {
     try {
-      setIsLoading(true);
-      const result = await invoke<string>('create_profile', {
+      // React Queryのミューテーションを使用してプロファイルを作成
+      await createProfileMutation.mutateAsync({
         name: profileData.name,
         description: profileData.description,
       });
-      
-      toast.success(result);
       
       // ゲームもインストールする場合
       if (profileData.withGame) {
@@ -272,11 +267,8 @@ function ProfilesTab() {
       }
       
       closeCreateProfileModal();
-      await loadProfiles();
     } catch (err) {
       toast.error(`プロファイルの作成に失敗しました: ${err}`);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -447,7 +439,7 @@ function ProfilesTab() {
       const result = await invoke<string>('update_profile_game_interactive', { request });
       toast.success(result);
       closeUpdateModal();
-      await loadProfiles(); // プロファイル一覧を更新
+      await refetchProfiles(); // プロファイル一覧を更新
     } catch (err) {
       toast.error(`ゲームの更新に失敗しました: ${err}`);
     } finally {
@@ -488,7 +480,7 @@ function ProfilesTab() {
     try {
       const result = await invoke<string>('update_profile_config', { profile: config });
       toast.success(result);
-      await loadProfiles();
+      await refetchProfiles();
     } catch (err) {
       toast.error(`プロファイルの更新に失敗しました: ${err}`);
       throw err;
@@ -535,9 +527,10 @@ function ProfilesTab() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="btn-secondary flex items-center space-x-2"
-            onClick={loadProfiles}
+            onClick={() => refetchProfiles()}
+            disabled={profilesLoading}
           >
-            <RefreshCw className="w-4 h-4" />
+            <RefreshCw className={`w-4 h-4 ${profilesLoading ? 'animate-spin' : ''}`} />
             <span>更新</span>
           </motion.button>
         </div>
@@ -982,16 +975,16 @@ function ProfilesTab() {
                 <button
                   className="btn-secondary flex-1"
                   onClick={closeCreateProfileModal}
-                  disabled={isLoading}
+                  disabled={createProfileMutation.isPending}
                 >
                   キャンセル
                 </button>
                 <button
                   className="btn-primary flex-1 flex items-center justify-center space-x-2"
                   onClick={createProfile}
-                  disabled={isLoading || !newProfileName.trim()}
+                  disabled={createProfileMutation.isPending || !newProfileName.trim()}
                 >
-                  {isLoading ? (
+                  {createProfileMutation.isPending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Plus className="w-4 h-4" />

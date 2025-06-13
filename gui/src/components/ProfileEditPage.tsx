@@ -121,6 +121,16 @@ interface UnmanagedMod {
   detected_version?: string;
 }
 
+interface GameVersion {
+  gameVersion: string;
+  manifestId: string;
+  timestamp: string;
+}
+
+export interface BranchInfo {
+  [key: string]: GameVersion[];
+}
+
 type TabType = 'info' | 'launch' | 'mods' | 'other';
 
 function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
@@ -189,7 +199,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [currentBranch, setCurrentBranch] = useState<string>('release');
   const [showGameInstallModal, setShowGameInstallModal] = useState(false);
   const [isInstallingGame, setIsInstallingGame] = useState(false);
-  const [gameVersions, setGameVersions] = useState<any>(null);
+  const [gameVersions, setGameVersions] = useState<BranchInfo>({});
+  
 
   const tabs = [
     { id: 'info' as TabType, label: 'プロファイル情報', icon: User },

@@ -632,8 +632,11 @@ async fn open_profile_folder(
     // Open folder in system file explorer
     #[cfg(target_os = "windows")]
     {
+        use std::os::windows::process::CommandExt;
+        
         std::process::Command::new("explorer")
             .arg(&profile_dir)
+            .creation_flags(if cfg!(debug_assertions) { 0 } else { 0x08000000 }) // CREATE_NO_WINDOW in release
             .spawn()
             .map_err(|e| format!("Failed to open folder: {}", e))?;
     }
@@ -1017,18 +1020,27 @@ async fn get_yt_dlp_status(
     }
     
     // Get version by running yt-dlp --version
-    let version = match Command::new(&yt_dlp_path)
-        .arg("--version")
-        .output()
-    {
-        Ok(output) => {
-            if output.status.success() {
-                Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
-            } else {
-                None
-            }
+    let version = {
+        let mut cmd = Command::new(&yt_dlp_path);
+        cmd.arg("--version");
+        
+        // リリースビルドではウィンドウを非表示にする
+        #[cfg(all(target_os = "windows", not(debug_assertions)))]
+        {
+            use std::os::windows::process::CommandExt;
+            cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
         }
-        Err(_) => None,
+        
+        match cmd.output() {
+            Ok(output) => {
+                if output.status.success() {
+                    Some(String::from_utf8_lossy(&output.stdout).trim().to_string())
+                } else {
+                    None
+                }
+            }
+            Err(_) => None,
+        }
     };
     
     Ok(YtDlpInfo {
@@ -1094,10 +1106,18 @@ async fn update_yt_dlp(
         
         download_yt_dlp(&yt_dlp_path).await?;
         
-        let version = match Command::new(&yt_dlp_path)
-            .arg("--version")
-            .output()
-        {
+        let version = {
+            let mut cmd = Command::new(&yt_dlp_path);
+            cmd.arg("--version");
+            
+            // リリースビルドではウィンドウを非表示にする
+            #[cfg(all(target_os = "windows", not(debug_assertions)))]
+            {
+                use std::os::windows::process::CommandExt;
+                cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+            }
+            
+            match cmd.output() {
             Ok(output) => {
                 if output.status.success() {
                     String::from_utf8_lossy(&output.stdout).trim().to_string()
@@ -1106,16 +1126,27 @@ async fn update_yt_dlp(
                 }
             }
             Err(_) => "unknown".to_string(),
+            }
         };
         
         return Ok(format!("yt-dlp installed successfully (version {})", version));
     }
     
     // Use yt-dlp's built-in update functionality
-    let output = Command::new(&yt_dlp_path)
-        .arg("-U")
-        .output()
-        .map_err(|e| format!("Failed to run yt-dlp update: {}", e))?;
+    let output = {
+        let mut cmd = Command::new(&yt_dlp_path);
+        cmd.arg("-U");
+        
+        // リリースビルドではウィンドウを非表示にする
+        #[cfg(all(target_os = "windows", not(debug_assertions)))]
+        {
+            use std::os::windows::process::CommandExt;
+            cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+        }
+        
+        cmd.output()
+            .map_err(|e| format!("Failed to run yt-dlp update: {}", e))?
+    };
     
     if !output.status.success() {
         let error_msg = String::from_utf8_lossy(&output.stderr);
@@ -1123,10 +1154,20 @@ async fn update_yt_dlp(
     }
     
     // Get the updated version
-    let version_output = Command::new(&yt_dlp_path)
-        .arg("--version")
-        .output()
-        .map_err(|e| format!("Failed to get yt-dlp version: {}", e))?;
+    let version_output = {
+        let mut cmd = Command::new(&yt_dlp_path);
+        cmd.arg("--version");
+        
+        // リリースビルドではウィンドウを非表示にする
+        #[cfg(all(target_os = "windows", not(debug_assertions)))]
+        {
+            use std::os::windows::process::CommandExt;
+            cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+        }
+        
+        cmd.output()
+            .map_err(|e| format!("Failed to get yt-dlp version: {}", e))?
+    };
     
     let version = if version_output.status.success() {
         String::from_utf8_lossy(&version_output.stdout).trim().to_string()
