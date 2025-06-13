@@ -235,6 +235,7 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
                   <p className="text-blue-200">
                     Steamアカウント情報を保存すると、ゲームのダウンロード時に自動でログインされます。
                     情報はローカルに暗号化されて保存され、外部には送信されません。
+                    メインアカウントとは違うサブアカウントを使用することを推奨します。
                   </p>
                 </div>
               </div>

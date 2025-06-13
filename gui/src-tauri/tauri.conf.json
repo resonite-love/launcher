@@ -45,9 +45,9 @@
         "close": true,
         "hide": true,
         "show": true,
-        "maximize": true,
+        "maximize": false,
         "minimize": true,
-        "unmaximize": true,
+        "unmaximize": false,
         "unminimize": true,
         "startDragging": true
       }
@@ -68,6 +68,7 @@
       {
         "fullscreen": false,
         "resizable": true,
+        "maximizable": false,
         "decorations": false,
         "transparent": true,
         "title": "Resonite Tools",

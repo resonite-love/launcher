@@ -1,36 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Minus, Square, X, Maximize2, Minimize2 } from 'lucide-react';
+import { Minus, X } from 'lucide-react';
 import { appWindow } from '@tauri-apps/api/window';
 
 function CustomTitlebar() {
-  const [isMaximized, setIsMaximized] = useState(false);
   const [isHovered, setIsHovered] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Listen for window state changes
-    const unlisten = appWindow.onResized(() => {
-      appWindow.isMaximized().then(setIsMaximized);
-    });
-
-    // Get initial state
-    appWindow.isMaximized().then(setIsMaximized);
-
-    return () => {
-      unlisten.then(f => f());
-    };
-  }, []);
 
   const handleMinimize = () => {
     appWindow.minimize();
-  };
-
-  const handleMaximize = () => {
-    if (isMaximized) {
-      appWindow.unmaximize();
-    } else {
-      appWindow.maximize();
-    }
   };
 
   const handleClose = () => {
@@ -41,12 +18,16 @@ function CustomTitlebar() {
     <div 
       className="top-0 left-0 right-0 z-[9999] flex items-center justify-between h-8 bg-dark-900/80 backdrop-blur-md select-none"
       data-tauri-drag-region
+      onDoubleClick={(e) => e.preventDefault()}
     >
       {/* Left side - App title */}
       <div className="flex items-center px-4" data-tauri-drag-region>
-        <div className="flex items-center space-x-2">
-          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-resonite-blue to-resonite-purple flex-shrink-0" />
-          <span className="text-sm font-medium text-white">KOKOA Resonite Launcher&nbsp; <span className="text-xs">powered by resonite.love</span></span>
+        <div className="flex items-center space-x-2" data-tauri-drag-region>
+          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-resonite-blue to-resonite-purple flex-shrink-0" data-tauri-drag-region />
+          <span className="text-sm font-medium text-white" data-tauri-drag-region>
+            KOKOA Resonite Launcher&nbsp; 
+            <span className="text-xs" data-tauri-drag-region>powered by resonite.love</span>
+          </span>
         </div>
       </div>
 
@@ -72,26 +53,6 @@ function CustomTitlebar() {
           <Minus className="w-4 h-4 text-gray-300" />
         </motion.button>
 
-        {/* Maximize/Restore Button */}
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className={`w-12 h-8 flex items-center justify-center transition-colors duration-150 ${
-            isHovered === 'maximize' 
-              ? 'bg-gray-600/50' 
-              : 'hover:bg-gray-600/30'
-          }`}
-          onClick={handleMaximize}
-          onMouseEnter={() => setIsHovered('maximize')}
-          onMouseLeave={() => setIsHovered(null)}
-          aria-label={isMaximized ? "Restore" : "Maximize"}
-        >
-          {isMaximized ? (
-            <Minimize2 className="w-3.5 h-3.5 text-gray-300" />
-          ) : (
-            <Maximize2 className="w-3.5 h-3.5 text-gray-300" />
-          )}
-        </motion.button>
 
         {/* Close Button */}
         <motion.button
