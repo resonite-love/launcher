@@ -26,6 +26,7 @@ import ModRiskWarningModal from './ModRiskWarningModal';
 import GameVersionSelector from './GameVersionSelector';
 import GameUpdateModal from './GameUpdateModal';
 import GameInstallModal from './GameInstallModal';
+import LaunchArgumentsEditor from './LaunchArgumentsEditor';
 import { ModVersionSelector } from './ModVersionSelector';
 import { 
   useModManifest, 
@@ -143,7 +144,6 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [displayName, setDisplayName] = useState('');
   const [description, setDescription] = useState('');
   const [args, setArgs] = useState<string[]>([]);
-  const [newArg, setNewArg] = useState('');
   
   // MODローダー用の状態
   const [modLoaderInfo, setModLoaderInfo] = useState<any>(null);
@@ -254,22 +254,6 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     }
   };
 
-  const addArg = () => {
-    if (!newArg.trim()) return;
-    
-    setArgs([...args, newArg.trim()]);
-    setNewArg('');
-  };
-
-  const removeArg = (index: number) => {
-    setArgs(args.filter((_, i) => i !== index));
-  };
-
-  const updateArg = (index: number, value: string) => {
-    const updatedArgs = [...args];
-    updatedArgs[index] = value;
-    setArgs(updatedArgs);
-  };
 
   const loadModLoaderInfo = async () => {
     try {
@@ -902,90 +886,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 </div>
               </div>
             ) : (
-              <>
-                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
-                  <div className="flex items-start space-x-3">
-                    <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="text-white font-medium mb-2">起動引数について</h4>
-                      <ul className="text-sm text-gray-300 space-y-1">
-                        <li>• Resonite起動時に渡されるコマンドライン引数を設定できます</li>
-                        <li>• 各引数は自動的に適切にエスケープされます</li>
-                        <li>• 一般的な引数: <code className="bg-dark-800 px-1 rounded">-SkipIntroTutorial</code>, <code className="bg-dark-800 px-1 rounded">-DataPath "path"</code></li>
-                        <li>• パス変数が使用可能: <code className="bg-dark-800 px-1 rounded">%PROFILE_DIR%</code>, <code className="bg-dark-800 px-1 rounded">%GAME_DIR%</code>, <code className="bg-dark-800 px-1 rounded">%DATA_DIR%</code></li>
-                        <li>• 例: <code className="bg-dark-800 px-1 rounded">-DataPath "%DATA_DIR%"</code> → プロファイルのDataPathフォルダ</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-
-            <div className="space-y-4">
-              {/* Add new argument */}
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={newArg}
-                  onChange={(e) => setNewArg(e.target.value)}
-                  placeholder="新しい引数を入力 (例: -SkipIntroTutorial)"
-                  className="input-primary flex-1"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      addArg();
-                    }
-                  }}
-                />
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="btn-primary flex items-center space-x-2"
-                  onClick={addArg}
-                  disabled={!newArg.trim()}
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>追加</span>
-                </motion.button>
-              </div>
-
-              {/* Arguments list */}
-              {args.length === 0 ? (
-                <div className="text-center py-8">
-                  <Terminal className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                  <p className="text-gray-400">起動引数が設定されていません</p>
-                  <p className="text-gray-500 text-sm">上のフィールドから引数を追加してください</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {args.map((arg, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      className="flex items-center space-x-2 p-3 bg-dark-800/30 border border-dark-600/30 rounded-lg"
-                    >
-                      <Terminal className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                      <input
-                        type="text"
-                        value={arg}
-                        onChange={(e) => updateArg(index, e.target.value)}
-                        className="input-primary flex-1"
-                      />
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="btn-danger flex items-center space-x-2"
-                        onClick={() => removeArg(index)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </motion.button>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-            </div>
-              </>
+              <LaunchArgumentsEditor
+                args={args}
+                onArgsChange={setArgs}
+              />
             )}
           </motion.div>
         );
