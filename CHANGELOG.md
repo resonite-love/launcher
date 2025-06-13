@@ -7,17 +7,22 @@
 
 ## [Unreleased]
 
+## [v0.0.2] - 2025-06-13
+
 ### 追加
 - GitHub Actionsによる自動リリースビルド
 - タグ付け時のCLI・GUIの自動ビルドとリリース
+- GUIポータブル版（シングルバイナリ）のリリース対応
 
 ### 変更
 - カスタムタイトルバーの最大化ボタンを削除
 - タイトルバーのダブルクリック最大化を無効化
 - アプリケーション全体でテキスト選択をデフォルト無効化
+- Tauriビルド設定の改善（アイコン設定、バージョン統一）
 
 ### 修正
 - CustomTitlebarのテキスト部分でのウィンドウドラッグを有効化
+- Tauriバンドル設定のアイコンエラーを修正
 
 ## [v0.0.1] - 2025-06-13
 
@@ -55,5 +60,6 @@
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.1.0...HEAD
-[v0.1.0]: https://github.com/kokoa-love/kokoa-resonite-tools/releases/tag/v0.1.0
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.2...HEAD
+[v0.0.2]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.1...v0.0.2
+[v0.0.1]: https://github.com/kokoa-love/kokoa-resonite-tools/releases/tag/v0.0.1

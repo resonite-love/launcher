@@ -66,7 +66,9 @@ jobs:
             ## 📦 ダウンロード
             
             ### GUI版（推奨）
-            - **Windows**: `Resonite.Tools_${{ github.ref_name }}_x64_en-US.msi` または `.exe`
+            - **インストーラー**: `Kokoa.Resonite.Tools_${{ github.ref_name }}_x64_en-US.msi` - 自動インストール・更新対応
+            - **セットアップEXE**: `Kokoa.Resonite.Tools_${{ github.ref_name }}_x64-setup.exe` - 軽量インストーラー
+            - **ポータブル版**: `kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe` - インストール不要のシングルバイナリ
             
             ### CLI版
             - **Windows**: `resonite-manager-${{ github.ref_name }}-windows.exe`
@@ -84,8 +86,8 @@ jobs:
             ## 🔧 使用方法
             
             ### GUI版
-            1. `.msi` または `.exe` ファイルをダウンロード
-            2. インストーラーを実行
+            1. **インストーラー版**: `.msi`ファイルをダウンロードして実行
+            2. **ポータブル版**: `.exe`ファイルをダウンロードして任意の場所で実行
             3. 初回セットアップガイドに従って設定
             
             ### CLI版
@@ -102,15 +104,27 @@ jobs:
           includeDebug: false
           includeRelease: true
 
-      # Create CLI release asset
+      # Create additional release assets
       - name: Create CLI Release Asset
         run: |
           cp ./target/release/resonite-manager.exe ./resonite-manager-${{ github.ref_name }}-windows.exe
         
-      - name: Upload CLI binary to release
+      - name: Create GUI Portable Binary
+        run: |
+          # Copy the built Tauri executable as portable version
+          if (Test-Path ".\gui\src-tauri\target\release\resonite-tools-tauri.exe") {
+            cp .\gui\src-tauri\target\release\resonite-tools-tauri.exe .\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe
+          } else {
+            Write-Warning "GUI executable not found, skipping portable version"
+          }
+        shell: pwsh
+        
+      - name: Upload additional binaries to release
         uses: softprops/action-gh-release@v1
         with:
-          files: ./resonite-manager-${{ github.ref_name }}-windows.exe
+          files: |
+            ./resonite-manager-${{ github.ref_name }}-windows.exe
+            ./kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe
           tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

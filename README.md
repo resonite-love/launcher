@@ -8,8 +8,13 @@ Resoniteのインストール、更新、プロファイル管理を行うため
 
 最新版は [Releases](https://github.com/kokoa-love/kokoa-resonite-tools/releases) からダウンロードできます。
 
-- **GUI版（推奨）**: `Resonite.Tools_vX.X.X_x64_en-US.msi` - ユーザーフレンドリーなグラフィカルインターフェース
-- **CLI版**: `resonite-manager-vX.X.X-windows.exe` - コマンドライン操作向け
+#### GUI版（推奨）
+- **インストーラー**: `Kokoa.Resonite.Tools_vX.X.X_x64_en-US.msi` - 自動インストール・更新対応
+- **セットアップEXE**: `Kokoa.Resonite.Tools_vX.X.X_x64-setup.exe` - 軽量インストーラー  
+- **ポータブル版**: `kokoa-resonite-tools-vX.X.X-windows-portable.exe` - インストール不要のシングルバイナリ
+
+#### CLI版
+- **Windows**: `resonite-manager-vX.X.X-windows.exe` - コマンドライン操作向け
 
 ### 初回セットアップ
 
@@ -17,6 +22,11 @@ GUI版では初回起動時に以下が自動で行われます：
 - DepotDownloaderの自動ダウンロード
 - Steamクレデンシャルの設定（オプション）
 - 基本設定の完了
+
+### 利用形態の選択
+
+- **インストーラー版**: システムに統合され、自動更新やファイル関連付けが利用可能
+- **ポータブル版**: USBメモリなどで持ち運び可能、レジストリ変更なし、インストール不要
 
 ## プロジェクト構成
 
