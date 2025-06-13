@@ -49,18 +49,18 @@ jobs:
       - name: Build CLI (release)
         run: cargo build --release -p resonite-manager
 
-      # Build raw executable first for portable version
+      # Build frontend first
+      - name: Build Frontend
+        run: |
+          cd gui
+          npm run build
+          
+      # Build raw executable for portable version
       - name: Build GUI executable (for portable)
         run: |
           cd gui/src-tauri
           cargo build --release --features custom-protocol
         
-      # Build frontend before Tauri build
-      - name: Build frontend
-        run: |
-          cd gui
-          npm run build
-          
       # Build GUI with Tauri
       - name: Build GUI (release)
         uses: tauri-apps/tauri-action@v0

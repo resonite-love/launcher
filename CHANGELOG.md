@@ -7,6 +7,12 @@
 
 ## [Unreleased]
 
+## [v0.0.6] - 2025-06-13
+
+### 修正
+- GitHub Actions のビルド順序を修正
+- フロントエンドビルドの重複を削除
+
 ## [v0.0.5] - 2025-06-13
 
 ### 改善
@@ -14,6 +20,10 @@
 - 直接 cargo build を使用して実行ファイルを生成
 - WebView2Loader.dll を含むZIPファイルも作成
 - ビルドプロセスのデバッグ情報を強化
+
+### 修正
+- フロントエンドのビルドを実行ファイルビルドの前に実行するよう修正
+- `distDir` が存在しないエラーを解決
 
 ## [v0.0.4] - 2025-06-13
 
@@ -81,7 +91,8 @@
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.5...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.6...HEAD
+[v0.0.6]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.5...v0.0.6
 [v0.0.5]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.4...v0.0.5
 [v0.0.4]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.3...v0.0.4
 [v0.0.3]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.2...v0.0.3

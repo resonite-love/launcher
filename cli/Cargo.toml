@@ -1,6 +1,6 @@
 [package]
 name = "resonite-manager"
-version = "0.0.5"
+version = "0.0.6"
 edition = "2021"
 authors = ["kokoa-love"]
 description = "Kokoa Resonite Tools - CLI tool for Resonite management"
