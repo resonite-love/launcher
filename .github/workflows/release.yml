@@ -36,6 +36,15 @@ jobs:
         run: npm install
         working-directory: ./gui
 
+      - name: Check Tauri icon
+        run: |
+          if (!(Test-Path ".\gui\src-tauri\icons\icon.ico")) {
+            Write-Error "Icon file not found: .\gui\src-tauri\icons\icon.ico"
+            exit 1
+          }
+          Write-Host "Icon file found: .\gui\src-tauri\icons\icon.ico"
+        shell: pwsh
+
       # Build CLI
       - name: Build CLI (release)
         run: cargo build --release -p resonite-manager
@@ -45,6 +54,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
           projectPath: ./gui
           tagName: ${{ github.ref_name }}

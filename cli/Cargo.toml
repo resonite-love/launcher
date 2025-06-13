@@ -1,9 +1,9 @@
 [package]
 name = "resonite-manager"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
-authors = ["Your Name <your.email@example.com>"]
-description = "A CLI tool to manage Resonite installations using steamcmd"
+authors = ["kokoa-love"]
+description = "Kokoa Resonite Tools - CLI tool for Resonite management"
 
 [dependencies]
 clap = "2.33"  # コマンドライン引数のパース
