@@ -2,6 +2,22 @@
 
 Resoniteのインストール、更新、プロファイル管理を行うためのツールセット。
 
+## 📦 ダウンロード
+
+### リリース版（推奨）
+
+最新版は [Releases](https://github.com/kokoa-love/kokoa-resonite-tools/releases) からダウンロードできます。
+
+- **GUI版（推奨）**: `Resonite.Tools_vX.X.X_x64_en-US.msi` - ユーザーフレンドリーなグラフィカルインターフェース
+- **CLI版**: `resonite-manager-vX.X.X-windows.exe` - コマンドライン操作向け
+
+### 初回セットアップ
+
+GUI版では初回起動時に以下が自動で行われます：
+- DepotDownloaderの自動ダウンロード
+- Steamクレデンシャルの設定（オプション）
+- 基本設定の完了
+
 ## プロジェクト構成
 
 このプロジェクトは以下のコンポーネントで構成されています：
