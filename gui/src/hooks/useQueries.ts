@@ -185,16 +185,18 @@ export const useLaunchResonite = () => {
 };
 
 export const useInstallGame = () => {
-  const { setIsInstalling } = useAppStore();
+  const { setIsInstalling, addInstallingProfile, removeInstallingProfile } = useAppStore();
   const queryClient = useQueryClient();
   
   return useMutation({
     mutationFn: async (request: GameInstallRequest) => {
       setIsInstalling(true);
+      addInstallingProfile(request.profile_name);
       try {
         return await invoke<string>('install_game_to_profile_interactive', { request });
       } finally {
         setIsInstalling(false);
+        removeInstallingProfile(request.profile_name);
       }
     },
     onSuccess: (result) => {
@@ -209,16 +211,18 @@ export const useInstallGame = () => {
 };
 
 export const useUpdateGame = () => {
-  const { setIsUpdating } = useAppStore();
+  const { setIsUpdating, addInstallingProfile, removeInstallingProfile } = useAppStore();
   const queryClient = useQueryClient();
   
   return useMutation({
     mutationFn: async (request: GameInstallRequest) => {
       setIsUpdating(true);
+      addInstallingProfile(request.profile_name);
       try {
         return await invoke<string>('update_profile_game_interactive', { request });
       } finally {
         setIsUpdating(false);
+        removeInstallingProfile(request.profile_name);
       }
     },
     onSuccess: (result) => {

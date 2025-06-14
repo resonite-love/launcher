@@ -49,6 +49,9 @@ interface AppState {
   isInstalling: boolean;
   isUpdating: boolean;
   
+  // Installation tracking
+  installingProfiles: Set<string>;
+  
   // Actions
   setAppStatus: (status: AppStatus | null) => void;
   setIsInitializing: (loading: boolean) => void;
@@ -70,6 +73,11 @@ interface AppState {
   setIsLaunching: (loading: boolean) => void;
   setIsInstalling: (loading: boolean) => void;
   setIsUpdating: (loading: boolean) => void;
+  
+  // Installation tracking actions
+  addInstallingProfile: (profileName: string) => void;
+  removeInstallingProfile: (profileName: string) => void;
+  isProfileInstalling: (profileName: string) => boolean;
   
   // Computed
   hasAvailableProfiles: () => boolean;
@@ -98,6 +106,8 @@ export const useAppStore = create<AppState>()(
       isLaunching: false,
       isInstalling: false,
       isUpdating: false,
+      
+      installingProfiles: new Set(),
       
       // Actions
       setAppStatus: (status) => set({ appStatus: status }),
@@ -146,6 +156,25 @@ export const useAppStore = create<AppState>()(
       setIsLaunching: (loading) => set({ isLaunching: loading }),
       setIsInstalling: (loading) => set({ isInstalling: loading }),
       setIsUpdating: (loading) => set({ isUpdating: loading }),
+      
+      // Installation tracking actions
+      addInstallingProfile: (profileName) => {
+        const current = get();
+        const newSet = new Set(current.installingProfiles);
+        newSet.add(profileName);
+        set({ installingProfiles: newSet });
+      },
+      
+      removeInstallingProfile: (profileName) => {
+        const current = get();
+        const newSet = new Set(current.installingProfiles);
+        newSet.delete(profileName);
+        set({ installingProfiles: newSet });
+      },
+      
+      isProfileInstalling: (profileName) => {
+        return get().installingProfiles.has(profileName);
+      },
       
       // Computed
       hasAvailableProfiles: () => get().profiles.length > 0,

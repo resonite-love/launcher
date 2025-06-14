@@ -63,7 +63,8 @@ function ProfilesTab() {
     profilesPage, 
     editingProfileName, 
     navigateToProfileEdit, 
-    navigateToProfileList 
+    navigateToProfileList,
+    isProfileInstalling
   } = useAppStore();
   
   // React Query hooks
@@ -636,12 +637,23 @@ function ProfilesTab() {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="btn-primary flex-1 flex items-center justify-center space-x-2"
+                      className={`btn-primary flex-1 flex items-center justify-center space-x-2 ${
+                        isProfileInstalling(profile.id) ? 'opacity-50' : ''
+                      }`}
                       onClick={() => launchProfile(profile.id)}
-                      disabled={isLoading}
+                      disabled={isLoading || isProfileInstalling(profile.id)}
                     >
-                      <Play className="w-4 h-4" />
-                      <span>起動</span>
+                      {isProfileInstalling(profile.id) ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>インストール中</span>
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4" />
+                          <span>起動</span>
+                        </>
+                      )}
                     </motion.button>
                     
                     <motion.button
@@ -651,17 +663,23 @@ function ProfilesTab() {
                         hasNewerVersion(profile)
                           ? 'btn-primary border-blue-500/50 shadow-blue-500/20'
                           : 'btn-secondary'
-                      }`}
+                      } ${isProfileInstalling(profile.id) ? 'opacity-50' : ''}`}
                       onClick={() => openUpdateModal(profile.id)}
-                      disabled={isLoading}
-                      title={hasNewerVersion(profile) 
-                        ? '新しいバージョンが利用可能です' 
-                        : 'ゲームを最新版に更新'
+                      disabled={isLoading || isProfileInstalling(profile.id)}
+                      title={isProfileInstalling(profile.id) 
+                        ? 'インストール中です' 
+                        : hasNewerVersion(profile) 
+                          ? '新しいバージョンが利用可能です' 
+                          : 'ゲームを最新版に更新'
                       }
                     >
-                      <RefreshCw className={`w-4 h-4 ${hasNewerVersion(profile) ? 'text-white' : ''}`} />
-                      <span>更新</span>
-                      {hasNewerVersion(profile) && (
+                      {isProfileInstalling(profile.id) ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className={`w-4 h-4 ${hasNewerVersion(profile) ? 'text-white' : ''}`} />
+                      )}
+                      <span>{isProfileInstalling(profile.id) ? 'インストール中' : '更新'}</span>
+                      {hasNewerVersion(profile) && !isProfileInstalling(profile.id) && (
                         <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
                       )}
                     </motion.button>
@@ -670,12 +688,23 @@ function ProfilesTab() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="btn-primary flex-1 flex items-center justify-center space-x-2"
+                    className={`btn-primary flex-1 flex items-center justify-center space-x-2 ${
+                      isProfileInstalling(profile.id) ? 'opacity-50' : ''
+                    }`}
                     onClick={() => openInstallModal(profile.id)}
-                    disabled={isLoading}
+                    disabled={isLoading || isProfileInstalling(profile.id)}
                   >
-                    <Download className="w-4 h-4" />
-                    <span>ゲームをインストール</span>
+                    {isProfileInstalling(profile.id) ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>インストール中</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-4 h-4" />
+                        <span>ゲームをインストール</span>
+                      </>
+                    )}
                   </motion.button>
                 )}
                 

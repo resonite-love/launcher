@@ -15,6 +15,7 @@ function HomeTab() {
     selectedProfile, 
     setSelectedProfile,
     isLaunching,
+    isProfileInstalling
   } = useAppStore();
 
   const { 
@@ -224,24 +225,26 @@ function HomeTab() {
           {/* Launch Button */}
           <motion.button
             whileHover={{ 
-              scale: selectedProfileData?.has_game && !isLaunching ? 1.02 : 1 
+              scale: selectedProfileData?.has_game && !isLaunching && !isProfileInstalling(selectedProfile) ? 1.02 : 1 
             }}
             whileTap={{ 
-              scale: selectedProfileData?.has_game && !isLaunching ? 0.98 : 1 
+              scale: selectedProfileData?.has_game && !isLaunching && !isProfileInstalling(selectedProfile) ? 0.98 : 1 
             }}
             className={`btn-primary flex items-center space-x-2 px-6 py-3 ${
-              !selectedProfileData?.has_game || isLaunching ? 'opacity-50 cursor-not-allowed' : ''
+              !selectedProfileData?.has_game || isLaunching || isProfileInstalling(selectedProfile) ? 'opacity-50 cursor-not-allowed' : ''
             }`}
             onClick={handleLaunch}
-            disabled={!selectedProfile || !selectedProfileData?.has_game || isLaunching}
+            disabled={!selectedProfile || !selectedProfileData?.has_game || isLaunching || isProfileInstalling(selectedProfile)}
           >
             {isLaunching ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : isProfileInstalling(selectedProfile) ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
               <Play className="w-5 h-5" />
             )}
             <span className="font-medium">
-              {isLaunching ? 'Starting...' : 'Play'}
+              {isLaunching ? 'Starting...' : isProfileInstalling(selectedProfile) ? 'インストール中...' : 'Play'}
             </span>
           </motion.button>
         </div>
