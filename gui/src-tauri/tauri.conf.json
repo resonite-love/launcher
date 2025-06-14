@@ -57,6 +57,7 @@
       "targets": "all",
       "identifier": "com.resonite.tools",
       "icon": [
+        "icons/icon.png",
         "icons/icon.ico"
       ]
     },

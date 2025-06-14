@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Minus, X } from 'lucide-react';
 import { appWindow } from '@tauri-apps/api/window';
+import iconPng from '../assets/icon.png';
 
 function CustomTitlebar() {
   const [isHovered, setIsHovered] = useState<string | null>(null);
@@ -23,7 +24,12 @@ function CustomTitlebar() {
       {/* Left side - App title */}
       <div className="flex items-center px-4" data-tauri-drag-region>
         <div className="flex items-center space-x-2" data-tauri-drag-region>
-          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-resonite-blue to-resonite-purple flex-shrink-0" data-tauri-drag-region />
+          <img 
+            src={iconPng} 
+            alt="Kokoa Resonite Tools" 
+            className="w-4 h-4 flex-shrink-0" 
+            data-tauri-drag-region 
+          />
           <span className="text-sm font-medium text-white" data-tauri-drag-region>
             KOKOA Resonite Launcher&nbsp; 
             <span className="text-xs" data-tauri-drag-region>powered by resonite.love</span>

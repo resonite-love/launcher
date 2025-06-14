@@ -17,7 +17,9 @@
       "Bash(find:*)",
       "Bash(chmod:*)",
       "Bash(python:*)",
-      "WebFetch(domain:wiki.resonite.com)"
+      "WebFetch(domain:wiki.resonite.com)",
+      "Bash(cp:*)",
+      "Bash(convert:*)"
     ],
     "deny": []
   }
