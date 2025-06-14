@@ -4,6 +4,7 @@ version = "1.0.1"
 edition = "2021"
 authors = ["resonite.love community"]
 description = "RESO Launcher - Core library for Resonite management"
+license = "MIT"
 
 [dependencies]
 regex = "1.5"  # 正規表現

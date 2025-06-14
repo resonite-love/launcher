@@ -4,6 +4,7 @@ version = "1.0.1"
 edition = "2021"
 authors = ["resonite.love community"]
 description = "RESO Launcher - Community Resonite management tool"
+license = "MIT"
 
 [[bin]]
 name = "reso-launcher"

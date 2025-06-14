@@ -4,6 +4,7 @@ version = "1.0.1"
 edition = "2021"
 authors = ["resonite.love community"]
 description = "RESO Launcher CLI - Community Resonite management CLI"
+license = "MIT"
 
 [dependencies]
 clap = "2.33"  # コマンドライン引数のパース
