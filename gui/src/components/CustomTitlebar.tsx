@@ -31,7 +31,7 @@ function CustomTitlebar() {
             data-tauri-drag-region 
           />
           <span className="text-sm font-medium text-white" data-tauri-drag-region>
-            KOKOA Resonite Launcher&nbsp; 
+            RESO Launcher&nbsp; 
             <span className="text-xs" data-tauri-drag-region>powered by resonite.love</span>
           </span>
         </div>
