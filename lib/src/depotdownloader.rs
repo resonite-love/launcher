@@ -34,6 +34,11 @@ impl DepotDownloader {
                 .and_then(|p| p.parent())
                 .unwrap_or(base_dir)
                 .join(exe_name),                        // 二つ上のディレクトリ（開発時用）
+            base_dir.parent()
+                .and_then(|p| p.parent())
+                .and_then(|p| p.parent())
+                .unwrap_or(base_dir)
+                .join(exe_name),                        // 三つ上のディレクトリ（プロジェクトルート）
         ];
 
         // 存在する最初のパスを使用
@@ -192,42 +197,39 @@ impl DepotDownloader {
     pub fn run_interactive(&self, args: &[String]) -> Result<(), Box<dyn Error>> {
         println!("Using DepotDownloader path: {}", self.path.display());
         println!("Running interactively with args: {:?}", args);
+        
+        // DepotDownloaderの存在確認
+        self.check_exists()?;
 
         #[cfg(target_os = "windows")]
         {
             use std::os::windows::process::CommandExt;
             
-            // リリースビルドではウィンドウを非表示にする
-            // #[cfg(not(debug_assertions))]
-            // {
-            //     // バックグラウンドで実行（ウィンドウなし）
-            //     let _child = Command::new(&self.path)
-            //         .args(args)
-            //         .creation_flags(0x08000000) // CREATE_NO_WINDOW
-            //         .stdin(Stdio::null())
-            //         .stdout(Stdio::null())
-            //         .stderr(Stdio::null())
-            //         .spawn()?;
-            //     println!("DepotDownloader launched in background (no window)");
-            // }
+            // 新しいアプローチ：PowerShellを使用してDepotDownloaderを実行
+            let mut cmd = Command::new("powershell");
+            cmd.args(&["-NoExit", "-Command"]);
             
-            // デバッグビルドでは従来通りウィンドウを表示
-            // #[cfg(debug_assertions)]
-            // {
-                let depot_path = self.path.to_string_lossy();
-                let args_str = args.join(" ");
-
-                // startコマンドで新しいウィンドウを開き、/kでコマンド実行後もウィンドウを保持
-                let command_line = format!("start  cmd /c {} {}", depot_path, args_str);
-
-                println!("Executing command: cmd /c {}", command_line);
-
-                let _cmd = Command::new("cmd")
-                    .args(&["/c", &command_line])
-                    .spawn()?;
-                // startコマンドは即座に戻るので、waitしない
-                println!("DepotDownloader launched in new window");
-            // }
+            // PowerShellスクリプトを構築
+            let depot_path_str = self.path.to_string_lossy();
+            let args_str = args.join(" ");
+            
+            let powershell_script = vec![
+                "Write-Host 'Starting DepotDownloader...' -ForegroundColor Green;",
+                &format!("& '{}' {}", depot_path_str, args_str),
+                "Write-Host '';",
+                "Write-Host 'Download completed. Press any key to close this window.' -ForegroundColor Green;",
+                "Read-Host"
+            ].join(" ");
+            
+            cmd.arg(&powershell_script);
+            cmd.creation_flags(0x00000010); // CREATE_NEW_CONSOLE - 新しいコンソールウィンドウを作成
+            
+            println!("Using DepotDownloader path: {}", depot_path_str);
+            println!("Running interactively with args: {:?}", args);
+            println!("Launching PowerShell in new console window...");
+            
+            let _child = cmd.spawn()?;
+            println!("DepotDownloader launched in new PowerShell console window");
         }
 
         #[cfg(not(target_os = "windows"))]

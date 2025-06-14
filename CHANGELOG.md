@@ -7,6 +7,43 @@
 
 ## [Unreleased]
 
+## [v1.0.4] - 2025-06-14
+
+### 修正
+- **重要**: `format!`マクロによるバックスラッシュエスケープ問題を修正
+- フォアグラウンドインストール時のコマンド実行エラーを解決
+- DepotDownloaderパスの引用符処理を文字列連結で実装し直し
+- コマンド実行前にDepotDownloaderの存在確認を追加
+- 検索パスにプロジェクトルートを追加してパス検出を改善
+
+### 改善
+- より堅牢なコマンド文字列構築方式に変更
+- エラーハンドリングの強化
+
+## [v1.0.3] - 2025-06-14
+
+### 修正
+- **重要**: フォアグラウンドインストール時にCMDウィンドウが即座に閉じる問題を修正
+- リリースビルドでも `run_interactive` でCMDウィンドウが継続表示されるよう改善
+- DepotDownloaderウィンドウにタイトル「DepotDownloader」を設定
+- インストール開始・完了メッセージの表示を追加
+- `/c` から `/k` に変更してコマンド実行後もウィンドウを保持
+
+### 改善
+- フォアグラウンドインストール時のユーザー体験を大幅に向上
+- インストール進行状況の視認性を改善
+
+## [v1.0.2] - 2025-06-14
+
+### 修正
+- フォアグラウンドインストール時のCMDウィンドウ表示問題を部分的に修正
+
+## [v1.0.1] - 2025-06-14
+
+### 修正
+- インストール中状態管理を追加
+- UIの表示文言と引数のプレースホルダーを改善
+
 ## [v0.1.1] - 2025-06-14
 
 ### 修正
@@ -137,7 +174,11 @@
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.4...HEAD
+[v1.0.4]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.3...v1.0.4
+[v1.0.3]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.2...v1.0.3
+[v1.0.2]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.1...v1.0.2
+[v1.0.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.1.1...v1.0.1
 [v0.1.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.1.0...v0.1.1
 [v0.1.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.9...v0.1.0
 [v0.0.9]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v0.0.8...v0.0.9
