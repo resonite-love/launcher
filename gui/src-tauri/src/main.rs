@@ -59,6 +59,24 @@ pub struct GameInstallRequest {
     pub password: Option<String>,
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct AppUpdateInfo {
+    current_version: String,
+    latest_version: String,
+    update_available: bool,
+    release_notes: String,
+    download_url: String,
+    published_at: String,
+    assets: Vec<UpdateAsset>,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct UpdateAsset {
+    name: String,
+    download_url: String,
+    size: i64,
+}
+
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct AppStatus {
     pub initialized: bool,
@@ -710,6 +728,83 @@ fn delete_profile(
     Ok(format!("Profile '{}' deleted successfully", profile_name))
 }
 
+// Check for application updates
+#[tauri::command]
+async fn check_for_app_update() -> Result<AppUpdateInfo, String> {
+    // Get current version from Cargo.toml
+    let current_version = env!("CARGO_PKG_VERSION");
+    
+    // Fetch latest release from GitHub
+    let client = reqwest::Client::new();
+    let url = "https://api.github.com/repos/rassi0429/kokoa-resonite-tools/releases/latest";
+    
+    let response = client
+        .get(url)
+        .header("User-Agent", "kokoa-resonite-tools")
+        .send()
+        .await
+        .map_err(|e| format!("Failed to fetch update info: {}", e))?;
+    
+    if !response.status().is_success() {
+        return Err("Failed to fetch update information from GitHub".to_string());
+    }
+    
+    let release: GitHubRelease = response
+        .json()
+        .await
+        .map_err(|e| format!("Failed to parse release info: {}", e))?;
+    
+    // Compare versions (remove 'v' prefix if present)
+    let latest_version = release.tag_name.trim_start_matches('v');
+    let current_clean = current_version.trim_start_matches('v');
+    
+    // Simple version comparison
+    let update_available = latest_version != current_clean && 
+        version_compare(latest_version, current_clean) > 0;
+    
+    // Convert assets
+    let assets: Vec<UpdateAsset> = release.assets
+        .into_iter()
+        .map(|asset| UpdateAsset {
+            name: asset.name,
+            download_url: asset.browser_download_url,
+            size: asset.size.unwrap_or(0) as i64,
+        })
+        .collect();
+    
+    // Build release page URL
+    let download_url = format!("https://github.com/rassi0429/kokoa-resonite-tools/releases/tag/{}", release.tag_name);
+    
+    Ok(AppUpdateInfo {
+        current_version: current_version.to_string(),
+        latest_version: latest_version.to_string(),
+        update_available,
+        release_notes: release.body.unwrap_or_else(|| "No release notes available".to_string()),
+        download_url,
+        published_at: release.published_at.unwrap_or_else(|| "Unknown".to_string()),
+        assets,
+    })
+}
+
+// Simple version comparison helper
+fn version_compare(a: &str, b: &str) -> i32 {
+    let a_parts: Vec<u32> = a.split('.').filter_map(|s| s.parse().ok()).collect();
+    let b_parts: Vec<u32> = b.split('.').filter_map(|s| s.parse().ok()).collect();
+    
+    for i in 0..std::cmp::max(a_parts.len(), b_parts.len()) {
+        let a_part = a_parts.get(i).unwrap_or(&0);
+        let b_part = b_parts.get(i).unwrap_or(&0);
+        
+        if a_part > b_part {
+            return 1;
+        } else if a_part < b_part {
+            return -1;
+        }
+    }
+    
+    0
+}
+
 // Fetch available MODs from manifest
 #[tauri::command]
 async fn fetch_mod_manifest(
@@ -1334,6 +1429,7 @@ fn main() {
             uninstall_mod_loader,
             open_profile_folder,
             delete_profile,
+            check_for_app_update,
             fetch_mod_manifest,
             get_installed_mods,
             install_mod_from_cache,

@@ -21,6 +21,44 @@ Deletes a profile and all its associated data.
 await invoke('delete_profile', { profileName: 'my-profile' });
 ```
 
+## Application Updates
+
+### check_for_app_update
+Checks for available application updates from GitHub releases.
+
+**Parameters:**
+- None
+
+**Returns:**
+- `Result<AppUpdateInfo, String>` - Update information or error
+
+**Response Type:**
+```typescript
+interface AppUpdateInfo {
+  current_version: string;    // Current app version
+  latest_version: string;     // Latest available version
+  update_available: boolean;  // Whether an update is available
+  release_notes: string;      // Release notes/changelog
+  download_url: string;       // GitHub release page URL
+  published_at: string;       // Release date
+  assets: UpdateAsset[];      // Available download files
+}
+
+interface UpdateAsset {
+  name: string;              // File name
+  download_url: string;      // Direct download URL
+  size: number;              // File size in bytes
+}
+```
+
+**Example:**
+```typescript
+const updateInfo = await invoke<AppUpdateInfo>('check_for_app_update');
+if (updateInfo.update_available) {
+  console.log(`New version available: ${updateInfo.latest_version}`);
+}
+```
+
 このファイルは利用可能なTauriコマンドとその使用方法を説明します。
 
 ## アプリケーション初期化

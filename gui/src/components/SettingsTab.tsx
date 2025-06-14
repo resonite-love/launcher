@@ -9,9 +9,15 @@ import {
   Edit3,
   Trash2,
   Loader2,
-  X
+  X,
+  Download,
+  ExternalLink,
+  RefreshCw,
+  Info
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAppUpdate } from '../hooks/useQueries';
+import { shell } from '@tauri-apps/api';
 
 interface SteamCredentials {
   username: string;
@@ -26,6 +32,9 @@ function SettingsTab() {
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
   const [credentialsUsername, setCredentialsUsername] = useState('');
   const [credentialsPassword, setCredentialsPassword] = useState('');
+  
+  // アップデートチェック
+  const { data: updateInfo, isLoading: updateLoading, refetch: checkUpdate } = useAppUpdate();
 
   useEffect(() => {
     loadSavedCredentials();
@@ -168,7 +177,7 @@ function SettingsTab() {
         </div>
       </motion.div>
 
-      {/* Application Settings Section (Future expansion) */}
+      {/* Application Settings Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -180,11 +189,138 @@ function SettingsTab() {
           <h2 className="text-2xl font-bold text-white">アプリケーション設定</h2>
         </div>
 
-        <div className="bg-dark-800/30 rounded-lg p-4">
-          <p className="text-gray-400 text-center">
-            今後、アプリケーションの設定項目がここに追加される予定です
-          </p>
-        </div>
+        {/* アップデート情報 */}
+        {updateLoading ? (
+          <div className="bg-dark-800/30 rounded-lg p-6 flex items-center justify-center">
+            <Loader2 className="w-6 h-6 animate-spin text-resonite-blue mr-3" />
+            <span className="text-gray-300">アップデート情報を確認中...</span>
+          </div>
+        ) : updateInfo ? (
+          <div className="space-y-4">
+            {updateInfo.update_available ? (
+              <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-lg p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3">
+                    <div className="p-2 bg-blue-500/20 rounded-lg">
+                      <Download className="w-6 h-6 text-blue-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-white mb-2">
+                        新しいバージョンが利用可能です！
+                      </h3>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center space-x-4">
+                          <span className="text-gray-400">現在のバージョン:</span>
+                          <span className="font-mono text-gray-300">v{updateInfo.current_version}</span>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <span className="text-gray-400">最新バージョン:</span>
+                          <span className="font-mono text-green-400">v{updateInfo.latest_version}</span>
+                        </div>
+                      </div>
+                      
+                      {/* リリースノート */}
+                      {updateInfo.release_notes && (
+                        <div className="mt-4">
+                          <h4 className="text-sm font-medium text-gray-300 mb-2">変更内容:</h4>
+                          <div className="bg-dark-800/50 rounded-lg p-3 max-h-40 overflow-y-auto">
+                            <pre className="text-xs text-gray-400 whitespace-pre-wrap">
+                              {updateInfo.release_notes}
+                            </pre>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* ダウンロードアセット */}
+                      {updateInfo.assets && updateInfo.assets.length > 0 && (
+                        <div className="mt-4">
+                          <h4 className="text-sm font-medium text-gray-300 mb-2">ダウンロード:</h4>
+                          <div className="space-y-2">
+                            {updateInfo.assets.map((asset, index) => (
+                              <motion.button
+                                key={index}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                className="w-full flex items-center justify-between p-3 bg-dark-800/50 hover:bg-dark-700/50 rounded-lg transition-colors"
+                                onClick={() => shell.open(asset.download_url)}
+                              >
+                                <div className="flex items-center space-x-3">
+                                  <Download className="w-4 h-4 text-gray-400" />
+                                  <span className="text-sm text-gray-300">{asset.name}</span>
+                                </div>
+                                <span className="text-xs text-gray-500">
+                                  {(asset.size / 1024 / 1024).toFixed(1)} MB
+                                </span>
+                              </motion.button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="btn-primary flex items-center space-x-2"
+                    onClick={() => shell.open(updateInfo.download_url)}
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>リリースページ</span>
+                  </motion.button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-dark-800/30 rounded-lg p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Check className="w-5 h-5 text-emerald-400" />
+                    <div>
+                      <p className="text-white font-medium">最新版を使用しています</p>
+                      <p className="text-gray-400 text-sm">
+                        現在のバージョン: v{updateInfo.current_version}
+                      </p>
+                    </div>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="btn-secondary flex items-center space-x-2"
+                    onClick={() => checkUpdate()}
+                    disabled={updateLoading}
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>再チェック</span>
+                  </motion.button>
+                </div>
+              </div>
+            )}
+            
+            {/* アップデート情報のフッター */}
+            <div className="flex items-center space-x-2 text-xs text-gray-500">
+              <Info className="w-3 h-3" />
+              <span>
+                最終チェック: {new Date().toLocaleString('ja-JP')}
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-dark-800/30 rounded-lg p-6">
+            <div className="flex items-center justify-between">
+              <p className="text-gray-400">アップデート情報を取得できませんでした</p>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="btn-secondary flex items-center space-x-2"
+                onClick={() => checkUpdate()}
+                disabled={updateLoading}
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>再試行</span>
+              </motion.button>
+            </div>
+          </div>
+        )}
       </motion.div>
 
       {/* Steam Credentials Modal */}
