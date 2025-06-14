@@ -51,7 +51,7 @@ const argumentPresets: ArgumentPreset[] = [
     description: 'デスクトップモードで起動',
     icon: Monitor,
     category: 'hardware',
-    arg: '-Device Screen',
+    arg: '-Screen',
     tooltip: 'VRヘッドセットなしでデスクトップモードで起動します'
   },
   {

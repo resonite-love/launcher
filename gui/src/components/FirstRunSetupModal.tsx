@@ -107,7 +107,7 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white mb-3">
-                Kokoa Resonite Toolsへようこそ！
+                RESO Launcherへようこそ！
               </h2>
               <p className="text-gray-300 leading-relaxed">
                 初回セットアップを開始します。<br />
@@ -333,7 +333,7 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
               </h2>
               <p className="text-gray-300 leading-relaxed">
                 初回セットアップが完了しました。<br />
-                Kokoa Resonite Toolsをお使いいただけます。
+                RESO Launcherをお使いいただけます。
               </p>
             </div>
             <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
