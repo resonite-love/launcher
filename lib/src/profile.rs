@@ -334,4 +334,20 @@ impl ProfileManager {
         
         Ok(profile.game_info)
     }
+
+    /// プロファイルを削除する（プロファイルリストから削除のみ、ディレクトリは呼び出し側で削除）
+    pub fn delete_profile(&mut self, profile_identifier: &str) -> Result<(), Box<dyn Error>> {
+        // Prevent deletion of default profile
+        if profile_identifier == "default" {
+            return Err("Cannot delete the default profile".into());
+        }
+        
+        // Check if profile exists
+        let _ = self.get_profile(profile_identifier)?;
+        
+        // Profile deletion is handled by removing the directory
+        // No internal state to update since profiles are loaded from disk
+        
+        Ok(())
+    }
 }

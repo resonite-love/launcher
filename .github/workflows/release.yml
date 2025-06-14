@@ -152,7 +152,6 @@ jobs:
             ## ⚠️ 注意事項
             
             - 初回起動時にDepotDownloaderが自動ダウンロードされます
-            - セキュリティソフトが反応する場合がありますが、安全なツールです
             - Steam Guardが有効な場合、初回ダウンロード時に認証が必要です
           releaseDraft: false
           prerelease: false

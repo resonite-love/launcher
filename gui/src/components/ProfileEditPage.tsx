@@ -22,12 +22,14 @@ import {
   UserPlus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useQueryClient } from '@tanstack/react-query';
 import ModRiskWarningModal from './ModRiskWarningModal';
 import GameVersionSelector from './GameVersionSelector';
 import GameUpdateModal from './GameUpdateModal';
 import GameInstallModal from './GameInstallModal';
 import LaunchArgumentsEditor from './LaunchArgumentsEditor';
 import { ModVersionSelector } from './ModVersionSelector';
+import { ProfileDeleteConfirmModal } from './ProfileDeleteConfirmModal';
 import { 
   useModManifest, 
   useInstalledMods, 
@@ -135,6 +137,7 @@ export interface BranchInfo {
 type TabType = 'info' | 'launch' | 'mods' | 'other';
 
 function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
+  const queryClient = useQueryClient();
   const [profile, setProfile] = useState<ProfileConfig | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -196,6 +199,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [showGameUpdateModal, setShowGameUpdateModal] = useState(false);
   const [hasGame, setHasGame] = useState(false);
   const [currentGameVersion, setCurrentGameVersion] = useState<string | null>(null);
+  
+  // 削除確認モーダル用の状態
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [currentBranch, setCurrentBranch] = useState<string>('release');
   const [showGameInstallModal, setShowGameInstallModal] = useState(false);
   const [isInstallingGame, setIsInstallingGame] = useState(false);
@@ -626,6 +633,39 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     });
     
     return sortedVersions[0];
+  };
+  
+  // プロファイル削除処理
+  const handleDeleteProfile = async () => {
+    if (profileName === 'default') {
+      toast.error('デフォルトプロファイルは削除できません');
+      return;
+    }
+    
+    try {
+      setIsDeleting(true);
+      
+      // Tauriコマンドを呼び出してプロファイルを削除
+      const result = await invoke<string>('delete_profile', { profileName });
+      
+      toast.success(result);
+      
+      // プロファイル一覧のキャッシュを無効化
+      await queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      
+      // HomeTabで使用されているプロファイル情報も更新
+      await queryClient.invalidateQueries({ queryKey: ['profileInfo'] });
+      
+      // プロファイル一覧画面に戻る
+      setTimeout(() => {
+        onBack();
+      }, 500);
+    } catch (err) {
+      toast.error(`プロファイルの削除に失敗しました: ${err}`);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirmModal(false);
+    }
   };
 
   if (isLoading) {
@@ -1618,6 +1658,20 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             )}
             <span>保存</span>
           </motion.button>
+          
+          {/* 削除ボタン（デフォルトプロファイル以外で表示） */}
+          {profileName !== 'default' && (
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="btn-danger flex items-center space-x-2"
+              onClick={() => setShowDeleteConfirmModal(true)}
+              disabled={isDeleting}
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>削除</span>
+            </motion.button>
+          )}
         </div>
       </motion.div>
 
@@ -1795,6 +1849,15 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           </motion.div>
         </div>
       )}
+      
+      {/* 削除確認モーダル */}
+      <ProfileDeleteConfirmModal
+        isOpen={showDeleteConfirmModal}
+        profileName={profile?.display_name || profileName}
+        onConfirm={handleDeleteProfile}
+        onCancel={() => setShowDeleteConfirmModal(false)}
+        isDeleting={isDeleting}
+      />
     </div>
   );
 }

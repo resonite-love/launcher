@@ -678,6 +678,38 @@ async fn open_profile_folder(
     Ok(format!("Opened profile folder: {}", profile_dir.display()))
 }
 
+// Delete a profile and all its data
+#[tauri::command]
+fn delete_profile(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let mut app_state = state.lock().unwrap();
+    
+    let profile_manager = app_state.profile_manager.as_mut()
+        .ok_or("Profile manager not initialized")?;
+    
+    // Prevent deletion of default profile
+    if profile_name == "default" {
+        return Err("Cannot delete the default profile".to_string());
+    }
+    
+    // Get profile directory path before deletion
+    let profile_dir = profile_manager.get_profile_dir(&profile_name);
+    
+    // Delete profile from manager (this removes from profiles list)
+    profile_manager.delete_profile(&profile_name)
+        .map_err(|e| format!("Failed to delete profile: {}", e))?;
+    
+    // Delete profile directory and all its contents
+    if profile_dir.exists() {
+        std::fs::remove_dir_all(&profile_dir)
+            .map_err(|e| format!("Failed to delete profile directory: {}", e))?;
+    }
+    
+    Ok(format!("Profile '{}' deleted successfully", profile_name))
+}
+
 // Fetch available MODs from manifest
 #[tauri::command]
 async fn fetch_mod_manifest(
@@ -1301,6 +1333,7 @@ fn main() {
             install_mod_loader,
             uninstall_mod_loader,
             open_profile_folder,
+            delete_profile,
             fetch_mod_manifest,
             get_installed_mods,
             install_mod_from_cache,

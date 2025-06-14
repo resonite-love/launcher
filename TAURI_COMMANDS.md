@@ -1,5 +1,26 @@
 # Tauri Commands Documentation
 
+## Profile Management
+
+### delete_profile
+Deletes a profile and all its associated data.
+
+**Parameters:**
+- `profile_name: String` - The name of the profile to delete
+
+**Returns:**
+- `Result<String, String>` - Success message or error
+
+**Notes:**
+- Cannot delete the "default" profile
+- Removes profile from the profile list
+- Deletes the entire profile directory and all contents
+
+**Example:**
+```typescript
+await invoke('delete_profile', { profileName: 'my-profile' });
+```
+
 このファイルは利用可能なTauriコマンドとその使用方法を説明します。
 
 ## アプリケーション初期化
