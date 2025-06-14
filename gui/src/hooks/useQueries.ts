@@ -511,7 +511,7 @@ export const useUpdateYtDlp = () => {
 };
 
 // App update types
-interface AppUpdateInfo {
+export interface AppUpdateInfo {
   current_version: string;
   latest_version: string;
   update_available: boolean;
@@ -521,7 +521,7 @@ interface AppUpdateInfo {
   assets: UpdateAsset[];
 }
 
-interface UpdateAsset {
+export interface UpdateAsset {
   name: string;
   download_url: string;
   size: number;
@@ -535,7 +535,7 @@ export const useAppUpdate = () => {
       return await invoke<AppUpdateInfo>('check_for_app_update');
     },
     staleTime: 1000 * 60 * 60, // 1 hour
-    cacheTime: 1000 * 60 * 60 * 24, // 24 hours
+    gcTime: 1000 * 60 * 60 * 24, // 24 hours
     retry: 1,
   });
 };

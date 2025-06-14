@@ -16,7 +16,7 @@ import {
   Info
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAppUpdate } from '../hooks/useQueries';
+import { useAppUpdate, type AppUpdateInfo, type UpdateAsset } from '../hooks/useQueries';
 import { shell } from '@tauri-apps/api';
 
 interface SteamCredentials {
