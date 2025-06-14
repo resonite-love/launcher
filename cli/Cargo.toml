@@ -1,11 +1,11 @@
 [package]
-name = "resonite-manager"
+name = "reso-launcher-cli"
 version = "0.1.1"
 edition = "2021"
-authors = ["kokoa-love"]
-description = "Kokoa Resonite Tools - CLI tool for Resonite management"
+authors = ["resonite.love community"]
+description = "RESO Launcher CLI - Community Resonite management CLI"
 
 [dependencies]
 clap = "2.33"  # コマンドライン引数のパース
 regex = "1.5"  # 正規表現
-resonite-tools-lib = { path = "../lib" }  # 内部ライブラリ
+reso-launcher-lib = { path = "../lib" }  # 内部ライブラリ

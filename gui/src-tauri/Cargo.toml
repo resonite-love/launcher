@@ -1,12 +1,12 @@
 [package]
-name = "resonite-tools-tauri"
+name = "reso-launcher"
 version = "0.1.1"
 edition = "2021"
-authors = ["kokoa-love"]
-description = "Kokoa Resonite Tools - GUI application for Resonite management"
+authors = ["resonite.love community"]
+description = "RESO Launcher - Community Resonite management tool"
 
 [[bin]]
-name = "resonite-tools-tauri"
+name = "reso-launcher"
 path = "src/main.rs"
 
 [profile.release]
@@ -24,7 +24,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1.0", features = ["full"] }
 reqwest = { version = "0.11", features = ["json"] }
-resonite-tools-lib = { path = "../../lib" }
+reso-launcher-lib = { path = "../../lib" }
 zip = "0.6"
 
 [features]

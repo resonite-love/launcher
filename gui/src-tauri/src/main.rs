@@ -4,7 +4,7 @@
 use std::sync::Mutex;
 use std::path::PathBuf;
 use tauri::{State, Window, AppHandle};
-use resonite_tools_lib::{
+use reso_launcher_lib::{
     depotdownloader::DepotDownloader,
     install::{ResoniteInstall, ResoniteInstallManager},
     profile::{Profile, ProfileManager},
@@ -736,11 +736,11 @@ async fn check_for_app_update() -> Result<AppUpdateInfo, String> {
     
     // Fetch latest release from GitHub
     let client = reqwest::Client::new();
-    let url = "https://api.github.com/repos/rassi0429/kokoa-resonite-tools/releases/latest";
+    let url = "https://api.github.com/repos/resonite-love/launcher/releases/latest";
     
     let response = client
         .get(url)
-        .header("User-Agent", "kokoa-resonite-tools")
+        .header("User-Agent", "reso-launcher")
         .send()
         .await
         .map_err(|e| format!("Failed to fetch update info: {}", e))?;
@@ -773,7 +773,7 @@ async fn check_for_app_update() -> Result<AppUpdateInfo, String> {
         .collect();
     
     // Build release page URL
-    let download_url = format!("https://github.com/rassi0429/kokoa-resonite-tools/releases/tag/{}", release.tag_name);
+    let download_url = format!("https://github.com/resonite-love/launcher/releases/tag/{}", release.tag_name);
     
     Ok(AppUpdateInfo {
         current_version: current_version.to_string(),

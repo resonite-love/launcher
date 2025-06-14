@@ -7,7 +7,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "Kokoa Resonite Tools",
+    "productName": "RESO Launcher",
     "version": "0.1.1"
   },
   "tauri": {
@@ -55,7 +55,7 @@
     "bundle": {
       "active": true,
       "targets": "all",
-      "identifier": "com.resonite.tools",
+      "identifier": "love.resonite.launcher",
       "icon": [
         "icons/icon.png",
         "icons/icon.ico"
@@ -75,7 +75,7 @@
         "maximizable": false,
         "decorations": false,
         "transparent": true,
-        "title": "Resonite Tools",
+        "title": "RESO Launcher",
         "width": 1080,
         "height": 800,
         "minWidth": 1000,

@@ -26,7 +26,7 @@ function CustomTitlebar() {
         <div className="flex items-center space-x-2" data-tauri-drag-region>
           <img 
             src={iconPng} 
-            alt="Kokoa Resonite Tools" 
+            alt="RESO Launcher" 
             className="w-4 h-4 flex-shrink-0" 
             data-tauri-drag-region 
           />

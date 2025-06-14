@@ -47,7 +47,7 @@ jobs:
 
       # Build CLI
       - name: Build CLI (release)
-        run: cargo build --release -p resonite-manager
+        run: cargo build --release -p reso-launcher-cli
 
       # Build frontend first
       - name: Build Frontend
@@ -75,9 +75,9 @@ jobs:
           
           # Check multiple possible locations
           $possiblePaths = @(
-            "$env:CARGO_TARGET_DIR\release\resonite-tools-tauri.exe",
-            "..\..\target\release\resonite-tools-tauri.exe",
-            "target\release\resonite-tools-tauri.exe"
+            "$env:CARGO_TARGET_DIR\release\reso-launcher.exe",
+            "..\..\target\release\reso-launcher.exe",
+            "target\release\reso-launcher.exe"
           )
           
           $foundPath = $null
@@ -114,19 +114,19 @@ jobs:
         with:
           projectPath: ./gui
           tagName: ${{ github.ref_name }}
-          releaseName: 'Kokoa Resonite Tools ${{ github.ref_name }}'
+          releaseName: 'RESO Launcher ${{ github.ref_name }}'
           releaseBody: |
-            # Kokoa Resonite Tools ${{ github.ref_name }}
+            # RESO Launcher ${{ github.ref_name }}
             
             ## 📦 ダウンロード
             
             ### GUI版（推奨）
-            - **インストーラー**: `Kokoa.Resonite.Tools_${{ github.ref_name }}_x64_en-US.msi` - 自動インストール・更新対応
-            - **セットアップEXE**: `Kokoa.Resonite.Tools_${{ github.ref_name }}_x64-setup.exe` - 軽量インストーラー
-            - **ポータブル版**: `kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe` - インストール不要のシングルバイナリ
+            - **インストーラー**: `RESO.Launcher_${{ github.ref_name }}_x64_en-US.msi` - 自動インストール・更新対応
+            - **セットアップEXE**: `RESO.Launcher_${{ github.ref_name }}_x64-setup.exe` - 軽量インストーラー
+            - **ポータブル版**: `reso-launcher-${{ github.ref_name }}-windows-portable.exe` - インストール不要のシングルバイナリ
             
             ### CLI版
-            - **Windows**: `resonite-manager-${{ github.ref_name }}-windows.exe`
+            - **Windows**: `reso-launcher-cli-${{ github.ref_name }}-windows.exe`
             
             ## 🚀 新機能・変更点
             
@@ -146,7 +146,7 @@ jobs:
             3. 初回セットアップガイドに従って設定
             
             ### CLI版
-            1. `resonite-manager-${{ github.ref_name }}-windows.exe` をダウンロード
+            1. `reso-launcher-cli-${{ github.ref_name }}-windows.exe` をダウンロード
             2. コマンドラインから実行
             
             ## ⚠️ 注意事項
@@ -161,7 +161,7 @@ jobs:
       # Create additional release assets
       - name: Create CLI Release Asset
         run: |
-          cp ./target/release/resonite-manager.exe ./resonite-manager-${{ github.ref_name }}-windows.exe
+          cp ./target/release/reso-launcher-cli.exe ./reso-launcher-cli-${{ github.ref_name }}-windows.exe
         
       # Verify executable exists before creating portable
       - name: Verify GUI executable
@@ -169,19 +169,19 @@ jobs:
           Write-Host "=== Verifying GUI executable location ==="
           Write-Host "Current directory: $(Get-Location)"
           
-          if (Test-Path ".\target\release\Kokoa Resonite Tools.exe") {
-            Write-Host "SUCCESS: Found 'Kokoa Resonite Tools.exe' in expected location"
-            $item = Get-Item ".\target\release\Kokoa Resonite Tools.exe"
+          if (Test-Path ".\target\release\RESO Launcher.exe") {
+            Write-Host "SUCCESS: Found 'RESO Launcher.exe' in expected location"
+            $item = Get-Item ".\target\release\RESO Launcher.exe"
             Write-Host "  Full path: $($item.FullName)"
             Write-Host "  Size: $($item.Length) bytes"
             Write-Host "  Last write time: $($item.LastWriteTime)"
           } else {
-            Write-Host "ERROR: 'Kokoa Resonite Tools.exe' not found in .\target\release\"
+            Write-Host "ERROR: 'RESO Launcher.exe' not found in .\target\release\"
             Write-Host "`nChecking alternative locations:"
             
             $locations = @(
-              ".\gui\src-tauri\target\release\resonite-tools-tauri.exe",
-              ".\gui\target\release\resonite-tools-tauri.exe"
+              ".\gui\src-tauri\target\release\reso-launcher.exe",
+              ".\gui\target\release\reso-launcher.exe"
             )
             
             foreach ($loc in $locations) {
@@ -199,8 +199,8 @@ jobs:
         
       - name: Create GUI Portable Binary
         run: |
-          # The executable is named "Kokoa Resonite Tools.exe" with spaces
-          $exePath = ".\target\release\Kokoa Resonite Tools.exe"
+          # The executable is named "RESO Launcher.exe" with spaces
+          $exePath = ".\target\release\RESO Launcher.exe"
           
           if (Test-Path $exePath) {
             Write-Host "Found executable at: $exePath"
@@ -208,8 +208,8 @@ jobs:
             Write-Host "File size: $([math]::Round($fileSize, 2)) MB"
             
             # Copy the executable
-            cp $exePath ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe"
-            Write-Host "Created portable executable: kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe"
+            cp $exePath ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe"
+            Write-Host "Created portable executable: reso-launcher-${{ github.ref_name }}-windows-portable.exe"
             
             # Check for WebView2Loader.dll in various locations
             $webview2Paths = @(
@@ -229,11 +229,11 @@ jobs:
             
             # Create a zip file with both files if WebView2Loader exists
             if ($webview2Found) {
-              Compress-Archive -Path ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe", ".\WebView2Loader.dll" -DestinationPath ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.zip" -Force
+              Compress-Archive -Path ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe", ".\WebView2Loader.dll" -DestinationPath ".\reso-launcher-${{ github.ref_name }}-windows-portable.zip" -Force
               Write-Host "Created portable ZIP with executable and WebView2Loader.dll"
             } else {
               Write-Host "WebView2Loader.dll not found, creating ZIP with executable only"
-              Compress-Archive -Path ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe" -DestinationPath ".\kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.zip" -Force
+              Compress-Archive -Path ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe" -DestinationPath ".\reso-launcher-${{ github.ref_name }}-windows-portable.zip" -Force
             }
           } else {
             Write-Error "GUI executable not found at expected location: $exePath"
@@ -245,9 +245,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./resonite-manager-${{ github.ref_name }}-windows.exe
-            ./kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.exe
-            ./kokoa-resonite-tools-${{ github.ref_name }}-windows-portable.zip
+            ./reso-launcher-cli-${{ github.ref_name }}-windows.exe
+            ./reso-launcher-${{ github.ref_name }}-windows-portable.exe
+            ./reso-launcher-${{ github.ref_name }}-windows-portable.zip
           tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

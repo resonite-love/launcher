@@ -3140,16 +3140,30 @@ dependencies = [
 ]
 
 [[package]]
-name = "resonite-manager"
+name = "reso-launcher"
+version = "0.1.1"
+dependencies = [
+ "reqwest",
+ "reso-launcher-lib",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tokio",
+ "zip",
+]
+
+[[package]]
+name = "reso-launcher-cli"
 version = "0.1.1"
 dependencies = [
  "clap",
  "regex",
- "resonite-tools-lib",
+ "reso-launcher-lib",
 ]
 
 [[package]]
-name = "resonite-tools-lib"
+name = "reso-launcher-lib"
 version = "0.1.1"
 dependencies = [
  "anyhow",
@@ -3160,20 +3174,6 @@ dependencies = [
  "serde_json",
  "sha2",
  "tokio",
-]
-
-[[package]]
-name = "resonite-tools-tauri"
-version = "0.1.1"
-dependencies = [
- "reqwest",
- "resonite-tools-lib",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tokio",
- "zip",
 ]
 
 [[package]]

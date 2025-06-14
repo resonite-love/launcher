@@ -1,6 +1,6 @@
 use clap::{App, Arg, SubCommand};
 
-use resonite_tools_lib::{
+use reso_launcher_lib::{
     install::{ResoniteInstall, ResoniteInstallManager},
     profile::ProfileManager,
     depotdownloader::DepotDownloader,
@@ -23,10 +23,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // インストールマネージャの初期化
     let install_manager = ResoniteInstallManager::new(&exe_dir);
 
-    let matches = App::new("Resonite Manager")
+    let matches = App::new("RESO Launcher CLI")
         .version("1.0")
-        .author("Your Name")
-        .about("Manages Resonite installations using DepotDownloader")
+        .author("resonite.love community")
+        .about("RESO Launcher CLI - Community Resonite management tool")
         .subcommand(
             SubCommand::with_name("install")
                 .about("Installs or updates Resonite")
