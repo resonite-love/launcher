@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let install_manager = ResoniteInstallManager::new(&exe_dir);
 
     let matches = App::new("RESO Launcher CLI")
-        .version("1.0.0")
+        .version("1.0.1")
         .author("resonite.love community")
         .about("RESO Launcher CLI - Community Resonite management tool")
         .subcommand(
