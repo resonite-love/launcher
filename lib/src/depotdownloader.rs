@@ -211,15 +211,21 @@ impl DepotDownloader {
             
             // PowerShellスクリプトを構築
             let depot_path_str = self.path.to_string_lossy();
-            let args_str = args.join(" ");
             
-            let powershell_script = vec![
-                "Write-Host 'Starting DepotDownloader...' -ForegroundColor Green;",
-                &format!("& '{}' {}", depot_path_str, args_str),
-                "Write-Host '';",
-                "Write-Host 'Download completed. Press any key to close this window.' -ForegroundColor Green;",
-                "Read-Host"
-            ].join(" ");
+            // 引数を適切にクォートする（スペースが含まれる場合）
+            let quoted_args: Vec<String> = args.iter().map(|arg| {
+                if arg.contains(' ') {
+                    format!("'{}'", arg)
+                } else {
+                    arg.clone()
+                }
+            }).collect();
+            let args_str = quoted_args.join(" ");
+            
+            let powershell_script = format!(
+                "Write-Host 'Starting DepotDownloader...' -ForegroundColor Green; & '{}' {}; Write-Host ''; Write-Host 'Download completed. Press any key to close this window.' -ForegroundColor Green; Read-Host",
+                depot_path_str, args_str
+            );
             
             cmd.arg(&powershell_script);
             cmd.creation_flags(0x00000010); // CREATE_NEW_CONSOLE - 新しいコンソールウィンドウを作成
