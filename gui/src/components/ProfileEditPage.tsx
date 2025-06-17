@@ -51,7 +51,8 @@ import {
   useYtDlpStatus,
   useUpdateYtDlp,
   useLaunchResonite,
-  useMigrateInstalledMods
+  useMigrateInstalledMods,
+  useSteamCredentials
 } from '../hooks/useQueries';
 
 interface ProfileConfig {
@@ -158,6 +159,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('info');
+  
+  // Steam認証情報を取得
+  const { data: steamCredentials } = useSteamCredentials();
   
   // フォーム状態
   const [displayName, setDisplayName] = useState('');
@@ -628,6 +632,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         profile_name: profileName,
         branch: branch,
         manifest_id: manifestId,
+        username: steamCredentials?.username || null,
+        password: steamCredentials?.password || null,
       };
       
       const result = await invoke<string>('install_game_to_profile_interactive', { request });
