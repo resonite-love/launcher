@@ -8,7 +8,9 @@ use reso_launcher_lib::{
     depotdownloader::DepotDownloader,
     install::{ResoniteInstall, ResoniteInstallManager},
     profile::{Profile, ProfileManager},
-    mod_loader::{ModLoader, ModLoaderInfo},
+    mod_loader::ModLoader,
+    mod_loader_type::ModLoaderType,
+    monkey_loader::MonkeyLoader,
     mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease, UnmanagedMod},
     utils,
 };
@@ -48,6 +50,7 @@ pub struct ProfileInfo {
     pub manifest_id: Option<String>,
     pub version: Option<String>,
     pub has_mod_loader: bool,
+    pub mod_loader_type: Option<ModLoaderType>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -57,6 +60,13 @@ pub struct GameInstallRequest {
     pub manifest_id: Option<String>,
     pub username: Option<String>,
     pub password: Option<String>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct UnifiedModLoaderInfo {
+    pub installed: bool,
+    pub loader_type: Option<ModLoaderType>,
+    pub version: Option<String>,
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -358,12 +368,30 @@ async fn get_profiles(state: State<'_, Mutex<AppState>>) -> Result<Vec<ProfileIn
         };
         
         // MODローダーの状態をチェック
-        let has_mod_loader = if p.has_game_installed() {
+        let (has_mod_loader, mod_loader_type) = if p.has_game_installed() {
             let game_dir = p.get_game_dir(&profile_dir);
-            let mod_loader = ModLoader::new(game_dir);
-            mod_loader.get_status().map(|info| info.installed).unwrap_or(false)
+            
+            // プロファイルに保存されているMODローダータイプを優先
+            if let Some(saved_type) = p.mod_loader_type {
+                (true, Some(saved_type))
+            } else {
+                // 実際にインストールされているMODローダーを検出
+                let rml = ModLoader::new(game_dir.clone());
+                let ml = MonkeyLoader::new(game_dir);
+                
+                let rml_installed = rml.get_status().map(|info| info.installed).unwrap_or(false);
+                let ml_installed = ml.get_status().map(|info| info.installed).unwrap_or(false);
+                
+                if rml_installed {
+                    (true, Some(ModLoaderType::ResoniteModLoader))
+                } else if ml_installed {
+                    (true, Some(ModLoaderType::MonkeyLoader))
+                } else {
+                    (false, None)
+                }
+            }
         } else {
-            false
+            (false, None)
         };
         
         ProfileInfo {
@@ -376,6 +404,7 @@ async fn get_profiles(state: State<'_, Mutex<AppState>>) -> Result<Vec<ProfileIn
             manifest_id: p.game_info.as_ref().and_then(|info| info.manifest_id.clone()),
             version: current_version,
             has_mod_loader,
+            mod_loader_type,
         }
     }).collect())
 }
@@ -558,24 +587,57 @@ fn find_game_path(profile_dir: &std::path::Path) -> Result<std::path::PathBuf, S
 async fn get_mod_loader_status(
     profile_name: String,
     state: State<'_, Mutex<AppState>>,
-) -> Result<ModLoaderInfo, String> {
+) -> Result<UnifiedModLoaderInfo, String> {
     let app_state = state.lock().unwrap();
     
     let profile_manager = app_state.profile_manager.as_ref()
         .ok_or("Profile manager not initialized")?;
     
+    let profile = profile_manager.get_profile(&profile_name)
+        .map_err(|e| format!("Failed to get profile: {}", e))?;
+    
     let profile_dir = profile_manager.get_profile_dir(&profile_name);
     let game_path = find_game_path(&profile_dir)?;
     
-    let mod_loader = ModLoader::new(game_path);
-    mod_loader.get_status()
-        .map_err(|e| format!("Failed to get mod loader status: {}", e))
+    // Check ResoniteModLoader
+    let rml = ModLoader::new(game_path.clone());
+    let rml_status = rml.get_status()
+        .map_err(|e| format!("Failed to get RML status: {}", e))?;
+    
+    // Check MonkeyLoader
+    let ml = MonkeyLoader::new(game_path);
+    let ml_status = ml.get_status()
+        .map_err(|e| format!("Failed to get MonkeyLoader status: {}", e))?;
+    
+    // Determine which loader is installed
+    let (installed, loader_type, version) = if rml_status.installed {
+        (true, Some(ModLoaderType::ResoniteModLoader), rml_status.version)
+    } else if ml_status.installed {
+        (true, Some(ModLoaderType::MonkeyLoader), ml_status.version)
+    } else {
+        (false, None, None)
+    };
+    
+    // If profile has a loader type stored, use that, otherwise use detected
+    let loader_type = if installed {
+        profile.mod_loader_type.or(loader_type)
+    } else {
+        // プロファイルにローダータイプが保存されているが実際にはインストールされていない場合
+        profile.mod_loader_type
+    };
+    
+    Ok(UnifiedModLoaderInfo {
+        installed,
+        loader_type,
+        version,
+    })
 }
 
 // Install mod loader to a profile
 #[tauri::command]
 async fn install_mod_loader(
     profile_name: String,
+    loader_type: ModLoaderType,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<String, String> {
     let game_path = {
@@ -588,9 +650,18 @@ async fn install_mod_loader(
         find_game_path(&profile_dir)?
     };
     
-    let mod_loader = ModLoader::new(game_path);
-    let result = mod_loader.install().await
-        .map_err(|e| format!("Failed to install mod loader: {}", e))?;
+    let result = match loader_type {
+        ModLoaderType::ResoniteModLoader => {
+            let mod_loader = ModLoader::new(game_path.clone());
+            mod_loader.install().await
+                .map_err(|e| format!("Failed to install ResoniteModLoader: {}", e))?
+        },
+        ModLoaderType::MonkeyLoader => {
+            let monkey_loader = MonkeyLoader::new(game_path.clone());
+            monkey_loader.install().await
+                .map_err(|e| format!("Failed to install MonkeyLoader: {}", e))?
+        }
+    };
     
     // プロファイルの起動引数も更新
     {
@@ -601,7 +672,21 @@ async fn install_mod_loader(
         let mut profile = profile_manager.get_profile(&profile_name)
             .map_err(|e| format!("Failed to get profile: {}", e))?;
         
-        mod_loader.add_launch_args(&mut profile.args);
+        // Update launch args based on loader type
+        match loader_type {
+            ModLoaderType::ResoniteModLoader => {
+                let mod_loader = ModLoader::new(game_path.clone());
+                mod_loader.add_launch_args(&mut profile.args);
+            },
+            ModLoaderType::MonkeyLoader => {
+                // MonkeyLoader doesn't need special launch args
+                let monkey_loader = MonkeyLoader::new(game_path.clone());
+                monkey_loader.remove_disable_args(&mut profile.args);
+            }
+        }
+        
+        // Save the mod loader type to the profile
+        profile.mod_loader_type = Some(loader_type);
         
         profile_manager.update_profile(&profile)
             .map_err(|e| format!("Failed to update profile args: {}", e))?;
@@ -616,19 +701,51 @@ async fn uninstall_mod_loader(
     profile_name: String,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<String, String> {
-    let game_path = {
+    let (game_path, mod_loader_type) = {
         let app_state = state.lock().unwrap();
         
         let profile_manager = app_state.profile_manager.as_ref()
             .ok_or("Profile manager not initialized")?;
         
+        let profile = profile_manager.get_profile(&profile_name)
+            .map_err(|e| format!("Failed to get profile: {}", e))?;
+        
         let profile_dir = profile_manager.get_profile_dir(&profile_name);
-        find_game_path(&profile_dir)?
+        let game_path = find_game_path(&profile_dir)?;
+        
+        (game_path, profile.mod_loader_type)
     };
     
-    let mod_loader = ModLoader::new(game_path);
-    let result = mod_loader.uninstall()
-        .map_err(|e| format!("Failed to uninstall mod loader: {}", e))?;
+    // Detect which loader is installed if not specified in profile
+    let loader_type = if let Some(loader_type) = mod_loader_type {
+        loader_type
+    } else {
+        // Auto-detect
+        let rml = ModLoader::new(game_path.clone());
+        let ml = MonkeyLoader::new(game_path.clone());
+        
+        if rml.get_status().map_or(false, |s| s.installed) {
+            ModLoaderType::ResoniteModLoader
+        } else if ml.get_status().map_or(false, |s| s.installed) {
+            ModLoaderType::MonkeyLoader
+        } else {
+            return Err("No mod loader installed".to_string());
+        }
+    };
+    
+    // Uninstall the appropriate loader
+    let result = match loader_type {
+        ModLoaderType::ResoniteModLoader => {
+            let mod_loader = ModLoader::new(game_path.clone());
+            mod_loader.uninstall()
+                .map_err(|e| format!("Failed to uninstall ResoniteModLoader: {}", e))?
+        },
+        ModLoaderType::MonkeyLoader => {
+            let monkey_loader = MonkeyLoader::new(game_path.clone());
+            monkey_loader.uninstall()
+                .map_err(|e| format!("Failed to uninstall MonkeyLoader: {}", e))?
+        }
+    };
     
     // プロファイルの起動引数からも削除
     {
@@ -639,7 +756,19 @@ async fn uninstall_mod_loader(
         let mut profile = profile_manager.get_profile(&profile_name)
             .map_err(|e| format!("Failed to get profile: {}", e))?;
         
-        mod_loader.remove_launch_args(&mut profile.args);
+        // Remove launch args based on loader type
+        match loader_type {
+            ModLoaderType::ResoniteModLoader => {
+                let mod_loader = ModLoader::new(game_path.clone());
+                mod_loader.remove_launch_args(&mut profile.args);
+            },
+            ModLoaderType::MonkeyLoader => {
+                // MonkeyLoader doesn't have special launch args to remove
+            }
+        }
+        
+        // Clear mod loader type from profile
+        profile.mod_loader_type = None;
         
         profile_manager.update_profile(&profile)
             .map_err(|e| format!("Failed to update profile args: {}", e))?;

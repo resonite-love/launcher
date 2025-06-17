@@ -37,6 +37,7 @@ interface ProfileInfo {
   manifest_id?: string;
   version?: string;
   has_mod_loader: boolean;
+  mod_loader_type?: 'ResoniteModLoader' | 'MonkeyLoader';
 }
 
 interface GameInstallRequest {
@@ -82,6 +83,7 @@ function ProfilesTab() {
   const [createGameBranch, setCreateGameBranch] = useState('release');
   const [createManifestId, setCreateManifestId] = useState('');
   const [createWithModLoader, setCreateWithModLoader] = useState(false);
+  const [createModLoaderType, setCreateModLoaderType] = useState<'ResoniteModLoader' | 'MonkeyLoader'>('ResoniteModLoader');
   
   // ゲームインストール用の状態
   const [showInstallModal, setShowInstallModal] = useState(false);
@@ -106,6 +108,8 @@ function ProfilesTab() {
     withGame: boolean;
     branch: string;
     manifestId: string;
+    withModLoader: boolean;
+    modLoaderType: 'ResoniteModLoader' | 'MonkeyLoader';
   } | null>(null);
   
   // ゲームアップデートモーダル用の状態
@@ -178,6 +182,7 @@ function ProfilesTab() {
     setCreateGameBranch('release');
     setCreateManifestId('');
     setCreateWithModLoader(false);
+    setCreateModLoaderType('ResoniteModLoader');
     setShowCreateProfileModal(true);
   };
 
@@ -189,6 +194,7 @@ function ProfilesTab() {
     setCreateGameBranch('release');
     setCreateManifestId('');
     setCreateWithModLoader(false);
+    setCreateModLoaderType('ResoniteModLoader');
   };
 
   const createProfile = async () => {
@@ -204,7 +210,9 @@ function ProfilesTab() {
         description: newProfileDescription.trim(),
         withGame: createWithGame,
         branch: createGameBranch,
-        manifestId: createManifestId
+        manifestId: createManifestId,
+        withModLoader: createWithModLoader,
+        modLoaderType: createModLoaderType
       });
       setShowModRiskModal(true);
       return;
@@ -216,8 +224,10 @@ function ProfilesTab() {
       description: newProfileDescription.trim(),
       withGame: createWithGame,
       branch: createGameBranch,
-      manifestId: createManifestId
-    }, false);
+      manifestId: createManifestId,
+      withModLoader: false,
+      modLoaderType: createModLoaderType
+    });
   };
 
   const executeProfileCreation = async (
@@ -227,8 +237,9 @@ function ProfilesTab() {
       withGame: boolean;
       branch: string;
       manifestId: string;
-    },
-    installModLoader: boolean
+      withModLoader: boolean;
+      modLoaderType: 'ResoniteModLoader' | 'MonkeyLoader';
+    }
   ) => {
     try {
       // React Queryのミューテーションを使用してプロファイルを作成
@@ -252,10 +263,11 @@ function ProfilesTab() {
           toast.success(installResult);
           
           // MODローダーもインストールする場合
-          if (installModLoader) {
+          if (profileData.withModLoader) {
             try {
               const modLoaderResult = await invoke<string>('install_mod_loader', { 
-                profileName: profileData.name
+                profileName: profileData.name,
+                loaderType: profileData.modLoaderType
               });
               toast.success(modLoaderResult);
             } catch (modErr) {
@@ -276,7 +288,7 @@ function ProfilesTab() {
   const handleModRiskConfirm = async () => {
     setShowModRiskModal(false);
     if (pendingProfileData) {
-      await executeProfileCreation(pendingProfileData, true);
+      await executeProfileCreation(pendingProfileData);
       setPendingProfileData(null);
     }
   };
@@ -588,8 +600,15 @@ function ProfilesTab() {
                   )}
                   
                   {profile.has_game && profile.has_mod_loader && (
-                    <span className="status-success text-xs">
-                      RML
+                    <span 
+                      className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        profile.mod_loader_type === 'MonkeyLoader' 
+                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
+                          : 'bg-green-500/20 text-green-300 border border-green-500/30'
+                      }`}
+                      title={profile.mod_loader_type === 'MonkeyLoader' ? 'MonkeyLoader' : 'Resonite Mod Loader'}
+                    >
+                      {profile.mod_loader_type === 'MonkeyLoader' ? 'ML' : 'RML'}
                     </span>
                   )}
                 </div>
@@ -966,26 +985,62 @@ function ProfilesTab() {
                       />
 
                       <div>
-                        <div className="flex items-center space-x-3 mb-4">
-                          <input
-                            type="checkbox"
-                            id="createWithModLoader"
-                            checked={createWithModLoader}
-                            onChange={(e) => setCreateWithModLoader(e.target.checked)}
-                            className="w-4 h-4 text-resonite-blue bg-dark-800 border-dark-600 rounded focus:ring-resonite-blue focus:ring-2"
-                          />
-                          <label htmlFor="createWithModLoader" className="text-white font-medium">
-                            ResoniteModLoaderもインストールする
-                          </label>
-                        </div>
-                        
-                        {createWithModLoader && (
-                          <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mb-4">
-                            <p className="text-sm text-blue-400">
-                              📝 ResoniteModLoaderがゲームと同時にインストールされ、MODを使用できるようになります。
-                            </p>
+                        <div className="space-y-4 mb-4">
+                          <div className="flex items-center space-x-3">
+                            <input
+                              type="checkbox"
+                              id="createWithModLoader"
+                              checked={createWithModLoader}
+                              onChange={(e) => setCreateWithModLoader(e.target.checked)}
+                              className="w-4 h-4 text-resonite-blue bg-dark-800 border-dark-600 rounded focus:ring-resonite-blue focus:ring-2"
+                            />
+                            <label htmlFor="createWithModLoader" className="text-white font-medium">
+                              MODローダーもインストールする
+                            </label>
                           </div>
-                        )}
+                          
+                          {createWithModLoader && (
+                            <div className="ml-7 space-y-3">
+                              <div className="flex space-x-4">
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="createModLoaderType"
+                                    value="ResoniteModLoader"
+                                    checked={createModLoaderType === 'ResoniteModLoader'}
+                                    onChange={(e) => setCreateModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader')}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-sm text-gray-300">Resonite Mod Loader (RML)</span>
+                                </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="createModLoaderType"
+                                    value="MonkeyLoader"
+                                    checked={createModLoaderType === 'MonkeyLoader'}
+                                    onChange={(e) => setCreateModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader')}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-sm text-gray-300">MonkeyLoader</span>
+                                </label>
+                              </div>
+                              
+                              <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
+                                <p className="text-sm text-blue-400">
+                                  📝 {createModLoaderType === 'MonkeyLoader' 
+                                    ? 'MonkeyLoaderがゲームと同時にインストールされ、MODを使用できるようになります。' 
+                                    : 'ResoniteModLoaderがゲームと同時にインストールされ、MODを使用できるようになります。'}
+                                </p>
+                                <p className="text-xs text-blue-300 mt-1">
+                                  {createModLoaderType === 'MonkeyLoader' 
+                                    ? 'MonkeyLoaderは新しいMODローダーで、より高度な機能を提供します。' 
+                                    : 'RMLは従来のMODローダーで、多くのMODが対応しています。'}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       
                       {!savedCredentials && (
@@ -1020,7 +1075,7 @@ function ProfilesTab() {
                   )}
                   <span>
                     {createWithGame && createWithModLoader 
-                      ? 'プロファイル作成＆ゲーム＆MODローダーインストール'
+                      ? `プロファイル作成＆ゲーム＆${createModLoaderType === 'MonkeyLoader' ? 'MonkeyLoader' : 'RML'}インストール`
                       : createWithGame 
                       ? 'プロファイル作成＆ゲームインストール' 
                       : 'プロファイル作成'
@@ -1046,7 +1101,7 @@ function ProfilesTab() {
         isOpen={showModRiskModal}
         onClose={handleModRiskCancel}
         onConfirm={handleModRiskConfirm}
-        title="MODローダー付きプロファイル作成"
+        title={`${pendingProfileData?.modLoaderType === 'MonkeyLoader' ? 'MonkeyLoader' : 'ResoniteModLoader'}付きプロファイル作成`}
       />
       
       {/* Game Update Modal */}

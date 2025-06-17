@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::error::Error;
+use crate::mod_loader_type::ModLoaderType;
 
 /// Resoniteゲーム情報
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -14,9 +15,15 @@ pub struct GameInfo {
     pub version: Option<String>,
 }
 
+/// プロファイル設定のバージョン
+const PROFILE_CONFIG_VERSION: u32 = 2;
+
 /// Resoniteの起動プロファイルを管理するための構造体
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Profile {
+    /// コンフィグファイルのバージョン
+    #[serde(default = "default_config_version")]
+    pub config_version: u32,
     /// フォルダ名として使用される内部ID（ASCII文字のみ）
     pub id: String,
     /// ユーザーに表示される名前（日本語可）
@@ -27,12 +34,20 @@ pub struct Profile {
     pub description: String,
     pub game_info: Option<GameInfo>,
     pub args: Vec<String>,
+    /// インストールされているMODローダーのタイプ
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mod_loader_type: Option<ModLoaderType>,
+}
+
+fn default_config_version() -> u32 {
+    PROFILE_CONFIG_VERSION
 }
 
 impl Profile {
     /// 新しいプロファイルを作成する
     pub fn new(id: &str, display_name: &str, _full_profile_path: &Path) -> Self {
         Profile {
+            config_version: PROFILE_CONFIG_VERSION,
             id: id.to_string(),
             display_name: display_name.to_string(),
             name: String::new(), // 互換性のため
@@ -42,6 +57,7 @@ impl Profile {
                 "-DataPath".to_string(),
                 "%PROFILE_DIR%\\DataPath".to_string(), // パス変数を使用
             ],
+            mod_loader_type: None,
         }
     }
     
@@ -147,8 +163,61 @@ impl Profile {
     pub fn load(profile_dir: &Path) -> Result<Self, Box<dyn Error>> {
         let config_path = profile_dir.join("launchconfig.json");
         let json = fs::read_to_string(config_path)?;
-        let profile: Profile = serde_json::from_str(&json)?;
+        let mut profile: Profile = serde_json::from_str(&json)?;
+        
+        // マイグレーションを実行
+        if profile.config_version < PROFILE_CONFIG_VERSION {
+            profile = Self::migrate_profile(profile, profile_dir)?;
+            // マイグレーション後は自動保存
+            profile.save(profile_dir)?;
+        }
+        
         Ok(profile)
+    }
+    
+    /// プロファイルのマイグレーション
+    fn migrate_profile(mut profile: Profile, profile_dir: &Path) -> Result<Self, Box<dyn Error>> {
+        println!("プロファイル設定をバージョン{}からバージョン{}にマイグレーションします", profile.config_version, PROFILE_CONFIG_VERSION);
+        
+        // バージョン1からバージョン2へのマイグレーション
+        if profile.config_version < 2 {
+            // 既存のMODローダーがインストールされているかチェック
+            if let Some(mod_loader_type) = Self::detect_existing_mod_loader(profile_dir) {
+                profile.mod_loader_type = Some(mod_loader_type);
+                println!("既存のMODローダーを検出しました: {:?}", mod_loader_type);
+            } else {
+                println!("MODローダーは検出されませんでした");
+            }
+        }
+        
+        // バージョンを更新
+        profile.config_version = PROFILE_CONFIG_VERSION;
+        println!("マイグレーション完了");
+        
+        Ok(profile)
+    }
+    
+    /// 既存のMODローダーを検出
+    fn detect_existing_mod_loader(profile_dir: &Path) -> Option<ModLoaderType> {
+        let game_dir = profile_dir.join("Game");
+        
+        // ResoniteModLoaderの検出
+        let rml_dll = game_dir.join("Libraries").join("ResoniteModLoader.dll");
+        let harmony_dll = game_dir.join("rml_libs").join("0Harmony.dll");
+        
+        if rml_dll.exists() && harmony_dll.exists() {
+            return Some(ModLoaderType::ResoniteModLoader);
+        }
+        
+        // MonkeyLoaderの検出
+        let winhttp_dll = game_dir.join("winhttp.dll");
+        let run_script = game_dir.join("run_monkeyloader.sh");
+        
+        if winhttp_dll.exists() || run_script.exists() {
+            return Some(ModLoaderType::MonkeyLoader);
+        }
+        
+        None
     }
 }
 
@@ -255,11 +324,13 @@ impl ProfileManager {
 
         let mut profile = Profile::load(&profile_dir)?;
         
-        // 旧フォーマットのマイグレーション
+        // 旧フォーマットのマイグレーション（バージョン1以前）
         if profile.id.is_empty() && !profile.name.is_empty() {
             // 旧フォーマット: nameをidとdisplay_nameにコピー
             profile.id = profile.name.clone();
             profile.display_name = profile.name.clone();
+            // この変更も保存
+            profile.save(&profile_dir)?;
         }
         
         Ok(profile)

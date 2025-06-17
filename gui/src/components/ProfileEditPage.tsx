@@ -47,6 +47,7 @@ import {
 } from '../hooks/useQueries';
 
 interface ProfileConfig {
+  config_version?: number;
   id: string;
   display_name: string;
   name?: string; // 互換性のため
@@ -56,11 +57,18 @@ interface ProfileConfig {
     branch: string;
     manifest_id?: string;
   };
+  mod_loader_type?: 'ResoniteModLoader' | 'MonkeyLoader';
 }
 
 interface ProfileEditPageProps {
   profileName: string;
   onBack: () => void;
+}
+
+interface UnifiedModLoaderInfo {
+  installed: boolean;
+  loader_type?: 'ResoniteModLoader' | 'MonkeyLoader';
+  version?: string;
 }
 
 interface ModInfo {
@@ -149,9 +157,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [args, setArgs] = useState<string[]>([]);
   
   // MODローダー用の状態
-  const [modLoaderInfo, setModLoaderInfo] = useState<any>(null);
+  const [modLoaderInfo, setModLoaderInfo] = useState<UnifiedModLoaderInfo | null>(null);
   const [isLoadingModLoader, setIsLoadingModLoader] = useState(false);
   const [showModRiskModal, setShowModRiskModal] = useState(false);
+  const [selectedModLoaderType, setSelectedModLoaderType] = useState<'ResoniteModLoader' | 'MonkeyLoader'>('ResoniteModLoader');
   
   // MOD管理用の状態
   const [isLoadingMods, setIsLoadingMods] = useState(false);
@@ -306,7 +315,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const installModLoader = async () => {
     try {
       setIsLoadingModLoader(true);
-      const result = await invoke<string>('install_mod_loader', { profileName });
+      const result = await invoke<string>('install_mod_loader', { 
+        profileName,
+        loaderType: selectedModLoaderType 
+      });
       toast.success(result);
       await loadModLoaderInfo();
       await loadProfile(); // 起動引数が更新される可能性がある
@@ -966,11 +978,46 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-6 mb-6">
                 <div className="flex items-start space-x-3">
                   <Info className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h4 className="text-yellow-400 font-medium mb-2">ResoniteModLoaderが必要です</h4>
+                  <div className="flex-1">
+                    <h4 className="text-yellow-400 font-medium mb-2">MODローダーが必要です</h4>
                     <p className="text-yellow-200 text-sm mb-4">
-                      MODを使用するにはResoniteModLoaderをインストールする必要があります。
+                      MODを使用するにはMODローダーをインストールする必要があります。
                     </p>
+                    
+                    {/* MODローダータイプ選択 */}
+                    <div className="mb-4">
+                      <label className="text-gray-300 text-sm mb-2 block">MODローダーを選択:</label>
+                      <div className="flex space-x-4">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="modLoaderType"
+                            value="ResoniteModLoader"
+                            checked={selectedModLoaderType === 'ResoniteModLoader'}
+                            onChange={(e) => setSelectedModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader')}
+                            className="mr-2"
+                          />
+                          <span className="text-sm text-gray-300">Resonite Mod Loader (RML)</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="modLoaderType"
+                            value="MonkeyLoader"
+                            checked={selectedModLoaderType === 'MonkeyLoader'}
+                            onChange={(e) => setSelectedModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader')}
+                            className="mr-2"
+                          />
+                          <span className="text-sm text-gray-300">MonkeyLoader</span>
+                        </label>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2">
+                        {selectedModLoaderType === 'ResoniteModLoader' 
+                          ? 'RMLは従来のMODローダーで、多くのMODが対応しています。'
+                          : 'MonkeyLoaderは新しいMODローダーで、より高度な機能を提供します。'}
+                      </p>
+                    </div>
+                    
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -983,7 +1030,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                       ) : (
                         <Package className="w-4 h-4" />
                       )}
-                      <span>ResoniteModLoaderをインストール</span>
+                      <span>{selectedModLoaderType}をインストール</span>
                     </motion.button>
                   </div>
                 </div>
@@ -991,6 +1038,42 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             ) : (
               /* MOD管理メニュー */
               <div className="space-y-6">
+                {/* インストール済みMODローダー情報 */}
+                {modLoaderInfo?.installed && (
+                  <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <Package className="w-5 h-5 text-green-400" />
+                        <div>
+                          <h4 className="text-green-400 font-medium">
+                            {modLoaderInfo.loader_type === 'MonkeyLoader' ? 'MonkeyLoader' : 'Resonite Mod Loader'} インストール済み
+                          </h4>
+                          <p className="text-green-200 text-sm">
+                            バージョン: {modLoaderInfo.version || '不明'}
+                            {profile?.config_version && profile.config_version < 2 && (
+                              <span className="ml-2 text-yellow-300">(マイグレーション済み)</span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="btn-secondary text-xs flex items-center space-x-1"
+                        onClick={uninstallModLoader}
+                        disabled={isLoadingModLoader}
+                      >
+                        {isLoadingModLoader ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3 h-3" />
+                        )}
+                        <span>アンインストール</span>
+                      </motion.button>
+                    </div>
+                  </div>
+                )}
+                
                 {/* MODサブタブ */}
                 <div className="flex space-x-1 bg-dark-800/30 p-1 rounded-lg">
                   <motion.button
@@ -1754,7 +1837,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         isOpen={showModRiskModal}
         onClose={handleModRiskCancel}
         onConfirm={handleModRiskConfirm}
-        title="MODローダーのインストール"
+        title={`${selectedModLoaderType === 'MonkeyLoader' ? 'MonkeyLoader' : 'Resonite Mod Loader'}のインストール`}
       />
       
       {/* Game Update Modal */}
