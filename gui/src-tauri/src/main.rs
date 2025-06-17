@@ -1068,6 +1068,60 @@ async fn get_mod_versions(
         .map_err(|e| format!("Failed to get mod versions: {}", e))
 }
 
+#[tauri::command]
+async fn get_github_releases(repo_url: String) -> Result<Vec<ModRelease>, String> {
+    // GitHub リポジトリURLからAPI URLに変換
+    let api_url = if repo_url.contains("github.com") {
+        let parts: Vec<&str> = repo_url.split('/').collect();
+        if parts.len() >= 5 {
+            let owner = parts[parts.len() - 2];
+            let repo = parts[parts.len() - 1];
+            format!("https://api.github.com/repos/{}/{}/releases", owner, repo)
+        } else {
+            return Err("Invalid GitHub repository URL".to_string());
+        }
+    } else {
+        return Err("Not a valid GitHub repository URL".to_string());
+    };
+
+    // GitHub APIからリリース情報を取得
+    let client = reqwest::Client::new();
+    let response = client
+        .get(&api_url)
+        .header("User-Agent", "RESO-Launcher")
+        .send()
+        .await
+        .map_err(|e| format!("Failed to fetch releases: {}", e))?;
+
+    if !response.status().is_success() {
+        return Err(format!("GitHub API error: {}", response.status()));
+    }
+
+    let releases: Vec<serde_json::Value> = response
+        .json()
+        .await
+        .map_err(|e| format!("Failed to parse releases: {}", e))?;
+
+    // ModRelease形式に変換
+    let mod_releases: Vec<ModRelease> = releases
+        .into_iter()
+        .map(|release| ModRelease {
+            version: release["tag_name"].as_str().unwrap_or("").to_string(),
+            download_url: None,
+            release_url: release["html_url"].as_str().unwrap_or("").to_string(),
+            published_at: release["published_at"].as_str().unwrap_or("").to_string(),
+            prerelease: release["prerelease"].as_bool().unwrap_or(false),
+            draft: release["draft"].as_bool().unwrap_or(false),
+            changelog: release["body"].as_str().map(|s| s.to_string()),
+            file_name: None,
+            file_size: None,
+            sha256: None,
+        })
+        .collect();
+
+    Ok(mod_releases)
+}
+
 // Update MOD to a specific version
 #[tauri::command]
 async fn update_mod(
@@ -1565,6 +1619,7 @@ fn main() {
             install_mod_from_github,
             uninstall_mod,
             get_mod_versions,
+            get_github_releases,
             update_mod,
             downgrade_mod,
             upgrade_mod,

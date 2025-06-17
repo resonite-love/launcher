@@ -172,6 +172,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [selectedModForVersions, setSelectedModForVersions] = useState<InstalledMod | null>(null);
   const [selectedAvailableModForVersions, setSelectedAvailableModForVersions] = useState<ModInfo | null>(null);
   const [selectedInstallVersion, setSelectedInstallVersion] = useState<string>('');
+  const [selectedCustomModUrl, setSelectedCustomModUrl] = useState<string>('');
+  const [customModVersions, setCustomModVersions] = useState<any[]>([]);
   const [modActiveTab, setModActiveTab] = useState<'install' | 'manage'>('install');
 
   // React Query hooks - disable auto-fetch for available mods
@@ -482,6 +484,16 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     }
   };
 
+  const handleCustomModInstallButtonClick = async () => {
+    if (selectedCustomModUrl && selectedInstallVersion) {
+      await installModFromUrl(selectedCustomModUrl, selectedInstallVersion);
+      setSelectedCustomModUrl('');
+      setSelectedInstallVersion('');
+      setCustomModVersions([]);
+      setCustomRepoUrl('');
+    }
+  };
+
   const installModFromUrl = async (repoUrl: string, version?: string) => {
     try {
       setIsInstallingMod(repoUrl);
@@ -514,8 +526,24 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       return;
     }
 
-    await installModFromUrl(customRepoUrl.trim());
-    setCustomRepoUrl('');
+    // GitHubからバージョン情報を取得
+    try {
+      setIsInstallingMod(customRepoUrl);
+      const versions = await invoke<any[]>('get_github_releases', { repoUrl: customRepoUrl.trim() });
+      
+      if (versions.length === 0) {
+        toast.error('このリポジトリにはリリースが見つかりませんでした');
+        return;
+      }
+
+      setCustomModVersions(versions);
+      setSelectedCustomModUrl(customRepoUrl.trim());
+      setSelectedInstallVersion('');
+    } catch (error) {
+      toast.error(`バージョン情報の取得に失敗しました: ${error}`);
+    } finally {
+      setIsInstallingMod(null);
+    }
   };
 
   const openProfileFolder = async () => {
@@ -1952,6 +1980,67 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 <p className="text-gray-400">利用可能なバージョンがありません</p>
               </div>
             )}
+          </motion.div>
+        </div>
+      )}
+
+      {/* カスタムMODバージョン選択モーダル */}
+      {selectedCustomModUrl && customModVersions.length > 0 && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-dark-800 rounded-lg p-6 max-w-md w-full mx-4 border border-dark-600"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-white">バージョンを選択</h3>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  setSelectedCustomModUrl('');
+                  setCustomModVersions([]);
+                  setSelectedInstallVersion('');
+                }}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </motion.button>
+            </div>
+
+            <div className="space-y-4">
+              <ModVersionSelector
+                mod={{
+                  name: selectedCustomModUrl.split('/').pop() || 'Custom MOD',
+                  description: 'GitHub リポジトリから手動インストール',
+                  source_location: selectedCustomModUrl,
+                  installed_version: '',
+                  installed_date: new Date().toISOString(),
+                  dll_path: ''
+                }}
+                availableVersions={customModVersions}
+                onVersionSelect={handleAvailableModVersionSelect}
+                isLoading={isInstallingMod !== null}
+              />
+              
+              <div className="flex justify-end">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="btn-primary flex items-center space-x-2"
+                  onClick={handleCustomModInstallButtonClick}
+                  disabled={isInstallingMod !== null || !selectedInstallVersion}
+                >
+                  {isInstallingMod ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                  <span>インストール</span>
+                </motion.button>
+              </div>
+            </div>
           </motion.div>
         </div>
       )}
