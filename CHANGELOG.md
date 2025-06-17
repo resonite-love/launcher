@@ -7,6 +7,42 @@
 
 ## [Unreleased]
 
+## [v1.1.0] - 2025-06-17
+
+### 🎉 新機能
+- **MonkeyLoader対応**: ResoniteModLoaderに加えて、新しいMODローダー「MonkeyLoader」もサポート
+- **MODローダー選択機能**: プロファイル作成時とMOD管理画面でRMLとMonkeyLoaderを選択可能
+- **自動マイグレーション**: 既存プロファイルでResoniteModLoaderが検出された場合、自動的にコンフィグをマイグレーション
+- **プロファイル設定バージョン管理**: コンフィグファイルにバージョン番号を追加し、今後のアップデートでスムーズなマイグレーションが可能
+
+### ✨ 改善
+- **視覚的な識別**: プロファイル一覧でMODローダータイプをカラーチップで表示（RML: 緑色、ML: 紫色）
+- **統一インターフェース**: 両方のMODローダーを統一的に管理できるUI
+- **詳細な説明**: 各MODローダーの特徴を選択時に表示
+- **マイグレーション表示**: 自動マイグレーションされたプロファイルに「(マイグレーション済み)」表示
+
+### 🔧 技術的改善
+- **型安全性の向上**: ModLoaderTypeエニュームによる型安全なMODローダー管理
+- **コンフィグバージョニング**: 将来のアップデートに対応したコンフィグバージョン管理システム
+- **自動検出機能**: インストール済みMODローダーの自動検出と識別
+
+### 📖 詳細情報
+#### MonkeyLoaderについて
+MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定性を提供します：
+- **自動インストール**: ZIPファイルからゲームディレクトリに自動展開
+- **シンプルな起動**: 特別な起動引数不要
+- **無効化機能**: `--doorstop-enabled false` フラグで簡単に無効化可能
+
+#### 既存ユーザーへの影響
+- **完全後方互換**: 既存のRMLプロファイルは引き続き動作
+- **自動認識**: 既存のRMLインストールを自動検出してコンフィグに反映
+- **選択の自由**: 新しいプロファイルではRMLまたはMonkeyLoaderを自由選択
+
+### 🛠️ 使用方法
+1. **新規プロファイル作成時**: MODローダーチェックボックスを有効にすると、RMLまたはMonkeyLoaderを選択可能
+2. **既存プロファイル**: MOD管理画面でローダータイプを確認し、別のローダーに切り替え可能
+3. **プロファイル一覧**: 各プロファイルのMODローダータイプがチップで一目で確認可能
+
 ## [v1.0.4] - 2025-06-14
 
 ### 修正
@@ -174,7 +210,8 @@
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.4...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.1.0...HEAD
+[v1.1.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.4...v1.1.0
 [v1.0.4]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.3...v1.0.4
 [v1.0.3]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.2...v1.0.3
 [v1.0.2]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.1...v1.0.2
