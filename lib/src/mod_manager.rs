@@ -49,7 +49,9 @@ pub struct InstalledMod {
     #[serde(default)]
     pub mod_loader_type: Option<String>, // "ResoniteModLoader" or "MonkeyLoader"
     #[serde(default)]
-    pub file_format: Option<String>, // "dll" or "nsis"
+    pub file_format: Option<String>, // "dll" or "nupkg"
+    #[serde(default)]
+    pub enabled: Option<bool>, // MODの有効/無効状態
 }
 
 /// 未管理MOD情報（手動で追加されたMOD）
@@ -355,6 +357,7 @@ impl ModManager {
             dll_path: file_path,
             mod_loader_type: mod_loader_type.map(|s| s.to_string()),
             file_format: Some(file_format.to_string()),
+            enabled: Some(true), // 新規インストール時は有効
         };
         
         // インストール済みMOD一覧に追加
@@ -429,6 +432,7 @@ impl ModManager {
             dll_path: file_path,
             mod_loader_type: mod_loader_type.map(|s| s.to_string()),
             file_format: Some(file_format.to_string()),
+            enabled: Some(true), // 新規インストール時は有効
         };
         
         // インストール済みMOD一覧に追加
@@ -583,6 +587,7 @@ impl ModManager {
             dll_path: unmanaged_mod.file_path.clone(),
             mod_loader_type: Some("ResoniteModLoader".to_string()), // 未管理MODはRMLと仮定
             file_format: Some("dll".to_string()),
+            enabled: Some(true), // 未管理MODは有効と仮定
         };
 
         // インストール済みMOD一覧に追加
@@ -677,6 +682,82 @@ impl ModManager {
             
             // インストール済みMOD一覧を更新
             self.save_installed_mods(&installed_mods)?;
+        }
+        
+        Ok(())
+    }
+
+    /// MODを無効化（拡張子を.disabledに変更）
+    pub fn disable_mod(&self, mod_name: &str) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let mut installed_mods = self.get_installed_mods()?;
+        
+        if let Some(mod_info) = installed_mods.iter_mut().find(|m| m.name == mod_name) {
+            let current_path = &mod_info.dll_path;
+            
+            // 既に無効化されているかチェック
+            if current_path.extension().and_then(|ext| ext.to_str()) == Some("disabled") {
+                return Err("MOD is already disabled".into());
+            }
+            
+            // 現在のパスに.disabledを追加
+            let current_path_str = current_path.to_string_lossy();
+            let disabled_path_str = format!("{}.disabled", current_path_str);
+            let disabled_path = PathBuf::from(disabled_path_str);
+            
+            // ファイルをリネーム
+            if current_path.exists() {
+                fs::rename(current_path, &disabled_path)?;
+            }
+            
+            // パスと状態を更新
+            mod_info.dll_path = disabled_path;
+            mod_info.enabled = Some(false);
+            
+            // インストール済みMOD一覧を更新
+            self.save_installed_mods(&installed_mods)?;
+        } else {
+            return Err(format!("MOD '{}' not found", mod_name).into());
+        }
+        
+        Ok(())
+    }
+
+    /// MODを有効化（.disabled拡張子を削除）
+    pub fn enable_mod(&self, mod_name: &str) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let mut installed_mods = self.get_installed_mods()?;
+        
+        if let Some(mod_info) = installed_mods.iter_mut().find(|m| m.name == mod_name) {
+            let current_path = &mod_info.dll_path;
+            
+            // 無効化されているかチェック
+            if current_path.extension().and_then(|ext| ext.to_str()) != Some("disabled") {
+                return Err("MOD is already enabled".into());
+            }
+            
+            // .disabledを削除した元のパスを復元
+            let current_path_str = current_path.to_string_lossy();
+            let enabled_path_str = if current_path_str.ends_with(".disabled") {
+                // .disabledを単純に削除
+                current_path_str.strip_suffix(".disabled").unwrap().to_string()
+            } else {
+                return Err("Invalid disabled file format".into());
+            };
+            
+            let enabled_path = PathBuf::from(enabled_path_str);
+            
+            // ファイルをリネーム
+            if current_path.exists() {
+                fs::rename(current_path, &enabled_path)?;
+            }
+            
+            // パスと状態を更新
+            mod_info.dll_path = enabled_path;
+            mod_info.enabled = Some(true);
+            
+            // インストール済みMOD一覧を更新
+            self.save_installed_mods(&installed_mods)?;
+        } else {
+            return Err(format!("MOD '{}' not found", mod_name).into());
         }
         
         Ok(())

@@ -20,7 +20,9 @@ import {
   Github,
   Edit,
   RefreshCw,
-  UserPlus
+  UserPlus,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -37,6 +39,8 @@ import {
   useModVersions,
   useInstallMod,
   useUninstallMod,
+  useDisableMod,
+  useEnableMod,
   useUpdateMod,
   useDowngradeMod,
   useUpgradeMod,
@@ -196,6 +200,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   
   const installModMutation = useInstallMod();
   const uninstallModMutation = useUninstallMod();
+  const disableModMutation = useDisableMod();
+  const enableModMutation = useEnableMod();
   const updateModMutation = useUpdateMod();
   const downgradeModMutation = useDowngradeMod();
   const upgradeModMutation = useUpgradeMod();
@@ -513,6 +519,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
   const uninstallMod = async (modName: string) => {
     await uninstallModMutation.mutateAsync({ profileName, modName });
+  };
+
+  const disableMod = async (modName: string) => {
+    await disableModMutation.mutateAsync({ profileName, modName });
+  };
+
+  const enableMod = async (modName: string) => {
+    await enableModMutation.mutateAsync({ profileName, modName });
   };
 
   const installCustomMod = async () => {
@@ -1482,6 +1496,13 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       </span>
                                     )}
                                     
+                                    {/* MOD有効/無効状態 */}
+                                    {mod.enabled === false && (
+                                      <span className="inline-flex items-center text-xs bg-gray-500/20 text-gray-400 border border-gray-500/30 px-2 py-0.5 rounded-full">
+                                        無効
+                                      </span>
+                                    )}
+                                    
                                     {hasNewerVersion(mod) && (
                                       <span className="inline-flex items-center text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-full">
                                         <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
@@ -1536,6 +1557,27 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                     {hasNewerVersion(mod) && (
                                       <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                                     )}
+                                  </motion.button>
+                                  
+                                  {/* MOD有効化/無効化ボタン */}
+                                  <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className={`text-xs flex items-center space-x-1 ${
+                                      mod.enabled === false ? 'btn-primary' : 'btn-secondary'
+                                    }`}
+                                    onClick={() => mod.enabled === false ? enableMod(mod.name) : disableMod(mod.name)}
+                                    disabled={disableModMutation.isPending || enableModMutation.isPending}
+                                    title={mod.enabled === false ? 'MODを有効化' : 'MODを無効化'}
+                                  >
+                                    {disableModMutation.isPending || enableModMutation.isPending ? (
+                                      <Loader2 className="w-3 h-3 animate-spin" />
+                                    ) : mod.enabled === false ? (
+                                      <Eye className="w-3 h-3" />
+                                    ) : (
+                                      <EyeOff className="w-3 h-3" />
+                                    )}
+                                    <span>{mod.enabled === false ? '有効化' : '無効化'}</span>
                                   </motion.button>
                                   
                                   <motion.button

@@ -71,6 +71,7 @@ interface InstalledMod {
   dll_path: string;
   mod_loader_type?: 'ResoniteModLoader' | 'MonkeyLoader';
   file_format?: string;
+  enabled?: boolean;
 }
 
 interface UnmanagedMod {
@@ -354,6 +355,40 @@ export const useUninstallMod = () => {
     },
     onError: (error) => {
       toast.error(`MODのアンインストールに失敗しました: ${error}`);
+    },
+  });
+};
+
+export const useDisableMod = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ profileName, modName }: { profileName: string; modName: string }) => {
+      return await invoke<string>('disable_mod', { profileName, modName });
+    },
+    onSuccess: (result, variables) => {
+      toast.success(result);
+      queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(variables.profileName) });
+    },
+    onError: (error) => {
+      toast.error(`MODの無効化に失敗しました: ${error}`);
+    },
+  });
+};
+
+export const useEnableMod = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ profileName, modName }: { profileName: string; modName: string }) => {
+      return await invoke<string>('enable_mod', { profileName, modName });
+    },
+    onSuccess: (result, variables) => {
+      toast.success(result);
+      queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(variables.profileName) });
+    },
+    onError: (error) => {
+      toast.error(`MODの有効化に失敗しました: ${error}`);
     },
   });
 };

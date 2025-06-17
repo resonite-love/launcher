@@ -1064,6 +1064,54 @@ async fn uninstall_mod(
     Ok(format!("Successfully uninstalled mod: {}", mod_name))
 }
 
+// Disable a MOD (rename to .disabled)
+#[tauri::command]
+async fn disable_mod(
+    profile_name: String,
+    mod_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    }; // MutexGuard is dropped here
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.disable_mod(&mod_name)
+        .map_err(|e| format!("Failed to disable mod: {}", e))?;
+    
+    Ok(format!("Successfully disabled mod: {}", mod_name))
+}
+
+// Enable a MOD (remove .disabled extension)
+#[tauri::command]
+async fn enable_mod(
+    profile_name: String,
+    mod_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    }; // MutexGuard is dropped here
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.enable_mod(&mod_name)
+        .map_err(|e| format!("Failed to enable mod: {}", e))?;
+    
+    Ok(format!("Successfully enabled mod: {}", mod_name))
+}
+
 // Get all available versions for a MOD
 #[tauri::command]
 async fn get_mod_versions(
@@ -1636,6 +1684,8 @@ fn main() {
             install_mod_from_cache,
             install_mod_from_github,
             uninstall_mod,
+            disable_mod,
+            enable_mod,
             get_mod_versions,
             get_github_releases,
             update_mod,
