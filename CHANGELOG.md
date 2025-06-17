@@ -7,6 +7,29 @@
 
 ## [Unreleased]
 
+## [v1.2.1] - 2025-06-17
+
+### 🐛 修正
+- **TypeScriptエラー修正**: `ModRelease`型で`tag_name`ではなく`version`フィールドを使用するよう修正
+- **MODローダータイプ判定の改善**: ファイル形式（.dll/.nupkg）に基づいてMODローダータイプを自動判定
+  - `.nupkg`ファイルは自動的に`MonkeyLoader (ML)`として表示
+  - `.dll`ファイルは自動的に`ResoniteModLoader (RML)`として表示
+
+### ✨ 改善
+- **MODデータ自動マイグレーション**: 既存のインストール済みMODデータに不足しているフィールドを自動補完
+  - `mod_loader_type`: ファイル形式から自動判定
+  - `file_format`: ファイル拡張子から自動設定
+  - `enabled`: .disabled拡張子の有無から判定
+- **リロードボタンの強化**: MODリストのリロード時に自動的にマイグレーションを実行
+- **UIの一貫性向上**: MODローダータイプの表示ロジックを統一化
+
+### 🔧 技術的改善
+- **マイグレーション処理の実装**: 
+  - `get_installed_mods`関数でMODデータの自動マイグレーション
+  - 新しいTauriコマンド`migrate_installed_mods`の追加
+  - React Queryフック`useMigrateInstalledMods`の追加
+- **データ整合性の強化**: MODリスト読み込み時に古いデータ形式を自動的に新形式に変換
+
 ## [v1.2.0] - 2025-06-17
 
 ### 🎉 新機能
@@ -266,7 +289,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.1...HEAD
+[v1.2.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.0...v1.2.1
 [v1.2.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.1.1...v1.2.0
 [v1.1.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.4...v1.1.0
