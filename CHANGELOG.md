@@ -7,6 +7,18 @@
 
 ## [Unreleased]
 
+## [v1.1.1] - 2025-06-17
+
+### 🐛 修正
+- **プロファイル作成UI**: ゲーム＆MODローダー同時インストール時にインストールボタンが適切にグレーアウトされない問題を修正
+- **状態管理の改善**: `isLoading`状態を`executeProfileCreation`関数で適切に管理するよう修正
+- **視覚的フィードバック**: インストール処理中のボタン表示とテキストを改善（「インストール中...」表示）
+- **キャンセルボタン**: インストール処理中はキャンセルボタンも無効化して操作の整合性を保持
+
+### 🔧 技術的改善
+- ローディング状態の一貫した管理
+- ユーザーインターフェースの応答性向上
+
 ## [v1.1.0] - 2025-06-17
 
 ### 🎉 新機能
@@ -210,7 +222,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.1.1...HEAD
+[v1.1.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.4...v1.1.0
 [v1.0.4]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.3...v1.0.4
 [v1.0.3]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.2...v1.0.3
