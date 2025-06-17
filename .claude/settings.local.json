@@ -19,7 +19,8 @@
       "Bash(python:*)",
       "WebFetch(domain:wiki.resonite.com)",
       "Bash(cp:*)",
-      "Bash(convert:*)"
+      "Bash(convert:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
