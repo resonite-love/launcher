@@ -7,6 +7,39 @@
 
 ## [Unreleased]
 
+## [v1.2.2] - 2025-06-18
+
+### 🐛 修正
+- **重要**: プロファイル編集画面のゲームインストール機能を修正
+  - インストールモーダル内のインストールボタンが動作しない問題を解決
+  - 保存されているSteam認証情報が正しくゲームインストール処理に渡されるよう修正
+  - `useSteamCredentials`フックを使用して認証情報を適切に取得
+
+### ✨ 改善
+- **MonkeyLoader MOD管理の最適化**: 
+  - MonkeyLoaderでも.dllファイルは`rml_mods`フォルダに統一配置
+  - .nupkgファイルのみ`Game/MonkeyLoader/Mods`に配置することで管理を簡素化
+  - 未管理MODスキャン機能でMonkeyLoader MODも適切に検出
+- **MODフォルダスキャンの改善**: 
+  - 複数のMODローダーディレクトリを効率的にスキャン
+  - ファイル形式に基づく自動分類機能の強化
+  - MOD検出処理の構文エラーを修正
+
+### 🔧 技術的改善
+- **ファイル管理の統一化**: 
+  - `scan_mod_folder`関数でRMLとMonkeyLoader両方のMODを適切にスキャン
+  - ファイル拡張子（.dll/.nupkg）に基づく自動判定ロジックの改善
+  - MODインストール処理でのパス管理を最適化
+- **認証情報管理の強化**: 
+  - Steam認証情報を`ProfileEditPage`で適切に取得・使用
+  - `handleGameInstall`関数でのエラーハンドリング改善
+
+### 🎯 ユーザー体験
+- **インストール体験の向上**: 
+  - プロファイル編集画面からのゲームインストールが確実に動作
+  - 保存済みSteam認証情報の自動利用で手間を削減
+  - エラー発生時の分かりやすいメッセージ表示
+
 ## [v1.2.1] - 2025-06-17
 
 ### 🐛 修正
@@ -289,7 +322,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.1...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.2...HEAD
+[v1.2.2]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.1...v1.2.2
 [v1.2.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.0...v1.2.1
 [v1.2.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.1.1...v1.2.0
 [v1.1.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.1.0...v1.1.1
