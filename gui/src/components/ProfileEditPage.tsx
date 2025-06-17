@@ -456,6 +456,15 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   };
 
   // 利用可能なMODのインストールボタンクリック
+  // 最新版を自動インストール
+  const handleInstallLatestClick = async (mod: ModInfo) => {
+    if (mod.releases.length > 0) {
+      const latestVersion = mod.releases[0].tag_name; // 配列の最初が最新版
+      await installMod(mod, latestVersion);
+    }
+  };
+
+  // カスタムインストール（バージョン選択）
   const handleAvailableModInstallClick = (mod: ModInfo) => {
     setSelectedAvailableModForVersions(mod);
     setSelectedInstallVersion(''); // リセット
@@ -1229,13 +1238,26 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       <ExternalLink className="w-3 h-3" />
                                     </motion.button>
                                     
+                                    {/* カスタムインストールボタン */}
+                                    <motion.button
+                                      whileHover={{ scale: 1.02 }}
+                                      whileTap={{ scale: 0.98 }}
+                                      className="btn-secondary text-xs p-1.5"
+                                      onClick={() => handleAvailableModInstallClick(mod)}
+                                      disabled={installModMutation.isPending || mod.releases.length === 0}
+                                      title="バージョンを選択してインストール"
+                                    >
+                                      <Settings className="w-3 h-3" />
+                                    </motion.button>
+                                    
+                                    {/* 最新版インストールボタン */}
                                     <motion.button
                                       whileHover={{ scale: 1.02 }}
                                       whileTap={{ scale: 0.98 }}
                                       className="btn-primary text-xs flex items-center space-x-1 px-3 py-1.5"
-                                      onClick={() => handleAvailableModInstallClick(mod)}
+                                      onClick={() => handleInstallLatestClick(mod)}
                                       disabled={installModMutation.isPending || mod.releases.length === 0}
-                                      title="バージョンを選択してインストール"
+                                      title="最新版をインストール"
                                     >
                                       {installModMutation.isPending ? (
                                         <Loader2 className="w-3 h-3 animate-spin" />
