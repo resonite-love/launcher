@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
+import { open } from '@tauri-apps/api/shell';
 import { motion } from 'framer-motion';
 import { 
   ArrowLeft,
@@ -1222,7 +1223,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       whileHover={{ scale: 1.02 }}
                                       whileTap={{ scale: 0.98 }}
                                       className="btn-secondary text-xs p-1.5"
-                                      onClick={() => window.open(mod.source_location, '_blank')}
+                                      onClick={() => open(mod.source_location)}
                                       title="GitHubで開く"
                                     >
                                       <ExternalLink className="w-3 h-3" />
@@ -1369,7 +1370,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         className="btn-secondary text-xs"
-                                        onClick={() => window.open(mod.matched_mod_info!.source_location, '_blank')}
+                                        onClick={() => open(mod.matched_mod_info!.source_location)}
                                       >
                                         <ExternalLink className="w-3 h-3" />
                                       </motion.button>
@@ -1446,7 +1447,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     className="btn-secondary text-xs"
-                                    onClick={() => window.open(mod.source_location, '_blank')}
+                                    onClick={() => open(mod.source_location)}
                                   >
                                     <ExternalLink className="w-3 h-3" />
                                   </motion.button>
