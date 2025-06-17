@@ -470,7 +470,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   // 最新版を自動インストール
   const handleInstallLatestClick = async (mod: ModInfo) => {
     if (mod.releases.length > 0) {
-      const latestVersion = mod.releases[0].tag_name; // 配列の最初が最新版
+      const latestVersion = mod.releases[0].version; // 配列の最初が最新版
       await installMod(mod, latestVersion);
     }
   };

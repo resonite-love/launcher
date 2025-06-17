@@ -7,6 +7,50 @@
 
 ## [Unreleased]
 
+## [v1.2.0] - 2025-06-17
+
+### 🎉 新機能
+- **MOD無効化/有効化機能**: インストール済みMODを一時的に無効化・有効化できる機能を追加
+  - ファイル名に`.disabled`拡張子を追加/削除して制御
+  - 管理画面で無効化されたMODに「無効」ラベル表示
+  - 有効化/無効化ボタンで簡単に切り替え可能
+- **NuGetパッケージ対応**: MonkeyLoader使用時に`.nupkg`形式のMODも自動インストール対応
+  - `.nupkg`ファイルを優先的に検出・ダウンロード
+  - `Game/MonkeyLoader/Mods/`ディレクトリに自動配置
+  - 管理画面で「ML-PKG」として表示
+- **プロファイル編集画面から起動**: プロファイル編集画面に緑色の起動ボタンを追加
+  - ゲーム未インストール時は無効化表示
+  - クリック一つで直接Resoniteを起動可能
+- **手動MODインストールのバージョン選択**: 手動MODインストール時にもバージョン選択モーダルを表示
+  - GitHubからリリース情報を取得
+  - 利用可能な全バージョンから選択可能
+
+### ✨ 改善
+- **MODインストールボタンの最適化**: 
+  - デフォルトで最新版を自動インストール
+  - 設定アイコン（歯車）でカスタムバージョン選択
+  - ボタン配置を歯車→インストールの順に変更
+- **外部リンクの改善**: MODのGitHubリンクをOSのデフォルトブラウザで開くよう変更
+- **UI/UX向上**:
+  - 起動オプションのツールチップを非クリック化（誤クリック防止）
+  - MODローダータイプ表示の強化（RML/ML、PKG対応）
+  - MOD管理画面での状態表示改善
+
+### 🔧 技術的改善
+- **MOD管理システムの拡張**: 
+  - `InstalledMod`構造体に`enabled`、`mod_loader_type`、`file_format`フィールド追加
+  - ファイル形式別インストール処理の実装
+- **GitHub API統合**: 
+  - `get_github_releases`コマンドの追加
+  - リリース情報の取得と処理機能
+- **エラーハンドリング強化**: 
+  - ファイル名変更処理の信頼性向上
+  - 重複拡張子問題の解決
+
+### 🐛 修正
+- **ファイル名処理の修正**: MOD無効化/有効化時のファイル名重複問題を解決
+- **UI表示の一貫性**: MODローダータイプ表示の統一化
+
 ## [v1.1.1] - 2025-06-17
 
 ### 🐛 修正
@@ -222,7 +266,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.0...HEAD
+[v1.2.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.1.1...v1.2.0
 [v1.1.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.1.0...v1.1.1
 [v1.1.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.4...v1.1.0
 [v1.0.4]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.0.3...v1.0.4
