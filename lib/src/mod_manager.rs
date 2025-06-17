@@ -327,7 +327,7 @@ impl ModManager {
             if file_name.ends_with(".nupkg") {
                 ("nupkg", self.profile_dir.join("Game").join("MonkeyLoader").join("Mods"))
             } else if file_name.ends_with(".dll") {
-                ("dll", self.profile_dir.join("Game").join("MonkeyLoader").join("Mods"))
+                ("dll", self.mods_dir.clone()) // MonkeyLoaderでもDLLはrml_modsフォルダに
             } else {
                 return Err("Downloaded file is not a DLL or NuGet package for MonkeyLoader".into());
             }
@@ -400,8 +400,7 @@ impl ModManager {
                 let monkey_mods_dir = self.profile_dir.join("Game").join("MonkeyLoader").join("Mods");
                 (nupkg_asset, "nupkg", monkey_mods_dir)
             } else if let Some(dll_asset) = release.assets.iter().find(|asset| asset.name.ends_with(".dll")) {
-                let monkey_mods_dir = self.profile_dir.join("Game").join("MonkeyLoader").join("Mods");
-                (dll_asset, "dll", monkey_mods_dir)
+                (dll_asset, "dll", self.mods_dir.clone()) // MonkeyLoaderでもDLLはrml_modsフォルダに
             } else {
                 return Err("No NuGet package or DLL file found in release for MonkeyLoader".into());
             }
@@ -505,52 +504,72 @@ impl ModManager {
             .collect())
     }
 
-    /// rml_modsフォルダをスキャンして全MODファイルを検出
+    /// MODフォルダをスキャンして全MODファイルを検出（RMLとMonkeyLoader両方）
     pub fn scan_mod_folder(&self) -> Result<Vec<UnmanagedMod>, Box<dyn Error + Send + Sync>> {
-        if !self.mods_dir.exists() {
-            return Ok(Vec::new());
-        }
-
         let mut unmanaged_mods = Vec::new();
         let known_mods = self.get_installed_mods().unwrap_or_default();
         
-        // rml_modsフォルダ内の全.dllファイルを取得
-        for entry in fs::read_dir(&self.mods_dir)? {
-            let entry = entry?;
-            let path = entry.path();
+        // スキャンするディレクトリのリスト
+        let scan_dirs = vec![
+            (self.mods_dir.clone(), vec!["dll"]), // RML mods と MonkeyLoader dll mods
+            (self.profile_dir.join("Game").join("MonkeyLoader").join("Mods"), vec!["nupkg"]), // MonkeyLoader nupkg mods のみ
+        ];
+        
+        for (dir, extensions) in scan_dirs {
+            if !dir.exists() {
+                continue;
+            }
             
-            if path.is_file() && path.extension().map_or(false, |ext| ext == "dll") {
-                let file_name = path.file_name()
-                    .and_then(|name| name.to_str())
-                    .unwrap_or_default()
-                    .to_string();
+            // フォルダ内の全ファイルを取得
+            for entry in fs::read_dir(&dir)? {
+                let entry = entry?;
+                let path = entry.path();
                 
-                // 既知のMODリストに含まれているかチェック
-                let is_managed = known_mods.iter().any(|known_mod| {
-                    known_mod.dll_path == path
-                });
-                
-                if !is_managed {
-                    // ファイル情報を取得
-                    let metadata = fs::metadata(&path)?;
-                    let file_size = metadata.len();
-                    let modified_time = metadata.modified()
-                        .map(|time| {
-                            let datetime: chrono::DateTime<chrono::Utc> = time.into();
-                            datetime.format("%Y-%m-%d %H:%M:%S").to_string()
-                        })
-                        .unwrap_or_default();
-                    
-                    unmanaged_mods.push(UnmanagedMod {
-                        file_name: file_name.clone(),
-                        file_path: path,
-                        file_size,
-                        modified_time,
-                        dll_name: file_name.trim_end_matches(".dll").to_string(),
-                        matched_mod_info: None, // 後でマッチングを行う
-                        calculated_sha256: None, // 後でハッシュを計算
-                        detected_version: None, // 後でバージョンを検出
-                    });
+                if path.is_file() {
+                    let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
+                    if extensions.contains(&ext) {
+                        let file_name = path.file_name()
+                            .and_then(|name| name.to_str())
+                            .unwrap_or_default()
+                            .to_string();
+                        
+                        // 既知のMODリストに含まれているかチェック
+                        let is_managed = known_mods.iter().any(|known_mod| {
+                            known_mod.dll_path == path
+                        });
+                        
+                        if !is_managed {
+                            // ファイル情報を取得
+                            let metadata = fs::metadata(&path)?;
+                            let file_size = metadata.len();
+                            let modified_time = metadata.modified()
+                                .map(|time| {
+                                    let datetime: chrono::DateTime<chrono::Utc> = time.into();
+                                    datetime.format("%Y-%m-%d %H:%M:%S").to_string()
+                                })
+                                .unwrap_or_default();
+                            
+                            // dll_nameを拡張子に基づいて設定
+                            let dll_name = if file_name.ends_with(".dll") {
+                                file_name.trim_end_matches(".dll").to_string()
+                            } else if file_name.ends_with(".nupkg") {
+                                file_name.trim_end_matches(".nupkg").to_string()
+                            } else {
+                                file_name.clone()
+                            };
+                            
+                            unmanaged_mods.push(UnmanagedMod {
+                                file_name: file_name.clone(),
+                                file_path: path,
+                                file_size,
+                                modified_time,
+                                dll_name,
+                                matched_mod_info: None, // 後でマッチングを行う
+                                calculated_sha256: None, // 後でハッシュを計算
+                                detected_version: None, // 後でバージョンを検出
+                            });
+                        }
+                    }
                 }
             }
         }
@@ -620,6 +639,22 @@ impl ModManager {
             None
         };
         
+        // ファイル形式とMODローダータイプを判定
+        let file_format = if unmanaged_mod.file_path.extension().and_then(|ext| ext.to_str()) == Some("nupkg") {
+            "nupkg"
+        } else {
+            "dll"
+        };
+        
+        let mod_loader_type = if file_format == "nupkg" {
+            "MonkeyLoader"
+        } else if unmanaged_mod.file_path.to_string_lossy().contains("MonkeyLoader") && file_format == "nupkg" {
+            "MonkeyLoader"
+        } else {
+            // DLLファイルはパスに関係なくResoniteModLoaderとして扱う（rml_modsフォルダに配置されるため）
+            "ResoniteModLoader"
+        };
+
         // InstallModの情報を構築
         let installed_mod = InstalledMod {
             name: unmanaged_mod.dll_name.clone(),
@@ -634,8 +669,8 @@ impl ModManager {
             installed_version: detected_version.unwrap_or_else(|| "unknown".to_string()),
             installed_date: unmanaged_mod.modified_time.clone(),
             dll_path: unmanaged_mod.file_path.clone(),
-            mod_loader_type: Some("ResoniteModLoader".to_string()), // 未管理MODはRMLと仮定
-            file_format: Some("dll".to_string()),
+            mod_loader_type: Some(mod_loader_type.to_string()),
+            file_format: Some(file_format.to_string()),
             enabled: Some(true), // 未管理MODは有効と仮定
         };
 

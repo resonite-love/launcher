@@ -1500,7 +1500,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                     {/* MODローダータイプとファイル形式のチップ */}
                                     {(mod.mod_loader_type || mod.file_format) && (
                                       <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full ${
-                                        mod.file_format === 'nupkg' || mod.mod_loader_type === 'MonkeyLoader'
+                                        mod.file_format === 'nupkg'
                                           ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
                                           : 'bg-green-500/20 text-green-300 border border-green-500/30'
                                       }`}>
