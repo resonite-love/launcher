@@ -495,7 +495,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
                       </h4>
                       {preset.tooltip && (
                         <div className="group relative">
-                          <HelpCircle className="w-3 h-3 text-gray-500 cursor-help" />
+                          <HelpCircle className="w-3 h-3 text-gray-500 pointer-events-none" />
                           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-dark-900 border border-dark-600 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-50 w-80 shadow-lg">
                             {preset.tooltip}
                           </div>
