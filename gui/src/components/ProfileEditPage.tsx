@@ -50,7 +50,8 @@ import {
   useAddAllUnmanagedMods,
   useYtDlpStatus,
   useUpdateYtDlp,
-  useLaunchResonite
+  useLaunchResonite,
+  useMigrateInstalledMods
 } from '../hooks/useQueries';
 
 interface ProfileConfig {
@@ -214,6 +215,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const { data: ytDlpInfo, isLoading: ytDlpLoading, refetch: refetchYtDlp } = useYtDlpStatus(profileName);
   const updateYtDlpMutation = useUpdateYtDlp();
   const launchMutation = useLaunchResonite();
+  const migrateInstalledModsMutation = useMigrateInstalledMods();
   
   // ゲーム情報用の状態
   const [profileInfo, setProfileInfo] = useState<any>(null);
@@ -1496,14 +1498,13 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                     <h4 className="text-white font-medium">{mod.name}</h4>
                                     
                                     {/* MODローダータイプとファイル形式のチップ */}
-                                    {mod.mod_loader_type && (
+                                    {(mod.mod_loader_type || mod.file_format) && (
                                       <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full ${
-                                        mod.mod_loader_type === 'MonkeyLoader' 
+                                        mod.file_format === 'nupkg' || mod.mod_loader_type === 'MonkeyLoader'
                                           ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
                                           : 'bg-green-500/20 text-green-300 border border-green-500/30'
                                       }`}>
-                                        {mod.mod_loader_type === 'MonkeyLoader' ? 'ML' : 'RML'}
-                                        {mod.file_format === 'nupkg' && '-PKG'}
+                                        {mod.file_format === 'nupkg' ? 'ML' : 'RML'}
                                       </span>
                                     )}
                                     
@@ -1829,14 +1830,16 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className="btn-secondary flex items-center space-x-2"
-            onClick={() => {
+            onClick={async () => {
+              // マイグレーションを実行してからリフェッチ
+              await migrateInstalledModsMutation.mutateAsync(profileName);
               refetchInstalledMods();
               refetchUnmanagedMods();
             }}
-            disabled={installedModsLoading || unmanagedModsLoading}
+            disabled={installedModsLoading || unmanagedModsLoading || migrateInstalledModsMutation.isPending}
             title="MODフォルダの変更を反映"
           >
-            {installedModsLoading || unmanagedModsLoading ? (
+            {installedModsLoading || unmanagedModsLoading || migrateInstalledModsMutation.isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <RefreshCw className="w-4 h-4" />

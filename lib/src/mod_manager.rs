@@ -448,7 +448,56 @@ impl ModManager {
         }
         
         let content = fs::read_to_string(&self.installed_mods_file)?;
-        let mods: Vec<InstalledMod> = serde_json::from_str(&content)?;
+        let mut mods: Vec<InstalledMod> = serde_json::from_str(&content)?;
+        
+        // マイグレーションが必要かチェック
+        let mut needs_migration = false;
+        for mod_info in &mut mods {
+            if mod_info.mod_loader_type.is_none() || mod_info.file_format.is_none() || mod_info.enabled.is_none() {
+                needs_migration = true;
+                
+                // ファイル形式を拡張子から判定
+                let file_format = if mod_info.dll_path.extension().and_then(|ext| ext.to_str()) == Some("nupkg") {
+                    "nupkg"
+                } else if mod_info.dll_path.extension().and_then(|ext| ext.to_str()) == Some("disabled") {
+                    // .disabledファイルの場合、元の拡張子を確認
+                    let path_str = mod_info.dll_path.to_string_lossy();
+                    if path_str.contains(".nupkg.disabled") {
+                        "nupkg"
+                    } else {
+                        "dll"
+                    }
+                } else {
+                    "dll"
+                };
+                
+                // MODローダータイプを判定
+                let mod_loader_type = if file_format == "nupkg" {
+                    "MonkeyLoader"
+                } else {
+                    "ResoniteModLoader"
+                };
+                
+                // 有効状態を判定（.disabledでなければ有効）
+                let enabled = !mod_info.dll_path.extension().and_then(|ext| ext.to_str()).map_or(false, |ext| ext == "disabled");
+                
+                // フィールドを更新
+                if mod_info.mod_loader_type.is_none() {
+                    mod_info.mod_loader_type = Some(mod_loader_type.to_string());
+                }
+                if mod_info.file_format.is_none() {
+                    mod_info.file_format = Some(file_format.to_string());
+                }
+                if mod_info.enabled.is_none() {
+                    mod_info.enabled = Some(enabled);
+                }
+            }
+        }
+        
+        // マイグレーションが実行された場合、ファイルを更新
+        if needs_migration {
+            self.save_installed_mods(&mods)?;
+        }
         
         // ファイルが実際に存在するもののみ返す
         Ok(mods.into_iter()

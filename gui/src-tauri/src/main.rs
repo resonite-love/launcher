@@ -1112,6 +1112,30 @@ async fn enable_mod(
     Ok(format!("Successfully enabled mod: {}", mod_name))
 }
 
+// Migrate installed MODs data
+#[tauri::command]
+async fn migrate_installed_mods(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    }; // MutexGuard is dropped here
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    // インストール済みMODを取得（自動的にマイグレーションが実行される）
+    mod_manager.get_installed_mods()
+        .map_err(|e| format!("Failed to migrate installed mods: {}", e))?;
+    
+    Ok("Successfully migrated installed mods data".to_string())
+}
+
 // Get all available versions for a MOD
 #[tauri::command]
 async fn get_mod_versions(
@@ -1686,6 +1710,7 @@ fn main() {
             uninstall_mod,
             disable_mod,
             enable_mod,
+            migrate_installed_mods,
             get_mod_versions,
             get_github_releases,
             update_mod,

@@ -393,6 +393,23 @@ export const useEnableMod = () => {
   });
 };
 
+export const useMigrateInstalledMods = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (profileName: string) => {
+      return await invoke<string>('migrate_installed_mods', { profileName });
+    },
+    onSuccess: (result, profileName) => {
+      toast.success(result);
+      queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(profileName) });
+    },
+    onError: (error) => {
+      toast.error(`MODデータのマイグレーションに失敗しました: ${error}`);
+    },
+  });
+};
+
 export const useUpdateMod = () => {
   const queryClient = useQueryClient();
   
