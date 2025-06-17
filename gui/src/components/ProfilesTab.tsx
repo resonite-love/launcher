@@ -242,6 +242,8 @@ function ProfilesTab() {
     }
   ) => {
     try {
+      setIsLoading(true);
+      
       // React Queryのミューテーションを使用してプロファイルを作成
       await createProfileMutation.mutateAsync({
         name: profileData.name,
@@ -282,6 +284,8 @@ function ProfilesTab() {
       closeCreateProfileModal();
     } catch (err) {
       toast.error(`プロファイルの作成に失敗しました: ${err}`);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -1059,27 +1063,34 @@ function ProfilesTab() {
                 <button
                   className="btn-secondary flex-1"
                   onClick={closeCreateProfileModal}
-                  disabled={createProfileMutation.isPending}
+                  disabled={createProfileMutation.isPending || isLoading}
                 >
                   キャンセル
                 </button>
                 <button
                   className="btn-primary flex-1 flex items-center justify-center space-x-2"
                   onClick={createProfile}
-                  disabled={createProfileMutation.isPending || !newProfileName.trim()}
+                  disabled={createProfileMutation.isPending || isLoading || !newProfileName.trim()}
                 >
-                  {createProfileMutation.isPending ? (
+                  {(createProfileMutation.isPending || isLoading) ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Plus className="w-4 h-4" />
                   )}
                   <span>
-                    {createWithGame && createWithModLoader 
-                      ? `プロファイル作成＆ゲーム＆${createModLoaderType === 'MonkeyLoader' ? 'MonkeyLoader' : 'RML'}インストール`
-                      : createWithGame 
-                      ? 'プロファイル作成＆ゲームインストール' 
-                      : 'プロファイル作成'
-                    }
+                    {(createProfileMutation.isPending || isLoading) ? (
+                      createWithGame && createWithModLoader 
+                        ? 'インストール中...'
+                        : createWithGame 
+                        ? 'インストール中...' 
+                        : '作成中...'
+                    ) : (
+                      createWithGame && createWithModLoader 
+                        ? `プロファイル作成＆ゲーム＆${createModLoaderType === 'MonkeyLoader' ? 'MonkeyLoader' : 'RML'}インストール`
+                        : createWithGame 
+                        ? 'プロファイル作成＆ゲームインストール' 
+                        : 'プロファイル作成'
+                    )}
                   </span>
                 </button>
               </div>
