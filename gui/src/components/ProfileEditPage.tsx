@@ -22,7 +22,8 @@ import {
   RefreshCw,
   UserPlus,
   Eye,
-  EyeOff
+  EyeOff,
+  Play
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -48,7 +49,8 @@ import {
   useAddUnmanagedMod,
   useAddAllUnmanagedMods,
   useYtDlpStatus,
-  useUpdateYtDlp
+  useUpdateYtDlp,
+  useLaunchResonite
 } from '../hooks/useQueries';
 
 interface ProfileConfig {
@@ -211,6 +213,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   // yt-dlp管理用のクエリ
   const { data: ytDlpInfo, isLoading: ytDlpLoading, refetch: refetchYtDlp } = useYtDlpStatus(profileName);
   const updateYtDlpMutation = useUpdateYtDlp();
+  const launchMutation = useLaunchResonite();
   
   // ゲーム情報用の状態
   const [profileInfo, setProfileInfo] = useState<any>(null);
@@ -527,6 +530,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
   const enableMod = async (modName: string) => {
     await enableModMutation.mutateAsync({ profileName, modName });
+  };
+
+  const handleLaunch = () => {
+    if (!hasGame) {
+      toast.error('ゲームがインストールされていません');
+      return;
+    }
+    launchMutation.mutate(profileName);
   };
 
   const installCustomMod = async () => {
@@ -1831,6 +1842,27 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               <RefreshCw className="w-4 h-4" />
             )}
             <span>リロード</span>
+          </motion.button>
+          
+          {/* 起動ボタン */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className={`flex items-center space-x-2 ${
+              hasGame 
+                ? 'bg-green-600 hover:bg-green-700 text-white border border-green-500 px-4 py-2 rounded-lg transition-colors duration-200' 
+                : 'btn-secondary opacity-50 cursor-not-allowed'
+            }`}
+            onClick={handleLaunch}
+            disabled={!hasGame || launchMutation.isPending}
+            title={hasGame ? 'Resoniteを起動' : 'ゲームがインストールされていません'}
+          >
+            {launchMutation.isPending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
+            <span>起動</span>
           </motion.button>
           
           <motion.button
