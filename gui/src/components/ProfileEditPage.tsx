@@ -1467,8 +1467,21 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                             >
                               <div className="flex items-start justify-between mb-2">
                                 <div className="flex-1">
-                                  <div className="flex items-center space-x-2 mb-1">
+                                  <div className="flex items-center space-x-2 mb-1 flex-wrap gap-1">
                                     <h4 className="text-white font-medium">{mod.name}</h4>
+                                    
+                                    {/* MODローダータイプとファイル形式のチップ */}
+                                    {mod.mod_loader_type && (
+                                      <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full ${
+                                        mod.mod_loader_type === 'MonkeyLoader' 
+                                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
+                                          : 'bg-green-500/20 text-green-300 border border-green-500/30'
+                                      }`}>
+                                        {mod.mod_loader_type === 'MonkeyLoader' ? 'ML' : 'RML'}
+                                        {mod.file_format === 'nupkg' && '-PKG'}
+                                      </span>
+                                    )}
+                                    
                                     {hasNewerVersion(mod) && (
                                       <span className="inline-flex items-center text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-full">
                                         <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>

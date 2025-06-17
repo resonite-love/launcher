@@ -46,6 +46,10 @@ pub struct InstalledMod {
     pub installed_version: String,
     pub installed_date: String,
     pub dll_path: PathBuf,
+    #[serde(default)]
+    pub mod_loader_type: Option<String>, // "ResoniteModLoader" or "MonkeyLoader"
+    #[serde(default)]
+    pub file_format: Option<String>, // "dll" or "nsis"
 }
 
 /// 未管理MOD情報（手動で追加されたMOD）
@@ -297,7 +301,7 @@ impl ModManager {
     }
 
     /// MODをインストール（キャッシュ情報を活用）
-    pub async fn install_mod_from_cache(&self, mod_info: &ModInfo, version: Option<&str>) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
+    pub async fn install_mod_from_cache(&self, mod_info: &ModInfo, version: Option<&str>, mod_loader_type: Option<&str>) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
         // 指定されたバージョンまたは最新バージョンのリリース情報を取得
         let release = if let Some(target_version) = version {
             mod_info.releases.iter()
@@ -316,19 +320,31 @@ impl ModManager {
             .or_else(|| download_url.split('/').last())
             .ok_or("Cannot determine file name")?;
         
-        if !file_name.ends_with(".dll") {
-            return Err("Downloaded file is not a DLL".into());
-        }
+        // ファイル形式とインストール先を決定
+        let (file_format, install_dir) = if mod_loader_type == Some("MonkeyLoader") {
+            if file_name.ends_with(".nupkg") {
+                ("nupkg", self.profile_dir.join("Game").join("MonkeyLoader").join("Mods"))
+            } else if file_name.ends_with(".dll") {
+                ("dll", self.profile_dir.join("Game").join("MonkeyLoader").join("Mods"))
+            } else {
+                return Err("Downloaded file is not a DLL or NuGet package for MonkeyLoader".into());
+            }
+        } else {
+            if !file_name.ends_with(".dll") {
+                return Err("Downloaded file is not a DLL".into());
+            }
+            ("dll", self.mods_dir.clone())
+        };
         
-        // MODsディレクトリを作成
-        fs::create_dir_all(&self.mods_dir)?;
+        // インストールディレクトリを作成
+        fs::create_dir_all(&install_dir)?;
         
         // ファイルをダウンロード
-        let dll_response = self.client.get(download_url).send().await?;
-        let dll_content = dll_response.bytes().await?;
+        let file_response = self.client.get(download_url).send().await?;
+        let file_content = file_response.bytes().await?;
         
-        let dll_path = self.mods_dir.join(file_name);
-        fs::write(&dll_path, dll_content)?;
+        let file_path = install_dir.join(file_name);
+        fs::write(&file_path, file_content)?;
         
         let installed_mod = InstalledMod {
             name: mod_info.name.clone(),
@@ -336,7 +352,9 @@ impl ModManager {
             source_location: mod_info.source_location.clone(),
             installed_version: release.version.clone(),
             installed_date: chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
-            dll_path,
+            dll_path: file_path,
+            mod_loader_type: mod_loader_type.map(|s| s.to_string()),
+            file_format: Some(file_format.to_string()),
         };
         
         // インストール済みMOD一覧に追加
@@ -346,7 +364,7 @@ impl ModManager {
     }
 
     /// GitHubリポジトリからMODをインストール（フォールバック）
-    pub async fn install_mod_from_github(&self, repo_url: &str, version: Option<&str>) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
+    pub async fn install_mod_from_github(&self, repo_url: &str, version: Option<&str>, mod_loader_type: Option<&str>) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
         let api_url = self.github_repo_to_api_url(repo_url)?;
         
         // 指定されたバージョンまたは最新リリースを取得
@@ -372,28 +390,45 @@ impl ModManager {
         let release: GitHubRelease = serde_json::from_str(&response_text)
             .map_err(|e| format!("Failed to parse GitHub release JSON: {}. Response: {}", e, &response_text[..200.min(response_text.len())]))?;
         
-        // .dllファイルを探す
-        let dll_asset = release.assets.iter()
-            .find(|asset| asset.name.ends_with(".dll"))
-            .ok_or("No DLL file found in release")?;
+        // MODローダータイプに応じてファイルを探す
+        let (asset, file_format, install_dir) = if mod_loader_type == Some("MonkeyLoader") {
+            // MonkeyLoaderの場合、NuGetパッケージファイルまたはDLLファイルを探す
+            if let Some(nupkg_asset) = release.assets.iter().find(|asset| asset.name.ends_with(".nupkg")) {
+                let monkey_mods_dir = self.profile_dir.join("Game").join("MonkeyLoader").join("Mods");
+                (nupkg_asset, "nupkg", monkey_mods_dir)
+            } else if let Some(dll_asset) = release.assets.iter().find(|asset| asset.name.ends_with(".dll")) {
+                let monkey_mods_dir = self.profile_dir.join("Game").join("MonkeyLoader").join("Mods");
+                (dll_asset, "dll", monkey_mods_dir)
+            } else {
+                return Err("No NuGet package or DLL file found in release for MonkeyLoader".into());
+            }
+        } else {
+            // ResoniteModLoaderの場合、DLLファイルのみ
+            let dll_asset = release.assets.iter()
+                .find(|asset| asset.name.ends_with(".dll"))
+                .ok_or("No DLL file found in release")?;
+            (dll_asset, "dll", self.mods_dir.clone())
+        };
         
-        // MODsディレクトリを作成
-        fs::create_dir_all(&self.mods_dir)?;
+        // インストールディレクトリを作成
+        fs::create_dir_all(&install_dir)?;
         
         // ファイルをダウンロード
-        let dll_response = self.client.get(&dll_asset.browser_download_url).send().await?;
-        let dll_content = dll_response.bytes().await?;
+        let file_response = self.client.get(&asset.browser_download_url).send().await?;
+        let file_content = file_response.bytes().await?;
         
-        let dll_path = self.mods_dir.join(&dll_asset.name);
-        fs::write(&dll_path, dll_content)?;
+        let file_path = install_dir.join(&asset.name);
+        fs::write(&file_path, file_content)?;
         
         let installed_mod = InstalledMod {
-            name: dll_asset.name.trim_end_matches(".dll").to_string(),
+            name: asset.name.trim_end_matches(&format!(".{}", file_format)).to_string(),
             description: release.body.unwrap_or_default(),
             source_location: repo_url.to_string(),
             installed_version: release.tag_name,
             installed_date: chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
-            dll_path,
+            dll_path: file_path,
+            mod_loader_type: mod_loader_type.map(|s| s.to_string()),
+            file_format: Some(file_format.to_string()),
         };
         
         // インストール済みMOD一覧に追加
@@ -546,6 +581,8 @@ impl ModManager {
             installed_version: detected_version.unwrap_or_else(|| "unknown".to_string()),
             installed_date: unmanaged_mod.modified_time.clone(),
             dll_path: unmanaged_mod.file_path.clone(),
+            mod_loader_type: Some("ResoniteModLoader".to_string()), // 未管理MODはRMLと仮定
+            file_format: Some("dll".to_string()),
         };
 
         // インストール済みMOD一覧に追加
@@ -589,7 +626,7 @@ impl ModManager {
         self.uninstall_mod(mod_name)?;
         
         // 指定されたバージョンをインストール
-        self.install_mod_from_cache(mod_info, Some(target_version)).await
+        self.install_mod_from_cache(mod_info, Some(target_version), None).await
     }
 
     /// MODのダウングレード
@@ -623,7 +660,7 @@ impl ModManager {
         self.uninstall_mod(mod_name)?;
         
         // 新しいバージョンをインストール
-        self.install_mod_from_cache(mod_info, Some(upgrade_version)).await
+        self.install_mod_from_cache(mod_info, Some(upgrade_version), None).await
     }
 
     /// MODをアンインストール

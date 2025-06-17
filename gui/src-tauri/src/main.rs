@@ -984,18 +984,27 @@ async fn install_mod_from_cache(
     version: Option<String>,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<InstalledMod, String> {
-    let profile_dir = {
+    let (profile_dir, mod_loader_type) = {
         let app_state = state.lock().unwrap();
         
         let profile_manager = app_state.profile_manager.as_ref()
             .ok_or("Profile manager not initialized")?;
         
-        profile_manager.get_profile_dir(&profile_name)
+        let profile_dir = profile_manager.get_profile_dir(&profile_name);
+        let profile = profile_manager.get_profile(&profile_name)
+            .map_err(|e| format!("Failed to get profile: {}", e))?;
+        
+        let mod_loader_type = profile.mod_loader_type.map(|t| match t {
+            crate::ModLoaderType::ResoniteModLoader => "ResoniteModLoader".to_string(),
+            crate::ModLoaderType::MonkeyLoader => "MonkeyLoader".to_string(),
+        });
+        
+        (profile_dir, mod_loader_type)
     }; // MutexGuard is dropped here
     
     let mod_manager = ModManager::new(profile_dir);
     
-    mod_manager.install_mod_from_cache(&mod_info, version.as_deref()).await
+    mod_manager.install_mod_from_cache(&mod_info, version.as_deref(), mod_loader_type.as_deref()).await
         .map_err(|e| format!("Failed to install mod: {}", e))
 }
 
@@ -1007,18 +1016,27 @@ async fn install_mod_from_github(
     version: Option<String>,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<InstalledMod, String> {
-    let profile_dir = {
+    let (profile_dir, mod_loader_type) = {
         let app_state = state.lock().unwrap();
         
         let profile_manager = app_state.profile_manager.as_ref()
             .ok_or("Profile manager not initialized")?;
         
-        profile_manager.get_profile_dir(&profile_name)
+        let profile_dir = profile_manager.get_profile_dir(&profile_name);
+        let profile = profile_manager.get_profile(&profile_name)
+            .map_err(|e| format!("Failed to get profile: {}", e))?;
+        
+        let mod_loader_type = profile.mod_loader_type.map(|t| match t {
+            crate::ModLoaderType::ResoniteModLoader => "ResoniteModLoader".to_string(),
+            crate::ModLoaderType::MonkeyLoader => "MonkeyLoader".to_string(),
+        });
+        
+        (profile_dir, mod_loader_type)
     }; // MutexGuard is dropped here
     
     let mod_manager = ModManager::new(profile_dir);
     
-    mod_manager.install_mod_from_github(&repo_url, version.as_deref()).await
+    mod_manager.install_mod_from_github(&repo_url, version.as_deref(), mod_loader_type.as_deref()).await
         .map_err(|e| format!("Failed to install mod: {}", e))
 }
 

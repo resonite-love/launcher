@@ -69,6 +69,8 @@ interface InstalledMod {
   installed_version: string;
   installed_date: string;
   dll_path: string;
+  mod_loader_type?: 'ResoniteModLoader' | 'MonkeyLoader';
+  file_format?: string;
 }
 
 interface UnmanagedMod {
