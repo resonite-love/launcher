@@ -20,6 +20,7 @@ interface Profile {
   manifest_id?: string;
   version?: string;
   has_mod_loader: boolean;
+  mod_loader_type?: 'ResoniteModLoader' | 'MonkeyLoader';
 }
 
 interface SteamCredentials {
