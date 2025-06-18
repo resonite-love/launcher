@@ -26,7 +26,10 @@
       "Bash(/home/neo/.volta/tools/image/packages/@anthropic-ai/claude-code/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -A 30 \"ArrowLeft.*戻る\" /mnt/c/Users/neo/GitHub/kokoa-resonite-tools/gui/src/components/ProfileEditPage.tsx)",
       "Bash(/home/neo/.volta/tools/image/packages/@anthropic-ai/claude-code/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -A 30 'className=\"flex items-center justify-between' /mnt/c/Users/neo/GitHub/kokoa-resonite-tools/gui/src/components/ProfileEditPage.tsx)",
       "Bash(/home/neo/.volta/tools/image/packages/@anthropic-ai/claude-code/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n \"className=\"\"flex items-center justify-between\"\"\" /mnt/c/Users/neo/GitHub/kokoa-resonite-tools/gui/src/components/ProfileEditPage.tsx)",
-      "Bash(/home/neo/.volta/tools/image/packages/@anthropic-ai/claude-code/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n 'flex items-center justify-between' /mnt/c/Users/neo/GitHub/kokoa-resonite-tools/gui/src/components/ProfileEditPage.tsx)"
+      "Bash(/home/neo/.volta/tools/image/packages/@anthropic-ai/claude-code/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n 'flex items-center justify-between' /mnt/c/Users/neo/GitHub/kokoa-resonite-tools/gui/src/components/ProfileEditPage.tsx)",
+      "Bash(ssh:*)",
+      "Bash(npm run tauri:*)",
+      "mcp__ssh-mcp__exec"
     ],
     "deny": []
   }

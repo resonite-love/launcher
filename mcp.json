@@ -1,0 +1,16 @@
+{
+    "mcpServers": {
+        "ssh-mcp": {
+            "command": "npx",
+            "args": [
+                "ssh-mcp",
+                "-y",
+                "--",
+                "--host=192.168.0.43",
+                "--port=22",
+                "--user=neo",
+                "--password=kobato"
+            ]
+        }
+    }
+}

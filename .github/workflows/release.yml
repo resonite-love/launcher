@@ -22,10 +22,25 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      # Sccache setup for faster builds
+      - name: Configure sccache
+        uses: mozilla-actions/sccache-action@v0.0.6
+        with:
+          version: "v0.8.2"
+      
+      - name: Configure Rust to use sccache
+        shell: pwsh
+        run: |
+          echo "SCCACHE_GHA_ENABLED=true" >> $env:GITHUB_ENV
+          echo "RUSTC_WRAPPER=sccache" >> $env:GITHUB_ENV
+          echo "CARGO_INCREMENTAL=0" >> $env:GITHUB_ENV
+      
       - name: Rust cache
         uses: swatinem/rust-cache@v2
         with:
           workspaces: './cli -> target'
+          cache-on-failure: true
+          shared-key: "release-${{ matrix.platform }}"
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -47,7 +62,16 @@ jobs:
 
       # Build CLI
       - name: Build CLI (release)
-        run: cargo build --release -p reso-launcher-cli
+        run: |
+          Write-Host "=== Building CLI with sccache ==="
+          Write-Host "Sccache stats before build:"
+          sccache --show-stats
+          
+          cargo build --release -p reso-launcher-cli
+          
+          Write-Host "`nSccache stats after build:"
+          sccache --show-stats
+        shell: pwsh
 
       # Build frontend first
       - name: Build Frontend
@@ -68,8 +92,14 @@ jobs:
           cd gui/src-tauri
           Write-Host "Changed to directory: $(Get-Location)"
           
-          Write-Host "`nBuilding with cargo..."
+          Write-Host "`nBuilding with cargo (using sccache)..."
+          Write-Host "Sccache stats before GUI build:"
+          sccache --show-stats
+          
           cargo build --release --features custom-protocol
+          
+          Write-Host "`nSccache stats after GUI build:"
+          sccache --show-stats
           
           Write-Host "`n=== Build complete, checking outputs ==="
           
@@ -111,6 +141,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          SCCACHE_GHA_ENABLED: true
+          RUSTC_WRAPPER: sccache
+          CARGO_INCREMENTAL: 0
         with:
           projectPath: ./gui
           tagName: ${{ github.ref_name }}
@@ -251,3 +284,11 @@ jobs:
           tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Show final sccache statistics
+      - name: Show sccache statistics
+        if: always()
+        shell: pwsh
+        run: |
+          Write-Host "=== Final sccache statistics ==="
+          sccache --show-stats
