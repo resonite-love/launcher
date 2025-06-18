@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Play, ChevronDown, Info, Calendar, Loader2, RefreshCw, Construction } from 'lucide-react';
+import { Play, ChevronDown, Info, Calendar, Loader2, RefreshCw, Construction, ExternalLink } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useAppStore } from '../store/useAppStore';
-import { useProfiles, useLaunchResonite } from '../hooks/useQueries';
-
-interface UpdateNote {
-  version: string;
-  date: string;
-  notes: string[];
-}
+import { useProfiles, useLaunchResonite, useSteamNews } from '../hooks/useQueries';
+import { UpdateNote } from '../types/steam-news';
 
 function HomeTab() {
   const { 
@@ -24,9 +21,13 @@ function HomeTab() {
     refetch: refetchProfiles 
   } = useProfiles();
 
-  const launchMutation = useLaunchResonite();
+  const { 
+    data: updateNotes = [], 
+    isLoading: isLoadingNews,
+    refetch: refetchNews 
+  } = useSteamNews();
 
-  const [updateNotes] = useState<UpdateNote[]>([]);
+  const launchMutation = useLaunchResonite();
 
   // Auto-select first profile if none selected
   useEffect(() => {
@@ -51,6 +52,7 @@ function HomeTab() {
 
   const handleRefresh = () => {
     refetchProfiles();
+    refetchNews();
   };
 
   return (
@@ -72,76 +74,132 @@ function HomeTab() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleRefresh}
-              disabled={isLoadingProfiles}
+              disabled={isLoadingProfiles || isLoadingNews}
               className="btn-secondary flex items-center space-x-2"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoadingProfiles ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoadingProfiles || isLoadingNews ? 'animate-spin' : ''}`} />
               <span>更新</span>
             </motion.button>
           </div>
           
           <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide space-y-4">
-            {updateNotes.length === 0 ? (
-              /* 未実装状態の表示 */
+            {isLoadingNews ? (
+              /* Loading state */
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col items-center justify-center h-full text-center py-12"
               >
-                <Construction className="w-16 h-16 text-yellow-500 mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">アップデート情報機能</h3>
-                <p className="text-gray-400 mb-1">この機能はまだ実装されていません</p>
+                <Loader2 className="w-16 h-16 text-resonite-blue mb-4 animate-spin" />
+                <h3 className="text-xl font-semibold text-white mb-2">アップデート情報を取得中...</h3>
+                <p className="text-gray-400">Resoniteの最新情報を読み込んでいます</p>
+              </motion.div>
+            ) : updateNotes.length === 0 ? (
+              /* No data state */
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex flex-col items-center justify-center h-full text-center py-12"
+              >
+                <Info className="w-16 h-16 text-gray-500 mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2">アップデート情報なし</h3>
+                <p className="text-gray-400 mb-1">現在表示可能なアップデート情報がありません</p>
                 <p className="text-gray-500 text-sm">
-                  将来のバージョンでResoniteの最新アップデート情報を自動取得する予定です
+                  更新ボタンを押して最新情報を取得してください
                 </p>
-                
-                <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg max-w-md">
-                  <div className="flex items-start space-x-3">
-                    <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                    <div className="text-sm text-left">
-                      <p className="text-blue-300 font-medium mb-1">予定している機能</p>
-                      <ul className="text-blue-200 space-y-1">
-                        <li>• Resonite公式のアップデート情報を自動取得</li>
-                        <li>• バージョン履歴とチェンジログの表示</li>
-                        <li>• 新バージョンの通知機能</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
               </motion.div>
             ) : (
               updateNotes.map((update, index) => (
                 <motion.div
-                  key={index}
+                  key={update.gid}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className="bg-dark-800/50 border border-dark-600/30 rounded-lg p-4 hover:border-resonite-blue/30 transition-colors duration-200"
+                  className="bg-dark-800/50 border border-dark-600/30 rounded-lg p-6 hover:border-resonite-blue/30 transition-colors duration-200"
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-lg font-semibold text-resonite-blue">
-                      {update.version}
-                    </span>
-                    <div className="flex items-center space-x-2 text-gray-400 text-sm">
-                      <Calendar className="w-4 h-4" />
-                      <span>{update.date}</span>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-white mb-1">
+                        {update.title}
+                      </h3>
+                      {update.version && (
+                        <span className="inline-block px-3 py-1 bg-resonite-blue/20 text-resonite-blue text-sm rounded-full font-mono">
+                          v{update.version}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-3 text-gray-400 text-sm flex-shrink-0 ml-4">
+                      <div className="flex items-center space-x-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>{update.formattedDate}</span>
+                      </div>
+                      <motion.a
+                        href={update.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ scale: 1.1 }}
+                        className="p-1 hover:text-resonite-blue transition-colors duration-200"
+                        title="Steam で開く"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </motion.a>
                     </div>
                   </div>
                   
-                  <ul className="space-y-2">
-                    {update.notes.map((note, noteIndex) => (
-                      <motion.li
-                        key={noteIndex}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: (index * 0.1) + (noteIndex * 0.05) }}
-                        className="flex items-start space-x-3 text-gray-300"
-                      >
-                        <div className="w-1.5 h-1.5 bg-resonite-blue rounded-full mt-2 flex-shrink-0" />
-                        <span>{note}</span>
-                      </motion.li>
-                    ))}
-                  </ul>
+                  <div className="prose prose-invert prose-sm max-w-none">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({ children }) => (
+                          <h1 className="text-xl font-bold text-white mb-3 mt-4 first:mt-0">{children}</h1>
+                        ),
+                        h2: ({ children }) => (
+                          <h2 className="text-lg font-semibold text-resonite-blue mb-2 mt-4 first:mt-0 flex items-center">
+                            <div className="w-2 h-2 bg-resonite-blue rounded-full mr-2" />
+                            {children}
+                          </h2>
+                        ),
+                        h3: ({ children }) => (
+                          <h3 className="text-md font-medium text-gray-200 mb-2 mt-3 first:mt-0">{children}</h3>
+                        ),
+                        p: ({ children }) => (
+                          <p className="text-gray-300 text-sm leading-relaxed mb-3">{children}</p>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="space-y-1 mb-4 ml-2">{children}</ul>
+                        ),
+                        li: ({ children }) => (
+                          <li className="flex items-start space-x-2 text-gray-300 text-sm">
+                            <div className="w-1 h-1 bg-gray-500 rounded-full mt-2 flex-shrink-0" />
+                            <span className="leading-relaxed">{children}</span>
+                          </li>
+                        ),
+                        strong: ({ children }) => (
+                          <strong className="text-white font-semibold">{children}</strong>
+                        ),
+                        em: ({ children }) => (
+                          <em className="text-gray-200 italic">{children}</em>
+                        ),
+                        a: ({ href, children }) => (
+                          <a 
+                            href={href} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-resonite-blue hover:text-blue-300 underline transition-colors duration-200"
+                          >
+                            {children}
+                          </a>
+                        ),
+                        code: ({ children }) => (
+                          <code className="bg-dark-700 text-gray-200 px-1 py-0.5 rounded text-xs font-mono">
+                            {children}
+                          </code>
+                        ),
+                      }}
+                    >
+                      {update.rawContent}
+                    </ReactMarkdown>
+                  </div>
                 </motion.div>
               ))
             )}

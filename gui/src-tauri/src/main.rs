@@ -1414,6 +1414,29 @@ async fn get_game_versions() -> Result<serde_json::Value, String> {
     Ok(json_data)
 }
 
+// Get Resonite steam news from version monitor
+#[tauri::command]
+async fn fetch_steam_news() -> Result<serde_json::Value, String> {
+    let client = reqwest::Client::new();
+    let url = "https://raw.githubusercontent.com/resonite-love/resonite-version-monitor/refs/heads/master/data/steam_news.json";
+    
+    let response = client.get(url)
+        .header("User-Agent", "RESO-Launcher")
+        .send()
+        .await
+        .map_err(|e| format!("Failed to fetch steam news: {}", e))?;
+    
+    if !response.status().is_success() {
+        return Err(format!("Failed to fetch steam news: HTTP {}", response.status()));
+    }
+    
+    let json_data = response.json::<serde_json::Value>()
+        .await
+        .map_err(|e| format!("Failed to parse steam news: {}", e))?;
+    
+    Ok(json_data)
+}
+
 // Get yt-dlp status for a profile
 #[tauri::command]
 async fn get_yt_dlp_status(
@@ -1722,6 +1745,7 @@ fn main() {
             add_all_unmanaged_mods_to_system,
             get_github_release_info,
             get_game_versions,
+            fetch_steam_news,
             get_yt_dlp_status,
             update_yt_dlp,
             download_depot_downloader,

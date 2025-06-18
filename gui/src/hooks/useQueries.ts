@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { invoke } from '@tauri-apps/api/tauri';
 import toast from 'react-hot-toast';
 import { useAppStore } from '../store/useAppStore';
+import { SteamNewsResponse, UpdateNote } from '../types/steam-news';
 
 interface AppStatus {
   initialized: boolean;
@@ -96,6 +97,7 @@ export const queryKeys = {
   appStatus: ['appStatus'] as const,
   profiles: ['profiles'] as const,
   steamCredentials: ['steamCredentials'] as const,
+  steamNews: ['steamNews'] as const,
   modManifest: (profileName: string) => ['modManifest', profileName] as const,
   installedMods: (profileName: string) => ['installedMods', profileName] as const,
   modVersions: (profileName: string, modName: string) => ['modVersions', profileName, modName] as const,
@@ -146,6 +148,111 @@ export const useSteamCredentials = () => {
       return credentials;
     },
     staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+};
+
+// Helper function to convert BBCode to Markdown
+const convertBBCodeToMarkdown = (content: string): string => {
+  return content
+    // Convert headers
+    .replace(/\[h2\](.*?)\[\/h2\]/g, '## $1')
+    .replace(/\[h3\](.*?)\[\/h3\]/g, '### $1')
+    .replace(/\[h1\](.*?)\[\/h1\]/g, '# $1')
+    // Convert bold/italic
+    .replace(/\[b\](.*?)\[\/b\]/g, '**$1**')
+    .replace(/\[i\](.*?)\[\/i\]/g, '*$1*')
+    // Convert links
+    .replace(/\[url=(.*?)\](.*?)\[\/url\]/g, '[$2]($1)')
+    // Convert lists - handle both [list] and direct bullet points
+    .replace(/\[list\](.*?)\[\/list\]/gs, (_, listContent) => {
+      return listContent.replace(/\[\*\]/g, '-');
+    })
+    // Handle standalone [*] items (convert to markdown bullets)
+    .replace(/\[\*\]/g, '-')
+    // Clean up any remaining BBCode tags
+    .replace(/\[[^\]]*\]/g, '')
+    // Clean up extra whitespace
+    .replace(/\n\s*\n\s*\n/g, '\n\n')
+    .trim();
+};
+
+// Helper function to parse steam news content
+const parseSteamNewsContent = (newsItem: any): UpdateNote => {
+  const content = newsItem.contents || '';
+  
+  // Extract version from title (e.g., "2025.6.17.623 - Improvements and fixes")
+  const versionMatch = newsItem.title.match(/^(\d{4}\.\d{1,2}\.\d{1,2}\.\d+)/);
+  const version = versionMatch ? versionMatch[1] : undefined;
+  
+  // Convert BBCode to Markdown
+  const markdownContent = convertBBCodeToMarkdown(content);
+  
+  // Parse sections from markdown content
+  const sections: any[] = [];
+  const sectionRegex = /## (.+?)\n((?:(?!##).*\n?)*)/g;
+  let match;
+  
+  while ((match = sectionRegex.exec(markdownContent)) !== null) {
+    const title = match[1].trim();
+    const sectionContent = match[2].trim();
+    
+    // Extract list items from this section
+    const listItems = sectionContent
+      .split('\n')
+      .filter(line => line.trim().startsWith('-'))
+      .map(line => line.replace(/^-\s*/, '').trim())
+      .filter(item => item.length > 0);
+    
+    if (listItems.length > 0) {
+      sections.push({
+        title,
+        items: listItems
+      });
+    }
+  }
+  
+  // Format date
+  const date = new Date(newsItem.date * 1000);
+  const formattedDate = date.toLocaleDateString('ja-JP', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+  
+  return {
+    gid: newsItem.gid,
+    title: newsItem.title,
+    version,
+    date: newsItem.date_formatted,
+    formattedDate,
+    author: newsItem.author,
+    url: newsItem.url,
+    parsedContent: {
+      version,
+      sections,
+      rawContent: markdownContent
+    },
+    rawContent: markdownContent
+  };
+};
+
+// Steam News
+export const useSteamNews = () => {
+  return useQuery({
+    queryKey: queryKeys.steamNews,
+    queryFn: async (): Promise<UpdateNote[]> => {
+      const response = await invoke<SteamNewsResponse>('fetch_steam_news');
+      
+      // Parse and transform the news items
+      const updateNotes = response.newsitems
+        .slice(0, 10) // Limit to 10 most recent items
+        .map(parseSteamNewsContent)
+        .filter(note => note.version); // Only include items with version numbers
+      
+      return updateNotes;
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutes
+    retry: 2,
   });
 };
 
