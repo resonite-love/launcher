@@ -7,6 +7,62 @@
 
 ## [Unreleased]
 
+## [v1.3.0] - 2025-06-18
+
+### 🎉 新機能
+- **Steam News 統合**: ホームタブにResoniteの公式アップデート情報を自動表示
+  - Steam公式ニュースAPIからリアルタイムで最新情報を取得
+  - BBCode形式からMarkdown形式への自動変換機能
+  - 美しいMarkdown表示による読みやすいアップデート情報
+  - Steam ページへの外部リンク機能付き
+  - 30分間のキャッシュ機能で高速表示とサーバー負荷軽減
+
+### ✨ 改善
+- **ホームタブの刷新**: 
+  - 未実装の placeholder から実際のアップデート情報表示に変更
+  - ローディング状態とエラーハンドリングの完全実装
+  - 日本語での日付表示と読みやすいUI設計
+  - リアルタイム更新機能（更新ボタンで手動更新も可能）
+- **ユーザーエクスペリエンス向上**:
+  - プロファイル選択と起動機能をフッターに配置してアクセス性向上
+  - バージョン情報の見やすい表示（青色のチップ表示）
+  - セクション別の構造化されたアップデート内容表示
+
+### 🔧 技術的改善
+- **新しいライブラリ統合**:
+  - `react-markdown`: Markdown コンテンツの高品質レンダリング
+  - `remark-gfm`: GitHub Flavored Markdown サポート
+- **型安全性の向上**:
+  - Steam News API の完全な TypeScript 型定義
+  - UI コンポーネント用の変換型定義
+- **アーキテクチャ改善**:
+  - React Query による効率的なデータフェッチとキャッシュ
+  - BBCode → Markdown 変換エンジンの実装
+  - カスタム Markdown コンポーネントによるダークテーマ対応
+
+### 🎨 UI/UX 改善
+- **Markdown 表示の最適化**:
+  - Resonite ブルーのアクセントカラーでヘッダー表示
+  - 読みやすいタイポグラフィとスペーシング
+  - コードブロック、リンク、強調表示の美しいスタイリング
+  - リストアイテムの視覚的改善（小さな丸印付き）
+- **レスポンシブデザイン**:
+  - スクロール可能なアップデート一覧
+  - 外部リンクのホバーエフェクト
+  - 適切なローディングアニメーション
+
+### 📱 使用方法
+1. **自動更新**: アプリケーション起動時に最新のアップデート情報を自動取得
+2. **手動更新**: ホームタブの「更新」ボタンで最新情報を手動取得
+3. **詳細表示**: Steam リンクアイコンをクリックして公式ページで詳細確認
+4. **統合体験**: プロファイル管理とアップデート情報確認をシームレスに
+
+### 🔮 今後の展開
+- アップデート通知機能
+- バージョン比較機能
+- お気に入りアップデート機能
+- アップデート履歴検索
+
 ## [v1.2.2] - 2025-06-18
 
 ### 🐛 修正
@@ -322,7 +378,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.3.0...HEAD
+[v1.3.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.2...v1.3.0
 [v1.2.2]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.1...v1.2.2
 [v1.2.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.0...v1.2.1
 [v1.2.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.1.1...v1.2.0
