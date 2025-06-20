@@ -54,7 +54,7 @@
     },
     "bundle": {
       "active": true,
-      "targets": ["nsis"],
+      "targets": "all",
       "identifier": "love.resonite.launcher",
       "icon": [
         "icons/icon.png",
