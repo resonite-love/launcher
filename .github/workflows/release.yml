@@ -106,7 +106,6 @@ jobs:
           projectPath: ./gui
           tagName: ${{ github.ref_name }}
           releaseName: 'RESO Launcher ${{ github.ref_name }}'
-          args: --bundles nsis
           releaseBody: |
             # RESO Launcher ${{ github.ref_name }}
             
