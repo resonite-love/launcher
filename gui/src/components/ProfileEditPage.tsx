@@ -23,7 +23,8 @@ import {
   UserPlus,
   Eye,
   EyeOff,
-  Play
+  Play,
+  Copy
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -230,6 +231,12 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   // 削除確認モーダル用の状態
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // 複製モーダル用の状態
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [isDuplicating, setIsDuplicating] = useState(false);
+  const [duplicateName, setDuplicateName] = useState('');
+  const [duplicateDescription, setDuplicateDescription] = useState('');
   const [currentBranch, setCurrentBranch] = useState<string>('release');
   const [showGameInstallModal, setShowGameInstallModal] = useState(false);
   const [isInstallingGame, setIsInstallingGame] = useState(false);
@@ -285,6 +292,36 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       toast.error(`プロファイルの更新に失敗しました: ${err}`);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDuplicate = async () => {
+    if (!duplicateName.trim()) {
+      toast.error('プロファイル名を入力してください');
+      return;
+    }
+
+    try {
+      setIsDuplicating(true);
+      await invoke<string>('duplicate_profile', {
+        sourceProfileName: profileName,
+        newProfileName: duplicateName.trim(),
+        newDescription: duplicateDescription.trim() || `${profile?.display_name || profileName}のコピー`
+      });
+      
+      toast.success(`プロファイル "${duplicateName}" を作成しました`);
+      
+      // プロファイル一覧を更新
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
+      
+      // モーダルを閉じてフィールドをリセット
+      setShowDuplicateModal(false);
+      setDuplicateName('');
+      setDuplicateDescription('');
+    } catch (err) {
+      toast.error(`プロファイルの複製に失敗しました: ${err}`);
+    } finally {
+      setIsDuplicating(false);
     }
   };
 
@@ -1889,6 +1926,23 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             <span>保存</span>
           </motion.button>
           
+          {/* 複製ボタン */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="btn-secondary flex items-center space-x-2"
+            onClick={() => {
+              setDuplicateName(`${profile?.display_name || profileName} - コピー`);
+              setDuplicateDescription(profile?.description || '');
+              setShowDuplicateModal(true);
+            }}
+            disabled={isDuplicating}
+            title="プロファイルを複製"
+          >
+            <Copy className="w-4 h-4" />
+            <span>複製</span>
+          </motion.button>
+          
           {/* 削除ボタン（デフォルトプロファイル以外で表示） */}
           {profileName !== 'default' && (
             <motion.button
@@ -2136,6 +2190,108 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                   <span>インストール</span>
                 </motion.button>
               </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
+      
+      {/* プロファイル複製モーダル */}
+      {showDuplicateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-dark-800 rounded-lg p-6 max-w-md w-full mx-4 border border-dark-600"
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-white flex items-center space-x-2">
+                <Copy className="w-5 h-5 text-resonite-blue" />
+                <span>プロファイルを複製</span>
+              </h3>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  setShowDuplicateModal(false);
+                  setDuplicateName('');
+                  setDuplicateDescription('');
+                }}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </motion.button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  新しいプロファイル名 <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={duplicateName}
+                  onChange={(e) => setDuplicateName(e.target.value)}
+                  className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:border-resonite-blue focus:outline-none"
+                  placeholder="新しいプロファイル名を入力"
+                  maxLength={100}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  説明
+                </label>
+                <textarea
+                  value={duplicateDescription}
+                  onChange={(e) => setDuplicateDescription(e.target.value)}
+                  className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:border-resonite-blue focus:outline-none resize-none"
+                  placeholder="プロファイルの説明を入力（任意）"
+                  rows={3}
+                  maxLength={500}
+                />
+              </div>
+
+              <div className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-4">
+                <div className="flex items-start space-x-3">
+                  <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-blue-200 text-sm">
+                      元のプロファイルの設定、ゲームデータ、MODが全て複製されます。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="btn-secondary"
+                onClick={() => {
+                  setShowDuplicateModal(false);
+                  setDuplicateName('');
+                  setDuplicateDescription('');
+                }}
+                disabled={isDuplicating}
+              >
+                キャンセル
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="btn-primary flex items-center space-x-2"
+                onClick={handleDuplicate}
+                disabled={isDuplicating || !duplicateName.trim()}
+              >
+                {isDuplicating ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Copy className="w-4 h-4" />
+                )}
+                <span>{isDuplicating ? '複製中...' : '複製'}</span>
+              </motion.button>
             </div>
           </motion.div>
         </div>

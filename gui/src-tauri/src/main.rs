@@ -825,6 +825,91 @@ async fn open_profile_folder(
     Ok(format!("Opened profile folder: {}", profile_dir.display()))
 }
 
+// Duplicate a profile and all its data
+#[tauri::command]
+async fn duplicate_profile(
+    source_profile_name: String,
+    new_profile_name: String,
+    new_description: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let app_state = state.lock().unwrap();
+    
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
+    
+    // Check if source profile exists
+    let source_profile = profile_manager.get_profile(&source_profile_name)
+        .map_err(|e| format!("Source profile not found: {}", e))?;
+    
+    // Check if target profile name already exists
+    if profile_manager.get_profile(&new_profile_name).is_ok() {
+        return Err(format!("Profile '{}' already exists", new_profile_name));
+    }
+    
+    // Create new profile with unique folder name
+    let mut new_profile = profile_manager.create_profile(&new_profile_name)
+        .map_err(|e| format!("Failed to create new profile: {}", e))?;
+    
+    // Copy all settings from source profile
+    new_profile.description = new_description;
+    new_profile.args = source_profile.args.clone();
+    new_profile.game_info = source_profile.game_info.clone();
+    new_profile.mod_loader_type = source_profile.mod_loader_type;
+    
+    // Get profile directories
+    let source_profile_dir = profile_manager.get_profile_dir(&source_profile_name);
+    let new_profile_dir = profile_manager.get_profile_dir(&new_profile.get_folder_name());
+    
+    // Save the new profile configuration first
+    new_profile.save(&new_profile_dir)
+        .map_err(|e| format!("Failed to save new profile: {}", e))?;
+    
+    // Copy all profile data (Game, DataPath, mods, etc.)
+    if source_profile_dir.exists() {
+        copy_directory_recursive(&source_profile_dir, &new_profile_dir, &new_profile.get_folder_name())
+            .map_err(|e| format!("Failed to copy profile data: {}", e))?;
+    }
+    
+    Ok(format!("Profile '{}' duplicated successfully as '{}'", source_profile_name, new_profile_name))
+}
+
+// Helper function to recursively copy directory contents
+fn copy_directory_recursive(src: &std::path::Path, dst: &std::path::Path, new_profile_id: &str) -> Result<(), String> {
+    if !src.exists() {
+        return Ok(());
+    }
+    
+    // Create destination directory if it doesn't exist
+    std::fs::create_dir_all(dst)
+        .map_err(|e| format!("Failed to create destination directory: {}", e))?;
+    
+    // Iterate through source directory
+    for entry in std::fs::read_dir(src)
+        .map_err(|e| format!("Failed to read source directory: {}", e))? {
+        let entry = entry
+            .map_err(|e| format!("Failed to read directory entry: {}", e))?;
+        let entry_path = entry.path();
+        let file_name = entry.file_name();
+        
+        // Skip the launchconfig.json file as it's already created with new profile data
+        if file_name == "launchconfig.json" {
+            continue;
+        }
+        
+        let dst_path = dst.join(&file_name);
+        
+        if entry_path.is_dir() {
+            copy_directory_recursive(&entry_path, &dst_path, new_profile_id)?;
+        } else {
+            std::fs::copy(&entry_path, &dst_path)
+                .map_err(|e| format!("Failed to copy file '{}': {}", entry_path.display(), e))?;
+        }
+    }
+    
+    Ok(())
+}
+
 // Delete a profile and all its data
 #[tauri::command]
 fn delete_profile(
@@ -1724,6 +1809,7 @@ fn main() {
             install_mod_loader,
             uninstall_mod_loader,
             open_profile_folder,
+            duplicate_profile,
             delete_profile,
             check_for_app_update,
             fetch_mod_manifest,

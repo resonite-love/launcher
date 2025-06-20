@@ -123,6 +123,31 @@ const result = await invoke<string>('create_profile', {
 });
 ```
 
+### `duplicate_profile`
+既存のプロファイルを複製して新しいプロファイルを作成します。
+
+**パラメータ:**
+- `source_profile_name: string` - 複製元のプロファイル名
+- `new_profile_name: string` - 新しいプロファイル名
+- `new_description: string` - 新しいプロファイルの説明
+
+**戻り値:** `string` - 成功メッセージ
+
+**注意事項:**
+- 複製元のプロファイルが存在する必要があります
+- 新しいプロファイル名は既存のプロファイルと重複してはいけません
+- プロファイルの設定、ゲームデータ、MODなどすべての内容が複製されます
+- `launchconfig.json`は新しい設定で上書きされますが、その他のファイルは完全にコピーされます
+
+**使用例:**
+```typescript
+const result = await invoke<string>('duplicate_profile', {
+  sourceProfileName: 'OriginalProfile',
+  newProfileName: 'CopiedProfile',
+  newDescription: 'オリジナルプロファイルのコピー'
+});
+```
+
 ### `get_profile_config`
 指定されたプロファイルの設定を取得します。
 
