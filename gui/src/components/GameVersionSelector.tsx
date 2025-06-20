@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { motion } from 'framer-motion';
 import { ChevronDown, Loader2, History, Calendar } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface GameVersion {
   gameVersion: string;
@@ -17,6 +18,7 @@ interface GameVersionSelectorProps {
 }
 
 function GameVersionSelector({ branch, selectedVersion, onVersionSelect, disabled }: GameVersionSelectorProps) {
+  const { t } = useTranslation();
   const [versions, setVersions] = useState<GameVersion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +39,7 @@ function GameVersionSelector({ branch, selectedVersion, onVersionSelect, disable
       setVersions(branchVersions.reverse());
     } catch (err) {
       console.error('Failed to load game versions:', err);
-      setError('バージョン情報の取得に失敗しました');
+      setError(t('gameVersion.fetchFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -53,7 +55,7 @@ function GameVersionSelector({ branch, selectedVersion, onVersionSelect, disable
       <label className="block text-sm font-medium text-gray-300">
         <div className="flex items-center space-x-2">
           <History className="w-4 h-4" />
-          <span>バージョン選択（オプション）</span>
+          <span>{t('gameVersion.selectVersion')}</span>
         </div>
       </label>
       
@@ -61,7 +63,7 @@ function GameVersionSelector({ branch, selectedVersion, onVersionSelect, disable
         {isLoading ? (
           <div className="select-primary w-full pr-10 text-sm flex items-center justify-center">
             <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            読み込み中...
+            {t('gameVersion.loading')}
           </div>
         ) : error ? (
           <div className="select-primary w-full text-sm text-red-400">
@@ -77,7 +79,7 @@ function GameVersionSelector({ branch, selectedVersion, onVersionSelect, disable
               style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
             >
               <option value="">
-                最新版を使用（推奨）
+                {t('gameVersion.useLatest')}
               </option>
               {versions.map((version) => (
                 <option key={version.manifestId} value={version.manifestId}>
@@ -99,12 +101,12 @@ function GameVersionSelector({ branch, selectedVersion, onVersionSelect, disable
           <div className="flex items-start space-x-2 text-xs">
             <Calendar className="w-4 h-4 text-yellow-500 mt-0.5 flex-shrink-0" />
             <div className="space-y-1">
-              <p className="text-yellow-400 font-medium">特定バージョンが選択されています</p>
+              <p className="text-yellow-400 font-medium">{t('gameVersion.specificSelected')}</p>
               <p className="text-gray-400">
-                選択したバージョン: {versions.find(v => v.manifestId === selectedVersion)?.gameVersion}
+                {t('gameVersion.selectedVersion')} {versions.find(v => v.manifestId === selectedVersion)?.gameVersion}
               </p>
               <p className="text-gray-500">
-                このバージョンに固定してインストールされます。最新版への自動更新は行われません。
+                {t('gameVersion.fixedVersionWarning')}
               </p>
             </div>
           </div>
@@ -112,8 +114,8 @@ function GameVersionSelector({ branch, selectedVersion, onVersionSelect, disable
       )}
 
       <p className="text-xs text-gray-500 mt-2">
-        特定のバージョンを選択すると、そのバージョンに固定されます。
-        通常は「最新版を使用」を選択することをお勧めします。
+        {t('gameVersion.fixedVersionInfo')}
+        {t('gameVersion.recommendLatest')}
       </p>
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ModRelease {
   version: string;
@@ -35,6 +36,7 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
   onVersionSelect,
   isLoading = false
 }) => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedVersion, setSelectedVersion] = useState(mod.installed_version);
 
@@ -70,7 +72,7 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
         {isLoading ? (
           <Loader2 className="w-4 h-4 animate-spin" />
         ) : (
-          <span>{selectedVersion || "バージョンを選択"}</span>
+          <span>{selectedVersion || t('modLoader.versionSelector.selectVersion')}</span>
         )}
         {availableVersions.length > 0 && (
           <ChevronDown 
@@ -84,7 +86,7 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
                         rounded-md shadow-lg z-[70] min-w-80 max-h-96 overflow-y-auto">
           <div className="p-2 border-b border-gray-600">
             <h4 className="text-sm font-medium text-gray-300">
-              {mod.name} - バージョン選択
+              {t('modLoader.versionSelector.title', { modName: mod.name })}
             </h4>
           </div>
           
@@ -104,12 +106,12 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
                     <span className="font-medium">{release.version}</span>
                     {release.version === mod.installed_version && (
                       <span className="text-xs bg-blue-600 px-2 py-0.5 rounded">
-                        インストール済み
+                        {t('modLoader.versionSelector.installed')}
                       </span>
                     )}
                     {release.prerelease && (
                       <span className="text-xs bg-yellow-600 px-2 py-0.5 rounded">
-                        プレリリース
+                        {t('modLoader.versionSelector.prerelease')}
                       </span>
                     )}
                   </div>
@@ -138,7 +140,7 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
           
           {availableVersions.length === 0 && (
             <div className="p-4 text-center text-gray-500 text-sm">
-              利用可能なバージョンがありません
+              {t('modLoader.versionSelector.noVersions')}
             </div>
           )}
         </div>
