@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   Plus, 
   Trash2, 
@@ -34,261 +35,264 @@ interface ArgumentPreset {
   tooltip?: string;
 }
 
-const argumentPresets: ArgumentPreset[] = [
+const getArgumentPresets = (t: any): ArgumentPreset[] => [
   // Hardware/Display
   {
     id: 'skip-intro',
-    name: 'イントロチュートリアルをスキップ',
-    description: 'イントロチュートリアルの実行を防ぎます',
+    name: t('launchArgs.presets.skipIntroTutorial'),
+    description: t('launchArgs.presets.skipIntroTutorial'),
     icon: Monitor,
     category: 'interface',
     arg: '-SkipIntroTutorial',
-    tooltip: '初回起動時のチュートリアルをスキップします'
+    tooltip: t('launchArgs.presets.skipIntroTutorial')
   },
   {
     id: 'screen-mode',
-    name: 'スクリーンモード',
-    description: 'デスクトップモードで起動',
+    name: t('launchArgs.presets.screen'),
+    description: t('launchArgs.presets.screen'),
     icon: Monitor,
     category: 'hardware',
     arg: '-Screen',
-    tooltip: 'VRヘッドセットなしでデスクトップモードで起動します'
+    tooltip: t('launchArgs.presets.screen')
   },
   {
     id: 'steamvr',
     name: 'SteamVR',
-    description: 'SteamVRデバイスを強制使用',
+    description: 'Force use SteamVR device',
     icon: Gamepad2,
     category: 'hardware',
     arg: '-Device SteamVR',
-    tooltip: 'SteamVR対応デバイスを強制的に使用します'
+    tooltip: 'Force use SteamVR compatible device'
   },
   {
     id: 'oculus',
     name: 'Oculus Rift',
-    description: 'Oculus Riftデバイスを強制使用',
+    description: 'Force use Oculus Rift device',
     icon: Gamepad2,
     category: 'hardware',
     arg: '-Device Oculus',
-    tooltip: 'Oculus Rift + Touchコントローラーを使用します'
+    tooltip: 'Use Oculus Rift + Touch controllers'
   },
   {
     id: 'oculus-quest',
     name: 'Oculus Quest',
-    description: 'Oculus Questデバイスを強制使用',
+    description: 'Force use Oculus Quest device',
     icon: Gamepad2,
     category: 'hardware',
     arg: '-Device OculusQuest',
-    tooltip: 'Oculus Quest + Touchコントローラーを使用します'
+    tooltip: 'Use Oculus Quest + Touch controllers'
   },
   {
     id: 'windows-mr',
     name: 'Windows MR',
-    description: 'Windows Mixed Realityを強制使用',
+    description: 'Force use Windows Mixed Reality',
     icon: Gamepad2,
     category: 'hardware',
     arg: '-Device WindowsMR',
-    tooltip: 'Windows Mixed Realityデバイスを使用します'
+    tooltip: 'Use Windows Mixed Reality device'
   },
   
   // Network/Session
   {
     id: 'invisible',
-    name: 'ログイン時に非表示',
-    description: 'ログイン時にオンラインステータスを非表示にします',
+    name: t('launchArgs.presets.invisible'),
+    description: t('launchArgs.presets.invisible'),
     icon: Eye,
     category: 'network',
     arg: '-Invisible',
-    tooltip: 'ログイン時に他のユーザーから見えない状態になります'
+    tooltip: t('launchArgs.presets.invisible')
   },
   {
     id: 'lan-only',
-    name: 'LAN限定',
-    description: 'すべてのワールドをLANのみでアナウンス',
+    name: t('launchArgs.presets.forceLANOnly'),
+    description: t('launchArgs.presets.forceLANOnly'),
     icon: Globe,
     category: 'network',
     arg: '-ForceLANOnly',
-    tooltip: 'ワールドがインターネットからアクセスできないようになります'
+    tooltip: t('launchArgs.presets.forceLANOnly')
   },
   {
     id: 'announce-home',
-    name: 'ホームをLANで公開',
-    description: 'ホームとUserspaceをLANでアクセス可能にします',
+    name: 'Announce Home on LAN',
+    description: 'Make home and userspace accessible on LAN',
     icon: Users,
     category: 'network',
     arg: '-AnnounceHomeOnLAN',
-    tooltip: 'ホームワールドがLANネットワークから参加可能になります'
+    tooltip: 'Makes home world joinable from LAN network'
   },
   {
     id: 'join-auto',
-    name: '自動セッション参加',
-    description: 'LAN上のアクティブセッションに自動参加',
+    name: t('launchArgs.presets.join'),
+    description: t('launchArgs.presets.join'),
     icon: Users,
     category: 'network',
     arg: '-Join Auto',
-    tooltip: 'LAN上で最も多くのユーザーがいるワールドに自動で参加します'
+    tooltip: t('launchArgs.presets.join')
   },
   
   // Interface
   {
     id: 'no-ui',
-    name: 'UI非表示',
-    description: 'UserspaceのUIを非表示にします',
+    name: t('launchArgs.presets.noUI'),
+    description: t('launchArgs.presets.noUI'),
     icon: Eye,
     category: 'interface',
     arg: '-NoUI',
-    tooltip: 'Userspaceの要素（ロゴやワールドスイッチャーなど）を非表示にします'
+    tooltip: t('launchArgs.presets.noUI')
   },
   {
     id: 'kiosk',
-    name: 'キオスクモード',
-    description: 'キオスクモードで実行',
+    name: t('launchArgs.presets.kiosk'),
+    description: t('launchArgs.presets.kiosk'),
     icon: Monitor,
     category: 'interface',
     arg: '-Kiosk',
-    tooltip: 'Userspaceを非表示にし、ゲストのテレポートを無効にします'
+    tooltip: t('launchArgs.presets.kiosk')
   },
   {
     id: 'reset-dash',
-    name: 'ダッシュリセット',
-    description: 'ダッシュのレイアウトをデフォルトにリセット',
+    name: t('launchArgs.presets.resetDash'),
+    description: t('launchArgs.presets.resetDash'),
     icon: Settings,
     category: 'interface',
     arg: '-ResetDash',
-    tooltip: 'ダッシュボードの配置をデフォルト設定に戻します'
+    tooltip: t('launchArgs.presets.resetDash')
   },
   {
     id: 'no-auto-home',
-    name: 'ホーム自動読み込み無効',
-    description: '起動時にクラウドホームを自動読み込みしません',
+    name: t('launchArgs.presets.doNotAutoLoadHome'),
+    description: t('launchArgs.presets.doNotAutoLoadHome'),
     icon: Folder,
     category: 'interface',
     arg: '-DoNotAutoLoadHome',
-    tooltip: '起動時にホームワールドの自動読み込みを無効にします'
+    tooltip: t('launchArgs.presets.doNotAutoLoadHome')
   },
   
   // Data/Paths
   {
     id: 'data-path',
-    name: 'データパス',
-    description: 'データベースディレクトリのパスを指定',
+    name: t('launchArgs.presets.dataPath'),
+    description: t('launchArgs.presets.dataPath'),
     icon: Folder,
     category: 'paths',
     arg: '-DataPath',
     hasValue: true,
     valueType: 'path',
-    placeholder: 'データフォルダのパス',
-    tooltip: 'Resoniteのデータベースファイルを保存するディレクトリを指定します'
+    placeholder: 'Data folder path',
+    tooltip: t('launchArgs.presets.dataPath')
   },
   {
     id: 'cache-path',
-    name: 'キャッシュパス',
-    description: 'キャッシュディレクトリのパスを指定',
+    name: t('launchArgs.presets.cachePath'),
+    description: t('launchArgs.presets.cachePath'),
     icon: Folder,
     category: 'paths',
     arg: '-CachePath',
     hasValue: true,
     valueType: 'path',
-    placeholder: 'キャッシュフォルダのパス',
-    tooltip: 'Resoniteのキャッシュファイルを保存するディレクトリを指定します'
+    placeholder: 'Cache folder path',
+    tooltip: t('launchArgs.presets.cachePath')
   },
   {
     id: 'logs-path',
-    name: 'ログパス',
-    description: 'ログファイルのディレクトリを指定',
+    name: t('launchArgs.presets.logPath'),
+    description: t('launchArgs.presets.logPath'),
     icon: FileText,
     category: 'paths',
     arg: '-LogsPath',
     hasValue: true,
     valueType: 'path',
-    placeholder: 'ログフォルダのパス',
-    tooltip: 'ログファイルを保存するディレクトリを指定します'
+    placeholder: 'Log folder path',
+    tooltip: t('launchArgs.presets.logPath')
   },
   
   // Graphics
   {
     id: 'ctaa',
-    name: 'CTAA有効',
-    description: 'Cinematic Temporal Anti-Aliasingを有効にします',
+    name: t('launchArgs.presets.ctaa'),
+    description: t('launchArgs.presets.ctaa'),
     icon: Camera,
     category: 'graphics',
     arg: '-ctaa',
-    tooltip: '高品質なアンチエイリアシングを有効にします（パフォーマンスに影響します）'
+    tooltip: t('launchArgs.presets.ctaa')
   },
   {
     id: 'screen-fullscreen-0',
-    name: 'ウィンドウモード',
-    description: 'ウィンドウモードで起動',
+    name: 'Windowed Mode',
+    description: 'Launch in windowed mode',
     icon: Monitor,
     category: 'graphics',
     arg: '-screen-fullscreen 0',
-    tooltip: 'フルスクリーンではなくウィンドウモードで起動します'
+    tooltip: 'Launch in windowed mode instead of fullscreen'
   },
   {
     id: 'screen-fullscreen-1',
-    name: 'フルスクリーンモード',
-    description: 'フルスクリーンで起動',
+    name: 'Fullscreen Mode',
+    description: 'Launch in fullscreen',
     icon: Monitor,
     category: 'graphics',
     arg: '-screen-fullscreen 1',
-    tooltip: 'フルスクリーンモードで起動します'
+    tooltip: 'Launch in fullscreen mode'
   },
   {
     id: 'screen-width',
-    name: '画面幅',
-    description: '水平解像度を設定',
+    name: 'Screen Width',
+    description: 'Set horizontal resolution',
     icon: Monitor,
     category: 'graphics',
     arg: '-screen-width',
     hasValue: true,
     valueType: 'number',
     placeholder: '1920',
-    tooltip: 'ウィンドウまたはスクリーンの水平解像度を設定します'
+    tooltip: 'Set horizontal resolution of window or screen'
   },
   {
     id: 'screen-height',
-    name: '画面高さ',
-    description: '垂直解像度を設定',
+    name: 'Screen Height',
+    description: 'Set vertical resolution',
     icon: Monitor,
     category: 'graphics',
     arg: '-screen-height',
     hasValue: true,
     valueType: 'number',
     placeholder: '1080',
-    tooltip: 'ウィンドウまたはスクリーンの垂直解像度を設定します'
+    tooltip: 'Set vertical resolution of window or screen'
   },
   
   // Advanced/Debug
   {
     id: 'verbose',
-    name: '詳細ログ',
-    description: 'エンジン初期化中により詳細なログを出力',
+    name: 'Verbose Logging',
+    description: 'Output more detailed logs during engine initialization',
     icon: FileText,
     category: 'debug',
     arg: '-Verbose',
-    tooltip: 'デバッグやプラグイン開発に有用な詳細なログを出力します'
+    tooltip: 'Outputs detailed logs useful for debugging and plugin development'
   },
   {
     id: 'force-no-voice',
-    name: '音声無効',
-    description: 'CommonAvatarBuilderで音声を設定しません',
+    name: 'Disable Voice',
+    description: 'Does not set up voice in CommonAvatarBuilder',
     icon: Settings,
     category: 'debug',
     arg: '-ForceNoVoice',
-    tooltip: 'ローカルプレゼンテーション用に音声機能を無効にします'
+    tooltip: 'Disables voice functionality for local presentations'
   }
 ];
 
-const categories = {
-  hardware: { name: 'ハードウェア/VR', icon: Gamepad2, color: 'text-purple-400' },
-  network: { name: 'ネットワーク', icon: Globe, color: 'text-blue-400' },
-  interface: { name: 'インターフェース', icon: Monitor, color: 'text-green-400' },
-  paths: { name: 'パス設定', icon: Folder, color: 'text-yellow-400' },
-  graphics: { name: 'グラフィック', icon: Camera, color: 'text-red-400' },
-  debug: { name: 'デバッグ/詳細', icon: Settings, color: 'text-gray-400' }
-};
+const getCategories = (t: any) => ({
+  hardware: { name: t('launchArgs.categories.hardware'), icon: Gamepad2, color: 'text-purple-400' },
+  network: { name: t('launchArgs.categories.network'), icon: Globe, color: 'text-blue-400' },
+  interface: { name: t('launchArgs.categories.interface'), icon: Monitor, color: 'text-green-400' },
+  paths: { name: t('launchArgs.categories.paths'), icon: Folder, color: 'text-yellow-400' },
+  graphics: { name: t('launchArgs.categories.graphics'), icon: Camera, color: 'text-red-400' },
+  debug: { name: t('launchArgs.categories.debug'), icon: Settings, color: 'text-gray-400' }
+});
 
 function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProps) {
+  const { t } = useTranslation();
+  const argumentPresets = getArgumentPresets(t);
+  const categories = getCategories(t);
   const [activePresets, setActivePresets] = useState<Set<string>>(new Set());
   const [presetValues, setPresetValues] = useState<{[key: string]: string}>({});
   const [customArgs, setCustomArgs] = useState<string[]>([]);
@@ -296,7 +300,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // 初期化時のみ引数を解析
+  // Parse arguments only during initialization
   useEffect(() => {
     if (isInitialized) return;
 
@@ -309,14 +313,14 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
       
       argumentPresets.forEach(preset => {
         if (preset.hasValue) {
-          // 値を持つ引数の場合
+          // For arguments with values
           if (arg.startsWith(preset.arg + ' ')) {
             newActivePresets.add(preset.id);
             newPresetValues[preset.id] = arg.substring(preset.arg.length + 1);
             matched = true;
           }
         } else {
-          // 値を持たない引数の場合
+          // For arguments without values
           if (arg === preset.arg) {
             newActivePresets.add(preset.id);
             matched = true;
@@ -340,7 +344,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
 
     const newArgs: string[] = [];
 
-    // プリセット引数を追加
+    // Add preset arguments
     argumentPresets.forEach(preset => {
       if (activePresets.has(preset.id)) {
         if (preset.hasValue) {
@@ -354,7 +358,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
       }
     });
 
-    // カスタム引数を追加
+    // Add custom arguments
     customArgs.forEach(arg => {
       if (arg.trim()) {
         newArgs.push(arg.trim());
@@ -374,23 +378,23 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
     
     const newActivePresets = new Set(activePresets);
     
-    // ハードウェア/VRカテゴリの場合は排他的選択
+    // Hardware/VR category uses exclusive selection
     if (preset.category === 'hardware') {
-      // 同じカテゴリの他のプリセットを全て無効化
+      // Disable all other presets in the same category
       argumentPresets.forEach(p => {
         if (p.category === 'hardware' && p.id !== presetId) {
           newActivePresets.delete(p.id);
         }
       });
       
-      // 選択されたプリセットをトグル
+      // Toggle the selected preset
       if (newActivePresets.has(presetId)) {
         newActivePresets.delete(presetId);
       } else {
         newActivePresets.add(presetId);
       }
     } else {
-      // その他のカテゴリは通常通りトグル
+      // Other categories toggle normally
       if (newActivePresets.has(presetId)) {
         newActivePresets.delete(presetId);
       } else {
@@ -429,7 +433,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
 
   return (
     <div className="space-y-6">
-      {/* カテゴリー選択 */}
+      {/* Category selection */}
       <div className="flex flex-wrap gap-2">
         <motion.button
           whileHover={{ scale: 1.02 }}
@@ -441,7 +445,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
           }`}
           onClick={() => setActiveCategory(null)}
         >
-          すべて
+          {t('launchArgs.all')}
         </motion.button>
         {Object.entries(categories).map(([key, category]) => {
           const Icon = category.icon;
@@ -464,7 +468,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
         })}
       </div>
 
-      {/* プリセット引数 */}
+      {/* Preset arguments */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {filteredPresets.map(preset => {
           const Icon = preset.icon;
@@ -536,7 +540,7 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
                 </motion.div>
               </div>
 
-              {/* 値入力フィールド */}
+              {/* Value input field */}
               {preset.hasValue && isActive && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
@@ -559,26 +563,26 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
         })}
       </div>
 
-      {/* カスタム引数セクション */}
+      {/* Custom arguments section */}
       <div className="border border-dark-600 rounded-lg p-4">
         <div className="flex items-center space-x-3 mb-4">
           <Settings className="w-5 h-5 text-gray-400" />
-          <h3 className="text-lg font-semibold text-white">カスタム引数</h3>
+          <h3 className="text-lg font-semibold text-white">{t('launchArgs.custom.title')}</h3>
           <div className="group relative">
             <Info className="w-4 h-4 text-gray-500 cursor-help" />
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-4 py-3 bg-dark-900 border border-dark-600 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-50 w-80 shadow-lg">
-              プリセットにない引数や、特別な設定が必要な引数を手動で追加できます
+              {t('launchArgs.custom.description')}
             </div>
           </div>
         </div>
 
-        {/* 新しいカスタム引数の追加 */}
+        {/* Adding new custom arguments */}
         <div className="flex space-x-2 mb-4">
           <input
             type="text"
             value={newCustomArg}
             onChange={(e) => setNewCustomArg(e.target.value)}
-            placeholder="例: -CustomArgument value"
+            placeholder={t('launchArgs.custom.placeholder')}
             className="input-primary flex-1 select-text"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
@@ -595,15 +599,15 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
             disabled={!newCustomArg.trim()}
           >
             <Plus className="w-4 h-4" />
-            <span>追加</span>
+            <span>{t('launchArgs.custom.add')}</span>
           </motion.button>
         </div>
 
-        {/* カスタム引数一覧 */}
+        {/* Custom arguments list */}
         {customArgs.length === 0 ? (
           <div className="text-center py-4 text-gray-500">
             <Settings className="w-8 h-8 mx-auto mb-2 text-gray-600" />
-            <p>カスタム引数はありません</p>
+            <p>{t('launchArgs.custom.noCustomArgs')}</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -635,12 +639,12 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
         )}
       </div>
 
-      {/* 現在の引数プレビュー */}
+      {/* Current arguments preview */}
       {args.length > 0 && (
         <div className="border border-dark-600 rounded-lg p-4">
           <div className="flex items-center space-x-3 mb-3">
             <FileText className="w-5 h-5 text-blue-400" />
-            <h3 className="text-lg font-semibold text-white">現在の起動引数</h3>
+            <h3 className="text-lg font-semibold text-white">{t('launchArgs.currentArgs')}</h3>
           </div>
           <div className="bg-dark-900 rounded-lg p-3 font-mono text-sm select-text">
             <div className="text-gray-300 break-all">

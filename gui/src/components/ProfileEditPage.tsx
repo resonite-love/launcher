@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { open } from '@tauri-apps/api/shell';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   ArrowLeft,
   Save,
@@ -155,6 +156,7 @@ export interface BranchInfo {
 type TabType = 'info' | 'launch' | 'mods' | 'other';
 
 function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [profile, setProfile] = useState<ProfileConfig | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -244,10 +246,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   
 
   const tabs = [
-    { id: 'info' as TabType, label: 'プロファイル情報', icon: User },
-    { id: 'launch' as TabType, label: '起動オプション', icon: Terminal },
+    { id: 'info' as TabType, label: t('common.profile') + '情報', icon: User },
+    { id: 'launch' as TabType, label: t('profiles.editModal.launchArgs.title'), icon: Terminal },
     { id: 'mods' as TabType, label: 'MOD管理', icon: Package },
-    { id: 'other' as TabType, label: 'その他', icon: Settings },
+    { id: 'other' as TabType, label: t('common.settings'), icon: Settings },
   ];
 
   useEffect(() => {
@@ -266,7 +268,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       setDescription(profileConfig.description);
       setArgs([...profileConfig.args]);
     } catch (err) {
-      toast.error(`プロファイル設定の取得に失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: err }));
       onBack();
     } finally {
       setIsLoading(false);
@@ -286,10 +288,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       };
 
       await invoke<string>('update_profile_config', { profile: updatedProfile });
-      toast.success('プロファイル設定を保存しました');
+      toast.success(t('toasts.profileUpdated'));
       setProfile(updatedProfile);
     } catch (err) {
-      toast.error(`プロファイルの更新に失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: err }));
     } finally {
       setIsSaving(false);
     }
@@ -297,7 +299,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
   const handleDuplicate = async () => {
     if (!duplicateName.trim()) {
-      toast.error('プロファイル名を入力してください');
+      toast.error(t('profiles.createModal.nameLabel') + 'を入力してください');
       return;
     }
 
@@ -309,7 +311,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         newDescription: duplicateDescription.trim() || `${profile?.display_name || profileName}のコピー`
       });
       
-      toast.success(`プロファイル "${duplicateName}" を作成しました`);
+      toast.success(t('toasts.profileCreated', { name: duplicateName }));
       
       // プロファイル一覧を更新
       queryClient.invalidateQueries({ queryKey: ['profiles'] });
@@ -319,7 +321,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       setDuplicateName('');
       setDuplicateDescription('');
     } catch (err) {
-      toast.error(`プロファイルの複製に失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: err }));
     } finally {
       setIsDuplicating(false);
     }
@@ -378,7 +380,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       await loadModLoaderInfo();
       await loadProfile(); // 起動引数が更新される可能性がある
     } catch (err) {
-      toast.error(`MODローダーのインストールに失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: err }));
     } finally {
       setIsLoadingModLoader(false);
     }
@@ -428,7 +430,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         });
       }
     } catch (err) {
-      toast.error(`バージョン変更に失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: err }));
     }
   };
 
@@ -485,7 +487,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       }));
       
     } catch (err) {
-      toast.error(`バージョン情報の取得に失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: err }));
     } finally {
       setLoadingManualVersions(null);
     }
@@ -554,10 +556,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         repoUrl,
         version: version || null
       });
-      toast.success(`MOD "${result.name}" をインストールしました`);
+      toast.success(`MOD "${result.name}" を` + t('common.install') + 'しました');
       refetchInstalledMods();
     } catch (err) {
-      toast.error(`MODのインストールに失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: err }));
     } finally {
       setIsInstallingMod(null);
     }
@@ -577,7 +579,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
   const handleLaunch = () => {
     if (!hasGame) {
-      toast.error('ゲームがインストールされていません');
+      toast.error(t('home.launcher.notInstalled'));
       return;
     }
     launchMutation.mutate(profileName);
@@ -608,7 +610,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       setSelectedCustomModUrl(customRepoUrl.trim());
       setSelectedInstallVersion('');
     } catch (error) {
-      toast.error(`バージョン情報の取得に失敗しました: ${error}`);
+      toast.error(t('toasts.error', { message: error }));
     } finally {
       setIsInstallingMod(null);
     }
@@ -619,7 +621,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       await invoke('open_profile_folder', { profileName });
       toast.success('プロファイルフォルダを開きました');
     } catch (err) {
-      toast.error(`フォルダを開けませんでした: ${err}`);
+      toast.error(t('toasts.error', { message: err }));
     }
   };
 
@@ -631,7 +633,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       await loadModLoaderInfo();
       await loadProfile(); // 起動引数が更新される可能性がある
     } catch (err) {
-      toast.error(`MODローダーのアンインストールに失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: err }));
     } finally {
       setIsLoadingModLoader(false);
     }
@@ -658,7 +660,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       await loadProfileInfo();
       setShowGameUpdateModal(false);
     } catch (err) {
-      toast.error(`ゲームの更新に失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: err }));
     }
   };
   
@@ -681,7 +683,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       await loadModLoaderInfo();
       setShowGameInstallModal(false);
     } catch (err) {
-      toast.error(`ゲームのインストールに失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: err }));
     } finally {
       setIsInstallingGame(false);
     }
@@ -781,7 +783,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         onBack();
       }, 500);
     } catch (err) {
-      toast.error(`プロファイルの削除に失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: err }));
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirmModal(false);
@@ -834,7 +836,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           >
             <div className="flex items-center space-x-3 mb-6">
               <User className="w-6 h-6 text-resonite-blue" />
-              <h2 className="text-2xl font-bold text-white">プロファイル情報</h2>
+              <h2 className="text-2xl font-bold text-white">{t('common.profile')}情報</h2>
             </div>
 
             <div className="space-y-4">
@@ -856,7 +858,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  プロファイルID
+                  {t('common.profile')}ID
                 </label>
                 <input
                   type="text"
@@ -871,13 +873,13 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  説明
+                  {t('common.description')}
                 </label>
                 <input
                   type="text"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="プロファイルの説明を入力"
+                  placeholder={t('profiles.editModal.descriptionPlaceholder')}
                   className="input-primary w-full"
                 />
               </div>
@@ -904,12 +906,12 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center py-2 border-b border-dark-600/50">
-                    <span className="text-gray-400">ブランチ</span>
+                    <span className="text-gray-400">{t('common.branch')}</span>
                     <span className="text-white font-medium">{currentBranch}</span>
                   </div>
                   
                   <div className="flex justify-between items-center py-2 border-b border-dark-600/50">
-                    <span className="text-gray-400">現在のバージョン</span>
+                    <span className="text-gray-400">現在の{t('common.version')}</span>
                     <div className="flex items-center space-x-2">
                       <span className="text-white font-mono text-sm">
                         {currentGameVersion || '不明'}
@@ -935,13 +937,13 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                   )}
                   
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-400">状態</span>
+                    <span className="text-gray-400">{t('common.status')}</span>
                     <div className="flex items-center space-x-2">
-                      <span className="status-success">インストール済み</span>
+                      <span className="status-success">{t('profiles.installed')}</span>
                       {hasNewerGameVersion() && (
                         <span className="status-info text-xs flex items-center space-x-1">
                           <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span>
-                          <span>更新可能</span>
+                          <span>{t('profiles.updateAvailable')}</span>
                         </span>
                       )}
                     </div>
@@ -953,7 +955,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     <div className="flex items-start space-x-2">
                       <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                       <div className="text-sm">
-                        <p className="text-blue-300 font-medium mb-1">新しいバージョンが利用可能です</p>
+                        <p className="text-blue-300 font-medium mb-1">{t('profiles.newVersionAvailable')}</p>
                         <p className="text-blue-200">
                           「バージョン変更」から最新版への更新や特定バージョンへの変更が可能です。
                         </p>
@@ -1029,7 +1031,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           >
             <div className="flex items-center space-x-3 mb-6">
               <Terminal className="w-6 h-6 text-resonite-blue" />
-              <h2 className="text-2xl font-bold text-white">起動引数</h2>
+              <h2 className="text-2xl font-bold text-white">{t('profiles.editModal.launchArgs.title')}</h2>
             </div>
             
             {!hasGame ? (
@@ -1074,7 +1076,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 <div className="flex items-start space-x-3">
                   <Info className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-orange-400 font-medium mb-2">ゲームがインストールされていません</h4>
+                    <h4 className="text-orange-400 font-medium mb-2">{t('home.launcher.notInstalled')}</h4>
                     <p className="text-orange-200 text-sm">
                       MOD管理機能を使用するには、まずResoniteをインストールしてください。
                     </p>
@@ -1730,7 +1732,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           >
             <div className="flex items-center space-x-3 mb-6">
               <Settings className="w-6 h-6 text-resonite-blue" />
-              <h2 className="text-2xl font-bold text-white">その他の設定</h2>
+              <h2 className="text-2xl font-bold text-white">その他の{t('common.settings')}</h2>
             </div>
 
             {!hasGame ? (
