@@ -7,6 +7,26 @@
 
 ## [Unreleased]
 
+## [v1.4.6] - 2025-06-21
+
+### 🔧 技術的改善
+- **GitHub Actions大幅リファクタリング**: 標準的なTauriアプリリリース形式に変更
+  - 複雑なファイル検索・署名生成処理を削除し、tauri-actionに一任
+  - 標準的なTauriワークフローに準拠してメンテナンス性を向上
+  - 自動アップデート機能の信頼性を改善
+
+### 🚀 自動アップデート改善
+- **リリースプロセス最適化**:
+  - `tauri-apps/tauri-action@v0`による自動インストーラー生成
+  - updater JSONの自動生成と署名処理
+  - エラーが発生しにくいシンプルなワークフロー
+
+### 🛠️ メンテナンス
+- **コード品質向上**:
+  - 不要な複雑な処理を除去
+  - Tauriのベストプラクティスに従った実装
+  - 将来のTauriバージョンアップデートに対応しやすい構造
+
 ## [v1.4.5] - 2025-06-21
 
 ### 🔧 メンテナンス
@@ -611,7 +631,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.5...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.6...HEAD
+[v1.4.6]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.5...v1.4.6
 [v1.4.5]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.4...v1.4.5
 [v1.4.4]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.3...v1.4.4
 [v1.4.3]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.2...v1.4.3
