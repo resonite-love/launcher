@@ -4,6 +4,8 @@
 ![Version](https://img.shields.io/github/v/release/resonite-love/launcher)
 ![Downloads](https://img.shields.io/github/downloads/resonite-love/launcher/total)
 
+[English](./README.en.md) | **日本語**
+
 Resoniteのインストール、更新、プロファイル管理を行うためのコミュニティランチャー。
 
 ## ✨ 主な機能
