@@ -308,7 +308,15 @@
       "updateCheckFailed": "アップデート情報を取得できませんでした",
       "lastCheck": "最終チェック:",
       "versionPrefix": "v",
-      "sizeUnit": "MB"
+      "sizeUnit": "MB",
+      "autoUpdater": {
+        "title": "自動アップデーター",
+        "description": "アプリ内から直接アップデートをチェック・インストールできます"
+      },
+      "checkUpdates": "アップデートをチェック",
+      "installing": "インストール中",
+      "installUpdate": "アップデートをインストール",
+      "updateInstalled": "アップデートがインストールされました。アプリを再起動してください。"
     }
   },
   "firstRun": {

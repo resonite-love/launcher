@@ -308,7 +308,15 @@
       "updateCheckFailed": "Failed to fetch update information",
       "lastCheck": "Last check:",
       "versionPrefix": "v",
-      "sizeUnit": "MB"
+      "sizeUnit": "MB",
+      "autoUpdater": {
+        "title": "Auto Updater",
+        "description": "Check and install updates directly from within the app"
+      },
+      "checkUpdates": "Check for Updates",
+      "installing": "Installing",
+      "installUpdate": "Install Update",
+      "updateInstalled": "Update installed successfully. Please restart the application."
     }
   },
   "firstRun": {
