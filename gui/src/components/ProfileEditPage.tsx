@@ -30,6 +30,7 @@ import {
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import ModRiskWarningModal from './ModRiskWarningModal';
+import MultiFileInstallModal from './MultiFileInstallModal';
 import GameVersionSelector from './GameVersionSelector';
 import GameUpdateModal from './GameUpdateModal';
 import GameInstallModal from './GameInstallModal';
@@ -50,11 +51,15 @@ import {
   useUnmanagedMods,
   useAddUnmanagedMod,
   useAddAllUnmanagedMods,
+  useCheckMultiFileInstall,
+  useInstallMultipleFiles,
   useYtDlpStatus,
   useUpdateYtDlp,
   useLaunchResonite,
   useMigrateInstalledMods,
-  useSteamCredentials
+  useSteamCredentials,
+  MultiFileInstallRequest,
+  FileInstallChoice
 } from '../hooks/useQueries';
 
 interface ProfileConfig {
@@ -217,6 +222,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const upgradeModMutation = useUpgradeMod();
   const addUnmanagedModMutation = useAddUnmanagedMod();
   const addAllUnmanagedModsMutation = useAddAllUnmanagedMods();
+  
+  // 複数ファイルインストール用のフック
+  const checkMultiFileInstallMutation = useCheckMultiFileInstall();
+  const installMultipleFilesMutation = useInstallMultipleFiles();
+  
+  // 複数ファイルインストール用の状態
+  const [multiFileInstallRequest, setMultiFileInstallRequest] = useState<MultiFileInstallRequest | null>(null);
+  const [showMultiFileModal, setShowMultiFileModal] = useState(false);
   
   // yt-dlp管理用のクエリ
   const { data: ytDlpInfo, isLoading: ytDlpLoading, refetch: refetchYtDlp } = useYtDlpStatus(profileName);
@@ -596,9 +609,23 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       return;
     }
 
-    // GitHubからバージョン情報を取得
     try {
       setIsInstallingMod(customRepoUrl);
+      
+      // 複数ファイルが必要かをチェック
+      const multiFileRequest = await checkMultiFileInstallMutation.mutateAsync({
+        repoUrl: customRepoUrl.trim()
+      });
+      
+      if (multiFileRequest) {
+        // 複数ファイルの場合、選択モーダルを表示
+        setMultiFileInstallRequest(multiFileRequest);
+        setShowMultiFileModal(true);
+        setIsInstallingMod(null);
+        return;
+      }
+      
+      // 単一ファイルの場合、従来のフローを継続
       const versions = await invoke<any[]>('get_github_releases', { repoUrl: customRepoUrl.trim() });
       
       if (versions.length === 0) {
@@ -613,6 +640,44 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       toast.error(t('toasts.error', { message: error }));
     } finally {
       setIsInstallingMod(null);
+    }
+  };
+
+  const handleMultiFileInstall = async (choices: FileInstallChoice[], version: string) => {
+    if (!customRepoUrl.trim()) return;
+    
+    try {
+      await installMultipleFilesMutation.mutateAsync({
+        profileName,
+        repoUrl: customRepoUrl.trim(),
+        version,
+        choices
+      });
+      
+      // インストール成功後、状態をリセット
+      setCustomRepoUrl('');
+      setMultiFileInstallRequest(null);
+      setShowMultiFileModal(false);
+    } catch (error) {
+      // エラーハンドリングはuseMutationで処理される
+    }
+  };
+
+  const handleMultiFileVersionChange = async (version: string) => {
+    if (!customRepoUrl.trim()) return;
+    
+    try {
+      // 新しいバージョンで複数ファイル情報を再取得
+      const multiFileRequest = await checkMultiFileInstallMutation.mutateAsync({
+        repoUrl: customRepoUrl.trim(),
+        version
+      });
+      
+      if (multiFileRequest) {
+        setMultiFileInstallRequest(multiFileRequest);
+      }
+    } catch (error) {
+      // エラーハンドリングはuseMutationで処理される
     }
   };
 
@@ -2298,6 +2363,18 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           </motion.div>
         </div>
       )}
+      
+      {/* 複数ファイルインストールモーダル */}
+      <MultiFileInstallModal
+        isOpen={showMultiFileModal}
+        onClose={() => {
+          setShowMultiFileModal(false);
+          setMultiFileInstallRequest(null);
+        }}
+        onConfirm={handleMultiFileInstall}
+        onVersionChange={handleMultiFileVersionChange}
+        installRequest={multiFileInstallRequest}
+      />
       
       {/* 削除確認モーダル */}
       <ProfileDeleteConfirmModal

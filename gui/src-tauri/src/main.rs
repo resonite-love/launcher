@@ -11,7 +11,7 @@ use reso_launcher_lib::{
     mod_loader::ModLoader,
     mod_loader_type::ModLoaderType,
     monkey_loader::MonkeyLoader,
-    mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease, UnmanagedMod},
+    mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease, UnmanagedMod, MultiFileInstallRequest, FileInstallChoice},
     utils,
 };
 use std::process::Command;
@@ -1125,6 +1125,52 @@ async fn install_mod_from_github(
         .map_err(|e| format!("Failed to install mod: {}", e))
 }
 
+// Check if a GitHub repository requires multi-file installation
+#[tauri::command]
+async fn check_multi_file_install(
+    repo_url: String,
+    version: Option<String>,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Option<MultiFileInstallRequest>, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir("default")
+    }; // MutexGuard is dropped here
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.check_multi_file_install(&repo_url, version.as_deref()).await
+        .map_err(|e| format!("Failed to check multi-file install: {}", e))
+}
+
+// Install multiple files with user choices
+#[tauri::command]
+async fn install_multiple_files(
+    profile_name: String,
+    repo_url: String,
+    version: Option<String>,
+    choices: Vec<FileInstallChoice>,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<InstalledMod>, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    }; // MutexGuard is dropped here
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.install_multiple_files(&repo_url, version.as_deref(), choices).await
+        .map_err(|e| format!("Failed to install multiple files: {}", e))
+}
+
 // Uninstall a MOD
 #[tauri::command]
 async fn uninstall_mod(
@@ -1816,6 +1862,8 @@ fn main() {
             get_installed_mods,
             install_mod_from_cache,
             install_mod_from_github,
+            check_multi_file_install,
+            install_multiple_files,
             uninstall_mod,
             disable_mod,
             enable_mod,

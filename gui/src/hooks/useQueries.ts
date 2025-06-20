@@ -466,6 +466,89 @@ export const useUninstallMod = () => {
   });
 };
 
+export interface MultiFileInstallRequest {
+  assets: GitHubAsset[];
+  available_destinations: FileDestination[];
+  releases: GitHubRelease[];
+  selected_version: string;
+}
+
+export interface FileDestination {
+  path: string;
+  description: string;
+}
+
+export interface GitHubAsset {
+  name: string;
+  browser_download_url: string;
+  content_type?: string;
+  size?: number;
+  download_count?: number;
+}
+
+export interface GitHubRelease {
+  tag_name: string;
+  name?: string;
+  body?: string;
+  published_at?: string;
+  prerelease?: boolean;
+  draft?: boolean;
+  assets?: GitHubAsset[];
+}
+
+export interface FileInstallChoice {
+  asset_name: string;
+  destination_path: string;
+}
+
+export const useCheckMultiFileInstall = () => {
+  return useMutation({
+    mutationFn: async ({ repoUrl, version }: { repoUrl: string; version?: string }) => {
+      return await invoke<MultiFileInstallRequest | null>('check_multi_file_install', { 
+        repoUrl, 
+        version 
+      });
+    },
+    onError: (error) => {
+      toast.error(`複数ファイルチェックに失敗しました: ${error}`);
+    },
+  });
+};
+
+export const useInstallMultipleFiles = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ 
+      profileName, 
+      repoUrl, 
+      version, 
+      choices 
+    }: { 
+      profileName: string; 
+      repoUrl: string; 
+      version?: string; 
+      choices: FileInstallChoice[] 
+    }) => {
+      return await invoke<InstalledMod[]>('install_multiple_files', { 
+        profileName, 
+        repoUrl, 
+        version, 
+        choices 
+      });
+    },
+    onSuccess: (result, variables) => {
+      const count = result.length;
+      toast.success(`${count}個のファイルをインストールしました`);
+      queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(variables.profileName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unmanagedMods(variables.profileName) });
+    },
+    onError: (error) => {
+      toast.error(`複数ファイルのインストールに失敗しました: ${error}`);
+    },
+  });
+};
+
 export const useDisableMod = () => {
   const queryClient = useQueryClient();
   

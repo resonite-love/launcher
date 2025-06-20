@@ -109,6 +109,29 @@ pub struct GitHubAsset {
     pub download_count: Option<u64>,
 }
 
+/// ファイル配置先の選択肢
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FileDestination {
+    pub path: String,
+    pub description: String,
+}
+
+/// 複数ファイルの配置選択要求
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct MultiFileInstallRequest {
+    pub assets: Vec<GitHubAsset>,
+    pub available_destinations: Vec<FileDestination>,
+    pub releases: Vec<GitHubRelease>,
+    pub selected_version: String,
+}
+
+/// ユーザーのファイル配置選択
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FileInstallChoice {
+    pub asset_name: String,
+    pub destination_path: String,
+}
+
 /// MODマニフェストの構造
 #[derive(Debug, Deserialize)]
 struct ModManifest {
@@ -364,6 +387,178 @@ impl ModManager {
         self.add_to_installed_mods(&installed_mod)?;
         
         Ok(installed_mod)
+    }
+
+    /// GitHubリリースの複数ファイルをチェックし、選択が必要かどうかを判定
+    pub async fn check_multi_file_install(&self, repo_url: &str, version: Option<&str>) -> Result<Option<MultiFileInstallRequest>, Box<dyn Error + Send + Sync>> {
+        let api_url = self.github_repo_to_api_url(repo_url)?;
+        
+        // 全てのリリースを取得
+        let all_releases_url = format!("{}/releases", api_url);
+        let all_releases_response = self.client
+            .get(&all_releases_url)
+            .header("User-Agent", "resonite-tools")
+            .send()
+            .await?;
+            
+        if !all_releases_response.status().is_success() {
+            return Err(format!("GitHub API request failed: {}", all_releases_response.status()).into());
+        }
+        
+        let all_releases_text = all_releases_response.text().await?;
+        let all_releases: Vec<GitHubRelease> = serde_json::from_str(&all_releases_text)
+            .map_err(|e| format!("Failed to parse GitHub releases JSON: {}. Response: {}", e, &all_releases_text[..200.min(all_releases_text.len())]))?;
+        
+        // 指定されたバージョンまたは最新リリースを選択
+        let selected_release = if let Some(version) = version {
+            all_releases.iter()
+                .find(|r| r.tag_name == version)
+                .ok_or(format!("Version {} not found", version))?
+        } else {
+            all_releases.first()
+                .ok_or("No releases found")?
+        };
+        
+        let selected_version = selected_release.tag_name.clone();
+        
+        // ソースコードとアーカイブファイルを除外したファイルを抽出
+        let installable_assets: Vec<GitHubAsset> = selected_release.assets.iter()
+            .filter(|asset| {
+                let name_lower = asset.name.to_lowercase();
+                // ソースコード関連ファイルを除外
+                !name_lower.contains("source") &&
+                !name_lower.contains("src") &&
+                // 一般的なアーカイブファイルを除外
+                !name_lower.ends_with(".zip") &&
+                !name_lower.ends_with(".tar.gz") &&
+                !name_lower.ends_with(".rar") &&
+                !name_lower.ends_with(".7z") &&
+                // GitHubのデフォルトソースアーカイブを除外
+                !name_lower.starts_with("source-code")
+            })
+            .cloned()
+            .collect();
+        
+        // 2つ以上のファイルがある場合、選択が必要
+        if installable_assets.len() >= 2 {
+            let available_destinations = vec![
+                FileDestination {
+                    path: "rml_mods".to_string(),
+                    description: "ResoniteModLoader / rml_mods フォルダ".to_string(),
+                },
+                FileDestination {
+                    path: "Mods".to_string(),
+                    description: "MonkeyLoader / Mods フォルダ".to_string(),
+                },
+                FileDestination {
+                    path: "Libraries".to_string(),
+                    description: "Resonite / Libraries フォルダ".to_string(),
+                },
+                FileDestination {
+                    path: "RuntimeData".to_string(),
+                    description: "Resonite / RuntimeData フォルダ".to_string(),
+                },
+                FileDestination {
+                    path: "skip".to_string(),
+                    description: "インストールしない".to_string(),
+                },
+            ];
+            
+            Ok(Some(MultiFileInstallRequest {
+                assets: installable_assets,
+                available_destinations,
+                releases: all_releases,
+                selected_version,
+            }))
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// 複数ファイルをユーザーの選択に基づいてインストール
+    pub async fn install_multiple_files(&self, repo_url: &str, version: Option<&str>, choices: Vec<FileInstallChoice>) -> Result<Vec<InstalledMod>, Box<dyn Error + Send + Sync>> {
+        let api_url = self.github_repo_to_api_url(repo_url)?;
+        
+        // リリース情報を再取得
+        let release_url = if let Some(version) = version {
+            format!("{}/releases/tags/{}", api_url, version)
+        } else {
+            format!("{}/releases/latest", api_url)
+        };
+        
+        let response = self.client
+            .get(&release_url)
+            .header("User-Agent", "resonite-tools")
+            .send()
+            .await?;
+            
+        let response_text = response.text().await?;
+        let release: GitHubRelease = serde_json::from_str(&response_text)?;
+        
+        let mut installed_mods = Vec::new();
+        
+        for choice in choices {
+            // スキップが選択された場合は何もしない
+            if choice.destination_path == "skip" {
+                continue;
+            }
+            
+            // 選択されたアセットを見つける
+            let asset = release.assets.iter()
+                .find(|a| a.name == choice.asset_name)
+                .ok_or(format!("Asset {} not found", choice.asset_name))?;
+            
+            // インストール先ディレクトリを決定
+            let install_dir = match choice.destination_path.as_str() {
+                "rml_mods" => self.mods_dir.clone(),
+                "Mods" => self.profile_dir.join("Game").join("MonkeyLoader").join("Mods"),
+                "Libraries" => self.profile_dir.join("Game").join("Resonite_Data").join("Managed"),
+                "RuntimeData" => self.profile_dir.join("Game").join("RuntimeData"),
+                _ => return Err(format!("Invalid destination: {}", choice.destination_path).into()),
+            };
+            
+            // ファイル形式を判定（拡張子から）
+            let file_format = if let Some(ext) = std::path::Path::new(&asset.name).extension() {
+                ext.to_string_lossy().to_string()
+            } else {
+                "unknown".to_string()
+            };
+            
+            // インストールディレクトリを作成
+            fs::create_dir_all(&install_dir)?;
+            
+            // ファイルをダウンロード
+            let file_response = self.client.get(&asset.browser_download_url).send().await?;
+            let file_content = file_response.bytes().await?;
+            
+            let file_path = install_dir.join(&asset.name);
+            fs::write(&file_path, file_content)?;
+            
+            // MODローダータイプを判定
+            let mod_loader_type = if choice.destination_path == "Mods" {
+                Some("MonkeyLoader".to_string())
+            } else {
+                None
+            };
+            
+            let installed_mod = InstalledMod {
+                name: asset.name.trim_end_matches(&format!(".{}", file_format)).to_string(),
+                description: release.body.clone().unwrap_or_default(),
+                source_location: repo_url.to_string(),
+                installed_version: release.tag_name.clone(),
+                installed_date: chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+                dll_path: file_path,
+                mod_loader_type,
+                file_format: Some(file_format.to_string()),
+                enabled: Some(true),
+            };
+            
+            // インストール済みMOD一覧に追加
+            self.add_to_installed_mods(&installed_mod)?;
+            installed_mods.push(installed_mod);
+        }
+        
+        Ok(installed_mods)
     }
 
     /// GitHubリポジトリからMODをインストール（フォールバック）
