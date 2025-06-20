@@ -1,0 +1,341 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "update": "Update",
+    "install": "Install",
+    "installing": "Installing...",
+    "play": "Play",
+    "launch": "Launch",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "close": "Close",
+    "apply": "Apply",
+    "none": "None",
+    "ready": "Ready",
+    "starting": "Starting...",
+    "settings": "Settings",
+    "version": "Version",
+    "description": "Description",
+    "profile": "Profile",
+    "branch": "Branch",
+    "status": "Status",
+    "download": "Download"
+  },
+  "app": {
+    "initializing": "Initializing application...",
+    "depotDownloaderWarning": "Warning: DepotDownloader not found. To install or update the game, please place DepotDownloader.exe in the application directory."
+  },
+  "nav": {
+    "home": "Home",
+    "profiles": "Profile Management",
+    "settings": "Settings"
+  },
+  "home": {
+    "updateInfo": {
+      "title": "Update Information",
+      "loading": "Fetching update information...",
+      "loadingDescription": "Loading latest Resonite information",
+      "noInfo": "No Update Information",
+      "noInfoDescription": "No update information available at this time",
+      "refreshHint": "Press the refresh button to get the latest information",
+      "openInSteam": "Open in Steam"
+    },
+    "launcher": {
+      "profileLabel": "Profile:",
+      "noProfiles": "No profiles",
+      "selectProfile": "Select a profile...",
+      "branchLabel": "Branch:",
+      "versionLabel": "Version:",
+      "statusLabel": "Status:",
+      "notInstalled": "Not Installed",
+      "notInstalledWarning": "⚠️ This profile does not have the game installed. Please install it from the Profile Management tab.",
+      "createProfileHint": "📝 Please create a new profile in the Profile Management tab."
+    }
+  },
+  "profiles": {
+    "title": "Profile List",
+    "newProfile": "New Profile",
+    "refresh": "Refresh",
+    "noProfiles": "No profiles",
+    "createHint": "Please create a new one",
+    "noDescription": "No description",
+    "installed": "✓ Installed",
+    "notInstalled": "Not Installed",
+    "updateAvailable": "Update Available",
+    "launching": "Launching",
+    "installGame": "Install Game",
+    "newVersionAvailable": "New version available",
+    "createModal": {
+      "title": "Create New Profile",
+      "nameLabel": "Profile Name *",
+      "namePlaceholder": "e.g., Main Profile",
+      "descriptionLabel": "Description (Optional)",
+      "descriptionPlaceholder": "e.g., Daily use profile",
+      "installGame": "Also install the game",
+      "installModLoader": "Also install mod loader",
+      "steamCredentialWarning": "⚠️ Steam credentials are not configured. Game installation may fail.",
+      "creating": "Creating...",
+      "createProfile": "Create Profile",
+      "createAndInstall": "Create Profile & Install Game",
+      "createAndInstallMonkey": "Create Profile & Install Game & MonkeyLoader",
+      "createAndInstallRML": "Create Profile & Install Game & RML"
+    },
+    "editModal": {
+      "title": "Edit Profile Settings",
+      "nameLabel": "Profile Name",
+      "nameHint": "Profile name cannot be changed",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Enter profile description",
+      "launchArgs": {
+        "title": "Launch Arguments",
+        "addPlaceholder": "Add new argument (e.g., -Screen)",
+        "add": "Add",
+        "availableVars": "Available variables:",
+        "profileDir": "%PROFILE_DIR% - Profile directory",
+        "gameDir": "%GAME_DIR% - Game directory",
+        "dataDir": "%DATA_DIR% - Data directory"
+      }
+    },
+    "installModal": {
+      "title": "Game Installation",
+      "profileLabel": "Target Profile",
+      "branchSelection": "Branch Selection",
+      "release": "Release",
+      "releaseDescription": "Stable version (Recommended)",
+      "prerelease": "Pre-release",
+      "prereleaseDescription": "Development version",
+      "about": {
+        "title": "About Installation",
+        "timeWarning": "• Installation may take some time",
+        "steamRequired": "• Steam account may be required",
+        "modLoaderHint": "• You can add a mod loader after installation"
+      },
+      "startInstall": "Start Installation"
+    },
+    "updateModal": {
+      "title": "Game Update",
+      "profileInfo": "Profile Information",
+      "profileLabel": "Profile:",
+      "branchLabel": "Branch:",
+      "currentVersion": "Current Version:",
+      "updateMethod": "Update Method",
+      "latestVersion": "Update to Latest",
+      "latestVersionDescription": "Update to the latest version of {{branch}} branch",
+      "specificVersion": "Specify Version",
+      "specificVersionDescription": "Upgrade/downgrade by specifying manifest ID",
+      "notes": {
+        "title": "Notes",
+        "noLaunch": "• Do not launch the game during update",
+        "compatibility": "• Compatibility issues may occur when downgrading",
+        "backup": "• Profile data backup is recommended"
+      },
+      "updateButton": "Update"
+    },
+    "deleteModal": {
+      "title": "Delete Profile",
+      "warning": "Warning: This action cannot be undone",
+      "description": "Profile \"{{profileName}}\" and all its data (game files, mods, settings) will be permanently deleted.",
+      "profileToDelete": "Profile to be deleted:",
+      "deleting": "Deleting...",
+      "deleteButton": "Delete",
+      "note": "※ Cannot be restored after deletion. Please backup any necessary data beforehand."
+    }
+  },
+  "settings": {
+    "steam": {
+      "title": "Steam Settings",
+      "username": "Username:",
+      "configured": "Steam credentials configured",
+      "notConfigured": "Steam setup required",
+      "requiredForInstall": "Steam account is required for game installation and updates",
+      "about": {
+        "title": "💡 About Steam Settings",
+        "downloadRequired": "• Steam account is required for game downloads",
+        "encrypted": "• Credentials are encrypted and stored locally",
+        "twoFactor": "• If 2FA is enabled, authentication code is required on first login",
+        "emptyPassword": "• Password can be saved empty (enter manually during authentication)"
+      },
+      "credentialModal": {
+        "title": "Steam Credential Settings",
+        "description": "🔒 Credentials are encrypted and stored locally, automatically used for game installation and updates",
+        "usernameLabel": "Steam Username *",
+        "passwordLabel": "Steam Password",
+        "usernameRequired": "Please enter Steam username"
+      }
+    },
+    "app": {
+      "title": "Application Settings",
+      "checkingUpdate": "Checking for updates...",
+      "updateAvailable": "New version available!",
+      "currentVersion": "Current version:",
+      "latestVersion": "Latest version:",
+      "changelog": "Changelog:",
+      "downloadLabel": "Download:",
+      "releasePage": "Release Page",
+      "upToDate": "You are using the latest version",
+      "recheck": "Recheck",
+      "updateCheckFailed": "Failed to fetch update information",
+      "lastCheck": "Last check:"
+    }
+  },
+  "firstRun": {
+    "welcome": {
+      "title": "Welcome",
+      "heading": "Welcome to RESO Launcher!",
+      "description": "Let's start the initial setup.",
+      "setupSteps": "We'll download necessary tools and configure Steam settings.",
+      "startSetup": "Start Setup"
+    },
+    "depotDownloader": {
+      "title": "DepotDownloader",
+      "description": "Download DepotDownloader required for Resonite installation.",
+      "githubInfo": "Latest version will be downloaded automatically from GitHub.",
+      "downloadComplete": "Download Complete",
+      "downloading": "Downloading...",
+      "startDownload": "Start Download"
+    },
+    "steam": {
+      "title": "Steam Settings",
+      "description": "Configure Steam account information (optional)",
+      "credentialTitle": "About Steam Credentials",
+      "autoLogin": "Saving Steam account information allows automatic login during game downloads.",
+      "encrypted": "Information is encrypted and stored locally, never sent externally.",
+      "subAccountRecommended": "Using a sub-account different from your main account is recommended.",
+      "saveCredentials": "Save Credentials",
+      "settingUp": "Setting up..."
+    },
+    "complete": {
+      "title": "Complete",
+      "setupComplete": "Setup Complete!",
+      "description": "Initial setup has been completed.",
+      "readyToUse": "RESO Launcher is ready to use.",
+      "nextSteps": {
+        "title": "Next Steps",
+        "createProfile": "• Create a profile",
+        "downloadGame": "• Download Resonite",
+        "manageMods": "• Manage mods"
+      },
+      "finish": "Finish Setup"
+    }
+  },
+  "gameVersion": {
+    "selectVersion": "Version Selection (Optional)",
+    "loading": "Loading...",
+    "fetchFailed": "Failed to fetch version information",
+    "useLatest": "Use Latest (Recommended)",
+    "specificSelected": "Specific version selected",
+    "selectedVersion": "Selected version:",
+    "fixedVersionWarning": "Will be installed and fixed to this version. No automatic updates to latest version.",
+    "fixedVersionInfo": "Selecting a specific version will lock to that version.",
+    "recommendLatest": "We recommend selecting \"Use Latest\" normally."
+  },
+  "modLoader": {
+    "riskWarning": {
+      "title": "Mod Loader Installation",
+      "importantWarning": "Important Warning",
+      "thirdPartyCode": "Installing a mod loader allows third-party code to run in Resonite.",
+      "risks": {
+        "title": "Please understand the following risks:",
+        "unstable": "• Mods may make the game unstable",
+        "security": "• Personal or account information could be stolen by malicious mods",
+        "compatibility": "• Mods may stop working after game updates"
+      },
+      "recommendations": {
+        "title": "Recommendations",
+        "trustedSource": "• Only install mods from trusted sources",
+        "ownRisk": "• Use mods at your own risk",
+        "backup": "• Regularly backup your profiles",
+        "removeIfIssue": "• Remove the mod loader if issues occur"
+      },
+      "agreement": "Do you understand the above risks and agree to use the mod loader at your own risk?",
+      "understandAndInstall": "I Understand and Install"
+    },
+    "versionSelector": {
+      "selectVersion": "Select Version",
+      "title": "{{modName}} - Version Selection",
+      "installed": "Installed",
+      "prerelease": "Pre-release",
+      "noVersions": "No versions available"
+    }
+  },
+  "launchArgs": {
+    "categories": {
+      "hardware": "Hardware/VR",
+      "network": "Network",
+      "interface": "Interface",
+      "paths": "Path Settings",
+      "graphics": "Graphics",
+      "debug": "Debug/Advanced"
+    },
+    "all": "All",
+    "custom": {
+      "title": "Custom Arguments",
+      "description": "Manually add arguments not in presets or requiring special configuration",
+      "placeholder": "e.g., -CustomArgument value",
+      "add": "Add",
+      "noCustomArgs": "No custom arguments"
+    },
+    "currentArgs": "Current Launch Arguments",
+    "presets": {
+      "forceNoVR": "Disable VR mode",
+      "screen": "Launch in windowed mode",
+      "ctaa": "Enable CTAA (Cinematic Temporal Anti-Aliasing)",
+      "skipIntroTutorial": "Skip intro tutorial",
+      "dataPath": "Specify data path",
+      "cachePath": "Specify cache path",
+      "deleteUnsyncedCloudRecords": "Delete unsynced cloud records",
+      "invisible": "Start invisible in home space",
+      "forceCacheUpdate": "Force cache update",
+      "doNotAutoLoadHome": "Disable auto-loading home space",
+      "join": "Auto-join specified session URL",
+      "open": "Auto-open content from specified URL",
+      "noUI": "Launch with hidden UI",
+      "kiosk": "Kiosk mode (hide exit button)",
+      "logPath": "Specify log file save location",
+      "resetDash": "Reset dash menu",
+      "resetUserspace": "Reset userspace",
+      "forceLANOnly": "LAN only mode (disable internet connection)",
+      "forceRelay": "Force relay connection",
+      "forceNoRelay": "Disable relay connection",
+      "loadAssembly": "Load specified assembly on startup",
+      "backgroundWorkers": "Specify number of background workers",
+      "priorityWorkers": "Specify number of priority workers",
+      "generatePreCache": "Generate pre-cache",
+      "dontGeneratePreCache": "Disable pre-cache generation",
+      "sharedDataPath": "Specify shared data path",
+      "forceExperience": "Force specific startup experience",
+      "forceCulture": "Force language/region settings",
+      "forceFullGC": "Enable full garbage collection",
+      "forceIncrementalGC": "Enable incremental garbage collection",
+      "disableGC": "Disable garbage collection",
+      "gc": "Set specific garbage collection mode"
+    }
+  },
+  "titlebar": {
+    "poweredBy": "RESO Launcher powered by resonite.love"
+  },
+  "toasts": {
+    "profileCreated": "Profile \"{{name}}\" created",
+    "profileDeleted": "Profile \"{{name}}\" deleted",
+    "profileUpdated": "Profile settings updated",
+    "gameInstallStarted": "Game installation started",
+    "gameInstallCompleted": "Game installation completed",
+    "gameUpdateStarted": "Game update started",
+    "gameUpdateCompleted": "Game update completed",
+    "modInstallStarted": "Mod loader installation started",
+    "modInstallCompleted": "Mod loader installation completed",
+    "steamCredentialsSaved": "Steam credentials saved",
+    "steamCredentialsDeleted": "Steam credentials deleted",
+    "error": "Error occurred: {{message}}",
+    "gameLaunched": "Game launched",
+    "gameLaunchFailed": "Failed to launch game"
+  }
+}

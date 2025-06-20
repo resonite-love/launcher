@@ -1,0 +1,341 @@
+{
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "retry": "再試行",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "update": "更新",
+    "install": "インストール",
+    "installing": "インストール中...",
+    "play": "Play",
+    "launch": "起動",
+    "back": "戻る",
+    "next": "次へ",
+    "finish": "完了",
+    "close": "閉じる",
+    "apply": "適用",
+    "none": "なし",
+    "ready": "Ready",
+    "starting": "Starting...",
+    "settings": "設定",
+    "version": "バージョン",
+    "description": "説明",
+    "profile": "プロファイル",
+    "branch": "ブランチ",
+    "status": "状態",
+    "download": "ダウンロード"
+  },
+  "app": {
+    "initializing": "アプリケーションを初期化中...",
+    "depotDownloaderWarning": "警告: DepotDownloader が見つかりません。ゲームのインストール・更新を行うには、アプリケーションディレクトリに DepotDownloader.exe を配置してください。"
+  },
+  "nav": {
+    "home": "ホーム",
+    "profiles": "プロファイル管理",
+    "settings": "設定"
+  },
+  "home": {
+    "updateInfo": {
+      "title": "アップデート情報",
+      "loading": "アップデート情報を取得中...",
+      "loadingDescription": "Resoniteの最新情報を読み込んでいます",
+      "noInfo": "アップデート情報なし",
+      "noInfoDescription": "現在表示可能なアップデート情報がありません",
+      "refreshHint": "更新ボタンを押して最新情報を取得してください",
+      "openInSteam": "Steam で開く"
+    },
+    "launcher": {
+      "profileLabel": "プロファイル:",
+      "noProfiles": "プロファイルがありません",
+      "selectProfile": "プロファイルを選択...",
+      "branchLabel": "ブランチ:",
+      "versionLabel": "バージョン:",
+      "statusLabel": "状態:",
+      "notInstalled": "未インストール",
+      "notInstalledWarning": "⚠️ このプロファイルにはゲームがインストールされていません。プロファイル管理タブからインストールしてください。",
+      "createProfileHint": "📝 プロファイル管理タブで新しいプロファイルを作成してください。"
+    }
+  },
+  "profiles": {
+    "title": "プロファイル一覧",
+    "newProfile": "新規作成",
+    "refresh": "更新",
+    "noProfiles": "プロファイルがありません",
+    "createHint": "新規作成してください",
+    "noDescription": "説明なし",
+    "installed": "✓ インストール済",
+    "notInstalled": "未インストール",
+    "updateAvailable": "更新可能",
+    "launching": "起動",
+    "installGame": "ゲームをインストール",
+    "newVersionAvailable": "新しいバージョンが利用可能です",
+    "createModal": {
+      "title": "新規プロファイル作成",
+      "nameLabel": "プロファイル名 *",
+      "namePlaceholder": "例: メインプロファイル",
+      "descriptionLabel": "説明（オプション）",
+      "descriptionPlaceholder": "例: 日常使用のプロファイル",
+      "installGame": "ゲームも同時にインストールする",
+      "installModLoader": "MODローダーもインストールする",
+      "steamCredentialWarning": "⚠️ Steamクレデンシャルが設定されていません。ゲームのインストールが失敗する可能性があります。",
+      "creating": "作成中...",
+      "createProfile": "プロファイル作成",
+      "createAndInstall": "プロファイル作成＆ゲームインストール",
+      "createAndInstallMonkey": "プロファイル作成＆ゲーム＆MonkeyLoaderインストール",
+      "createAndInstallRML": "プロファイル作成＆ゲーム＆RMLインストール"
+    },
+    "editModal": {
+      "title": "プロファイル設定編集",
+      "nameLabel": "プロファイル名",
+      "nameHint": "プロファイル名は変更できません",
+      "descriptionLabel": "説明",
+      "descriptionPlaceholder": "プロファイルの説明を入力",
+      "launchArgs": {
+        "title": "起動引数",
+        "addPlaceholder": "新しい引数を追加（例: -Screen）",
+        "add": "追加",
+        "availableVars": "使用可能な変数:",
+        "profileDir": "%PROFILE_DIR% - プロファイルディレクトリ",
+        "gameDir": "%GAME_DIR% - ゲームディレクトリ",
+        "dataDir": "%DATA_DIR% - データディレクトリ"
+      }
+    },
+    "installModal": {
+      "title": "ゲームインストール",
+      "profileLabel": "インストール先プロファイル",
+      "branchSelection": "ブランチ選択",
+      "release": "リリース版",
+      "releaseDescription": "安定版（推奨）",
+      "prerelease": "プレリリース版",
+      "prereleaseDescription": "開発版",
+      "about": {
+        "title": "インストールについて",
+        "timeWarning": "• インストールには時間がかかる場合があります",
+        "steamRequired": "• Steamアカウントが必要な場合があります",
+        "modLoaderHint": "• インストール後、MODローダーも追加できます"
+      },
+      "startInstall": "インストール開始"
+    },
+    "updateModal": {
+      "title": "ゲームアップデート",
+      "profileInfo": "プロファイル情報",
+      "profileLabel": "プロファイル:",
+      "branchLabel": "ブランチ:",
+      "currentVersion": "現在のバージョン:",
+      "updateMethod": "アップデート方法",
+      "latestVersion": "最新版にアップデート",
+      "latestVersionDescription": "{{branch}}ブランチの最新バージョンにアップデートします",
+      "specificVersion": "特定バージョンを指定",
+      "specificVersionDescription": "マニフェストIDを指定してアップグレード/ダウングレードします",
+      "notes": {
+        "title": "注意事項",
+        "noLaunch": "• アップデート中はゲームを起動しないでください",
+        "compatibility": "• ダウングレード時は互換性の問題が発生する可能性があります",
+        "backup": "• プロファイルデータのバックアップを推奨します"
+      },
+      "updateButton": "アップデート"
+    },
+    "deleteModal": {
+      "title": "プロファイルの削除",
+      "warning": "警告: この操作は取り消せません",
+      "description": "プロファイル「{{profileName}}」とその全てのデータ（ゲームファイル、MOD、設定）が完全に削除されます。",
+      "profileToDelete": "削除されるプロファイル:",
+      "deleting": "削除中...",
+      "deleteButton": "削除する",
+      "note": "※ 削除後は復元できません。必要なデータは事前にバックアップしてください。"
+    }
+  },
+  "settings": {
+    "steam": {
+      "title": "Steam設定",
+      "username": "ユーザー名:",
+      "configured": "Steamクレデンシャルが設定されています",
+      "notConfigured": "Steam設定が必要",
+      "requiredForInstall": "ゲームのインストール・更新にはSteamアカウントが必要です",
+      "about": {
+        "title": "💡 Steam設定について",
+        "downloadRequired": "• Steamアカウントはゲームのダウンロードに必要です",
+        "encrypted": "• 認証情報はローカルに暗号化して保存されます",
+        "twoFactor": "• 2段階認証が有効な場合、初回ログイン時に認証コードが必要です",
+        "emptyPassword": "• パスワードは空欄でも保存可能（手動認証時に入力）"
+      },
+      "credentialModal": {
+        "title": "Steamクレデンシャル設定",
+        "description": "🔒 認証情報はローカルに暗号化保存され、ゲームのインストール・更新時に自動使用されます",
+        "usernameLabel": "Steamユーザー名 *",
+        "passwordLabel": "Steamパスワード",
+        "usernameRequired": "Steamユーザー名を入力してください"
+      }
+    },
+    "app": {
+      "title": "アプリケーション設定",
+      "checkingUpdate": "アップデート情報を確認中...",
+      "updateAvailable": "新しいバージョンが利用可能です！",
+      "currentVersion": "現在のバージョン:",
+      "latestVersion": "最新バージョン:",
+      "changelog": "変更内容:",
+      "downloadLabel": "ダウンロード:",
+      "releasePage": "リリースページ",
+      "upToDate": "最新版を使用しています",
+      "recheck": "再チェック",
+      "updateCheckFailed": "アップデート情報を取得できませんでした",
+      "lastCheck": "最終チェック:"
+    }
+  },
+  "firstRun": {
+    "welcome": {
+      "title": "ようこそ",
+      "heading": "RESO Launcherへようこそ！",
+      "description": "初回セットアップを開始します。",
+      "setupSteps": "必要なツールのダウンロードとSteam設定を行います。",
+      "startSetup": "セットアップを開始"
+    },
+    "depotDownloader": {
+      "title": "DepotDownloader",
+      "description": "Resoniteのインストールに必要なDepotDownloaderをダウンロードします。",
+      "githubInfo": "GitHubから最新版を自動でダウンロードします。",
+      "downloadComplete": "ダウンロード完了",
+      "downloading": "ダウンロード中...",
+      "startDownload": "ダウンロード開始"
+    },
+    "steam": {
+      "title": "Steam設定",
+      "description": "Steamアカウント情報を設定します（スキップ可能）",
+      "credentialTitle": "Steamクレデンシャルについて",
+      "autoLogin": "Steamアカウント情報を保存すると、ゲームのダウンロード時に自動でログインされます。",
+      "encrypted": "情報はローカルに暗号化されて保存され、外部には送信されません。",
+      "subAccountRecommended": "メインアカウントとは違うサブアカウントを使用することを推奨します。",
+      "saveCredentials": "クレデンシャルを保存する",
+      "settingUp": "セットアップ中..."
+    },
+    "complete": {
+      "title": "完了",
+      "setupComplete": "セットアップ完了！",
+      "description": "初回セットアップが完了しました。",
+      "readyToUse": "RESO Launcherをお使いいただけます。",
+      "nextSteps": {
+        "title": "次のステップ",
+        "createProfile": "• プロファイルを作成してください",
+        "downloadGame": "• Resoniteをダウンロードしてください",
+        "manageMods": "• MODを管理できます"
+      },
+      "finish": "セットアップ完了"
+    }
+  },
+  "gameVersion": {
+    "selectVersion": "バージョン選択（オプション）",
+    "loading": "読み込み中...",
+    "fetchFailed": "バージョン情報の取得に失敗しました",
+    "useLatest": "最新版を使用（推奨）",
+    "specificSelected": "特定バージョンが選択されています",
+    "selectedVersion": "選択したバージョン:",
+    "fixedVersionWarning": "このバージョンに固定してインストールされます。最新版への自動更新は行われません。",
+    "fixedVersionInfo": "特定のバージョンを選択すると、そのバージョンに固定されます。",
+    "recommendLatest": "通常は「最新版を使用」を選択することをお勧めします。"
+  },
+  "modLoader": {
+    "riskWarning": {
+      "title": "MODローダーのインストール",
+      "importantWarning": "重要な警告",
+      "thirdPartyCode": "MODローダーをインストールすることで、サードパーティのコードがResoniteで実行されることになります。",
+      "risks": {
+        "title": "以下のリスクを理解してください：",
+        "unstable": "• MODによりゲームが不安定になる可能性があります",
+        "security": "• 個人情報やアカウント情報が悪意のあるMODに盗まれる可能性があります",
+        "compatibility": "• ゲームアップデート時にMODが動作しなくなる可能性があります"
+      },
+      "recommendations": {
+        "title": "推奨事項",
+        "trustedSource": "• 信頼できるソースからのMODのみをインストールしてください",
+        "ownRisk": "• MODの使用は自己責任で行ってください",
+        "backup": "• 定期的にプロファイルのバックアップを取ってください",
+        "removeIfIssue": "• 問題が発生した場合はMODローダーを削除してください"
+      },
+      "agreement": "上記のリスクを理解し、自己責任でMODローダーを使用することに同意しますか？",
+      "understandAndInstall": "理解してインストール"
+    },
+    "versionSelector": {
+      "selectVersion": "バージョンを選択",
+      "title": "{{modName}} - バージョン選択",
+      "installed": "インストール済み",
+      "prerelease": "プレリリース",
+      "noVersions": "利用可能なバージョンがありません"
+    }
+  },
+  "launchArgs": {
+    "categories": {
+      "hardware": "ハードウェア/VR",
+      "network": "ネットワーク",
+      "interface": "インターフェース",
+      "paths": "パス設定",
+      "graphics": "グラフィック",
+      "debug": "デバッグ/詳細"
+    },
+    "all": "すべて",
+    "custom": {
+      "title": "カスタム引数",
+      "description": "プリセットにない引数や、特別な設定が必要な引数を手動で追加できます",
+      "placeholder": "例: -CustomArgument value",
+      "add": "追加",
+      "noCustomArgs": "カスタム引数はありません"
+    },
+    "currentArgs": "現在の起動引数",
+    "presets": {
+      "forceNoVR": "VRモードを無効化",
+      "screen": "ウィンドウモードで起動",
+      "ctaa": "CTAA (Cinematic Temporal Anti-Aliasing) を有効化",
+      "skipIntroTutorial": "初回チュートリアルをスキップ",
+      "dataPath": "データパスを指定",
+      "cachePath": "キャッシュパスを指定",
+      "deleteUnsyncedCloudRecords": "同期されていないクラウドレコードを削除",
+      "invisible": "ホームスペースで初期状態を非表示に",
+      "forceCacheUpdate": "キャッシュを強制的に更新",
+      "doNotAutoLoadHome": "ホームスペースの自動読み込みを無効化",
+      "join": "指定したセッションURLに自動参加",
+      "open": "指定したURLのコンテンツを自動的に開く",
+      "noUI": "UIを非表示で起動",
+      "kiosk": "キオスクモード（終了ボタンを非表示）",
+      "logPath": "ログファイルの保存先を指定",
+      "resetDash": "ダッシュメニューをリセット",
+      "resetUserspace": "ユーザースペースをリセット",
+      "forceLANOnly": "LANのみモード（インターネット接続を無効化）",
+      "forceRelay": "リレー接続を強制使用",
+      "forceNoRelay": "リレー接続を無効化",
+      "loadAssembly": "起動時に指定アセンブリを読み込み",
+      "backgroundWorkers": "バックグラウンドワーカー数を指定",
+      "priorityWorkers": "優先ワーカー数を指定",
+      "generatePreCache": "プリキャッシュを生成",
+      "dontGeneratePreCache": "プリキャッシュ生成を無効化",
+      "sharedDataPath": "共有データパスを指定",
+      "forceExperience": "起動時の体験を強制指定",
+      "forceCulture": "言語/地域設定を強制",
+      "forceFullGC": "完全ガベージコレクションを有効化",
+      "forceIncrementalGC": "インクリメンタルガベージコレクションを有効化",
+      "disableGC": "ガベージコレクションを無効化",
+      "gc": "特定のガベージコレクションモードを設定"
+    }
+  },
+  "titlebar": {
+    "poweredBy": "RESO Launcher powered by resonite.love"
+  },
+  "toasts": {
+    "profileCreated": "プロファイル「{{name}}」を作成しました",
+    "profileDeleted": "プロファイル「{{name}}」を削除しました",
+    "profileUpdated": "プロファイル設定を更新しました",
+    "gameInstallStarted": "ゲームのインストールを開始しました",
+    "gameInstallCompleted": "ゲームのインストールが完了しました",
+    "gameUpdateStarted": "ゲームのアップデートを開始しました",
+    "gameUpdateCompleted": "ゲームのアップデートが完了しました",
+    "modInstallStarted": "MODローダーのインストールを開始しました",
+    "modInstallCompleted": "MODローダーのインストールが完了しました",
+    "steamCredentialsSaved": "Steam認証情報を保存しました",
+    "steamCredentialsDeleted": "Steam認証情報を削除しました",
+    "error": "エラーが発生しました: {{message}}",
+    "gameLaunched": "ゲームを起動しました",
+    "gameLaunchFailed": "ゲームの起動に失敗しました"
+  }
+}

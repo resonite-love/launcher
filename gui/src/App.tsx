@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Home, User, Settings, Loader2, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import CustomTitlebar from './components/CustomTitlebar';
 import HomeTab from './components/HomeTab';
 import ProfilesTab from './components/ProfilesTab';
@@ -10,6 +11,7 @@ import { useAppStore } from './store/useAppStore';
 import { useAppStatus } from './hooks/useQueries';
 
 function App() {
+  const { t } = useTranslation();
   const { 
     currentTab, 
     setCurrentTab, 
@@ -46,7 +48,7 @@ function App() {
           className="flex flex-col items-center space-y-4"
         >
           <Loader2 className="w-8 h-8 text-resonite-blue animate-spin" />
-          <p className="text-gray-300 text-lg">アプリケーションを初期化中...</p>
+          <p className="text-gray-300 text-lg">{t('app.initializing')}</p>
         </motion.div>
       </div>
     );
@@ -61,10 +63,10 @@ function App() {
           className="card max-w-md w-full text-center"
         >
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-white mb-2">エラー</h3>
+          <h3 className="text-xl font-bold text-white mb-2">{t('common.error')}</h3>
           <p className="text-gray-300 mb-6">{String(statusError)}</p>
           <button className="btn-primary w-full" onClick={() => refetchStatus()}>
-            再試行
+            {t('common.retry')}
           </button>
         </motion.div>
       </div>
@@ -92,7 +94,7 @@ function App() {
           <div className="max-w-7xl mx-auto flex items-center space-x-3">
             <AlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0" />
             <p className="text-yellow-200 text-sm">
-              <strong>警告:</strong> DepotDownloader が見つかりません。ゲームのインストール・更新を行うには、アプリケーションディレクトリに DepotDownloader.exe を配置してください。
+              {t('app.depotDownloaderWarning')}
             </p>
           </div>
         </motion.div>
@@ -113,7 +115,7 @@ function App() {
               onClick={() => setCurrentTab('home')}
             >
               <Home className="w-4 h-4" />
-              <span>ホーム</span>
+              <span>{t('nav.home')}</span>
               {currentTab === 'home' && (
                 <motion.div
                   layoutId="activeTab"
@@ -134,7 +136,7 @@ function App() {
               onClick={() => setCurrentTab('profiles')}
             >
               <User className="w-4 h-4" />
-              <span>プロファイル管理</span>
+              <span>{t('nav.profiles')}</span>
               {currentTab === 'profiles' && (
                 <motion.div
                   layoutId="activeTab"
@@ -155,7 +157,7 @@ function App() {
               onClick={() => setCurrentTab('settings')}
             >
               <Settings className="w-4 h-4" />
-              <span>設定</span>
+              <span>{t('nav.settings')}</span>
               {currentTab === 'settings' && (
                 <motion.div
                   layoutId="activeTab"
