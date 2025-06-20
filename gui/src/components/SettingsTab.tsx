@@ -14,7 +14,8 @@ import {
   ExternalLink,
   RefreshCw,
   Info,
-  Globe
+  Globe,
+  RotateCcw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAppUpdate, type AppUpdateInfo, type UpdateAsset } from '../hooks/useQueries';
@@ -38,10 +39,37 @@ function SettingsTab() {
   
   // アップデートチェック
   const { data: updateInfo, isLoading: updateLoading, refetch: checkUpdate } = useAppUpdate();
+  
+  // App update states
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
+  const [isInstalling, setIsInstalling] = useState(false);
+  const [updateProgress, setUpdateProgress] = useState(0);
 
   useEffect(() => {
     loadSavedCredentials();
-  }, []);
+    
+    // Listen for update events
+    const unlisten = invoke('listen', {
+      event: 'update-progress',
+      handler: (payload: any) => {
+        setUpdateProgress(payload.payload);
+      }
+    });
+    
+    const unlistenComplete = invoke('listen', {
+      event: 'update-complete',
+      handler: () => {
+        setIsInstalling(false);
+        setUpdateProgress(0);
+        toast.success(t('settings.app.updateInstalled'));
+      }
+    });
+    
+    return () => {
+      if (unlisten) unlisten;
+      if (unlistenComplete) unlistenComplete;
+    };
+  }, [t]);
 
   // Steamクレデンシャル関連の関数
   const loadSavedCredentials = async () => {
@@ -99,6 +127,36 @@ function SettingsTab() {
       toast.error(t('toasts.error', { message: err }));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // App update functions
+  const checkForUpdates = async () => {
+    try {
+      setIsCheckingUpdates(true);
+      const hasUpdate = await invoke<boolean>('check_app_updates');
+      if (hasUpdate) {
+        toast.success(t('settings.app.updateAvailable'));
+      } else {
+        toast.success(t('settings.app.upToDate'));
+      }
+    } catch (err) {
+      toast.error(t('toasts.error', { message: err }));
+    } finally {
+      setIsCheckingUpdates(false);
+    }
+  };
+
+  const installUpdate = async () => {
+    try {
+      setIsInstalling(true);
+      setUpdateProgress(0);
+      const result = await invoke<string>('install_app_update');
+      toast.success(result);
+    } catch (err) {
+      toast.error(t('toasts.error', { message: err }));
+      setIsInstalling(false);
+      setUpdateProgress(0);
     }
   };
 
@@ -233,7 +291,55 @@ function SettingsTab() {
           <h2 className="text-2xl font-bold text-white">{t('settings.app.title')}</h2>
         </div>
 
-        {/* アップデート情報 */}
+        {/* App Updater Section */}
+        <div className="bg-dark-800/30 rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <RotateCcw className="w-5 h-5 text-resonite-blue" />
+              <div>
+                <p className="text-white font-medium">{t('settings.app.autoUpdater.title')}</p>
+                <p className="text-gray-400 text-sm">
+                  {t('settings.app.autoUpdater.description')}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex space-x-2">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="btn-secondary flex items-center space-x-2"
+                onClick={checkForUpdates}
+                disabled={isCheckingUpdates || isInstalling}
+              >
+                {isCheckingUpdates ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+                <span>{t('settings.app.checkUpdates')}</span>
+              </motion.button>
+            </div>
+          </div>
+          
+          {/* Installation Progress */}
+          {isInstalling && (
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-300">{t('settings.app.installing')}</span>
+                <span className="text-sm text-gray-400">{Math.round(updateProgress)}%</span>
+              </div>
+              <div className="w-full bg-dark-700 rounded-full h-2">
+                <div 
+                  className="bg-resonite-blue h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${updateProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Legacy Update Information (keeping for manual checks) */}
         {updateLoading ? (
           <div className="bg-dark-800/30 rounded-lg p-6 flex items-center justify-center">
             <Loader2 className="w-6 h-6 animate-spin text-resonite-blue mr-3" />
@@ -263,6 +369,24 @@ function SettingsTab() {
                         </div>
                       </div>
                       
+                      {/* Install Update Button */}
+                      <div className="mt-4">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="btn-primary flex items-center space-x-2"
+                          onClick={installUpdate}
+                          disabled={isInstalling || isCheckingUpdates}
+                        >
+                          {isInstalling ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Download className="w-4 h-4" />
+                          )}
+                          <span>{t('settings.app.installUpdate')}</span>
+                        </motion.button>
+                      </div>
+                      
                       {/* リリースノート */}
                       {updateInfo.release_notes && (
                         <div className="mt-4">
@@ -274,39 +398,13 @@ function SettingsTab() {
                           </div>
                         </div>
                       )}
-                      
-                      {/* ダウンロードアセット */}
-                      {updateInfo.assets && updateInfo.assets.length > 0 && (
-                        <div className="mt-4">
-                          <h4 className="text-sm font-medium text-gray-300 mb-2">{t('settings.app.downloadLabel')}</h4>
-                          <div className="space-y-2">
-                            {updateInfo.assets.map((asset, index) => (
-                              <motion.button
-                                key={index}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                className="w-full flex items-center justify-between p-3 bg-dark-800/50 hover:bg-dark-700/50 rounded-lg transition-colors"
-                                onClick={() => shell.open(asset.download_url)}
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <Download className="w-4 h-4 text-gray-400" />
-                                  <span className="text-sm text-gray-300">{asset.name}</span>
-                                </div>
-                                <span className="text-xs text-gray-500">
-                                  {(asset.size / 1024 / 1024).toFixed(1)} {t('settings.app.sizeUnit')}
-                                </span>
-                              </motion.button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
                   
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="btn-primary flex items-center space-x-2"
+                    className="btn-secondary flex items-center space-x-2"
                     onClick={() => shell.open(updateInfo.download_url)}
                   >
                     <ExternalLink className="w-4 h-4" />

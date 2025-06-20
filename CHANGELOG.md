@@ -7,6 +7,39 @@
 
 ## [Unreleased]
 
+## [v1.4.2] - 2025-06-21
+
+### 🚀 新機能
+- **アプリ内自動アップデート機能**:
+  - Tauri Plugin Updaterを統合し、アプリ内からワンクリックでアップデート可能に
+  - 設定タブに自動アップデーターセクションを追加
+  - アップデートのダウンロード進行状況をリアルタイム表示
+  - バックグラウンドダウンロードとインストール機能
+  - GitHub Releasesからの自動アップデート検出
+
+### ✨ 改善
+- **アップデート体験の向上**:
+  - 手動でGitHubページを開く必要がなくなり、シームレスなアップデート体験を実現
+  - アップデートチェックとインストールボタンを設定タブに統合
+  - ダウンロード進行状況バーでユーザーに視覚的フィードバック
+  - インストール完了後、アプリケーション再起動で新バージョンが適用
+
+### 🔧 技術的改善
+- **Tauri Updater統合**:
+  - `tauri-plugin-updater`プラグインの追加
+  - GitHub Actionsで`latest.json`マニフェストファイルの自動生成
+  - 署名キーによるセキュアなアップデート配信
+  - Tauriコマンド: `check_app_updates`、`install_app_update`の実装
+
+### 📚 必要な設定
+- **署名キーの生成** (デプロイ前に必要):
+  ```bash
+  npm run tauri signer generate -- -w ~/.tauri/myapp.key
+  ```
+- **GitHub Secrets設定**:
+  - `TAURI_PRIVATE_KEY`: 秘密キー
+  - `TAURI_KEY_PASSWORD`: キーのパスワード（設定した場合）
+
 ## [v1.4.1] - 2025-06-20
 
 ### 🚀 新機能
@@ -543,7 +576,9 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.0...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.2...HEAD
+[v1.4.2]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.1...v1.4.2
+[v1.4.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.0...v1.4.1
 [v1.4.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.3.1...v1.4.0
 [v1.3.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.3.0...v1.3.1
 [v1.3.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.2.2...v1.3.0

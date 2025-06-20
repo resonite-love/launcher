@@ -3,7 +3,8 @@
 
 use std::sync::Mutex;
 use std::path::PathBuf;
-use tauri::{State, Window, AppHandle};
+use tauri::{State, Window, AppHandle, Manager};
+use tauri_plugin_updater::UpdaterExt;
 use reso_launcher_lib::{
     depotdownloader::DepotDownloader,
     install::{ResoniteInstall, ResoniteInstallManager},
@@ -1832,8 +1833,71 @@ async fn complete_first_run_setup(state: State<'_, Mutex<AppState>>) -> Result<S
     Ok("First run setup completed successfully".to_string())
 }
 
+// Check for app updates using Tauri updater
+#[tauri::command]
+async fn check_app_updates(app: AppHandle) -> Result<bool, String> {
+    match app.updater() {
+        Some(updater) => {
+            match updater.check().await {
+                Ok(update) => {
+                    if update.is_some() {
+                        Ok(true)
+                    } else {
+                        Ok(false)
+                    }
+                }
+                Err(e) => Err(format!("Failed to check for updates: {}", e)),
+            }
+        }
+        None => Err("Updater not available".to_string()),
+    }
+}
+
+// Install app update
+#[tauri::command]
+async fn install_app_update(app: AppHandle, window: Window) -> Result<String, String> {
+    match app.updater() {
+        Some(updater) => {
+            match updater.check().await {
+                Ok(Some(update)) => {
+                    // Download and install the update
+                    let mut downloaded = 0;
+                    let content_length = update.content_length;
+                    
+                    update
+                        .download_and_install(
+                            |chunk_length, _chunk| {
+                                downloaded += chunk_length;
+                                let progress = if let Some(total) = content_length {
+                                    (downloaded as f64 / total as f64) * 100.0
+                                } else {
+                                    0.0
+                                };
+                                
+                                // Emit progress event
+                                let _ = window.emit("update-progress", progress);
+                            },
+                            || {
+                                // Emit completion event
+                                let _ = window.emit("update-complete", ());
+                            },
+                        )
+                        .await
+                        .map_err(|e| format!("Failed to install update: {}", e))?;
+                    
+                    Ok("Update installed successfully. Please restart the application.".to_string())
+                }
+                Ok(None) => Err("No update available".to_string()),
+                Err(e) => Err(format!("Failed to check for updates: {}", e)),
+            }
+        }
+        None => Err("Updater not available".to_string()),
+    }
+}
+
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(Mutex::new(AppState::default()))
         .invoke_handler(tauri::generate_handler![
             initialize_app,
@@ -1883,7 +1947,9 @@ fn main() {
             get_yt_dlp_status,
             update_yt_dlp,
             download_depot_downloader,
-            complete_first_run_setup
+            complete_first_run_setup,
+            check_app_updates,
+            install_app_update
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

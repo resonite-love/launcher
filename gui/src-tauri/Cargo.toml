@@ -1,6 +1,6 @@
 [package]
 name = "reso-launcher"
-version = "1.4.1"
+version = "1.4.2"
 edition = "2021"
 authors = ["resonite.love community"]
 description = "RESO Launcher - Community Resonite management tool"
@@ -20,7 +20,8 @@ panic = "abort"
 tauri-build = { version = "1.5", features = [] }
 
 [dependencies]
-tauri = { version = "1.7", features = [ "system-tray", "window-start-dragging", "window-show", "window-hide", "window-close", "window-unminimize", "window-minimize", "fs-read-file", "fs-copy-file", "shell-open", "fs-create-dir", "dialog-ask", "dialog-message", "dialog-open", "fs-write-file", "fs-remove-file", "fs-read-dir", "fs-exists", "dialog-save", "fs-remove-dir", "notification-all", "dialog-confirm", "fs-rename-file"] }
+tauri = { version = "1.7", features = [ "system-tray", "window-start-dragging", "window-show", "window-hide", "window-close", "window-unminimize", "window-minimize", "fs-read-file", "fs-copy-file", "shell-open", "fs-create-dir", "dialog-ask", "dialog-message", "dialog-open", "fs-write-file", "fs-remove-file", "fs-read-dir", "fs-exists", "dialog-save", "fs-remove-dir", "notification-all", "dialog-confirm", "fs-rename-file", "updater"] }
+tauri-plugin-updater = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1.0", features = ["full"] }

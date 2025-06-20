@@ -8,7 +8,7 @@
   },
   "package": {
     "productName": "RESO Launcher",
-    "version": "1.4.1"
+    "version": "1.4.2"
   },
   "tauri": {
     "allowlist": {
@@ -60,6 +60,14 @@
         "icons/icon.png",
         "icons/icon.ico"
       ]
+    },
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/neo-mashiro/kokoa-resonite-tools/releases/latest/download/latest.json"
+      ],
+      "dialog": true,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEQ0Mjc3NDM2RkE4NDg2NTgKUldSWWhvVDZOblFuMUVCMFNvU2xhOG4wdG0rM1RrUVFhYWJVNlQ4Zm5LWXRFTDEvTGVnU1BuTzMK"
     },
     "systemTray": {
       "iconPath": "icons/icon.ico",

@@ -241,6 +241,31 @@ jobs:
           }
         shell: pwsh
         
+      # Generate updater JSON
+      - name: Create updater manifest
+        run: |
+          $version = "${{ github.ref_name }}"
+          $versionClean = $version -replace '^v', ''
+          $baseUrl = "https://github.com/${{ github.repository }}/releases/download/$version"
+          
+          $updaterJson = @{
+            version = $versionClean
+            notes = "See release notes at $baseUrl"
+            pub_date = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+            platforms = @{
+              "windows-x86_64" = @{
+                signature = ""
+                url = "$baseUrl/RESO.Launcher_$($version)_x64-setup.nsis.zip"
+              }
+            }
+          }
+          
+          $json = $updaterJson | ConvertTo-Json -Depth 10
+          $json | Out-File -FilePath "latest.json" -Encoding UTF8
+          Write-Host "Created updater manifest:"
+          Write-Host $json
+        shell: pwsh
+
       - name: Upload additional binaries to release
         uses: softprops/action-gh-release@v1
         with:
@@ -248,6 +273,7 @@ jobs:
             ./reso-launcher-cli-${{ github.ref_name }}-windows.exe
             ./reso-launcher-${{ github.ref_name }}-windows-portable.exe
             ./reso-launcher-${{ github.ref_name }}-windows-portable.zip
+            ./latest.json
           tag_name: ${{ github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
