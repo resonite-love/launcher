@@ -48,27 +48,27 @@ function SettingsTab() {
   useEffect(() => {
     loadSavedCredentials();
     
-    // Listen for update events
-    const unlisten = invoke('listen', {
-      event: 'update-progress',
-      handler: (payload: any) => {
-        setUpdateProgress(payload.payload);
-      }
+    // Listen for update events using Tauri event system
+    import('@tauri-apps/api/event').then(({ listen }) => {
+      const setupListeners = async () => {
+        const unlistenProgress = await listen('update-progress', (event: any) => {
+          setUpdateProgress(event.payload);
+        });
+        
+        const unlistenComplete = await listen('update-complete', () => {
+          setIsInstalling(false);
+          setUpdateProgress(0);
+          toast.success(t('settings.app.updateInstalled'));
+        });
+        
+        return () => {
+          unlistenProgress();
+          unlistenComplete();
+        };
+      };
+      
+      setupListeners().catch(console.error);
     });
-    
-    const unlistenComplete = invoke('listen', {
-      event: 'update-complete',
-      handler: () => {
-        setIsInstalling(false);
-        setUpdateProgress(0);
-        toast.success(t('settings.app.updateInstalled'));
-      }
-    });
-    
-    return () => {
-      if (unlisten) unlisten;
-      if (unlistenComplete) unlistenComplete;
-    };
   }, [t]);
 
   // Steamクレデンシャル関連の関数
