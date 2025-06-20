@@ -30,24 +30,15 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 22
 
       - name: Install frontend dependencies
         run: npm install
         working-directory: ./gui
 
-      - name: Check Tauri icon
-        run: |
-          if (!(Test-Path ".\gui\src-tauri\icons\icon.ico")) {
-            Write-Error "Icon file not found: .\gui\src-tauri\icons\icon.ico"
-            exit 1
-          }
-          Write-Host "Icon file found: .\gui\src-tauri\icons\icon.ico"
-        shell: pwsh
-
-      # Build CLI
-      - name: Build CLI (release)
-        run: cargo build --release -p reso-launcher-cli
+      # # Build CLI
+      # - name: Build CLI (release)
+      #   run: cargo build --release -p reso-launcher-cli
 
       # Build frontend first
       - name: Build Frontend
@@ -56,53 +47,53 @@ jobs:
           npm run build
           
       # Build raw executable for portable version
-      - name: Build GUI executable (for portable)
-        run: |
-          Write-Host "=== Building GUI executable for portable version ==="
-          Write-Host "Current directory: $(Get-Location)"
+      # - name: Build GUI executable (for portable)
+      #   run: |
+      #     Write-Host "=== Building GUI executable for portable version ==="
+      #     Write-Host "Current directory: $(Get-Location)"
           
-          # Set CARGO_TARGET_DIR to ensure consistent output location
-          $env:CARGO_TARGET_DIR = "$PWD\target"
-          Write-Host "CARGO_TARGET_DIR set to: $env:CARGO_TARGET_DIR"
+      #     # Set CARGO_TARGET_DIR to ensure consistent output location
+      #     $env:CARGO_TARGET_DIR = "$PWD\target"
+      #     Write-Host "CARGO_TARGET_DIR set to: $env:CARGO_TARGET_DIR"
           
-          cd gui/src-tauri
-          Write-Host "Changed to directory: $(Get-Location)"
+      #     cd gui/src-tauri
+      #     Write-Host "Changed to directory: $(Get-Location)"
           
-          Write-Host "`nBuilding with cargo..."
-          cargo build --release --features custom-protocol
+      #     Write-Host "`nBuilding with cargo..."
+      #     cargo build --release --features custom-protocol
           
-          Write-Host "`n=== Build complete, checking outputs ==="
+      #     Write-Host "`n=== Build complete, checking outputs ==="
           
-          # Check multiple possible locations
-          $possiblePaths = @(
-            "$env:CARGO_TARGET_DIR\release\reso-launcher.exe",
-            "..\..\target\release\reso-launcher.exe",
-            "target\release\reso-launcher.exe"
-          )
+      #     # Check multiple possible locations
+      #     $possiblePaths = @(
+      #       "$env:CARGO_TARGET_DIR\release\reso-launcher.exe",
+      #       "..\..\target\release\reso-launcher.exe",
+      #       "target\release\reso-launcher.exe"
+      #     )
           
-          $foundPath = $null
-          foreach ($path in $possiblePaths) {
-            Write-Host "Checking: $path"
-            if (Test-Path $path) {
-              $foundPath = $path
-              $fullPath = (Resolve-Path $path).Path
-              Write-Host "  FOUND at: $fullPath"
-              Write-Host "  Size: $((Get-Item $path).Length) bytes"
-              break
-            } else {
-              Write-Host "  Not found"
-            }
-          }
+      #     $foundPath = $null
+      #     foreach ($path in $possiblePaths) {
+      #       Write-Host "Checking: $path"
+      #       if (Test-Path $path) {
+      #         $foundPath = $path
+      #         $fullPath = (Resolve-Path $path).Path
+      #         Write-Host "  FOUND at: $fullPath"
+      #         Write-Host "  Size: $((Get-Item $path).Length) bytes"
+      #         break
+      #       } else {
+      #         Write-Host "  Not found"
+      #       }
+      #     }
           
-          if (-not $foundPath) {
-            Write-Host "`nListing all EXE files in current tree:"
-            Get-ChildItem -Path . -Filter "*.exe" -Recurse | Select-Object -First 20 | ForEach-Object {
-              Write-Host "  $($_.FullName)"
-            }
-          }
+      #     if (-not $foundPath) {
+      #       Write-Host "`nListing all EXE files in current tree:"
+      #       Get-ChildItem -Path . -Filter "*.exe" -Recurse | Select-Object -First 20 | ForEach-Object {
+      #         Write-Host "  $($_.FullName)"
+      #       }
+      #     }
           
-          # Return to root directory
-          cd ..\..
+      #     # Return to root directory
+      #     cd ..\..
         
       # Build GUI with Tauri (excluding MSI)
       - name: Build GUI (release)
@@ -159,235 +150,235 @@ jobs:
           includeRelease: true
 
       # Create additional release assets
-      - name: Create CLI Release Asset
-        run: |
-          cp ./target/release/reso-launcher-cli.exe ./reso-launcher-cli-${{ github.ref_name }}-windows.exe
+      # - name: Create CLI Release Asset
+      #   run: |
+      #     cp ./target/release/reso-launcher-cli.exe ./reso-launcher-cli-${{ github.ref_name }}-windows.exe
         
       # Verify executable exists before creating portable
-      - name: Verify GUI executable
-        run: |
-          Write-Host "=== Verifying GUI executable location ==="
-          Write-Host "Current directory: $(Get-Location)"
+      # - name: Verify GUI executable
+      #   run: |
+      #     Write-Host "=== Verifying GUI executable location ==="
+      #     Write-Host "Current directory: $(Get-Location)"
           
-          if (Test-Path ".\target\release\RESO Launcher.exe") {
-            Write-Host "SUCCESS: Found 'RESO Launcher.exe' in expected location"
-            $item = Get-Item ".\target\release\RESO Launcher.exe"
-            Write-Host "  Full path: $($item.FullName)"
-            Write-Host "  Size: $($item.Length) bytes"
-            Write-Host "  Last write time: $($item.LastWriteTime)"
-          } else {
-            Write-Host "ERROR: 'RESO Launcher.exe' not found in .\target\release\"
-            Write-Host "`nChecking alternative locations:"
+      #     if (Test-Path ".\target\release\RESO Launcher.exe") {
+      #       Write-Host "SUCCESS: Found 'RESO Launcher.exe' in expected location"
+      #       $item = Get-Item ".\target\release\RESO Launcher.exe"
+      #       Write-Host "  Full path: $($item.FullName)"
+      #       Write-Host "  Size: $($item.Length) bytes"
+      #       Write-Host "  Last write time: $($item.LastWriteTime)"
+      #     } else {
+      #       Write-Host "ERROR: 'RESO Launcher.exe' not found in .\target\release\"
+      #       Write-Host "`nChecking alternative locations:"
             
-            $locations = @(
-              ".\gui\src-tauri\target\release\reso-launcher.exe",
-              ".\gui\target\release\reso-launcher.exe"
-            )
+      #       $locations = @(
+      #         ".\gui\src-tauri\target\release\reso-launcher.exe",
+      #         ".\gui\target\release\reso-launcher.exe"
+      #       )
             
-            foreach ($loc in $locations) {
-              if (Test-Path $loc) {
-                Write-Host "  Found at: $loc"
-              }
-            }
+      #       foreach ($loc in $locations) {
+      #         if (Test-Path $loc) {
+      #           Write-Host "  Found at: $loc"
+      #         }
+      #       }
             
-            Write-Host "`nAll files in target\release:"
-            if (Test-Path ".\target\release") {
-              Get-ChildItem ".\target\release" | Select-Object Mode, Length, Name | Format-Table
-            }
-          }
-        shell: pwsh
+      #       Write-Host "`nAll files in target\release:"
+      #       if (Test-Path ".\target\release") {
+      #         Get-ChildItem ".\target\release" | Select-Object Mode, Length, Name | Format-Table
+      #       }
+      #     }
+      #   shell: pwsh
         
-      - name: Create GUI Portable Binary
-        run: |
-          # The executable is named "RESO Launcher.exe" with spaces
-          $exePath = ".\target\release\RESO Launcher.exe"
+      # - name: Create GUI Portable Binary
+      #   run: |
+      #     # The executable is named "RESO Launcher.exe" with spaces
+      #     $exePath = ".\target\release\RESO Launcher.exe"
           
-          if (Test-Path $exePath) {
-            Write-Host "Found executable at: $exePath"
-            $fileSize = (Get-Item $exePath).Length / 1MB
-            Write-Host "File size: $([math]::Round($fileSize, 2)) MB"
+      #     if (Test-Path $exePath) {
+      #       Write-Host "Found executable at: $exePath"
+      #       $fileSize = (Get-Item $exePath).Length / 1MB
+      #       Write-Host "File size: $([math]::Round($fileSize, 2)) MB"
             
-            # Copy the executable
-            cp $exePath ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe"
-            Write-Host "Created portable executable: reso-launcher-${{ github.ref_name }}-windows-portable.exe"
+      #       # Copy the executable
+      #       cp $exePath ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe"
+      #       Write-Host "Created portable executable: reso-launcher-${{ github.ref_name }}-windows-portable.exe"
             
-            # Check for WebView2Loader.dll in various locations
-            $webview2Paths = @(
-              ".\target\release\WebView2Loader.dll",
-              ".\gui\src-tauri\target\release\WebView2Loader.dll"
-            )
+      #       # Check for WebView2Loader.dll in various locations
+      #       $webview2Paths = @(
+      #         ".\target\release\WebView2Loader.dll",
+      #         ".\gui\src-tauri\target\release\WebView2Loader.dll"
+      #       )
             
-            $webview2Found = $false
-            foreach ($path in $webview2Paths) {
-              if (Test-Path $path) {
-                cp $path ".\WebView2Loader.dll"
-                Write-Host "Copied WebView2Loader.dll from: $path"
-                $webview2Found = $true
-                break
-              }
-            }
+      #       $webview2Found = $false
+      #       foreach ($path in $webview2Paths) {
+      #         if (Test-Path $path) {
+      #           cp $path ".\WebView2Loader.dll"
+      #           Write-Host "Copied WebView2Loader.dll from: $path"
+      #           $webview2Found = $true
+      #           break
+      #         }
+      #       }
             
-            # Create a zip file with both files if WebView2Loader exists
-            if ($webview2Found) {
-              Compress-Archive -Path ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe", ".\WebView2Loader.dll" -DestinationPath ".\reso-launcher-${{ github.ref_name }}-windows-portable.zip" -Force
-              Write-Host "Created portable ZIP with executable and WebView2Loader.dll"
-            } else {
-              Write-Host "WebView2Loader.dll not found, creating ZIP with executable only"
-              Compress-Archive -Path ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe" -DestinationPath ".\reso-launcher-${{ github.ref_name }}-windows-portable.zip" -Force
-            }
-          } else {
-            Write-Error "GUI executable not found at expected location: $exePath"
-            exit 1
-          }
-        shell: pwsh
+      #       # Create a zip file with both files if WebView2Loader exists
+      #       if ($webview2Found) {
+      #         Compress-Archive -Path ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe", ".\WebView2Loader.dll" -DestinationPath ".\reso-launcher-${{ github.ref_name }}-windows-portable.zip" -Force
+      #         Write-Host "Created portable ZIP with executable and WebView2Loader.dll"
+      #       } else {
+      #         Write-Host "WebView2Loader.dll not found, creating ZIP with executable only"
+      #         Compress-Archive -Path ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe" -DestinationPath ".\reso-launcher-${{ github.ref_name }}-windows-portable.zip" -Force
+      #       }
+      #     } else {
+      #       Write-Error "GUI executable not found at expected location: $exePath"
+      #       exit 1
+      #     }
+      #   shell: pwsh
         
       # Find and prepare NSIS installer for updater
-      - name: Prepare updater files
-        run: |
-          Write-Host "Looking for installer files..."
-          Write-Host "Current directory: $(Get-Location)"
+      # - name: Prepare updater files
+      #   run: |
+      #     Write-Host "Looking for installer files..."
+      #     Write-Host "Current directory: $(Get-Location)"
           
-          # List all files to debug
-          Write-Host "`nAll files in current directory:"
-          Get-ChildItem -Recurse | Where-Object { $_.Name -like "*setup*" -or $_.Name -like "*.nsis*" -or $_.Name -like "*.exe" } | ForEach-Object {
-            Write-Host "  $($_.FullName)"
-          }
+      #     # List all files to debug
+      #     Write-Host "`nAll files in current directory:"
+      #     Get-ChildItem -Recurse | Where-Object { $_.Name -like "*setup*" -or $_.Name -like "*.nsis*" -or $_.Name -like "*.exe" } | ForEach-Object {
+      #       Write-Host "  $($_.FullName)"
+      #     }
           
-          # Look for NSIS installer first (from tauri-action)
-          $nsisFiles = Get-ChildItem -Path "." -Filter "*.nsis.zip" -Recurse
-          if ($nsisFiles.Count -gt 0) {
-            Write-Host "`nFound NSIS files:"
-            $nsisFiles | ForEach-Object { Write-Host "  $($_.FullName)" }
+      #     # Look for NSIS installer first (from tauri-action)
+      #     $nsisFiles = Get-ChildItem -Path "." -Filter "*.nsis.zip" -Recurse
+      #     if ($nsisFiles.Count -gt 0) {
+      #       Write-Host "`nFound NSIS files:"
+      #       $nsisFiles | ForEach-Object { Write-Host "  $($_.FullName)" }
             
-            # Use the first NSIS file found
-            $nsisFile = $nsisFiles[0]
-            $newName = "RESO.Launcher_${{ github.ref_name }}_x64-setup.nsis.zip"
-            Copy-Item $nsisFile.FullName -Destination ".\$newName"
-            Write-Host "Copied to: $newName"
-          } else {
-            Write-Host "`nNo .nsis.zip files found, checking for .exe installer..."
+      #       # Use the first NSIS file found
+      #       $nsisFile = $nsisFiles[0]
+      #       $newName = "RESO.Launcher_${{ github.ref_name }}_x64-setup.nsis.zip"
+      #       Copy-Item $nsisFile.FullName -Destination ".\$newName"
+      #       Write-Host "Copied to: $newName"
+      #     } else {
+      #       Write-Host "`nNo .nsis.zip files found, checking for .exe installer..."
             
-            # Look for any setup exe file
-            $setupFiles = Get-ChildItem -Path "." -Filter "*setup*.exe" -Recurse
-            if ($setupFiles.Count -eq 0) {
-              # Try broader search for exe files
-              $setupFiles = Get-ChildItem -Path "." -Filter "*.exe" -Recurse | Where-Object { 
-                $_.Name -notlike "*portable*" -and $_.Name -notlike "*cli*" -and $_.Name -notlike "reso-launcher.exe"
-              }
-            }
+      #       # Look for any setup exe file
+      #       $setupFiles = Get-ChildItem -Path "." -Filter "*setup*.exe" -Recurse
+      #       if ($setupFiles.Count -eq 0) {
+      #         # Try broader search for exe files
+      #         $setupFiles = Get-ChildItem -Path "." -Filter "*.exe" -Recurse | Where-Object { 
+      #           $_.Name -notlike "*portable*" -and $_.Name -notlike "*cli*" -and $_.Name -notlike "reso-launcher.exe"
+      #         }
+      #       }
             
-            if ($setupFiles.Count -gt 0) {
-              Write-Host "`nFound installer files:"
-              $setupFiles | ForEach-Object { Write-Host "  $($_.FullName)" }
+      #       if ($setupFiles.Count -gt 0) {
+      #         Write-Host "`nFound installer files:"
+      #         $setupFiles | ForEach-Object { Write-Host "  $($_.FullName)" }
               
-              # Use the first installer file
-              $setupFile = $setupFiles[0]
-              $zipName = "RESO.Launcher_${{ github.ref_name }}_x64-setup.nsis.zip"
+      #         # Use the first installer file
+      #         $setupFile = $setupFiles[0]
+      #         $zipName = "RESO.Launcher_${{ github.ref_name }}_x64-setup.nsis.zip"
               
-              # Create ZIP with the installer
-              Compress-Archive -Path $setupFile.FullName -DestinationPath ".\$zipName" -Force
-              Write-Host "Created zip: $zipName from $($setupFile.Name)"
+      #         # Create ZIP with the installer
+      #         Compress-Archive -Path $setupFile.FullName -DestinationPath ".\$zipName" -Force
+      #         Write-Host "Created zip: $zipName from $($setupFile.Name)"
               
-              # Verify the ZIP was created
-              if (Test-Path ".\$zipName") {
-                $zipSize = (Get-Item ".\$zipName").Length / 1MB
-                Write-Host "ZIP file created successfully, size: $([math]::Round($zipSize, 2)) MB"
-              } else {
-                Write-Error "Failed to create ZIP file"
-                exit 1
-              }
-            } else {
-              Write-Error "No installer files found!"
-              Write-Host "`nAvailable files:"
-              Get-ChildItem -Recurse | Select-Object -First 20 | ForEach-Object {
-                Write-Host "  $($_.FullName)"
-              }
-              exit 1
-            }
-          }
-        shell: pwsh
+      #         # Verify the ZIP was created
+      #         if (Test-Path ".\$zipName") {
+      #           $zipSize = (Get-Item ".\$zipName").Length / 1MB
+      #           Write-Host "ZIP file created successfully, size: $([math]::Round($zipSize, 2)) MB"
+      #         } else {
+      #           Write-Error "Failed to create ZIP file"
+      #           exit 1
+      #         }
+      #       } else {
+      #         Write-Error "No installer files found!"
+      #         Write-Host "`nAvailable files:"
+      #         Get-ChildItem -Recurse | Select-Object -First 20 | ForEach-Object {
+      #           Write-Host "  $($_.FullName)"
+      #         }
+      #         exit 1
+      #       }
+      #     }
+      #   shell: pwsh
       
-      # Generate signature and updater JSON
-      - name: Create updater manifest with signature
-        run: |
-          $version = "${{ github.ref_name }}"
-          $versionClean = $version -replace '^v', ''
-          $baseUrl = "https://github.com/${{ github.repository }}/releases/download/$version"
-          $zipFile = "RESO.Launcher_$($version)_x64-setup.nsis.zip"
+      # # Generate signature and updater JSON
+      # - name: Create updater manifest with signature
+      #   run: |
+      #     $version = "${{ github.ref_name }}"
+      #     $versionClean = $version -replace '^v', ''
+      #     $baseUrl = "https://github.com/${{ github.repository }}/releases/download/$version"
+      #     $zipFile = "RESO.Launcher_$($version)_x64-setup.nsis.zip"
           
-          # Check if the ZIP file exists
-          if (-not (Test-Path ".\$zipFile")) {
-            Write-Error "Installer ZIP file not found: $zipFile"
-            exit 1
-          }
+      #     # Check if the ZIP file exists
+      #     if (-not (Test-Path ".\$zipFile")) {
+      #       Write-Error "Installer ZIP file not found: $zipFile"
+      #       exit 1
+      #     }
           
-          # Generate signature if private key is available
-          $signature = ""
-          if ($env:TAURI_PRIVATE_KEY) {
-            Write-Host "Generating signature for updater..."
+      #     # Generate signature if private key is available
+      #     $signature = ""
+      #     if ($env:TAURI_PRIVATE_KEY) {
+      #       Write-Host "Generating signature for updater..."
             
-            # Save private key to temporary file
-            $privateKeyPath = "temp_private_key"
-            $env:TAURI_PRIVATE_KEY | Out-File -FilePath $privateKeyPath -Encoding ASCII
+      #       # Save private key to temporary file
+      #       $privateKeyPath = "temp_private_key"
+      #       $env:TAURI_PRIVATE_KEY | Out-File -FilePath $privateKeyPath -Encoding ASCII
             
-            # Install Tauri CLI if not available
-            npm install -g @tauri-apps/cli@^1.0
+      #       # Install Tauri CLI if not available
+      #       npm install -g @tauri-apps/cli@^1.0
             
-            # Generate signature
-            try {
-              $signatureOutput = & tauri signer sign "$zipFile" --private-key-path "$privateKeyPath" 2>&1
-              if ($LASTEXITCODE -eq 0) {
-                # Extract signature from output
-                $signature = ($signatureOutput | Select-String "Signature:" | Select-Object -Last 1).ToString().Split(":")[1].Trim()
-                Write-Host "Generated signature: $signature"
-              } else {
-                Write-Host "Failed to generate signature: $signatureOutput"
-                $signature = ""
-              }
-            } catch {
-              Write-Host "Error generating signature: $_"
-              $signature = ""
-            } finally {
-              # Clean up private key file
-              if (Test-Path $privateKeyPath) {
-                Remove-Item $privateKeyPath -Force
-              }
-            }
-          } else {
-            Write-Host "No private key provided, using empty signature"
-          }
+      #       # Generate signature
+      #       try {
+      #         $signatureOutput = & tauri signer sign "$zipFile" --private-key-path "$privateKeyPath" 2>&1
+      #         if ($LASTEXITCODE -eq 0) {
+      #           # Extract signature from output
+      #           $signature = ($signatureOutput | Select-String "Signature:" | Select-Object -Last 1).ToString().Split(":")[1].Trim()
+      #           Write-Host "Generated signature: $signature"
+      #         } else {
+      #           Write-Host "Failed to generate signature: $signatureOutput"
+      #           $signature = ""
+      #         }
+      #       } catch {
+      #         Write-Host "Error generating signature: $_"
+      #         $signature = ""
+      #       } finally {
+      #         # Clean up private key file
+      #         if (Test-Path $privateKeyPath) {
+      #           Remove-Item $privateKeyPath -Force
+      #         }
+      #       }
+      #     } else {
+      #       Write-Host "No private key provided, using empty signature"
+      #     }
           
-          # Create updater JSON
-          $updaterJson = @{
-            version = $versionClean
-            notes = "See release notes at $baseUrl"
-            pub_date = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
-            platforms = @{
-              "windows-x86_64" = @{
-                signature = $signature
-                url = "$baseUrl/$zipFile"
-              }
-            }
-          }
+      #     # Create updater JSON
+      #     $updaterJson = @{
+      #       version = $versionClean
+      #       notes = "See release notes at $baseUrl"
+      #       pub_date = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+      #       platforms = @{
+      #         "windows-x86_64" = @{
+      #           signature = $signature
+      #           url = "$baseUrl/$zipFile"
+      #         }
+      #       }
+      #     }
           
-          $json = $updaterJson | ConvertTo-Json -Depth 10
-          $json | Out-File -FilePath "latest.json" -Encoding UTF8
-          Write-Host "Created updater manifest:"
-          Write-Host $json
-        shell: pwsh
-        env:
-          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+      #     $json = $updaterJson | ConvertTo-Json -Depth 10
+      #     $json | Out-File -FilePath "latest.json" -Encoding UTF8
+      #     Write-Host "Created updater manifest:"
+      #     Write-Host $json
+      #   shell: pwsh
+      #   env:
+      #     TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+      #     TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
-      - name: Upload additional binaries to release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            ./reso-launcher-cli-${{ github.ref_name }}-windows.exe
-            ./reso-launcher-${{ github.ref_name }}-windows-portable.exe
-            ./reso-launcher-${{ github.ref_name }}-windows-portable.zip
-            ./RESO.Launcher_${{ github.ref_name }}_x64-setup.nsis.zip
-            ./latest.json
-          tag_name: ${{ github.ref_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Upload additional binaries to release
+      #   uses: softprops/action-gh-release@v1
+      #   with:
+      #     files: |
+      #       ./reso-launcher-cli-${{ github.ref_name }}-windows.exe
+      #       ./reso-launcher-${{ github.ref_name }}-windows-portable.exe
+      #       ./reso-launcher-${{ github.ref_name }}-windows-portable.zip
+      #       ./RESO.Launcher_${{ github.ref_name }}_x64-setup.nsis.zip
+      #       ./latest.json
+      #     tag_name: ${{ github.ref_name }}
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
