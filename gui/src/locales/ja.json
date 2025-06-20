@@ -158,6 +158,8 @@
       "launchResonite": "Resoniteを起動",
       "duplicate": "複製",
       "duplicateProfile": "プロファイルを複製",
+      "actions": "アクション",
+      "profileActions": "プロファイルアクション",
       "unsavedChanges": "未保存の変更があります",
       "unsavedChangesNote": "変更を保存することを忘れずに",
       "installGamePlaceholder": "ゲームをインストールしてください",

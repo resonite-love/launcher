@@ -31,6 +31,7 @@ import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import ModRiskWarningModal from './ModRiskWarningModal';
 import MultiFileInstallModal from './MultiFileInstallModal';
+import ProfileActionsDropdown from './ProfileActionsDropdown';
 import GameVersionSelector from './GameVersionSelector';
 import GameUpdateModal from './GameUpdateModal';
 import GameInstallModal from './GameInstallModal';
@@ -1925,38 +1926,44 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         </div>
         
         <div className="flex items-center space-x-3">
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="btn-secondary flex items-center space-x-2"
-            onClick={openProfileFolder}
-            title={t('profiles.editPage.openProfileFolder')}
-          >
-            <FolderOpen className="w-4 h-4" />
-            <span>{t('profiles.editPage.openFolder')}</span>
-          </motion.button>
-          
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="btn-secondary flex items-center space-x-2"
-            onClick={async () => {
+
+          {/* アクションドロップダウン */}
+          <ProfileActionsDropdown
+            profileName={profileName}
+            isReloading={installedModsLoading || unmanagedModsLoading || migrateInstalledModsMutation.isPending}
+            onDuplicate={() => {
+              setDuplicateName(`${profile?.display_name || profileName} - Copy`);
+              setDuplicateDescription(profile?.description || '');
+              setShowDuplicateModal(true);
+            }}
+            onDelete={() => setShowDeleteConfirmModal(true)}
+            onOpenFolder={openProfileFolder}
+            onReload={async () => {
               // マイグレーションを実行してからリフェッチ
               await migrateInstalledModsMutation.mutateAsync(profileName);
               refetchInstalledMods();
               refetchUnmanagedMods();
             }}
-            disabled={installedModsLoading || unmanagedModsLoading || migrateInstalledModsMutation.isPending}
-            title={t('profiles.editPage.reloadMods')}
+            showDeleteOption={profileName !== 'default'}
+          />
+
+          
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="btn-primary flex items-center space-x-2"
+            onClick={saveProfile}
+            disabled={isSaving || !hasChanges}
           >
-            {installedModsLoading || unmanagedModsLoading || migrateInstalledModsMutation.isPending ? (
+            {isSaving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <RefreshCw className="w-4 h-4" />
+              <Save className="w-4 h-4" />
             )}
-            <span>{t('profiles.editPage.reload')}</span>
+            <span>{t('common.save')}</span>
           </motion.button>
-          
+
+
           {/* 起動ボタン */}
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -1977,52 +1984,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             )}
             <span>{t('profiles.editPage.launch')}</span>
           </motion.button>
-          
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="btn-primary flex items-center space-x-2"
-            onClick={saveProfile}
-            disabled={isSaving || !hasChanges}
-          >
-            {isSaving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            <span>{t('common.save')}</span>
-          </motion.button>
-          
-          {/* 複製ボタン */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="btn-secondary flex items-center space-x-2"
-            onClick={() => {
-              setDuplicateName(`${profile?.display_name || profileName} - Copy`);
-              setDuplicateDescription(profile?.description || '');
-              setShowDuplicateModal(true);
-            }}
-            disabled={isDuplicating}
-            title={t('profiles.editPage.duplicateProfile')}
-          >
-            <Copy className="w-4 h-4" />
-            <span>{t('profiles.editPage.duplicate')}</span>
-          </motion.button>
-          
-          {/* 削除ボタン（デフォルトプロファイル以外で表示） */}
-          {profileName !== 'default' && (
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="btn-danger flex items-center space-x-2"
-              onClick={() => setShowDeleteConfirmModal(true)}
-              disabled={isDeleting}
-            >
-              <Trash2 className="w-4 h-4" />
-              <span>{t('common.delete')}</span>
-            </motion.button>
-          )}
+
         </div>
       </motion.div>
 

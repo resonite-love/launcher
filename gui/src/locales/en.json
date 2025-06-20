@@ -158,6 +158,8 @@
       "launchResonite": "Launch Resonite",
       "duplicate": "Duplicate",
       "duplicateProfile": "Duplicate profile",
+      "actions": "Actions",
+      "profileActions": "Profile Actions",
       "unsavedChanges": "Unsaved changes",
       "unsavedChangesNote": "Don't forget to save your changes",
       "installGamePlaceholder": "Please install the game",
