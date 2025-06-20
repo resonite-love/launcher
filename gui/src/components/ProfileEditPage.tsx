@@ -246,9 +246,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   
 
   const tabs = [
-    { id: 'info' as TabType, label: t('common.profile') + '情報', icon: User },
+    { id: 'info' as TabType, label: t('profiles.editPage.gameInfo'), icon: User },
     { id: 'launch' as TabType, label: t('profiles.editModal.launchArgs.title'), icon: Terminal },
-    { id: 'mods' as TabType, label: 'MOD管理', icon: Package },
+    { id: 'mods' as TabType, label: t('profiles.editPage.modManagement'), icon: Package },
     { id: 'other' as TabType, label: t('common.settings'), icon: Settings },
   ];
 
@@ -299,7 +299,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
   const handleDuplicate = async () => {
     if (!duplicateName.trim()) {
-      toast.error(t('profiles.createModal.nameLabel') + 'を入力してください');
+      toast.error(t('profiles.createModal.nameLabel') + t('toasts.nameRequired'));
       return;
     }
 
@@ -587,12 +587,12 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
   const installCustomMod = async () => {
     if (!customRepoUrl.trim()) {
-      toast.error('GitHubリポジトリURLを入力してください');
+      toast.error(t('toasts.githubUrlRequired'));
       return;
     }
 
     if (!customRepoUrl.includes('github.com')) {
-      toast.error('有効なGitHubリポジトリURLを入力してください');
+      toast.error(t('toasts.validGithubUrlRequired'));
       return;
     }
 
@@ -602,7 +602,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       const versions = await invoke<any[]>('get_github_releases', { repoUrl: customRepoUrl.trim() });
       
       if (versions.length === 0) {
-        toast.error('このリポジトリにはリリースが見つかりませんでした');
+        toast.error(t('toasts.noReleasesFound'));
         return;
       }
 
@@ -619,7 +619,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const openProfileFolder = async () => {
     try {
       await invoke('open_profile_folder', { profileName });
-      toast.success('プロファイルフォルダを開きました');
+      toast.success(t('toasts.profileFolderOpened'));
     } catch (err) {
       toast.error(t('toasts.error', { message: err }));
     }
@@ -760,7 +760,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   // プロファイル削除処理
   const handleDeleteProfile = async () => {
     if (profileName === 'default') {
-      toast.error('デフォルトプロファイルは削除できません');
+      toast.error(t('toasts.defaultProfileCannotBeDeleted'));
       return;
     }
     
@@ -799,7 +799,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           className="flex flex-col items-center space-y-4"
         >
           <Loader2 className="w-8 h-8 text-resonite-blue animate-spin" />
-          <p className="text-gray-300 text-lg">プロファイル設定を読み込み中...</p>
+          <p className="text-gray-300 text-lg">{t('profiles.editPage.loadingProfile')}</p>
         </motion.div>
       </div>
     );
@@ -814,9 +814,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           className="text-center"
         >
           <User className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400 text-lg">プロファイルが見つかりません</p>
+          <p className="text-gray-400 text-lg">{t('profiles.editPage.profileNotFound')}</p>
           <button className="btn-secondary mt-4" onClick={onBack}>
-            戻る
+            {t('common.back')}
           </button>
         </motion.div>
       </div>
@@ -836,23 +836,23 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           >
             <div className="flex items-center space-x-3 mb-6">
               <User className="w-6 h-6 text-resonite-blue" />
-              <h2 className="text-2xl font-bold text-white">{t('common.profile')}情報</h2>
+              <h2 className="text-2xl font-bold text-white">{t('profiles.editPage.gameInfo')}</h2>
             </div>
 
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  表示名
+                  {t('profiles.editPage.displayName')}
                 </label>
                 <input
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="プロファイルの表示名を入力"
+                  placeholder={t('profiles.editPage.displayNamePlaceholder')}
                   className="input-primary w-full"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  プロファイル一覧で表示される名前です（日本語使用可能）
+                  {t('profiles.editPage.displayNameHint')}
                 </p>
               </div>
 
@@ -867,7 +867,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                   className="input-primary w-full bg-dark-800/50 text-gray-400 cursor-not-allowed"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  フォルダ名として使用される内部ID（変更不可）
+                  {t('profiles.editPage.internalIdLabel')}
                 </p>
               </div>
 
@@ -891,7 +891,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-white flex items-center space-x-2">
                     <Package className="w-5 h-5 text-resonite-blue" />
-                    <span>ゲーム情報</span>
+                    <span>{t('profiles.editPage.gameInfo')}</span>
                   </h3>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -900,7 +900,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     onClick={() => setShowGameUpdateModal(true)}
                   >
                     <RefreshCw className="w-4 h-4" />
-                    <span>バージョン変更</span>
+                    <span>{t('profiles.editPage.versionChange')}</span>
                   </motion.button>
                 </div>
                 
@@ -911,10 +911,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                   </div>
                   
                   <div className="flex justify-between items-center py-2 border-b border-dark-600/50">
-                    <span className="text-gray-400">現在の{t('common.version')}</span>
+                    <span className="text-gray-400">{t('profiles.editPage.currentVersionLabel')}{t('common.version')}</span>
                     <div className="flex items-center space-x-2">
                       <span className="text-white font-mono text-sm">
-                        {currentGameVersion || '不明'}
+                        {currentGameVersion || t('profiles.editPage.unknown')}
                       </span>
                       {hasNewerGameVersion() && (() => {
                         const latestVersion = getLatestGameVersionInfo();
@@ -957,7 +957,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                       <div className="text-sm">
                         <p className="text-blue-300 font-medium mb-1">{t('profiles.newVersionAvailable')}</p>
                         <p className="text-blue-200">
-                          「バージョン変更」から最新版への更新や特定バージョンへの変更が可能です。
+                          {t('profiles.editPage.updateVersionNote')}
                         </p>
                       </div>
                     </div>
@@ -970,7 +970,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                       <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                       <div className="text-sm">
                         <p className="text-blue-300">
-                          「バージョン変更」から最新版への更新や特定バージョンへの変更が可能です。
+                          {t('profiles.editPage.updateVersionNote')}
                         </p>
                       </div>
                     </div>
@@ -983,7 +983,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-orange-400 flex items-center space-x-2">
                     <Package className="w-5 h-5" />
-                    <span>ゲーム未インストール</span>
+                    <span>{t('profiles.editPage.gameNotInstalled')}</span>
                   </h3>
                 </div>
                 
@@ -995,7 +995,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                         このプロファイルにはResoniteがインストールされていません。
                       </p>
                       <p className="text-orange-200 text-sm">
-                        ゲームをインストールすると、起動オプションやMOD管理機能が利用可能になります。
+                        {t('profiles.editPage.gameNotInstalledNote')}
                       </p>
                     </div>
                   </div>
@@ -1040,9 +1040,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 <div className="flex items-start space-x-3">
                   <Info className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-orange-400 font-medium mb-2">ゲームがインストールされていません</h4>
+                    <h4 className="text-orange-400 font-medium mb-2">{t('profiles.editPage.gameNotInstalledWarning')}</h4>
                     <p className="text-orange-200 text-sm">
-                      起動引数を設定するには、まずResoniteをインストールしてください。
+                      {t('profiles.editPage.installGameFirst')}
                     </p>
                   </div>
                 </div>
@@ -1067,7 +1067,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           >
             <div className="flex items-center space-x-3 mb-6">
               <Package className="w-6 h-6 text-resonite-blue" />
-              <h2 className="text-2xl font-bold text-white">MOD管理</h2>
+              <h2 className="text-2xl font-bold text-white">{t('profiles.editPage.modManagement')}</h2>
             </div>
 
             {!hasGame ? (
@@ -1078,7 +1078,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                   <div>
                     <h4 className="text-orange-400 font-medium mb-2">{t('home.launcher.notInstalled')}</h4>
                     <p className="text-orange-200 text-sm">
-                      MOD管理機能を使用するには、まずResoniteをインストールしてください。
+                      {t('profiles.editPage.modManagementWarning')}
                     </p>
                   </div>
                 </div>
@@ -1089,14 +1089,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 <div className="flex items-start space-x-3">
                   <Info className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <h4 className="text-yellow-400 font-medium mb-2">MODローダーが必要です</h4>
+                    <h4 className="text-yellow-400 font-medium mb-2">{t('profiles.editPage.modLoaderRequired')}</h4>
                     <p className="text-yellow-200 text-sm mb-4">
-                      MODを使用するにはMODローダーをインストールする必要があります。
+                      {t('profiles.editPage.modLoaderRequiredDescription')}
                     </p>
                     
                     {/* MODローダータイプ選択 */}
                     <div className="mb-4">
-                      <label className="text-gray-300 text-sm mb-2 block">MODローダーを選択:</label>
+                      <label className="text-gray-300 text-sm mb-2 block">{t('profiles.editPage.selectModLoader')}</label>
                       <div className="flex space-x-4">
                         <label className="flex items-center">
                           <input
@@ -1123,8 +1123,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                       </div>
                       <p className="text-xs text-gray-400 mt-2">
                         {selectedModLoaderType === 'ResoniteModLoader' 
-                          ? 'RMLは従来のMODローダーで、多くのMODが対応しています。'
-                          : 'MonkeyLoaderは新しいMODローダーで、より高度な機能を提供します。'}
+                          ? t('profiles.editPage.rmlDescription')
+                          : t('profiles.editPage.monkeyLoaderDescription')}
                       </p>
                     </div>
                     
@@ -1156,12 +1156,12 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                         <Package className="w-5 h-5 text-green-400" />
                         <div>
                           <h4 className="text-green-400 font-medium">
-                            {modLoaderInfo.loader_type === 'MonkeyLoader' ? 'MonkeyLoader' : 'Resonite Mod Loader'} インストール済み
+                            {t('profiles.editPage.modLoaderInstalled', { type: modLoaderInfo.loader_type === 'MonkeyLoader' ? 'MonkeyLoader' : 'Resonite Mod Loader' })}
                           </h4>
                           <p className="text-green-200 text-sm">
-                            バージョン: {modLoaderInfo.version || '不明'}
+                            {t('common.version')}: {modLoaderInfo.version || t('profiles.editPage.unknown')}
                             {profile?.config_version && profile.config_version < 2 && (
-                              <span className="ml-2 text-yellow-300">(マイグレーション済み)</span>
+                              <span className="ml-2 text-yellow-300">({t('profiles.editPage.migrated')})</span>
                             )}
                           </p>
                         </div>
@@ -1210,7 +1210,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     onClick={() => setModActiveTab('manage')}
                   >
                     <Package className="w-4 h-4" />
-                    <span className="font-medium">管理</span>
+                    <span className="font-medium">{t('profiles.editPage.manage')}</span>
                   </motion.button>
                 </div>
 
@@ -1221,7 +1221,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
                       <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                         <Github className="w-5 h-5" />
-                        <span>手動MODインストール</span>
+                        <span>{t('profiles.editPage.manualModInstall')}</span>
                       </h3>
                       
                       <div className="flex space-x-3 mb-4">
@@ -1249,14 +1249,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                       </div>
                       
                       <p className="text-gray-400 text-sm">
-                        GitHubリポジトリのURLを入力してMODを直接インストールできます。
+                        {t('profiles.editPage.githubUrlHint')}
                       </p>
                     </div>
 
                     {/* 利用可能なMOD一覧 */}
                     <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-white">利用可能なMOD</h3>
+                        <h3 className="text-lg font-semibold text-white">{t('profiles.editPage.availableMods')}</h3>
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
@@ -1269,7 +1269,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                           ) : (
                             <Search className="w-4 h-4" />
                           )}
-                          <span>MOD一覧を取得</span>
+                          <span>{t('profiles.editPage.fetchModList')}</span>
                         </motion.button>
                       </div>
 
@@ -1279,7 +1279,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                             type="text"
                             value={modSearchQuery}
                             onChange={(e) => setModSearchQuery(e.target.value)}
-                            placeholder="MODを検索..."
+                            placeholder={t('profiles.editPage.searchMods')}
                             className="input-primary w-full"
                           />
                         </div>
@@ -1289,13 +1289,13 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                         {modsLoading ? (
                           <div className="text-center py-8">
                             <Loader2 className="w-8 h-8 text-resonite-blue animate-spin mx-auto mb-4" />
-                            <p className="text-gray-400">MOD一覧を取得中...</p>
+                            <p className="text-gray-400">{t('profiles.editPage.fetchingMods')}</p>
                           </div>
                         ) : availableMods.length === 0 ? (
                           <div className="text-center py-8">
                             <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                            <p className="text-gray-400 mb-2">MOD一覧を取得してください</p>
-                            <p className="text-gray-500 text-sm">上の「MOD一覧を取得」ボタンを押してください</p>
+                            <p className="text-gray-400 mb-2">{t('profiles.editPage.fetchModsFirst')}</p>
+                            <p className="text-gray-500 text-sm">{t('profiles.editPage.fetchModsHint')}</p>
                           </div>
                         ) : (
                           availableMods
@@ -1323,7 +1323,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                         </span>
                                       )}
                                     </div>
-                                    <p className="text-gray-400 text-xs">by {mod.author} • {mod.releases.length} リリース</p>
+                                    <p className="text-gray-400 text-xs">{t('profiles.editPage.byAuthor')} {mod.author} • {mod.releases.length} {t('profiles.editPage.releases')}</p>
                                     <p className="text-gray-300 text-xs truncate">{mod.description}</p>
                                   </div>
                                   
@@ -1333,7 +1333,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       whileTap={{ scale: 0.98 }}
                                       className="btn-secondary text-xs p-1.5"
                                       onClick={() => open(mod.source_location)}
-                                      title="GitHubで開く"
+                                      title="Open in GitHub"
                                     >
                                       <ExternalLink className="w-3 h-3" />
                                     </motion.button>
@@ -1345,7 +1345,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       className="btn-secondary text-xs p-1.5"
                                       onClick={() => handleAvailableModInstallClick(mod)}
                                       disabled={installModMutation.isPending || mod.releases.length === 0}
-                                      title="バージョンを選択してインストール"
+                                      title={t('profiles.editPage.selectVersionToInstall')}
                                     >
                                       <Settings className="w-3 h-3" />
                                     </motion.button>
@@ -1357,7 +1357,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       className="btn-primary text-xs flex items-center space-x-1 px-3 py-1.5"
                                       onClick={() => handleInstallLatestClick(mod)}
                                       disabled={installModMutation.isPending || mod.releases.length === 0}
-                                      title="最新版をインストール"
+                                      title={t('profiles.editPage.installLatest')}
                                     >
                                       {installModMutation.isPending ? (
                                         <Loader2 className="w-3 h-3 animate-spin" />
@@ -1378,7 +1378,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     {unmanagedMods.length > 0 && (
                       <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
                         <div className="flex items-center justify-between mb-4">
-                          <h3 className="text-lg font-semibold text-orange-400">検出された未管理MOD</h3>
+                          <h3 className="text-lg font-semibold text-orange-400">{t('profiles.editPage.unmangedMods')}</h3>
                           <div className="flex items-center space-x-2">
                             <motion.button
                               whileHover={{ scale: 1.02 }}
@@ -1395,7 +1395,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                               ) : (
                                 <UserPlus className="w-3 h-3" />
                               )}
-                              <span>すべて管理システムに追加</span>
+                              <span>{t('profiles.editPage.addAllToManagement')}</span>
                             </motion.button>
                             <motion.button
                               whileHover={{ scale: 1.02 }}
@@ -1409,15 +1409,15 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                               ) : (
                                 <RefreshCw className="w-3 h-3" />
                               )}
-                              <span>再スキャン</span>
+                              <span>{t('profiles.editPage.rescan')}</span>
                             </motion.button>
                           </div>
                         </div>
                         
                         <div className="mb-4 p-3 bg-orange-500/10 border border-orange-500/20 rounded">
                           <p className="text-orange-300 text-sm">
-                            ⚠️ これらのMODはrml_modsフォルダに手動で追加されたファイルです。
-                            管理システムに追加すると、バージョン管理が可能になります。
+                            {t('profiles.editPage.unmangedModsWarning')}
+                            {t('profiles.editPage.versionControlNote')}
                           </p>
                         </div>
                         
@@ -1433,10 +1433,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                               <div className="flex items-start justify-between mb-2">
                                 <div className="flex-1">
                                   <h4 className="text-orange-200 font-medium">{mod.dll_name}</h4>
-                                  <p className="text-gray-400 text-sm">ファイル: {mod.file_name}</p>
+                                  <p className="text-gray-400 text-sm">{t('profiles.editPage.fileSize')}: {mod.file_name}</p>
                                   <p className="text-gray-500 text-xs">
-                                    サイズ: {(mod.file_size / 1024 / 1024).toFixed(2)}MB | 
-                                    更新: {mod.modified_time}
+                                    {t('profiles.editPage.size')}: {(mod.file_size / 1024 / 1024).toFixed(2)}MB | 
+                                    {t('profiles.editPage.updated')}: {mod.modified_time}
                                   </p>
                                   {mod.calculated_sha256 && (
                                     <p className="text-gray-500 text-xs font-mono">
@@ -1459,7 +1459,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                   ) : (
                                     <Plus className="w-3 h-3" />
                                   )}
-                                  <span>追加</span>
+                                  <span>{t('common.add')}</span>
                                 </motion.button>
                               </div>
                               
@@ -1467,10 +1467,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                               {mod.detected_version && (
                                 <div className="mt-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded">
                                   <p className="text-blue-300 text-sm">
-                                    🔍 検出バージョン: <span className="font-mono">{mod.detected_version}</span>
+                                    {t('profiles.editPage.detectedVersion')} <span className="font-mono">{mod.detected_version}</span>
                                   </p>
                                   <p className="text-blue-200 text-xs mt-1">
-                                    このMODは管理システムに追加時、検出されたバージョンで登録されます
+                                    {t('profiles.editPage.detectedVersionNote')}
                                   </p>
                                 </div>
                               )}
@@ -1479,12 +1479,12 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                 <div className="mt-3 p-3 bg-green-500/10 border border-green-500/30 rounded">
                                   <div className="flex items-start justify-between">
                                     <div className="flex-1">
-                                      <h5 className="text-green-400 font-medium">マッチしたMOD情報</h5>
+                                      <h5 className="text-green-400 font-medium">{t('profiles.editPage.matchedModInfo')}</h5>
                                       <p className="text-green-300 text-sm">{mod.matched_mod_info.name}</p>
                                       <p className="text-green-200 text-xs">{mod.matched_mod_info.description}</p>
-                                      <p className="text-green-200 text-xs">作者: {mod.matched_mod_info.author}</p>
+                                      <p className="text-green-200 text-xs">{t('profiles.editPage.byAuthor')} {mod.matched_mod_info.author}</p>
                                       {mod.matched_mod_info.latest_version && (
-                                        <p className="text-green-200 text-xs">最新バージョン: {mod.matched_mod_info.latest_version}</p>
+                                        <p className="text-green-200 text-xs">{t('profiles.editPage.latestVersion')} {mod.matched_mod_info.latest_version}</p>
                                       )}
                                     </div>
                                     <div className="flex space-x-2">
@@ -1502,7 +1502,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                               ) : !mod.detected_version && (
                                 <div className="mt-3 p-3 bg-gray-500/10 border border-gray-500/30 rounded">
                                   <p className="text-gray-400 text-sm">
-                                    📦 マニフェストに該当するMODが見つかりませんでした
+                                    {t('profiles.editPage.noMatchFound')}
                                   </p>
                                 </div>
                               )}
@@ -1519,14 +1519,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                   <div className="space-y-6">
                     {/* インストール済みMOD */}
                     <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-white mb-4">インストール済みMOD</h3>
+                      <h3 className="text-lg font-semibold text-white mb-4">{t('profiles.editPage.installedMods')}</h3>
                       
                       <div className="space-y-3">
                         {installedMods.length === 0 ? (
                           <div className="text-center py-8">
                             <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                            <p className="text-gray-400 mb-2">インストール済みMODはありません</p>
-                            <p className="text-gray-500 text-sm">インストールタブからMODをインストールしてください</p>
+                            <p className="text-gray-400 mb-2">{t('profiles.editPage.noInstalledMods')}</p>
+                            <p className="text-gray-500 text-sm">{t('profiles.editPage.installModsFirst')}</p>
                           </div>
                         ) : (
                           installedMods.map((mod, index) => (
@@ -1556,31 +1556,31 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                     {/* MOD有効/無効状態 */}
                                     {mod.enabled === false && (
                                       <span className="inline-flex items-center text-xs bg-gray-500/20 text-gray-400 border border-gray-500/30 px-2 py-0.5 rounded-full">
-                                        無効
+                                        {t('profiles.editPage.disabled')}
                                       </span>
                                     )}
                                     
                                     {hasNewerVersion(mod) && (
                                       <span className="inline-flex items-center text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-full">
                                         <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
-                                        更新可能
+                                        {t('profiles.editPage.updateAvailable')}
                                       </span>
                                     )}
                                   </div>
                                   <p className="text-gray-400 text-sm">
-                                    バージョン: {mod.installed_version}
+                                    {t('common.version')}: {mod.installed_version}
                                     {hasNewerVersion(mod) && (() => {
                                       const manifestMod = availableMods.find(m => 
                                         m.name === mod.name || m.source_location === mod.source_location
                                       );
                                       return manifestMod?.latest_version && (
                                         <span className="text-blue-300 ml-2">
-                                          → {manifestMod.latest_version} が利用可能
+                                          → {manifestMod.latest_version} {t('profiles.editPage.available')}
                                         </span>
                                       );
                                     })()}
                                   </p>
-                                  <p className="text-gray-500 text-xs">インストール日: {mod.installed_date}</p>
+                                  <p className="text-gray-500 text-xs">{t('profiles.editPage.installDate')} {mod.installed_date}</p>
                                 </div>
                                 
                                 <div className="flex items-center space-x-2">
@@ -1603,14 +1603,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                     }`}
                                     onClick={() => handleVersionChangeClick(mod)}
                                     disabled={versionsLoading || loadingManualVersions === mod.name}
-                                    title={hasNewerVersion(mod) ? '新しいバージョンが利用可能です' : 'バージョンを変更'}
+                                    title={hasNewerVersion(mod) ? t('profiles.editPage.newVersionAvailable') : t('profiles.editPage.changeVersion')}
                                   >
                                     {loadingManualVersions === mod.name ? (
                                       <Loader2 className="w-3 h-3 animate-spin" />
                                     ) : (
                                       <Edit className="w-3 h-3" />
                                     )}
-                                    <span>バージョン変更</span>
+                                    <span>{t('profiles.editPage.changeVersion')}</span>
                                     {hasNewerVersion(mod) && (
                                       <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                                     )}
@@ -1625,7 +1625,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                     }`}
                                     onClick={() => mod.enabled === false ? enableMod(mod.name) : disableMod(mod.name)}
                                     disabled={disableModMutation.isPending || enableModMutation.isPending}
-                                    title={mod.enabled === false ? 'MODを有効化' : 'MODを無効化'}
+                                    title={mod.enabled === false ? t('profiles.editPage.enableMod') : t('profiles.editPage.disableMod')}
                                   >
                                     {disableModMutation.isPending || enableModMutation.isPending ? (
                                       <Loader2 className="w-3 h-3 animate-spin" />
@@ -1634,7 +1634,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                     ) : (
                                       <EyeOff className="w-3 h-3" />
                                     )}
-                                    <span>{mod.enabled === false ? '有効化' : '無効化'}</span>
+                                    <span>{mod.enabled === false ? t('profiles.editPage.enable') : t('profiles.editPage.disable')}</span>
                                   </motion.button>
                                   
                                   <motion.button
@@ -1645,7 +1645,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                     disabled={uninstallModMutation.isPending}
                                   >
                                     <Trash2 className="w-3 h-3" />
-                                    <span>削除</span>
+                                    <span>{t('common.delete')}</span>
                                   </motion.button>
                                 </div>
                               </div>
@@ -1657,11 +1657,11 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                               {/* バージョン選択UI */}
                               {selectedModForVersions?.name === mod.name && (
                                 <div className="mt-4 p-3 bg-dark-600/30 border border-dark-500/30 rounded-lg">
-                                  <h5 className="text-white font-medium mb-2">バージョン選択</h5>
+                                  <h5 className="text-white font-medium mb-2">{t('profiles.editPage.versionSelection')}</h5>
                                   {(versionsLoading || loadingManualVersions === mod.name) ? (
                                     <div className="flex items-center space-x-2">
                                       <Loader2 className="w-4 h-4 animate-spin" />
-                                      <span className="text-gray-400">バージョン情報を取得中...</span>
+                                      <span className="text-gray-400">{t('profiles.editPage.fetchingVersions')}</span>
                                     </div>
                                   ) : (() => {
                                     const availableVersions = isModInManifest(mod) 
@@ -1677,7 +1677,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       />
                                     ) : (
                                       <div className="space-y-2">
-                                        <p className="text-gray-400 text-sm">利用可能なバージョンがありません</p>
+                                        <p className="text-gray-400 text-sm">{t('profiles.editPage.noVersionsAvailable')}</p>
                                         {!isModInManifest(mod) && (
                                           <motion.button
                                             whileHover={{ scale: 1.02 }}
@@ -1691,7 +1691,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                             ) : (
                                               <Github className="w-3 h-3" />
                                             )}
-                                            <span>GitHubから取得</span>
+                                            <span>{t('profiles.editPage.fetchFromGithub')}</span>
                                           </motion.button>
                                         )}
                                       </div>
@@ -1704,7 +1704,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       className="btn-secondary text-xs"
                                       onClick={() => setSelectedModForVersions(null)}
                                     >
-                                      閉じる
+                                      {t('common.close')}
                                     </motion.button>
                                   </div>
                                 </div>
@@ -1732,7 +1732,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           >
             <div className="flex items-center space-x-3 mb-6">
               <Settings className="w-6 h-6 text-resonite-blue" />
-              <h2 className="text-2xl font-bold text-white">その他の{t('common.settings')}</h2>
+              <h2 className="text-2xl font-bold text-white">{t('profiles.editPage.otherSettings')}</h2>
             </div>
 
             {!hasGame ? (
@@ -1743,7 +1743,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                   <div>
                     <h4 className="text-orange-400 font-medium mb-2">ゲームがインストールされていません</h4>
                     <p className="text-orange-200 text-sm">
-                      その他の設定を利用するには、まずResoniteをインストールしてください。
+                      {t('profiles.editPage.otherSettingsWarning')}
                     </p>
                   </div>
                 </div>
@@ -1754,13 +1754,13 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
                   <Download className="w-5 h-5 text-resonite-blue" />
-                  <span>yt-dlp管理</span>
+                  <span>{t('profiles.editPage.ytdlpManagement')}</span>
                 </h3>
                 
                 {ytDlpLoading ? (
                   <div className="flex items-center space-x-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-gray-400">yt-dlpの状態を確認中...</span>
+                    <span className="text-gray-400">{t('profiles.editPage.checkingYtdlp')}</span>
                   </div>
                 ) : ytDlpInfo ? (
                   <div className="space-y-4">
@@ -1770,11 +1770,11 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                           <h4 className="text-white font-medium">yt-dlp.exe</h4>
                         </div>
                         <p className="text-gray-400 text-sm">
-                          バージョン: {ytDlpInfo.version || '不明'}
+                          {t('common.version')}: {ytDlpInfo.version || t('profiles.editPage.unknown')}
                         </p>
                         {ytDlpInfo.path && (
                           <p className="text-gray-500 text-xs">
-                            パス: Game/RuntimeData/yt-dlp.exe
+                            {t('profiles.editPage.ytdlpPath')}
                           </p>
                         )}
                       </div>
@@ -1788,7 +1788,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                           disabled={ytDlpLoading}
                         >
                           <RefreshCw className={`w-3 h-3 ${ytDlpLoading ? 'animate-spin' : ''}`} />
-                          <span>更新確認</span>
+                          <span>{t('profiles.editPage.checkUpdate')}</span>
                         </motion.button>
                         
                         <motion.button
@@ -1812,7 +1812,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                   </div>
                 ) : (
                   <div className="text-center py-4">
-                    <p className="text-gray-400">yt-dlpの状態を取得できませんでした</p>
+                    <p className="text-gray-400">{t('profiles.editPage.ytdlpStatusFailed')}</p>
                   </div>
                 )}
               </div>
@@ -1820,8 +1820,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               {/* その他の設定エリア */}
               <div className="bg-dark-800/30 rounded-lg p-8 text-center">
                 <Settings className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400 text-lg mb-2">詳細設定</p>
-                <p className="text-gray-500">今後、詳細設定項目がここに追加される予定です</p>
+                <p className="text-gray-400 text-lg mb-2">{t('profiles.editPage.detailedSettings')}</p>
+                <p className="text-gray-500">{t('profiles.editPage.detailedSettingsNote')}</p>
               </div>
             </div>
             )}
@@ -1849,11 +1849,11 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             onClick={onBack}
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>戻る</span>
+            <span>{t('common.back')}</span>
           </motion.button>
           
           <div className="flex items-center space-x-2 text-sm text-gray-400">
-            <span>プロファイル管理</span>
+            <span>{t('profiles.editPage.profileManagement')}</span>
             <span>/</span>
             <span className="text-white font-medium">{profile.display_name}</span>
           </div>
@@ -1865,10 +1865,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             whileTap={{ scale: 0.98 }}
             className="btn-secondary flex items-center space-x-2"
             onClick={openProfileFolder}
-            title="プロファイルフォルダを開く"
+            title={t('profiles.editPage.openProfileFolder')}
           >
             <FolderOpen className="w-4 h-4" />
-            <span>フォルダを開く</span>
+            <span>{t('profiles.editPage.openFolder')}</span>
           </motion.button>
           
           <motion.button
@@ -1882,14 +1882,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               refetchUnmanagedMods();
             }}
             disabled={installedModsLoading || unmanagedModsLoading || migrateInstalledModsMutation.isPending}
-            title="MODフォルダの変更を反映"
+            title={t('profiles.editPage.reloadMods')}
           >
             {installedModsLoading || unmanagedModsLoading || migrateInstalledModsMutation.isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <RefreshCw className="w-4 h-4" />
             )}
-            <span>リロード</span>
+            <span>{t('profiles.editPage.reload')}</span>
           </motion.button>
           
           {/* 起動ボタン */}
@@ -1903,14 +1903,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             }`}
             onClick={handleLaunch}
             disabled={!hasGame || launchMutation.isPending}
-            title={hasGame ? 'Resoniteを起動' : 'ゲームがインストールされていません'}
+            title={hasGame ? t('profiles.editPage.launchResonite') : t('profiles.editPage.gameNotInstalledWarning')}
           >
             {launchMutation.isPending ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <Play className="w-4 h-4" />
             )}
-            <span>起動</span>
+            <span>{t('profiles.editPage.launch')}</span>
           </motion.button>
           
           <motion.button
@@ -1925,7 +1925,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             ) : (
               <Save className="w-4 h-4" />
             )}
-            <span>保存</span>
+            <span>{t('common.save')}</span>
           </motion.button>
           
           {/* 複製ボタン */}
@@ -1934,15 +1934,15 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             whileTap={{ scale: 0.98 }}
             className="btn-secondary flex items-center space-x-2"
             onClick={() => {
-              setDuplicateName(`${profile?.display_name || profileName} - コピー`);
+              setDuplicateName(`${profile?.display_name || profileName} - Copy`);
               setDuplicateDescription(profile?.description || '');
               setShowDuplicateModal(true);
             }}
             disabled={isDuplicating}
-            title="プロファイルを複製"
+            title={t('profiles.editPage.duplicateProfile')}
           >
             <Copy className="w-4 h-4" />
-            <span>複製</span>
+            <span>{t('profiles.editPage.duplicate')}</span>
           </motion.button>
           
           {/* 削除ボタン（デフォルトプロファイル以外で表示） */}
@@ -1955,7 +1955,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               disabled={isDeleting}
             >
               <Trash2 className="w-4 h-4" />
-              <span>削除</span>
+              <span>{t('common.delete')}</span>
             </motion.button>
           )}
         </div>
@@ -1986,7 +1986,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               }`}
               onClick={() => !isDisabled && setActiveTab(tab.id)}
               disabled={isDisabled}
-              title={isDisabled ? 'ゲームをインストールしてください' : undefined}
+              title={isDisabled ? t('profiles.editPage.installGamePlaceholder') : undefined}
             >
               <Icon className="w-4 h-4" />
               <span className="font-medium">{tab.label}</span>
@@ -2019,8 +2019,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           <div className="flex items-center space-x-3">
             <Info className="w-5 h-5 text-yellow-400 flex-shrink-0" />
             <div>
-              <p className="text-white font-medium">未保存の変更があります</p>
-              <p className="text-gray-300 text-sm">変更を保存することを忘れずに</p>
+              <p className="text-white font-medium">{t('profiles.editPage.unsavedChanges')}</p>
+              <p className="text-gray-300 text-sm">{t('profiles.editPage.unsavedChangesNote')}</p>
             </div>
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -2029,7 +2029,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               onClick={saveProfile}
               disabled={isSaving}
             >
-              保存
+              {t('common.save')}
             </motion.button>
           </div>
         </motion.div>
@@ -2077,7 +2077,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-white">
-                {selectedAvailableModForVersions.name} - インストール
+                {selectedAvailableModForVersions.name} - {t('common.install')}
               </h3>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -2085,14 +2085,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 className="btn-secondary text-sm"
                 onClick={() => setSelectedAvailableModForVersions(null)}
               >
-                閉じる
+                {t('common.close')}
               </motion.button>
             </div>
             
             {availableVersionsLoading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-6 h-6 animate-spin text-resonite-blue" />
-                <span className="ml-2 text-gray-400">バージョン情報を取得中...</span>
+                <span className="ml-2 text-gray-400">{t('profiles.editPage.fetchingVersions')}</span>
               </div>
             ) : availableModVersions.length > 0 ? (
               <div className="space-y-4">
@@ -2129,7 +2129,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               </div>
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-400">利用可能なバージョンがありません</p>
+                <p className="text-gray-400">{t('profiles.editPage.noVersionsAvailable')}</p>
               </div>
             )}
           </motion.div>
@@ -2146,7 +2146,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             className="bg-dark-800 rounded-lg p-6 max-w-md w-full mx-4 border border-dark-600"
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-white">バージョンを選択</h3>
+              <h3 className="text-lg font-semibold text-white">{t('modLoader.versionSelector.selectVersion')}</h3>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -2165,7 +2165,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               <ModVersionSelector
                 mod={{
                   name: selectedCustomModUrl.split('/').pop() || 'Custom MOD',
-                  description: 'GitHub リポジトリから手動インストール',
+                  description: 'Manual install from GitHub repository',
                   source_location: selectedCustomModUrl,
                   installed_version: '',
                   installed_date: new Date().toISOString(),
@@ -2209,7 +2209,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-semibold text-white flex items-center space-x-2">
                 <Copy className="w-5 h-5 text-resonite-blue" />
-                <span>プロファイルを複製</span>
+                <span>{t('profiles.editPage.duplicateModal.title')}</span>
               </h3>
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -2228,27 +2228,27 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  新しいプロファイル名 <span className="text-red-400">*</span>
+                  {t('profiles.editPage.duplicateModal.newName')} <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={duplicateName}
                   onChange={(e) => setDuplicateName(e.target.value)}
                   className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:border-resonite-blue focus:outline-none"
-                  placeholder="新しいプロファイル名を入力"
+                  placeholder={t('profiles.editPage.duplicateModal.newNamePlaceholder')}
                   maxLength={100}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  説明
+                  {t('common.description')}
                 </label>
                 <textarea
                   value={duplicateDescription}
                   onChange={(e) => setDuplicateDescription(e.target.value)}
                   className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-white placeholder-gray-400 focus:border-resonite-blue focus:outline-none resize-none"
-                  placeholder="プロファイルの説明を入力（任意）"
+                  placeholder={t('profiles.editPage.duplicateModal.newDescriptionPlaceholder')}
                   rows={3}
                   maxLength={500}
                 />
@@ -2259,7 +2259,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                   <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="text-blue-200 text-sm">
-                      元のプロファイルの設定、ゲームデータ、MODが全て複製されます。
+                      {t('profiles.editPage.duplicateModal.duplicateNote')}
                     </p>
                   </div>
                 </div>
@@ -2278,7 +2278,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 }}
                 disabled={isDuplicating}
               >
-                キャンセル
+                {t('common.cancel')}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -2292,7 +2292,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 ) : (
                   <Copy className="w-4 h-4" />
                 )}
-                <span>{isDuplicating ? '複製中...' : '複製'}</span>
+                <span>{isDuplicating ? t('profiles.editPage.duplicateModal.duplicating') : t('profiles.editPage.duplicate')}</span>
               </motion.button>
             </div>
           </motion.div>
