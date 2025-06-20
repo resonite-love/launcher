@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   Loader2
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import GameVersionSelector from './GameVersionSelector';
 
 interface GameInstallModalProps {
@@ -24,6 +25,7 @@ function GameInstallModal({
   profileName,
   isLoading = false
 }: GameInstallModalProps) {
+  const { t } = useTranslation();
   const [branch, setBranch] = useState<'release' | 'prerelease'>('release');
   const [manifestId, setManifestId] = useState<string | null>(null);
 
@@ -65,7 +67,7 @@ function GameInstallModal({
               <div className="flex items-center space-x-3">
                 <Download className="w-6 h-6 text-resonite-blue" />
                 <h3 className="text-xl font-bold text-white">
-                  Resoniteインストール
+                  {t('profiles.installModal.title')}
                 </h3>
               </div>
               <button
@@ -79,14 +81,14 @@ function GameInstallModal({
 
             {/* プロファイル情報 */}
             <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-4 mb-6">
-              <h4 className="text-white font-medium mb-2">インストール先プロファイル</h4>
+              <h4 className="text-white font-medium mb-2">{t('profiles.installModal.profileLabel')}</h4>
               <p className="text-white">{profileName}</p>
             </div>
 
             {/* インストール設定 */}
             <div className="space-y-4 mb-6">
               <div>
-                <h4 className="text-white font-medium mb-3">ブランチ選択</h4>
+                <h4 className="text-white font-medium mb-3">{t('profiles.installModal.branchSelection')}</h4>
                 <div className="flex space-x-3">
                   <label className="flex-1">
                     <input
@@ -102,8 +104,8 @@ function GameInstallModal({
                         ? 'border-resonite-blue bg-resonite-blue/20'
                         : 'border-dark-600 hover:border-dark-500'
                     }`}>
-                      <div className="font-medium text-white mb-1">リリース版</div>
-                      <div className="text-sm text-gray-400">安定版（推奨）</div>
+                      <div className="font-medium text-white mb-1">{t('profiles.installModal.release')}</div>
+                      <div className="text-sm text-gray-400">{t('profiles.installModal.releaseDescription')}</div>
                     </div>
                   </label>
                   
@@ -121,8 +123,8 @@ function GameInstallModal({
                         ? 'border-resonite-blue bg-resonite-blue/20'
                         : 'border-dark-600 hover:border-dark-500'
                     }`}>
-                      <div className="font-medium text-white mb-1">プレリリース版</div>
-                      <div className="text-sm text-gray-400">開発版</div>
+                      <div className="font-medium text-white mb-1">{t('profiles.installModal.prerelease')}</div>
+                      <div className="text-sm text-gray-400">{t('profiles.installModal.prereleaseDescription')}</div>
                     </div>
                   </label>
                 </div>
@@ -142,11 +144,11 @@ function GameInstallModal({
               <div className="flex items-start space-x-2">
                 <Info className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  <p className="text-blue-400 font-medium mb-1">インストールについて</p>
+                  <p className="text-blue-400 font-medium mb-1">{t('profiles.installModal.about.title')}</p>
                   <ul className="text-blue-200 space-y-1">
-                    <li>• インストールには時間がかかる場合があります</li>
-                    <li>• Steamアカウントが必要な場合があります</li>
-                    <li>• インストール後、MODローダーも追加できます</li>
+                    <li>{t('profiles.installModal.about.timeWarning')}</li>
+                    <li>{t('profiles.installModal.about.steamRequired')}</li>
+                    <li>{t('profiles.installModal.about.modLoaderHint')}</li>
                   </ul>
                 </div>
               </div>
@@ -161,7 +163,7 @@ function GameInstallModal({
                 onClick={handleClose}
                 disabled={isLoading}
               >
-                キャンセル
+                {t('common.cancel')}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -175,7 +177,7 @@ function GameInstallModal({
                 ) : (
                   <Download className="w-4 h-4" />
                 )}
-                <span>インストール開始</span>
+                <span>{t('profiles.installModal.startInstall')}</span>
               </motion.button>
             </div>
           </motion.div>

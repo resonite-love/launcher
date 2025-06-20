@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Save, Loader2, Plus, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileConfig {
   name: string;
@@ -16,6 +17,7 @@ interface ProfileEditModalProps {
 }
 
 function ProfileEditModal({ isOpen, profile, onClose, onSave }: ProfileEditModalProps) {
+  const { t } = useTranslation();
   const [config, setConfig] = useState<ProfileConfig>({
     name: '',
     description: '',
@@ -96,7 +98,7 @@ function ProfileEditModal({ isOpen, profile, onClose, onSave }: ProfileEditModal
       >
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-xl font-bold text-white">
-            プロファイル設定編集
+            {t('profiles.editModal.title')}
           </h3>
           <button
             onClick={onClose}
@@ -112,7 +114,7 @@ function ProfileEditModal({ isOpen, profile, onClose, onSave }: ProfileEditModal
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                プロファイル名
+                {t('profiles.editModal.nameLabel')}
               </label>
               <input
                 type="text"
@@ -123,19 +125,19 @@ function ProfileEditModal({ isOpen, profile, onClose, onSave }: ProfileEditModal
                 readOnly
               />
               <p className="text-xs text-gray-500 mt-1">
-                プロファイル名は変更できません
+                {t('profiles.editModal.nameHint')}
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                説明
+                {t('profiles.editModal.descriptionLabel')}
               </label>
               <input
                 type="text"
                 value={config.description}
                 onChange={(e) => setConfig(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="プロファイルの説明を入力"
+                placeholder={t('profiles.editModal.descriptionPlaceholder')}
                 className="input-primary w-full"
                 disabled={isLoading}
               />
@@ -145,7 +147,7 @@ function ProfileEditModal({ isOpen, profile, onClose, onSave }: ProfileEditModal
           {/* Launch Arguments */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              起動引数
+              {t('profiles.editModal.launchArgs.title')}
             </label>
             
             <div className="space-y-2 mb-4">
@@ -175,7 +177,7 @@ function ProfileEditModal({ isOpen, profile, onClose, onSave }: ProfileEditModal
                 value={newArg}
                 onChange={(e) => setNewArg(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="新しい引数を追加（例: -Screen）"
+                placeholder={t('profiles.editModal.launchArgs.addPlaceholder')}
                 className="input-primary flex-1"
                 disabled={isLoading}
               />
@@ -185,16 +187,16 @@ function ProfileEditModal({ isOpen, profile, onClose, onSave }: ProfileEditModal
                 disabled={isLoading || !newArg.trim()}
               >
                 <Plus className="w-4 h-4" />
-                <span>追加</span>
+                <span>{t('profiles.editModal.launchArgs.add')}</span>
               </button>
             </div>
 
             <div className="mt-2 text-xs text-gray-500">
-              <p>使用可能な変数:</p>
+              <p>{t('profiles.editModal.launchArgs.availableVars')}</p>
               <ul className="list-disc list-inside ml-2 mt-1">
-                <li>%PROFILE_DIR% - プロファイルディレクトリ</li>
-                <li>%GAME_DIR% - ゲームディレクトリ</li>
-                <li>%DATA_DIR% - データディレクトリ</li>
+                <li>{t('profiles.editModal.launchArgs.profileDir')}</li>
+                <li>{t('profiles.editModal.launchArgs.gameDir')}</li>
+                <li>{t('profiles.editModal.launchArgs.dataDir')}</li>
               </ul>
             </div>
           </div>
@@ -206,7 +208,7 @@ function ProfileEditModal({ isOpen, profile, onClose, onSave }: ProfileEditModal
             onClick={onClose}
             disabled={isLoading}
           >
-            キャンセル
+            {t('common.cancel')}
           </button>
           <button
             className="btn-primary flex-1 flex items-center justify-center space-x-2"
@@ -218,7 +220,7 @@ function ProfileEditModal({ isOpen, profile, onClose, onSave }: ProfileEditModal
             ) : (
               <Save className="w-4 h-4" />
             )}
-            <span>保存</span>
+            <span>{t('common.save')}</span>
           </button>
         </div>
       </motion.div>

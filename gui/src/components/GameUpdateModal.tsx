@@ -9,6 +9,7 @@ import {
   Info,
   AlertTriangle
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import GameVersionSelector from './GameVersionSelector';
 
 interface GameUpdateModalProps {
@@ -30,6 +31,7 @@ function GameUpdateModal({
   currentBranch = 'release',
   isLoading = false
 }: GameUpdateModalProps) {
+  const { t } = useTranslation();
   const [updateType, setUpdateType] = useState<'latest' | 'specific'>('latest');
   const [manifestId, setManifestId] = useState('');
 
@@ -76,7 +78,7 @@ function GameUpdateModal({
               <div className="flex items-center space-x-3">
                 <RefreshCw className="w-6 h-6 text-resonite-blue" />
                 <h3 className="text-xl font-bold text-white">
-                  ゲームアップデート
+                  {t('profiles.updateModal.title')}
                 </h3>
               </div>
               <button
@@ -90,19 +92,19 @@ function GameUpdateModal({
 
             {/* プロファイル情報 */}
             <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-4 mb-6">
-              <h4 className="text-white font-medium mb-2">プロファイル情報</h4>
+              <h4 className="text-white font-medium mb-2">{t('profiles.updateModal.profileInfo')}</h4>
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-400">プロファイル:</span>
+                  <span className="text-gray-400">{t('profiles.updateModal.profileLabel')}</span>
                   <span className="text-white">{profileName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-400">ブランチ:</span>
+                  <span className="text-gray-400">{t('profiles.updateModal.branchLabel')}</span>
                   <span className="text-white">{currentBranch}</span>
                 </div>
                 {currentVersion && (
                   <div className="flex justify-between">
-                    <span className="text-gray-400">現在のバージョン:</span>
+                    <span className="text-gray-400">{t('profiles.updateModal.currentVersion')}</span>
                     <span className="text-white">v{currentVersion}</span>
                   </div>
                 )}
@@ -111,7 +113,7 @@ function GameUpdateModal({
 
             {/* アップデート方法選択 */}
             <div className="space-y-4 mb-6">
-              <h4 className="text-white font-medium">アップデート方法</h4>
+              <h4 className="text-white font-medium">{t('profiles.updateModal.updateMethod')}</h4>
               
               <div className="space-y-3">
                 {/* 最新版にアップデート */}
@@ -127,10 +129,10 @@ function GameUpdateModal({
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
                       <ArrowUp className="w-4 h-4 text-green-400" />
-                      <span className="text-white font-medium">最新版にアップデート</span>
+                      <span className="text-white font-medium">{t('profiles.updateModal.latestVersion')}</span>
                     </div>
                     <p className="text-gray-400 text-sm mt-1">
-                      {currentBranch}ブランチの最新バージョンにアップデートします
+                      {t('profiles.updateModal.latestVersionDescription', { branch: currentBranch })}
                     </p>
                   </div>
                 </label>
@@ -148,10 +150,10 @@ function GameUpdateModal({
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
                       <ArrowDown className="w-4 h-4 text-yellow-400" />
-                      <span className="text-white font-medium">特定バージョンを指定</span>
+                      <span className="text-white font-medium">{t('profiles.updateModal.specificVersion')}</span>
                     </div>
                     <p className="text-gray-400 text-sm mt-1">
-                      マニフェストIDを指定してアップグレード/ダウングレードします
+                      {t('profiles.updateModal.specificVersionDescription')}
                     </p>
                   </div>
                 </label>
@@ -180,11 +182,11 @@ function GameUpdateModal({
               <div className="flex items-start space-x-2">
                 <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
                 <div className="text-sm">
-                  <p className="text-yellow-400 font-medium mb-1">注意事項</p>
+                  <p className="text-yellow-400 font-medium mb-1">{t('profiles.updateModal.notes.title')}</p>
                   <ul className="text-yellow-200 space-y-1">
-                    <li>• アップデート中はゲームを起動しないでください</li>
-                    <li>• ダウングレード時は互換性の問題が発生する可能性があります</li>
-                    <li>• プロファイルデータのバックアップを推奨します</li>
+                    <li>{t('profiles.updateModal.notes.noLaunch')}</li>
+                    <li>{t('profiles.updateModal.notes.compatibility')}</li>
+                    <li>{t('profiles.updateModal.notes.backup')}</li>
                   </ul>
                 </div>
               </div>
@@ -199,7 +201,7 @@ function GameUpdateModal({
                 onClick={handleClose}
                 disabled={isLoading}
               >
-                キャンセル
+                {t('common.cancel')}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -214,7 +216,7 @@ function GameUpdateModal({
                   <Download className="w-4 h-4" />
                 )}
                 <span>
-                  {updateType === 'latest' ? 'アップデート' : '適用'}
+                  {updateType === 'latest' ? t('profiles.updateModal.updateButton') : t('common.apply')}
                 </span>
               </motion.button>
             </div>

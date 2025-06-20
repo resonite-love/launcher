@@ -112,7 +112,7 @@ function SettingsTab() {
       >
         <div className="flex items-center space-x-3 mb-6">
           <Globe className="w-6 h-6 text-resonite-blue" />
-          <h2 className="text-2xl font-bold text-white">Language / 言語</h2>
+          <h2 className="text-2xl font-bold text-white">{t('settings.language.title')}</h2>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -126,8 +126,8 @@ function SettingsTab() {
             }`}
             onClick={() => i18n.changeLanguage('ja')}
           >
-            <p className="text-lg font-medium">日本語</p>
-            <p className="text-sm opacity-70">Japanese</p>
+            <p className="text-lg font-medium">{t('settings.language.japanese')}</p>
+            <p className="text-sm opacity-70">{t('settings.language.japaneseEn')}</p>
           </motion.button>
           
           <motion.button
@@ -140,8 +140,8 @@ function SettingsTab() {
             }`}
             onClick={() => i18n.changeLanguage('en')}
           >
-            <p className="text-lg font-medium">English</p>
-            <p className="text-sm opacity-70">英語</p>
+            <p className="text-lg font-medium">{t('settings.language.english')}</p>
+            <p className="text-sm opacity-70">{t('settings.language.englishJa')}</p>
           </motion.button>
         </div>
       </motion.div>
@@ -255,11 +255,11 @@ function SettingsTab() {
                       <div className="space-y-2 text-sm">
                         <div className="flex items-center space-x-4">
                           <span className="text-gray-400">{t('settings.app.currentVersion')}</span>
-                          <span className="font-mono text-gray-300">v{updateInfo.current_version}</span>
+                          <span className="font-mono text-gray-300">{t('settings.app.versionPrefix')}{updateInfo.current_version}</span>
                         </div>
                         <div className="flex items-center space-x-4">
                           <span className="text-gray-400">{t('settings.app.latestVersion')}</span>
-                          <span className="font-mono text-green-400">v{updateInfo.latest_version}</span>
+                          <span className="font-mono text-green-400">{t('settings.app.versionPrefix')}{updateInfo.latest_version}</span>
                         </div>
                       </div>
                       
@@ -293,7 +293,7 @@ function SettingsTab() {
                                   <span className="text-sm text-gray-300">{asset.name}</span>
                                 </div>
                                 <span className="text-xs text-gray-500">
-                                  {(asset.size / 1024 / 1024).toFixed(1)} MB
+                                  {(asset.size / 1024 / 1024).toFixed(1)} {t('settings.app.sizeUnit')}
                                 </span>
                               </motion.button>
                             ))}
@@ -322,7 +322,7 @@ function SettingsTab() {
                     <div>
                       <p className="text-white font-medium">{t('settings.app.upToDate')}</p>
                       <p className="text-gray-400 text-sm">
-                        {t('settings.app.currentVersion')} v{updateInfo.current_version}
+                        {t('settings.app.currentVersion')} {t('settings.app.versionPrefix')}{updateInfo.current_version}
                       </p>
                     </div>
                   </div>

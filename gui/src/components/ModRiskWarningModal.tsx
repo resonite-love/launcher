@@ -6,6 +6,7 @@ import {
   Check,
   ExternalLink 
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ModRiskWarningModalProps {
   isOpen: boolean;
@@ -18,8 +19,10 @@ function ModRiskWarningModal({
   isOpen, 
   onClose, 
   onConfirm, 
-  title = "MODローダーのインストール" 
+  title 
 }: ModRiskWarningModalProps) {
+  const { t } = useTranslation();
+  const modalTitle = title || t('modLoader.riskWarning.title');
   return (
     <AnimatePresence>
       {isOpen && (
@@ -42,7 +45,7 @@ function ModRiskWarningModal({
               <div className="flex items-center space-x-3">
                 <AlertTriangle className="w-6 h-6 text-orange-400" />
                 <h3 className="text-xl font-bold text-white">
-                  {title}
+                  {modalTitle}
                 </h3>
               </div>
               <button
@@ -59,29 +62,29 @@ function ModRiskWarningModal({
                 <div className="flex items-start space-x-3">
                   <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-orange-400 font-semibold mb-2">重要な警告</h4>
+                    <h4 className="text-orange-400 font-semibold mb-2">{t('modLoader.riskWarning.importantWarning')}</h4>
                     <p className="text-orange-200 text-sm">
-                      MODローダーをインストールすることで、サードパーティのコードがResoniteで実行されることになります。
+                      {t('modLoader.riskWarning.thirdPartyCode')}
                     </p>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-3 text-sm text-gray-300">
-                <h5 className="font-semibold text-white">以下のリスクを理解してください：</h5>
+                <h5 className="font-semibold text-white">{t('modLoader.riskWarning.risks.title')}</h5>
                 
                 <ul className="space-y-2 pl-4">
                   <li className="flex items-start space-x-2">
                     <span className="text-orange-400 mt-1">•</span>
-                    <span>MODによりゲームが不安定になる可能性があります</span>
+                    <span>{t('modLoader.riskWarning.risks.unstable')}</span>
                   </li>
                   <li className="flex items-start space-x-2">
                     <span className="text-orange-400 mt-1">•</span>
-                    <span>個人情報やアカウント情報が悪意のあるMODに盗まれる可能性があります</span>
+                    <span>{t('modLoader.riskWarning.risks.security')}</span>
                   </li>
                   <li className="flex items-start space-x-2">
                     <span className="text-orange-400 mt-1">•</span>
-                    <span>ゲームアップデート時にMODが動作しなくなる可能性があります</span>
+                    <span>{t('modLoader.riskWarning.risks.compatibility')}</span>
                   </li>
                 </ul>
               </div>
@@ -90,12 +93,12 @@ function ModRiskWarningModal({
                 <div className="flex items-start space-x-3">
                   <ExternalLink className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-blue-400 font-semibold mb-2">推奨事項</h4>
+                    <h4 className="text-blue-400 font-semibold mb-2">{t('modLoader.riskWarning.recommendations.title')}</h4>
                     <ul className="text-blue-200 text-sm space-y-1">
-                      <li>• 信頼できるソースからのMODのみをインストールしてください</li>
-                      <li>• MODの使用は自己責任で行ってください</li>
-                      <li>• 定期的にプロファイルのバックアップを取ってください</li>
-                      <li>• 問題が発生した場合はMODローダーを削除してください</li>
+                      <li>{t('modLoader.riskWarning.recommendations.trustedSource')}</li>
+                      <li>{t('modLoader.riskWarning.recommendations.ownRisk')}</li>
+                      <li>{t('modLoader.riskWarning.recommendations.backup')}</li>
+                      <li>{t('modLoader.riskWarning.recommendations.removeIfIssue')}</li>
                     </ul>
                   </div>
                 </div>
@@ -103,7 +106,7 @@ function ModRiskWarningModal({
 
               <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
                 <p className="text-red-200 text-sm text-center font-medium">
-                  上記のリスクを理解し、自己責任でMODローダーを使用することに同意しますか？
+                  {t('modLoader.riskWarning.agreement')}
                 </p>
               </div>
             </div>
@@ -116,7 +119,7 @@ function ModRiskWarningModal({
                 className="btn-secondary flex-1"
                 onClick={onClose}
               >
-                キャンセル
+                {t('common.cancel')}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.02 }}
@@ -125,7 +128,7 @@ function ModRiskWarningModal({
                 onClick={onConfirm}
               >
                 <Check className="w-4 h-4" />
-                <span>理解してインストール</span>
+                <span>{t('modLoader.riskWarning.understandAndInstall')}</span>
               </motion.button>
             </div>
           </motion.div>

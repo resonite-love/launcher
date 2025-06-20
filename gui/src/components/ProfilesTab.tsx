@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { listen } from '@tauri-apps/api/event';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { 
   Plus, 
   Play, 
@@ -30,7 +31,7 @@ import { BranchInfo } from './ProfileEditPage';
 interface ProfileInfo {
   id: string;
   display_name: string;
-  name?: string; // 互換性のため
+  name?: string; // for compatibility
   description: string;
   has_game: boolean;
   branch?: string;
@@ -60,6 +61,7 @@ interface ProfileConfig {
 }
 
 function ProfilesTab() {
+  const { t } = useTranslation();
   const { 
     profilesPage, 
     editingProfileName, 
@@ -72,10 +74,10 @@ function ProfilesTab() {
   const { data: profiles = [], isLoading: profilesLoading, refetch: refetchProfiles } = useProfiles();
   const createProfileMutation = useCreateProfile();
   
-  // ローカルローディング状態（ゲームインストールなど）
+  // Local loading state (for game installation, etc.)
   const [isLoading, setIsLoading] = useState(false);
   
-  // プロファイル作成モーダル用の状態
+  // State for profile creation modal
   const [showCreateProfileModal, setShowCreateProfileModal] = useState(false);
   const [newProfileName, setNewProfileName] = useState('');
   const [newProfileDescription, setNewProfileDescription] = useState('');
@@ -85,7 +87,7 @@ function ProfilesTab() {
   const [createWithModLoader, setCreateWithModLoader] = useState(false);
   const [createModLoaderType, setCreateModLoaderType] = useState<'ResoniteModLoader' | 'MonkeyLoader'>('ResoniteModLoader');
   
-  // ゲームインストール用の状態
+  // State for game installation
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [installBranch, setInstallBranch] = useState('release');
@@ -93,14 +95,14 @@ function ProfilesTab() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   
-  // Steamクレデンシャル管理用の状態
+  // State for Steam credentials management
   const [savedCredentials, setSavedCredentials] = useState<SteamCredentials | null>(null);
   
-  // プロファイル編集用の状態
+  // State for profile editing
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingProfile, setEditingProfile] = useState<ProfileConfig | null>(null);
   
-  // MODリスク警告モーダル用の状態
+  // State for MOD risk warning modal
   const [showModRiskModal, setShowModRiskModal] = useState(false);
   const [pendingProfileData, setPendingProfileData] = useState<{
     name: string;
@@ -112,11 +114,11 @@ function ProfilesTab() {
     modLoaderType: 'ResoniteModLoader' | 'MonkeyLoader';
   } | null>(null);
   
-  // ゲームアップデートモーダル用の状態
+  // State for game update modal
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [selectedUpdateProfile, setSelectedUpdateProfile] = useState<ProfileInfo | null>(null);
   
-  // バージョン情報管理
+  // Version info management
   const [gameVersions, setGameVersions] = useState<BranchInfo>({});
   const [loadingVersions, setLoadingVersions] = useState(false);
 
@@ -124,7 +126,7 @@ function ProfilesTab() {
     loadSavedCredentials();
     loadGameVersions();
 
-    // インストール完了イベントをリッスン
+    // Listen for installation completion events
     const unlistenCompleted = listen('installation-completed', (event) => {
       const data = event.payload as {
         profile_name: string;
@@ -135,13 +137,13 @@ function ProfilesTab() {
       
       if (data.success) {
         toast.success(data.message);
-        refetchProfiles(); // React Query を使用
+        refetchProfiles(); // Using React Query
       } else {
         toast.error(data.message);
       }
     });
 
-    // インストールステータス更新イベントをリッスン
+    // Listen for installation status update events
     const unlistenStatus = listen('installation-status', (event) => {
       const data = event.payload as {
         profile_name: string;
@@ -155,7 +157,7 @@ function ProfilesTab() {
       }
     });
 
-    // クリーンアップ
+    // Cleanup
     return () => {
       unlistenCompleted.then(f => f());
       unlistenStatus.then(f => f());
@@ -203,7 +205,7 @@ function ProfilesTab() {
       return;
     }
 
-    // MODローダーをインストールする場合は警告モーダルを表示
+    // Show warning modal if installing MOD loader
     if (createWithGame && createWithModLoader) {
       setPendingProfileData({
         name: newProfileName.trim(),
@@ -218,7 +220,7 @@ function ProfilesTab() {
       return;
     }
 
-    // MODローダーなしの場合は直接作成
+    // Create directly if no MOD loader
     await executeProfileCreation({
       name: newProfileName.trim(),
       description: newProfileDescription.trim(),
@@ -244,13 +246,13 @@ function ProfilesTab() {
     try {
       setIsLoading(true);
       
-      // React Queryのミューテーションを使用してプロファイルを作成
+      // Create profile using React Query mutation
       await createProfileMutation.mutateAsync({
         name: profileData.name,
         description: profileData.description,
       });
       
-      // ゲームもインストールする場合
+      // If also installing game
       if (profileData.withGame) {
         const request: GameInstallRequest = {
           profile_name: profileData.name,
@@ -264,7 +266,7 @@ function ProfilesTab() {
           const installResult = await invoke<string>('install_game_to_profile_interactive', { request });
           toast.success(installResult);
           
-          // MODローダーもインストールする場合
+          // If also installing MOD loader
           if (profileData.withModLoader) {
             try {
               const modLoaderResult = await invoke<string>('install_mod_loader', { 
@@ -273,17 +275,17 @@ function ProfilesTab() {
               });
               toast.success(modLoaderResult);
             } catch (modErr) {
-              toast.error(`MODローダーのインストールに失敗しました: ${modErr}`);
+              toast.error(t('toasts.error', { message: `MODローダーのインストールに失敗しました: ${modErr}` }));
             }
           }
         } catch (installErr) {
-          toast.error(`ゲームのインストールに失敗しました: ${installErr}`);
+          toast.error(t('toasts.error', { message: `ゲームのインストールに失敗しました: ${installErr}` }));
         }
       }
       
       closeCreateProfileModal();
     } catch (err) {
-      toast.error(`プロファイルの作成に失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: `プロファイルの作成に失敗しました: ${err}` }));
     } finally {
       setIsLoading(false);
     }
@@ -302,7 +304,7 @@ function ProfilesTab() {
     setPendingProfileData(null);
   };
   
-  // 新しいバージョンが利用可能かチェック
+  // Check if newer version is available
   const hasNewerVersion = (profile: ProfileInfo): boolean => {
     if (!gameVersions || !profile.has_game || !profile.branch) {
       return false;
@@ -313,7 +315,7 @@ function ProfilesTab() {
       return false;
     }
     
-    // 特定のマニフェストIDが指定されている場合はマニフェストIDで比較
+    // Compare by manifest ID if specific manifest ID is specified
     if (profile.manifest_id) {
       const latestVersion = branchVersions[0];
       return latestVersion && latestVersion.manifestId !== profile.manifest_id;
@@ -323,18 +325,18 @@ function ProfilesTab() {
       return false;
     }
     
-    // プロファイルの現在のバージョンに対応するエントリを探す
+    // Find entry corresponding to profile's current version
     const currentVersionEntry = branchVersions.find(v => v.gameVersion === profile.version);
     if (!currentVersionEntry) {
-      // 現在のバージョンが見つからない場合は更新なしと判断（古すぎるか無効）
+      // If current version not found, consider no update available (too old or invalid)
       return false;
     }
     
-    // タイムスタンプでソートして最新のバージョンを取得
+    // Sort by timestamp to get latest version
     const sortedVersions = [...branchVersions].sort((a, b) => {
       const timestampA = new Date(a.timestamp).getTime();
       const timestampB = new Date(b.timestamp).getTime();
-      return timestampB - timestampA; // 降順（新しい順）
+      return timestampB - timestampA; // Descending order (newest first)
     });
     
     const latestVersion = sortedVersions[0];
@@ -342,19 +344,19 @@ function ProfilesTab() {
       return false;
     }
     
-    // 現在のバージョンが最新バージョンと同じ場合は更新なし
+    // No update if current version is same as latest version
     if (currentVersionEntry.manifestId === latestVersion.manifestId) {
       return false;
     }
     
-    // タイムスタンプで比較
+    // Compare by timestamp
     const currentTimestamp = new Date(currentVersionEntry.timestamp).getTime();
     const latestTimestamp = new Date(latestVersion.timestamp).getTime();
     
     return latestTimestamp > currentTimestamp;
   };
   
-  // 最新バージョン情報を取得
+  // Get latest version info
   const getLatestVersionInfo = (profile: ProfileInfo) => {
     if (!gameVersions || !profile.branch) {
       return null;
@@ -365,11 +367,11 @@ function ProfilesTab() {
       return null;
     }
     
-    // タイムスタンプでソートして最新のバージョンを取得
+    // Sort by timestamp to get latest version
     const sortedVersions = [...branchVersions].sort((a, b) => {
       const timestampA = new Date(a.timestamp).getTime();
       const timestampB = new Date(b.timestamp).getTime();
-      return timestampB - timestampA; // 降順（新しい順）
+      return timestampB - timestampA; // Descending order (newest first)
     });
     
     return sortedVersions[0];
@@ -384,7 +386,7 @@ function ProfilesTab() {
       
       toast.success(result);
     } catch (err) {
-      toast.error(`起動に失敗しました: ${err}`);
+      toast.error(t('toasts.gameLaunchFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -421,7 +423,7 @@ function ProfilesTab() {
       toast.success(result);
       closeInstallModal();
     } catch (err) {
-      toast.error(`ゲームのインストールに失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: `ゲームのインストールに失敗しました: ${err}` }));
     } finally {
       setIsLoading(false);
     }
@@ -456,15 +458,15 @@ function ProfilesTab() {
       const result = await invoke<string>('update_profile_game_interactive', { request });
       toast.success(result);
       closeUpdateModal();
-      await refetchProfiles(); // プロファイル一覧を更新
+      await refetchProfiles(); // Update profile list
     } catch (err) {
-      toast.error(`ゲームの更新に失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: `ゲームの更新に失敗しました: ${err}` }));
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Steamクレデンシャル関連の関数
+  // Steam credentials related functions
   const loadSavedCredentials = async () => {
     try {
       const credentials = await invoke<SteamCredentials | null>('load_steam_credentials');
@@ -474,7 +476,7 @@ function ProfilesTab() {
     }
   };
 
-  // プロファイル編集関連の関数
+  // Profile editing related functions
   const openEditModal = async (profileName: string) => {
     try {
       setIsLoading(true);
@@ -482,7 +484,7 @@ function ProfilesTab() {
       setEditingProfile(profile);
       setShowEditModal(true);
     } catch (err) {
-      toast.error(`プロファイル設定の取得に失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: `プロファイル設定の取得に失敗しました: ${err}` }));
     } finally {
       setIsLoading(false);
     }
@@ -499,12 +501,12 @@ function ProfilesTab() {
       toast.success(result);
       await refetchProfiles();
     } catch (err) {
-      toast.error(`プロファイルの更新に失敗しました: ${err}`);
+      toast.error(t('toasts.error', { message: `プロファイルの更新に失敗しました: ${err}` }));
       throw err;
     }
   };
 
-  // プロファイル編集ページの表示
+  // Display profile editing page
   if (profilesPage === 'edit' && editingProfileName) {
     return (
       <ProfileEditPage
@@ -526,7 +528,7 @@ function ProfilesTab() {
       >
         <div className="flex items-center space-x-3">
           <User className="w-6 h-6 text-resonite-blue" />
-          <h2 className="text-2xl font-bold text-white">プロファイル一覧</h2>
+          <h2 className="text-2xl font-bold text-white">{t('profiles.title')}</h2>
         </div>
         
         <div className="flex items-center space-x-2">
@@ -537,7 +539,7 @@ function ProfilesTab() {
             onClick={openCreateProfileModal}
           >
             <Plus className="w-4 h-4" />
-            <span>新規作成</span>
+            <span>{t('profiles.newProfile')}</span>
           </motion.button>
           
           <motion.button
@@ -548,7 +550,7 @@ function ProfilesTab() {
             disabled={profilesLoading}
           >
             <RefreshCw className={`w-4 h-4 ${profilesLoading ? 'animate-spin' : ''}`} />
-            <span>更新</span>
+            <span>{t('profiles.refresh')}</span>
           </motion.button>
         </div>
       </motion.div>
@@ -562,8 +564,8 @@ function ProfilesTab() {
           className="text-center py-12"
         >
           <User className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400 text-lg">プロファイルがありません</p>
-          <p className="text-gray-500">新規作成してください</p>
+          <p className="text-gray-400 text-lg">{t('profiles.noProfiles')}</p>
+          <p className="text-gray-500">{t('profiles.createHint')}</p>
         </motion.div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -581,25 +583,25 @@ function ProfilesTab() {
                     {profile.display_name}
                   </h3>
                   <p className="text-gray-400 text-sm">
-                    {profile.description || '説明なし'}
+                    {profile.description || t('profiles.noDescription')}
                   </p>
                 </div>
                 
                 <div className="flex items-center space-x-2">
                   {profile.has_game ? (
                     <span className="status-success">
-                      ✓ インストール済
+                      {t('profiles.installed')}
                     </span>
                   ) : (
                     <span className="status-error">
-                      未インストール
+                      {t('profiles.notInstalled')}
                     </span>
                   )}
                   
                   {profile.has_game && hasNewerVersion(profile) && (
                     <span className="status-info text-xs flex items-center space-x-1">
                       <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span>
-                      <span>更新可能</span>
+                      <span>{t('profiles.updateAvailable')}</span>
                     </span>
                   )}
                   
@@ -621,12 +623,12 @@ function ProfilesTab() {
               {profile.has_game && (
                 <div className="mb-4 text-sm space-y-1">
                   <div className="flex justify-between">
-                    <span className="text-gray-400">ブランチ:</span>
+                    <span className="text-gray-400">{t('common.branch')}:</span>
                     <span className="text-white">{profile.branch}</span>
                   </div>
                   {profile.version && (
                     <div className="flex justify-between">
-                      <span className="text-gray-400">バージョン:</span>
+                      <span className="text-gray-400">{t('common.version')}:</span>
                       <div className="flex items-center space-x-2">
                         <span className="text-white">v{profile.version}</span>
                         {hasNewerVersion(profile) && (() => {
@@ -646,7 +648,7 @@ function ProfilesTab() {
                       <div className="flex items-center space-x-2">
                         <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                         <span className="text-blue-300">
-                          新しいバージョンが利用可能です
+                          {t('profiles.newVersionAvailable')}
                         </span>
                       </div>
                     </div>
@@ -669,12 +671,12 @@ function ProfilesTab() {
                       {isProfileInstalling(profile.id) ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>インストール中</span>
+                          <span>{t('common.installing')}</span>
                         </>
                       ) : (
                         <>
                           <Play className="w-4 h-4" />
-                          <span>起動</span>
+                          <span>{t('common.launch')}</span>
                         </>
                       )}
                     </motion.button>
@@ -690,10 +692,10 @@ function ProfilesTab() {
                       onClick={() => openUpdateModal(profile.id)}
                       disabled={isLoading || isProfileInstalling(profile.id)}
                       title={isProfileInstalling(profile.id) 
-                        ? 'インストール中です' 
+                        ? t('common.installing') 
                         : hasNewerVersion(profile) 
-                          ? '新しいバージョンが利用可能です' 
-                          : 'ゲームを最新版に更新'
+                          ? t('profiles.newVersionAvailable') 
+                          : t('common.update')
                       }
                     >
                       {isProfileInstalling(profile.id) ? (
@@ -701,7 +703,7 @@ function ProfilesTab() {
                       ) : (
                         <RefreshCw className={`w-4 h-4 ${hasNewerVersion(profile) ? 'text-white' : ''}`} />
                       )}
-                      <span>{isProfileInstalling(profile.id) ? 'インストール中' : '更新'}</span>
+                      <span>{isProfileInstalling(profile.id) ? t('common.installing') : t('common.update')}</span>
                       {hasNewerVersion(profile) && !isProfileInstalling(profile.id) && (
                         <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
                       )}
@@ -720,12 +722,12 @@ function ProfilesTab() {
                     {isProfileInstalling(profile.id) ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>インストール中</span>
+                        <span>{t('common.installing')}</span>
                       </>
                     ) : (
                       <>
                         <Download className="w-4 h-4" />
-                        <span>ゲームをインストール</span>
+                        <span>{t('profiles.installGame')}</span>
                       </>
                     )}
                   </motion.button>
@@ -737,10 +739,10 @@ function ProfilesTab() {
                   className="btn-secondary flex items-center space-x-2"
                   onClick={() => navigateToProfileEdit(profile.id)}
                   disabled={isLoading}
-                  title="プロファイル設定を編集"
+                  title={t('profiles.editModal.title')}
                 >
                   <Edit3 className="w-4 h-4" />
-                  <span>編集</span>
+                  <span>{t('common.edit')}</span>
                 </motion.button>
               </div>
             </motion.div>
@@ -767,7 +769,7 @@ function ProfilesTab() {
             >
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-bold text-white">
-                  ゲームインストール
+                  {t('profiles.installModal.title')}
                 </h3>
                 <button
                   onClick={closeInstallModal}
@@ -780,13 +782,13 @@ function ProfilesTab() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    プロファイル: {selectedProfile}
+                    {t('common.profile')}: {selectedProfile}
                   </label>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    ブランチ
+                    {t('common.branch')}
                   </label>
                   <div className="flex space-x-4">
                     <label className="flex items-center space-x-2">
@@ -797,7 +799,7 @@ function ProfilesTab() {
                         onChange={(e) => setInstallBranch(e.target.value)}
                         className="text-resonite-blue"
                       />
-                      <span className="text-white">リリース版</span>
+                      <span className="text-white">{t('profiles.installModal.release')}</span>
                     </label>
                     <label className="flex items-center space-x-2">
                       <input
@@ -807,7 +809,7 @@ function ProfilesTab() {
                         onChange={(e) => setInstallBranch(e.target.value)}
                         className="text-resonite-blue"
                       />
-                      <span className="text-white">プレリリース版</span>
+                      <span className="text-white">{t('profiles.installModal.prerelease')}</span>
                     </label>
                   </div>
                 </div>
@@ -821,26 +823,26 @@ function ProfilesTab() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Steamユーザー名（オプション）
+                    {t('settings.steam.credentialModal.usernameLabel')}
                   </label>
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Steamユーザー名"
+                    placeholder={t('settings.steam.credentialModal.usernameLabel')}
                     className="input-primary w-full"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Steamパスワード（オプション）
+                    {t('settings.steam.credentialModal.passwordLabel')}
                   </label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Steamパスワード"
+                    placeholder={t('settings.steam.credentialModal.passwordLabel')}
                     className="input-primary w-full"
                   />
                 </div>
@@ -852,7 +854,7 @@ function ProfilesTab() {
                   onClick={closeInstallModal}
                   disabled={isLoading}
                 >
-                  キャンセル
+                  {t('common.cancel')}
                 </button>
                 <button
                   className="btn-primary flex-1 flex items-center justify-center space-x-2"
@@ -864,7 +866,7 @@ function ProfilesTab() {
                   ) : (
                     <Download className="w-4 h-4" />
                   )}
-                  <span>インストール</span>
+                  <span>{t('common.install')}</span>
                 </button>
               </div>
             </motion.div>
@@ -894,7 +896,7 @@ function ProfilesTab() {
                 <div className="flex items-center space-x-3">
                   <Plus className="w-6 h-6 text-resonite-blue" />
                   <h3 className="text-xl font-bold text-white">
-                    新規プロファイル作成
+                    {t('profiles.createModal.title')}
                   </h3>
                 </div>
                 <button
@@ -908,26 +910,26 @@ function ProfilesTab() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    プロファイル名 *
+                    {t('profiles.createModal.nameLabel')}
                   </label>
                   <input
                     type="text"
                     value={newProfileName}
                     onChange={(e) => setNewProfileName(e.target.value)}
-                    placeholder="例: メインプロファイル"
+                    placeholder={t('profiles.createModal.namePlaceholder')}
                     className="input-primary w-full"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    説明（オプション）
+                    {t('profiles.createModal.descriptionLabel')}
                   </label>
                   <input
                     type="text"
                     value={newProfileDescription}
                     onChange={(e) => setNewProfileDescription(e.target.value)}
-                    placeholder="例: 日常使用のプロファイル"
+                    placeholder={t('profiles.createModal.descriptionPlaceholder')}
                     className="input-primary w-full"
                   />
                 </div>
@@ -942,7 +944,7 @@ function ProfilesTab() {
                       className="w-4 h-4 text-resonite-blue bg-dark-800 border-dark-600 rounded focus:ring-resonite-blue focus:ring-2"
                     />
                     <label htmlFor="createWithGame" className="text-white font-medium">
-                      ゲームも同時にインストールする
+                      {t('profiles.createModal.installGame')}
                     </label>
                   </div>
 
@@ -955,7 +957,7 @@ function ProfilesTab() {
                     >
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          ブランチ
+                          {t('common.branch')}
                         </label>
                         <div className="flex space-x-4">
                           <label className="flex items-center space-x-2">
@@ -966,7 +968,7 @@ function ProfilesTab() {
                               onChange={(e) => setCreateGameBranch(e.target.value)}
                               className="text-resonite-blue"
                             />
-                            <span className="text-white">リリース版</span>
+                            <span className="text-white">{t('profiles.installModal.release')}</span>
                           </label>
                           <label className="flex items-center space-x-2">
                             <input
@@ -976,7 +978,7 @@ function ProfilesTab() {
                               onChange={(e) => setCreateGameBranch(e.target.value)}
                               className="text-resonite-blue"
                             />
-                            <span className="text-white">プレリリース版</span>
+                            <span className="text-white">{t('profiles.installModal.prerelease')}</span>
                           </label>
                         </div>
                       </div>
@@ -999,7 +1001,7 @@ function ProfilesTab() {
                               className="w-4 h-4 text-resonite-blue bg-dark-800 border-dark-600 rounded focus:ring-resonite-blue focus:ring-2"
                             />
                             <label htmlFor="createWithModLoader" className="text-white font-medium">
-                              MODローダーもインストールする
+                              {t('profiles.createModal.installModLoader')}
                             </label>
                           </div>
                           
@@ -1050,7 +1052,7 @@ function ProfilesTab() {
                       {!savedCredentials && (
                         <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
                           <p className="text-sm text-yellow-400">
-                            ⚠️ Steamクレデンシャルが設定されていません。ゲームのインストールが失敗する可能性があります。
+                            {t('profiles.createModal.steamCredentialWarning')}
                           </p>
                         </div>
                       )}
@@ -1065,7 +1067,7 @@ function ProfilesTab() {
                   onClick={closeCreateProfileModal}
                   disabled={createProfileMutation.isPending || isLoading}
                 >
-                  キャンセル
+                  {t('common.cancel')}
                 </button>
                 <button
                   className="btn-primary flex-1 flex items-center justify-center space-x-2"

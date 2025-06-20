@@ -171,6 +171,13 @@
         "usernameRequired": "Steamユーザー名を入力してください"
       }
     },
+    "language": {
+      "title": "Language / 言語",
+      "japanese": "日本語",
+      "japaneseEn": "Japanese",
+      "english": "English",
+      "englishJa": "英語"
+    },
     "app": {
       "title": "アプリケーション設定",
       "checkingUpdate": "アップデート情報を確認中...",
@@ -183,7 +190,9 @@
       "upToDate": "最新版を使用しています",
       "recheck": "再チェック",
       "updateCheckFailed": "アップデート情報を取得できませんでした",
-      "lastCheck": "最終チェック:"
+      "lastCheck": "最終チェック:",
+      "versionPrefix": "v",
+      "sizeUnit": "MB"
     }
   },
   "firstRun": {

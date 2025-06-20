@@ -14,6 +14,7 @@ import {
   ArrowRight,
   ArrowLeft
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 
 interface FirstRunSetupModalProps {
@@ -29,6 +30,7 @@ interface SteamCredentials {
 type SetupStep = 'welcome' | 'depot' | 'steam' | 'complete';
 
 function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
+  const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState<SetupStep>('welcome');
   const [isDownloading, setIsDownloading] = useState(false);
   const [depotDownloaded, setDepotDownloaded] = useState(false);
@@ -38,10 +40,10 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
   const [isCompletingSetup, setIsCompletingSetup] = useState(false);
 
   const steps = [
-    { id: 'welcome', title: 'ようこそ', icon: Users },
-    { id: 'depot', title: 'DepotDownloader', icon: Package },
-    { id: 'steam', title: 'Steam設定', icon: Key },
-    { id: 'complete', title: '完了', icon: Check },
+    { id: 'welcome', title: t('firstRun.welcome.title'), icon: Users },
+    { id: 'depot', title: t('firstRun.depotDownloader.title'), icon: Package },
+    { id: 'steam', title: t('firstRun.steam.title'), icon: Key },
+    { id: 'complete', title: t('firstRun.complete.title'), icon: Check },
   ];
 
   const getCurrentStepIndex = () => {
@@ -56,7 +58,7 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
       setDepotDownloaded(true);
       setTimeout(() => setCurrentStep('steam'), 1000);
     } catch (err) {
-      toast.error(`DepotDownloaderのダウンロードに失敗しました: ${err}`);
+      toast.error(`DepotDownloader download failed: ${err}`);
     } finally {
       setIsDownloading(false);
     }
@@ -70,9 +72,9 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
           password: steamPassword.trim(),
         };
         await invoke<string>('save_steam_credentials', { credentials });
-        toast.success('Steamクレデンシャルを保存しました');
+        toast.success(t('toasts.steamCredentialsSaved'));
       } catch (err) {
-        toast.error(`クレデンシャルの保存に失敗しました: ${err}`);
+        toast.error(`Credential save failed: ${err}`);
       }
     }
   };
@@ -87,7 +89,7 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
         onComplete();
       }, 2000);
     } catch (err) {
-      toast.error(`セットアップの完了に失敗しました: ${err}`);
+      toast.error(`Setup completion failed: ${err}`);
     } finally {
       setIsCompletingSetup(false);
     }
@@ -107,11 +109,11 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white mb-3">
-                RESO Launcherへようこそ！
+                {t('firstRun.welcome.heading')}
               </h2>
               <p className="text-gray-300 leading-relaxed">
-                初回セットアップを開始します。<br />
-                必要なツールのダウンロードとSteam設定を行います。
+                {t('firstRun.welcome.description')}<br />
+                {t('firstRun.welcome.setupSteps')}
               </p>
             </div>
             <motion.button
@@ -120,7 +122,7 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
               className="btn-primary w-full flex items-center justify-center space-x-2"
               onClick={() => setCurrentStep('depot')}
             >
-              <span>セットアップを開始</span>
+              <span>{t('firstRun.welcome.startSetup')}</span>
               <ArrowRight className="w-4 h-4" />
             </motion.button>
           </motion.div>
@@ -144,11 +146,11 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white mb-3">
-                DepotDownloader
+                {t('firstRun.depotDownloader.title')}
               </h2>
               <p className="text-gray-300 leading-relaxed">
-                Resoniteのインストールに必要なDepotDownloaderをダウンロードします。<br />
-                GitHubから最新版を自動でダウンロードします。
+                {t('firstRun.depotDownloader.description')}<br />
+                {t('firstRun.depotDownloader.githubInfo')}
               </p>
             </div>
             
@@ -156,7 +158,7 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
               <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
                 <div className="flex items-center justify-center space-x-2">
                   <Check className="w-5 h-5 text-green-400" />
-                  <span className="text-green-300 font-medium">ダウンロード完了</span>
+                  <span className="text-green-300 font-medium">{t('firstRun.depotDownloader.downloadComplete')}</span>
                 </div>
               </div>
             )}
@@ -170,7 +172,7 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
                 disabled={isDownloading}
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>戻る</span>
+                <span>{t('common.back')}</span>
               </motion.button>
               
               {!depotDownloaded ? (
@@ -184,12 +186,12 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
                   {isDownloading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>ダウンロード中...</span>
+                      <span>{t('firstRun.depotDownloader.downloading')}</span>
                     </>
                   ) : (
                     <>
                       <Download className="w-4 h-4" />
-                      <span>ダウンロード開始</span>
+                      <span>{t('firstRun.depotDownloader.startDownload')}</span>
                     </>
                   )}
                 </motion.button>
@@ -200,7 +202,7 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
                   className="btn-primary flex-1 flex items-center justify-center space-x-2"
                   onClick={() => setCurrentStep('steam')}
                 >
-                  <span>次へ</span>
+                  <span>{t('common.next')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </motion.button>
               )}
@@ -220,10 +222,10 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
                 <Key className="w-10 h-10 text-resonite-blue" />
               </div>
               <h2 className="text-2xl font-bold text-white mb-3">
-                Steam設定
+                {t('firstRun.steam.title')}
               </h2>
               <p className="text-gray-300">
-                Steamアカウント情報を設定します（スキップ可能）
+                {t('firstRun.steam.description')}
               </p>
             </div>
 
@@ -231,11 +233,11 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
               <div className="flex items-start space-x-3">
                 <AlertCircle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-blue-300">
-                  <p className="font-medium mb-1">Steamクレデンシャルについて</p>
+                  <p className="font-medium mb-1">{t('firstRun.steam.credentialTitle')}</p>
                   <p className="text-blue-200">
-                    Steamアカウント情報を保存すると、ゲームのダウンロード時に自動でログインされます。
-                    情報はローカルに暗号化されて保存され、外部には送信されません。
-                    メインアカウントとは違うサブアカウントを使用することを推奨します。
+                    {t('firstRun.steam.autoLogin')}
+                    {t('firstRun.steam.encrypted')}
+                    {t('firstRun.steam.subAccountRecommended')}
                   </p>
                 </div>
               </div>
@@ -244,26 +246,26 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Steamユーザー名（オプション）
+                  {t('settings.steam.username')}
                 </label>
                 <input
                   type="text"
                   value={steamUsername}
                   onChange={(e) => setSteamUsername(e.target.value)}
-                  placeholder="Steamユーザー名"
+                  placeholder={t('settings.steam.credentialModal.usernameLabel')}
                   className="input-primary w-full"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Steamパスワード（オプション）
+                  {t('settings.steam.credentialModal.passwordLabel')}
                 </label>
                 <input
                   type="password"
                   value={steamPassword}
                   onChange={(e) => setSteamPassword(e.target.value)}
-                  placeholder="Steamパスワード"
+                  placeholder={t('settings.steam.credentialModal.passwordLabel')}
                   className="input-primary w-full"
                 />
               </div>
@@ -277,7 +279,7 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
                   className="w-4 h-4 text-resonite-blue bg-dark-800 border-dark-600 rounded focus:ring-resonite-blue focus:ring-2"
                 />
                 <label htmlFor="saveCredentials" className="text-white font-medium">
-                  クレデンシャルを保存する
+                  {t('firstRun.steam.saveCredentials')}
                 </label>
               </div>
             </div>
@@ -291,7 +293,7 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
                 disabled={isCompletingSetup}
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>戻る</span>
+                <span>{t('common.back')}</span>
               </motion.button>
               
               <motion.button
@@ -304,11 +306,11 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
                 {isCompletingSetup ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>セットアップ中...</span>
+                    <span>{t('firstRun.steam.settingUp')}</span>
                   </>
                 ) : (
                   <>
-                    <span>セットアップ完了</span>
+                    <span>{t('common.finish')}</span>
                     <ArrowRight className="w-4 h-4" />
                   </>
                 )}
@@ -329,22 +331,22 @@ function FirstRunSetupModal({ isOpen, onComplete }: FirstRunSetupModalProps) {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-white mb-3">
-                セットアップ完了！
+                {t('firstRun.complete.setupComplete')}
               </h2>
               <p className="text-gray-300 leading-relaxed">
-                初回セットアップが完了しました。<br />
-                RESO Launcherをお使いいただけます。
+                {t('firstRun.complete.description')}<br />
+                {t('firstRun.complete.readyToUse')}
               </p>
             </div>
             <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
               <div className="flex items-start space-x-3">
                 <Check className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-green-300">
-                  <p className="font-medium mb-1">次のステップ</p>
+                  <p className="font-medium mb-1">{t('firstRun.complete.nextSteps.title')}</p>
                   <ul className="space-y-1 text-green-200">
-                    <li>• プロファイルを作成してください</li>
-                    <li>• Resoniteをダウンロードしてください</li>
-                    <li>• MODを管理できます</li>
+                    <li>{t('firstRun.complete.nextSteps.createProfile')}</li>
+                    <li>{t('firstRun.complete.nextSteps.downloadGame')}</li>
+                    <li>{t('firstRun.complete.nextSteps.manageMods')}</li>
                   </ul>
                 </div>
               </div>

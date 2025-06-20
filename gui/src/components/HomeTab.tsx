@@ -3,11 +3,13 @@ import { motion } from 'framer-motion';
 import { Play, ChevronDown, Info, Calendar, Loader2, RefreshCw, Construction, ExternalLink } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useTranslation } from 'react-i18next';
 import { useAppStore } from '../store/useAppStore';
 import { useProfiles, useLaunchResonite, useSteamNews } from '../hooks/useQueries';
 import { UpdateNote } from '../types/steam-news';
 
 function HomeTab() {
+  const { t } = useTranslation();
   const { 
     selectedProfile, 
     setSelectedProfile,
@@ -67,7 +69,7 @@ function HomeTab() {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
               <Info className="w-6 h-6 text-resonite-blue" />
-              <h2 className="text-2xl font-bold text-white">アップデート情報</h2>
+              <h2 className="text-2xl font-bold text-white">{t('home.updateInfo.title')}</h2>
             </div>
             
             <motion.button
@@ -78,7 +80,7 @@ function HomeTab() {
               className="btn-secondary flex items-center space-x-2"
             >
               <RefreshCw className={`w-4 h-4 ${isLoadingProfiles || isLoadingNews ? 'animate-spin' : ''}`} />
-              <span>更新</span>
+              <span>{t('common.update')}</span>
             </motion.button>
           </div>
           
@@ -91,8 +93,8 @@ function HomeTab() {
                 className="flex flex-col items-center justify-center h-full text-center py-12"
               >
                 <Loader2 className="w-16 h-16 text-resonite-blue mb-4 animate-spin" />
-                <h3 className="text-xl font-semibold text-white mb-2">アップデート情報を取得中...</h3>
-                <p className="text-gray-400">Resoniteの最新情報を読み込んでいます</p>
+                <h3 className="text-xl font-semibold text-white mb-2">{t('home.updateInfo.loading')}</h3>
+                <p className="text-gray-400">{t('home.updateInfo.loadingDescription')}</p>
               </motion.div>
             ) : updateNotes.length === 0 ? (
               /* No data state */
@@ -102,10 +104,10 @@ function HomeTab() {
                 className="flex flex-col items-center justify-center h-full text-center py-12"
               >
                 <Info className="w-16 h-16 text-gray-500 mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">アップデート情報なし</h3>
-                <p className="text-gray-400 mb-1">現在表示可能なアップデート情報がありません</p>
+                <h3 className="text-xl font-semibold text-white mb-2">{t('home.updateInfo.noInfo')}</h3>
+                <p className="text-gray-400 mb-1">{t('home.updateInfo.noInfoDescription')}</p>
                 <p className="text-gray-500 text-sm">
-                  更新ボタンを押して最新情報を取得してください
+                  {t('home.updateInfo.refreshHint')}
                 </p>
               </motion.div>
             ) : (
@@ -139,7 +141,7 @@ function HomeTab() {
                         rel="noopener noreferrer"
                         whileHover={{ scale: 1.1 }}
                         className="p-1 hover:text-resonite-blue transition-colors duration-200"
-                        title="Steam で開く"
+                        title={t('home.updateInfo.openInSteam')}
                       >
                         <ExternalLink className="w-4 h-4" />
                       </motion.a>
@@ -219,14 +221,14 @@ function HomeTab() {
           <div className="flex-1">
             <div className="flex items-center gap-4">
               <label className="text-sm font-medium text-gray-300 whitespace-nowrap">
-                プロファイル:
+                {t('home.launcher.profileLabel')}
               </label>
               
               <div className="relative flex-1 max-w-xs">
                 {isLoadingProfiles ? (
                   <div className="select-primary w-full pr-10 text-sm flex items-center justify-center">
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    読み込み中...
+                    {t('common.loading')}
                   </div>
                 ) : (
                   <select
@@ -236,7 +238,7 @@ function HomeTab() {
                     disabled={profiles.length === 0}
                   >
                     <option value="">
-                      {profiles.length === 0 ? 'プロファイルがありません' : 'プロファイルを選択...'}
+                      {profiles.length === 0 ? t('home.launcher.noProfiles') : t('home.launcher.selectProfile')}
                     </option>
                     {profiles.map((profile) => (
                       <option key={profile.id} value={profile.id}>
@@ -254,7 +256,7 @@ function HomeTab() {
           {selectedProfileData && (
             <div className="flex items-center gap-6 text-sm">
               <div className="flex items-center gap-2">
-                <span className="text-gray-400">ブランチ:</span>
+                <span className="text-gray-400">{t('home.launcher.branchLabel')}</span>
                 <span className="px-2 py-1 bg-resonite-blue/20 text-resonite-blue rounded-md font-medium">
                   {selectedProfileData.branch || 'unknown'}
                 </span>
@@ -262,7 +264,7 @@ function HomeTab() {
               
               {selectedProfileData.version && (
                 <div className="flex items-center gap-2">
-                  <span className="text-gray-400">バージョン:</span>
+                  <span className="text-gray-400">{t('home.launcher.versionLabel')}</span>
                   <span className="px-2 py-1 bg-dark-700 text-white rounded-md font-mono text-xs">
                     {selectedProfileData.version}
                   </span>
@@ -270,11 +272,11 @@ function HomeTab() {
               )}
               
               <div className="flex items-center gap-2">
-                <span className="text-gray-400">状態:</span>
+                <span className="text-gray-400">{t('home.launcher.statusLabel')}</span>
                 {selectedProfileData.has_game ? (
-                  <span className="status-success">Ready</span>
+                  <span className="status-success">{t('common.ready')}</span>
                 ) : (
-                  <span className="status-error">未インストール</span>
+                  <span className="status-error">{t('home.launcher.notInstalled')}</span>
                 )}
               </div>
             </div>
@@ -302,7 +304,7 @@ function HomeTab() {
               <Play className="w-5 h-5" />
             )}
             <span className="font-medium">
-              {isLaunching ? 'Starting...' : isProfileInstalling(selectedProfile) ? 'インストール中...' : 'Play'}
+              {isLaunching ? t('common.starting') : isProfileInstalling(selectedProfile) ? t('common.installing') : t('common.play')}
             </span>
           </motion.button>
         </div>
@@ -315,7 +317,7 @@ function HomeTab() {
             className="mt-3 text-yellow-400 text-xs flex items-center gap-2"
           >
             <span>⚠️</span>
-            <span>このプロファイルにはゲームがインストールされていません。プロファイル管理タブからインストールしてください。</span>
+            <span>{t('home.launcher.notInstalledWarning')}</span>
           </motion.div>
         )}
 
@@ -326,7 +328,7 @@ function HomeTab() {
             className="mt-3 text-gray-400 text-xs flex items-center gap-2"
           >
             <span>📝</span>
-            <span>プロファイル管理タブで新しいプロファイルを作成してください。</span>
+            <span>{t('home.launcher.createProfileHint')}</span>
           </motion.div>
         )}
       </motion.div>

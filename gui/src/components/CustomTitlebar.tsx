@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Minus, X } from 'lucide-react';
 import { appWindow } from '@tauri-apps/api/window';
+import { useTranslation } from 'react-i18next';
 import iconPng from '../assets/icon.png';
 
 function CustomTitlebar() {
+  const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState<string | null>(null);
 
   const handleMinimize = () => {
@@ -32,7 +34,7 @@ function CustomTitlebar() {
           />
           <span className="text-sm font-medium text-white" data-tauri-drag-region>
             RESO Launcher&nbsp; 
-            <span className="text-xs" data-tauri-drag-region>powered by resonite.love</span>
+            <span className="text-xs" data-tauri-drag-region>{t('titlebar.poweredBy')}</span>
           </span>
         </div>
       </div>
