@@ -4,7 +4,6 @@
 use std::sync::Mutex;
 use std::path::PathBuf;
 use tauri::{State, Window, AppHandle, Manager};
-use tauri_plugin_updater::UpdaterExt;
 use reso_launcher_lib::{
     depotdownloader::DepotDownloader,
     install::{ResoniteInstall, ResoniteInstallManager},
@@ -1626,7 +1625,7 @@ async fn get_yt_dlp_status(
 // Download yt-dlp using ModManager
 async fn download_yt_dlp(yt_dlp_path: &std::path::Path) -> Result<(), String> {
     let temp_dir = std::env::temp_dir();
-    let mod_manager = ModManager::new(temp_dir);
+    let _mod_manager = ModManager::new(temp_dir);
     
     // Create a temporary HTTP client through ModManager
     let client = reqwest::Client::new();
@@ -1836,68 +1835,38 @@ async fn complete_first_run_setup(state: State<'_, Mutex<AppState>>) -> Result<S
 // Check for app updates using Tauri updater
 #[tauri::command]
 async fn check_app_updates(app: AppHandle) -> Result<bool, String> {
-    match app.updater() {
-        Some(updater) => {
-            match updater.check().await {
-                Ok(update) => {
-                    if update.is_some() {
-                        Ok(true)
-                    } else {
-                        Ok(false)
-                    }
-                }
-                Err(e) => Err(format!("Failed to check for updates: {}", e)),
-            }
+    match app.updater().check().await {
+        Ok(update) => {
+            Ok(update.is_update_available())
         }
-        None => Err("Updater not available".to_string()),
+        Err(e) => Err(format!("Failed to check for updates: {}", e)),
     }
 }
 
 // Install app update
 #[tauri::command]
 async fn install_app_update(app: AppHandle, window: Window) -> Result<String, String> {
-    match app.updater() {
-        Some(updater) => {
-            match updater.check().await {
-                Ok(Some(update)) => {
-                    // Download and install the update
-                    let mut downloaded = 0;
-                    let content_length = update.content_length;
-                    
-                    update
-                        .download_and_install(
-                            |chunk_length, _chunk| {
-                                downloaded += chunk_length;
-                                let progress = if let Some(total) = content_length {
-                                    (downloaded as f64 / total as f64) * 100.0
-                                } else {
-                                    0.0
-                                };
-                                
-                                // Emit progress event
-                                let _ = window.emit("update-progress", progress);
-                            },
-                            || {
-                                // Emit completion event
-                                let _ = window.emit("update-complete", ());
-                            },
-                        )
-                        .await
-                        .map_err(|e| format!("Failed to install update: {}", e))?;
-                    
-                    Ok("Update installed successfully. Please restart the application.".to_string())
-                }
-                Ok(None) => Err("No update available".to_string()),
-                Err(e) => Err(format!("Failed to check for updates: {}", e)),
+    match app.updater().check().await {
+        Ok(update) => {
+            if !update.is_update_available() {
+                return Err("No update available".to_string());
             }
+            
+            // Download and install the update
+            update.download_and_install().await
+                .map_err(|e| format!("Failed to install update: {}", e))?;
+            
+            // Emit completion event
+            let _ = window.emit("update-complete", ());
+            
+            Ok("Update installed successfully. Please restart the application.".to_string())
         }
-        None => Err("Updater not available".to_string()),
+        Err(e) => Err(format!("Failed to check for updates: {}", e)),
     }
 }
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(Mutex::new(AppState::default()))
         .invoke_handler(tauri::generate_handler![
             initialize_app,
