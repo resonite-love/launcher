@@ -241,6 +241,43 @@ jobs:
           }
         shell: pwsh
         
+      # Find and prepare NSIS installer for updater
+      - name: Prepare updater files
+        run: |
+          Write-Host "Looking for NSIS installer files..."
+          
+          # Find the NSIS installer file
+          $nsisFiles = Get-ChildItem -Path "." -Filter "*.nsis.zip" -Recurse | Select-Object -First 5
+          if ($nsisFiles) {
+            Write-Host "Found NSIS files:"
+            $nsisFiles | ForEach-Object { Write-Host "  $($_.FullName)" }
+            
+            # Use the first NSIS file found
+            $nsisFile = $nsisFiles[0]
+            $newName = "RESO.Launcher_${{ github.ref_name }}_x64-setup.nsis.zip"
+            Copy-Item $nsisFile.FullName -Destination ".\$newName"
+            Write-Host "Copied to: $newName"
+          } else {
+            Write-Host "No .nsis.zip files found, checking for .exe installer..."
+            
+            # Look for setup.exe file
+            $setupFiles = Get-ChildItem -Path "." -Filter "*setup.exe" -Recurse | Select-Object -First 5
+            if ($setupFiles) {
+              Write-Host "Found setup files:"
+              $setupFiles | ForEach-Object { Write-Host "  $($_.FullName)" }
+              
+              # Create a zip of the setup file
+              $setupFile = $setupFiles[0]
+              $zipName = "RESO.Launcher_${{ github.ref_name }}_x64-setup.nsis.zip"
+              Compress-Archive -Path $setupFile.FullName -DestinationPath ".\$zipName" -Force
+              Write-Host "Created zip: $zipName"
+            } else {
+              Write-Error "No installer files found!"
+              exit 1
+            }
+          }
+        shell: pwsh
+      
       # Generate updater JSON
       - name: Create updater manifest
         run: |
@@ -273,6 +310,7 @@ jobs:
             ./reso-launcher-cli-${{ github.ref_name }}-windows.exe
             ./reso-launcher-${{ github.ref_name }}-windows-portable.exe
             ./reso-launcher-${{ github.ref_name }}-windows-portable.zip
+            ./RESO.Launcher_${{ github.ref_name }}_x64-setup.nsis.zip
             ./latest.json
           tag_name: ${{ github.ref_name }}
         env:

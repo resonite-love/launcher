@@ -7,6 +7,20 @@
 
 ## [Unreleased]
 
+## [v1.4.3] - 2025-06-21
+
+### 🐛 修正
+- **GitHub Actions修正**: アプリ内自動アップデート機能のファイル名問題を解決
+  - NSISインストーラーファイルの自動検出と適切なリネーム処理を追加
+  - `RESO.Launcher_v1.4.3_x64-setup.nsis.zip`形式でupdater用ファイルを自動生成
+  - updater JSONで参照するファイルが確実に存在するよう修正
+
+### 🔧 技術的改善
+- **リリースプロセス自動化**:
+  - "Prepare updater files"ステップを追加してインストーラーファイルを自動処理
+  - `.nsis.zip`ファイルまたは`.exe`ファイルからupdater用ZIPを自動生成
+  - アップロード対象にupdater用ファイルを明示的に追加
+
 ## [v1.4.2] - 2025-06-21
 
 ### 🚀 新機能
@@ -576,7 +590,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.2...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.3...HEAD
+[v1.4.3]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.2...v1.4.3
 [v1.4.2]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.1...v1.4.2
 [v1.4.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.0...v1.4.1
 [v1.4.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.3.1...v1.4.0
