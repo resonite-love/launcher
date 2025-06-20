@@ -7,6 +7,20 @@
 
 ## [Unreleased]
 
+## [v1.4.4] - 2025-06-21
+
+### 🐛 修正
+- **翻訳修正**: 自動アップデーター機能の翻訳キー不足を解決
+  - `settings.app.autoUpdater.title`および`settings.app.autoUpdater.description`の翻訳を追加
+  - 関連する翻訳キー（`checkUpdates`, `installing`, `installUpdate`, `updateInstalled`）を追加
+  - 日本語・英語の両方で適切な翻訳を提供
+
+### 🌐 多言語対応改善
+- **設定タブの翻訳完全対応**:
+  - 自動アップデーター セクションの完全な多言語化
+  - アップデートチェックとインストール機能の翻訳対応
+  - ユーザーインターフェースの一貫した翻訳体験
+
 ## [v1.4.3] - 2025-06-21
 
 ### 🐛 修正
@@ -590,7 +604,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.3...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.4...HEAD
+[v1.4.4]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.3...v1.4.4
 [v1.4.3]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.2...v1.4.3
 [v1.4.2]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.1...v1.4.2
 [v1.4.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.4.0...v1.4.1
