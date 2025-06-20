@@ -29,7 +29,13 @@
       "Bash(/home/neo/.volta/tools/image/packages/@anthropic-ai/claude-code/lib/node_modules/@anthropic-ai/claude-code/vendor/ripgrep/x64-linux/rg -n 'flex items-center justify-between' /mnt/c/Users/neo/GitHub/kokoa-resonite-tools/gui/src/components/ProfileEditPage.tsx)",
       "Bash(ssh:*)",
       "Bash(npm run tauri:*)",
-      "mcp__ssh-mcp__exec"
+      "mcp__ssh-mcp__exec",
+      "Bash(npm run build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }
