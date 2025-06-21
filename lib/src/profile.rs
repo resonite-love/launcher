@@ -165,8 +165,11 @@ impl Profile {
         let json = fs::read_to_string(config_path)?;
         let mut profile: Profile = serde_json::from_str(&json)?;
         
-        // マイグレーションを実行
-        if profile.config_version < PROFILE_CONFIG_VERSION {
+        // マイグレーションと欠けているフィールドの補完を実行
+        let needs_migration = profile.config_version < PROFILE_CONFIG_VERSION;
+        let needs_field_check = Self::needs_field_completion(&profile, profile_dir);
+        
+        if needs_migration || needs_field_check {
             profile = Self::migrate_profile(profile, profile_dir)?;
             // マイグレーション後は自動保存
             profile.save(profile_dir)?;
@@ -175,9 +178,42 @@ impl Profile {
         Ok(profile)
     }
     
+    /// 欠けているフィールドがあるかチェック
+    fn needs_field_completion(profile: &Profile, profile_dir: &Path) -> bool {
+        // game_infoが存在しない場合
+        if profile.game_info.is_none() {
+            return true;
+        }
+        
+        // mod_loader_typeが存在しないが、MODローダーが検出される場合
+        if profile.mod_loader_type.is_none() {
+            if Self::detect_existing_mod_loader(profile_dir).is_some() {
+                return true;
+            }
+        }
+        
+        // display_nameが空の場合
+        if profile.display_name.is_empty() {
+            return true;
+        }
+        
+        // argsが空の場合
+        if profile.args.is_empty() {
+            return true;
+        }
+        
+        false
+    }
+    
     /// プロファイルのマイグレーション
     fn migrate_profile(mut profile: Profile, profile_dir: &Path) -> Result<Self, Box<dyn Error>> {
-        println!("プロファイル設定をバージョン{}からバージョン{}にマイグレーションします", profile.config_version, PROFILE_CONFIG_VERSION);
+        let is_version_migration = profile.config_version < PROFILE_CONFIG_VERSION;
+        
+        if is_version_migration {
+            println!("プロファイル設定をバージョン{}からバージョン{}にマイグレーションします", profile.config_version, PROFILE_CONFIG_VERSION);
+        } else {
+            println!("プロファイル設定の欠けているフィールドを補完します");
+        }
         
         // バージョン1からバージョン2へのマイグレーション
         if profile.config_version < 2 {
@@ -190,11 +226,131 @@ impl Profile {
             }
         }
         
+        // 欠けているフィールドの補完（全バージョン対象）
+        Self::ensure_required_fields(&mut profile, profile_dir)?;
+        
         // バージョンを更新
         profile.config_version = PROFILE_CONFIG_VERSION;
-        println!("マイグレーション完了");
+        
+        if is_version_migration {
+            println!("マイグレーション完了");
+        } else {
+            println!("フィールド補完完了");
+        }
         
         Ok(profile)
+    }
+    
+    /// 必須フィールドが存在することを確認し、欠けている場合は作成する
+    fn ensure_required_fields(profile: &mut Profile, profile_dir: &Path) -> Result<(), Box<dyn Error>> {
+        let mut fields_created = Vec::new();
+        
+        // game_infoが存在しない場合は作成
+        if profile.game_info.is_none() {
+            let game_info = Self::create_default_game_info(profile_dir)?;
+            profile.game_info = Some(game_info);
+            fields_created.push("game_info");
+        }
+        
+        // mod_loader_typeが存在しない場合は検出して設定
+        if profile.mod_loader_type.is_none() {
+            if let Some(mod_loader_type) = Self::detect_existing_mod_loader(profile_dir) {
+                profile.mod_loader_type = Some(mod_loader_type);
+                fields_created.push("mod_loader_type");
+            }
+        }
+        
+        // display_nameが空の場合はidから生成
+        if profile.display_name.is_empty() {
+            if !profile.name.is_empty() {
+                // レガシーnameフィールドから移行
+                profile.display_name = profile.name.clone();
+                fields_created.push("display_name (from legacy name)");
+            } else if !profile.id.is_empty() {
+                // idから生成
+                profile.display_name = profile.id.clone();
+                fields_created.push("display_name (from id)");
+            } else {
+                // 最後の手段として適当な名前を付ける
+                profile.display_name = "プロファイル".to_string();
+                fields_created.push("display_name (default)");
+            }
+        }
+        
+        // argsが空の場合はデフォルト引数を追加
+        if profile.args.is_empty() {
+            profile.args = vec![
+                "-DataPath".to_string(),
+                "%PROFILE_DIR%\\DataPath".to_string(),
+            ];
+            fields_created.push("args (default)");
+        }
+        
+        if !fields_created.is_empty() {
+            println!("作成されたフィールド: {}", fields_created.join(", "));
+        }
+        
+        Ok(())
+    }
+    
+    /// デフォルトのGameInfo情報を作成
+    fn create_default_game_info(profile_dir: &Path) -> Result<GameInfo, Box<dyn Error>> {
+        let game_dir = profile_dir.join("Game");
+        let installed = game_dir.exists() && game_dir.is_dir();
+        
+        // インストール済みの場合は既存のバージョンを検出を試行
+        let (branch, version) = if installed {
+            Self::detect_game_version(&game_dir).unwrap_or_else(|| ("release".to_string(), None))
+        } else {
+            ("release".to_string(), None)
+        };
+        
+        Ok(GameInfo {
+            branch,
+            manifest_id: None,
+            depot_id: "2519832".to_string(), // Resoniteのデフォルトdepot ID
+            installed,
+            last_updated: None,
+            version,
+        })
+    }
+    
+    /// インストール済みゲームのバージョンとブランチを検出
+    fn detect_game_version(game_dir: &Path) -> Option<(String, Option<String>)> {
+        // Resonite.exeの存在確認
+        let exe_path = game_dir.join("Resonite.exe");
+        if !exe_path.exists() {
+            return None;
+        }
+        
+        // プリリリース版の特徴的なファイルをチェック
+        let is_prerelease = game_dir.join("PreRelease.txt").exists() || 
+                           game_dir.join("PRERELEASE").exists();
+        
+        let branch = if is_prerelease {
+            "prerelease".to_string()
+        } else {
+            "release".to_string()
+        };
+        
+        // バージョン情報の取得を試行（失敗しても構わない）
+        let version = Self::extract_version_from_exe(&exe_path);
+        
+        Some((branch, version))
+    }
+    
+    /// Build.versionファイルからバージョン情報を抽出
+    fn extract_version_from_exe(exe_path: &Path) -> Option<String> {
+        let game_dir = exe_path.parent()?;
+        let version_file = game_dir.join("Build.version");
+        
+        if version_file.exists() {
+            if let Ok(version_content) = fs::read_to_string(&version_file) {
+                return Some(version_content.trim().to_string());
+            }
+        }
+        
+        None
     }
     
     /// 既存のMODローダーを検出

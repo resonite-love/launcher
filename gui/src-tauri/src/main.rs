@@ -1267,6 +1267,33 @@ async fn migrate_installed_mods(
     Ok("Successfully migrated installed mods data".to_string())
 }
 
+// Migrate profile configuration to latest version
+#[tauri::command]
+async fn migrate_profile_config(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let profile_manager = {
+        let app_state = state.lock().unwrap();
+        app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?
+            .clone()
+    };
+    
+    // プロファイルを再読み込み（マイグレーションが自動実行される）
+    match profile_manager.get_profile(&profile_name) {
+        Ok(profile) => {
+            // プロファイルをリロードして保存することでマイグレーションを強制実行
+            let profile_dir = profile_manager.get_profile_dir(&profile_name);
+            match profile.save(&profile_dir) {
+                Ok(_) => Ok(format!("プロファイル '{}' の設定を正常にマイグレーションしました", profile_name)),
+                Err(e) => Err(format!("プロファイル設定の保存に失敗しました: {}", e)),
+            }
+        },
+        Err(e) => Err(format!("プロファイルの読み込みに失敗しました: {}", e)),
+    }
+}
+
 // Get all available versions for a MOD
 #[tauri::command]
 async fn get_mod_versions(
@@ -1952,6 +1979,7 @@ fn main() {
             disable_mod,
             enable_mod,
             migrate_installed_mods,
+            migrate_profile_config,
             get_mod_versions,
             get_github_releases,
             update_mod,

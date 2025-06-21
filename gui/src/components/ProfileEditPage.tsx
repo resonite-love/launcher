@@ -58,6 +58,7 @@ import {
   useUpdateYtDlp,
   useLaunchResonite,
   useMigrateInstalledMods,
+  useMigrateProfileConfig,
   useSteamCredentials,
   MultiFileInstallRequest,
   FileInstallChoice
@@ -237,6 +238,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const updateYtDlpMutation = useUpdateYtDlp();
   const launchMutation = useLaunchResonite();
   const migrateInstalledModsMutation = useMigrateInstalledMods();
+  const migrateProfileConfigMutation = useMigrateProfileConfig();
   
   // ゲーム情報用の状態
   const [profileInfo, setProfileInfo] = useState<any>(null);
@@ -1930,7 +1932,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           {/* アクションドロップダウン */}
           <ProfileActionsDropdown
             profileName={profileName}
-            isReloading={installedModsLoading || unmanagedModsLoading || migrateInstalledModsMutation.isPending}
+            isReloading={installedModsLoading || unmanagedModsLoading || migrateInstalledModsMutation.isPending || migrateProfileConfigMutation.isPending}
             onDuplicate={() => {
               setDuplicateName(`${profile?.display_name || profileName} - Copy`);
               setDuplicateDescription(profile?.description || '');
@@ -1939,8 +1941,11 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             onDelete={() => setShowDeleteConfirmModal(true)}
             onOpenFolder={openProfileFolder}
             onReload={async () => {
-              // マイグレーションを実行してからリフェッチ
-              await migrateInstalledModsMutation.mutateAsync(profileName);
+              // プロファイル設定とMODデータのマイグレーションを実行してからリフェッチ
+              await Promise.all([
+                migrateProfileConfigMutation.mutateAsync(profileName),
+                migrateInstalledModsMutation.mutateAsync(profileName)
+              ]);
               refetchInstalledMods();
               refetchUnmanagedMods();
             }}

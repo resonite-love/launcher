@@ -40,7 +40,9 @@
       "Bash(git filter-branch:*)",
       "Bash(FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --msg-filter 'sed -e \"/🤖 Generated with \\[Claude Code\\]/,/Co-Authored-By: Claude/d\"' --tag-name-filter cat -- --branches --tags)",
       "Bash(git stash:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(git tag:*)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }

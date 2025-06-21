@@ -600,6 +600,26 @@ export const useMigrateInstalledMods = () => {
   });
 };
 
+export const useMigrateProfileConfig = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (profileName: string) => {
+      return await invoke<string>('migrate_profile_config', { profileName });
+    },
+    onSuccess: (result, profileName) => {
+      toast.success(result);
+      // プロファイル設定とMOD情報を更新
+      queryClient.invalidateQueries({ queryKey: queryKeys.profiles });
+      queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(profileName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unmanagedMods(profileName) });
+    },
+    onError: (error) => {
+      toast.error(`プロファイル設定のマイグレーションに失敗しました: ${error}`);
+    },
+  });
+};
+
 export const useUpdateMod = () => {
   const queryClient = useQueryClient();
   
