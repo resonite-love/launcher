@@ -113,31 +113,10 @@ jobs:
             
             ### GUI版（推奨）
             - **インストーラー**: `RESO.Launcher_${{ github.ref_name }}_x64-setup.exe` - セットアップファイル
-            - **ポータブル版**: `reso-launcher-${{ github.ref_name }}-windows-portable.exe` - インストール不要のシングルバイナリ
-            
-            ### CLI版
-            - **Windows**: `reso-launcher-cli-${{ github.ref_name }}-windows.exe`
             
             ## 🚀 新機能・変更点
             
             このリリースの詳細については、[CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) をご確認ください。
-            
-            ## 📋 システム要件
-            
-            - Windows 10/11 (x64)
-            - .NET 8.0 Runtime（DepotDownloader用）
-            - 十分なディスク容量（Resoniteインストール用）
-            
-            ## 🔧 使用方法
-            
-            ### GUI版
-            1. **インストーラー版**: `*-setup.exe`ファイルをダウンロードして実行
-            2. **ポータブル版**: `*-portable.exe`ファイルをダウンロードして任意の場所で実行
-            3. 初回セットアップガイドに従って設定
-            
-            ### CLI版
-            1. `reso-launcher-cli-${{ github.ref_name }}-windows.exe` をダウンロード
-            2. コマンドラインから実行
             
             ## ⚠️ 注意事項
             
