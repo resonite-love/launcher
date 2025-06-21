@@ -147,6 +147,7 @@ jobs:
           prerelease: false
           includeDebug: false
           includeRelease: true
+          updaterJsonPreferNsis: true
 
       # Create additional release assets
       # - name: Create CLI Release Asset
