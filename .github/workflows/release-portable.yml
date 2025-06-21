@@ -66,7 +66,7 @@ jobs:
           Write-Host "=== Creating portable package ==="
           
           # The executable is named "RESO Launcher.exe" with spaces
-          $exePath = ".\gui\src-tauri\target\release\RESO Launcher.exe"
+          $exePath = ".\target\release\RESO Launcher.exe"
           
           if (Test-Path $exePath) {
             Write-Host "Found executable at: $exePath"
