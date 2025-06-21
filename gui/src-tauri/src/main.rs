@@ -1832,9 +1832,49 @@ async fn complete_first_run_setup(state: State<'_, Mutex<AppState>>) -> Result<S
     Ok("First run setup completed successfully".to_string())
 }
 
+// Check if this is a portable version
+fn is_portable_build() -> bool {
+    // Primary method: Check compile-time flag set during build
+    #[cfg(portable_build)]
+    {
+        return true;
+    }
+    
+    #[cfg(not(portable_build))]
+    {
+        // Fallback method: Check for portable marker file at runtime
+        if let Ok(exe_path) = std::env::current_exe() {
+            if let Some(exe_dir) = exe_path.parent() {
+                let portable_marker = exe_dir.join(".portable");
+                if portable_marker.exists() {
+                    return true;
+                }
+            }
+        }
+        
+        // Additional fallback: Check if executable name contains "Portable"
+        if let Ok(exe_path) = std::env::current_exe() {
+            if let Some(exe_name) = exe_path.file_name() {
+                if let Some(name_str) = exe_name.to_str() {
+                    if name_str.contains("Portable") {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+}
+
 // Check for app updates using Tauri updater
 #[tauri::command]
 async fn check_app_updates(app: AppHandle) -> Result<bool, String> {
+    // Check if this is a portable version
+    if is_portable_build() {
+        return Ok(false);
+    }
+    
     match app.updater().check().await {
         Ok(update) => {
             Ok(update.is_update_available())
@@ -1846,6 +1886,11 @@ async fn check_app_updates(app: AppHandle) -> Result<bool, String> {
 // Install app update
 #[tauri::command]
 async fn install_app_update(app: AppHandle, window: Window) -> Result<String, String> {
+    // Check if this is a portable version
+    if is_portable_build() {
+        return Err("Auto-update is disabled in portable version".to_string());
+    }
+    
     match app.updater().check().await {
         Ok(update) => {
             if !update.is_update_available() {
@@ -1863,6 +1908,12 @@ async fn install_app_update(app: AppHandle, window: Window) -> Result<String, St
         }
         Err(e) => Err(format!("Failed to check for updates: {}", e)),
     }
+}
+
+// Check if the app is running in portable mode
+#[tauri::command]
+fn is_portable_version() -> bool {
+    is_portable_build()
 }
 
 fn main() {
@@ -1918,7 +1969,8 @@ fn main() {
             download_depot_downloader,
             complete_first_run_setup,
             check_app_updates,
-            install_app_update
+            install_app_update,
+            is_portable_version
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

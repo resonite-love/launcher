@@ -59,6 +59,72 @@ if (updateInfo.update_available) {
 }
 ```
 
+### check_app_updates
+Checks for available application updates using Tauri's built-in updater.
+
+**Parameters:**
+- None
+
+**Returns:**
+- `Result<boolean, String>` - Whether an update is available or error
+
+**Notes:**
+- Returns `false` if `TAURI_UPDATER_ACTIVE` is set to "false"
+- Uses Tauri's built-in update mechanism
+
+**Example:**
+```typescript
+const hasUpdate = await invoke<boolean>('check_app_updates');
+if (hasUpdate) {
+  console.log('An update is available');
+}
+```
+
+### install_app_update
+Downloads and installs the available application update.
+
+**Parameters:**
+- None
+
+**Returns:**
+- `Result<String, String>` - Success message or error
+
+**Notes:**
+- Returns error if `TAURI_UPDATER_ACTIVE` is set to "false"
+- Emits "update-complete" event when installation is complete
+- Application restart is required after installation
+
+**Example:**
+```typescript
+try {
+  const result = await invoke<string>('install_app_update');
+  console.log(result); // "Update installed successfully. Please restart the application."
+} catch (error) {
+  console.error('Update failed:', error);
+}
+```
+
+### is_portable_version
+Checks if the application is running in portable mode.
+
+**Parameters:**
+- None
+
+**Returns:**
+- `boolean` - `true` if running in portable mode, `false` otherwise
+
+**Notes:**
+- Portable mode is determined by checking if `TAURI_UPDATER_ACTIVE` environment variable is set to "false"
+- When in portable mode, auto-updates are disabled
+
+**Example:**
+```typescript
+const isPortable = await invoke<boolean>('is_portable_version');
+if (isPortable) {
+  console.log('Running in portable mode - auto-updates disabled');
+}
+```
+
 このファイルは利用可能なTauriコマンドとその使用方法を説明します。
 
 ## アプリケーション初期化

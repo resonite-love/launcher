@@ -44,9 +44,11 @@ function SettingsTab() {
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
   const [isInstalling, setIsInstalling] = useState(false);
   const [updateProgress, setUpdateProgress] = useState(0);
+  const [isPortableVersion, setIsPortableVersion] = useState(false);
 
   useEffect(() => {
     loadSavedCredentials();
+    checkPortableVersion();
     
     // Listen for update events using Tauri event system
     import('@tauri-apps/api/event').then(({ listen }) => {
@@ -70,6 +72,16 @@ function SettingsTab() {
       setupListeners().catch(console.error);
     });
   }, [t]);
+
+  // Check if running in portable version
+  const checkPortableVersion = async () => {
+    try {
+      const portable = await invoke<boolean>('is_portable_version');
+      setIsPortableVersion(portable);
+    } catch (err) {
+      console.error('Failed to check portable version:', err);
+    }
+  };
 
   // Steamクレデンシャル関連の関数
   const loadSavedCredentials = async () => {
@@ -291,53 +303,70 @@ function SettingsTab() {
           <h2 className="text-2xl font-bold text-white">{t('settings.app.title')}</h2>
         </div>
 
-        {/* App Updater Section */}
-        <div className="bg-dark-800/30 rounded-lg p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <RotateCcw className="w-5 h-5 text-resonite-blue" />
-              <div>
-                <p className="text-white font-medium">{t('settings.app.autoUpdater.title')}</p>
-                <p className="text-gray-400 text-sm">
-                  {t('settings.app.autoUpdater.description')}
-                </p>
+        {/* App Updater Section - Hidden for portable version */}
+        {!isPortableVersion && (
+          <div className="bg-dark-800/30 rounded-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <RotateCcw className="w-5 h-5 text-resonite-blue" />
+                <div>
+                  <p className="text-white font-medium">{t('settings.app.autoUpdater.title')}</p>
+                  <p className="text-gray-400 text-sm">
+                    {t('settings.app.autoUpdater.description')}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex space-x-2">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="btn-secondary flex items-center space-x-2"
+                  onClick={checkForUpdates}
+                  disabled={isCheckingUpdates || isInstalling}
+                >
+                  {isCheckingUpdates ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-4 h-4" />
+                  )}
+                  <span>{t('settings.app.checkUpdates')}</span>
+                </motion.button>
               </div>
             </div>
             
-            <div className="flex space-x-2">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="btn-secondary flex items-center space-x-2"
-                onClick={checkForUpdates}
-                disabled={isCheckingUpdates || isInstalling}
-              >
-                {isCheckingUpdates ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="w-4 h-4" />
-                )}
-                <span>{t('settings.app.checkUpdates')}</span>
-              </motion.button>
+            {/* Installation Progress */}
+            {isInstalling && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-300">{t('settings.app.installing')}</span>
+                  <span className="text-sm text-gray-400">{Math.round(updateProgress)}%</span>
+                </div>
+                <div className="w-full bg-dark-700 rounded-full h-2">
+                  <div 
+                    className="bg-resonite-blue h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${updateProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* Portable Version Notice */}
+        {isPortableVersion && (
+          <div className="bg-dark-800/30 rounded-lg p-6">
+            <div className="flex items-center space-x-3">
+              <Info className="w-5 h-5 text-amber-500" />
+              <div>
+                <p className="text-white font-medium">{t('settings.app.portableVersion.title', 'Portable Version')}</p>
+                <p className="text-gray-400 text-sm">
+                  {t('settings.app.portableVersion.description', 'Auto-update is disabled in portable version. Please download updates manually from the releases page.')}
+                </p>
+              </div>
             </div>
           </div>
-          
-          {/* Installation Progress */}
-          {isInstalling && (
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-300">{t('settings.app.installing')}</span>
-                <span className="text-sm text-gray-400">{Math.round(updateProgress)}%</span>
-              </div>
-              <div className="w-full bg-dark-700 rounded-full h-2">
-                <div 
-                  className="bg-resonite-blue h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${updateProgress}%` }}
-                />
-              </div>
-            </div>
-          )}
-        </div>
+        )}
 
         {/* Legacy Update Information (keeping for manual checks) */}
         {updateLoading ? (

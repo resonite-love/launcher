@@ -167,49 +167,6 @@ jobs:
       #     }
       #   shell: pwsh
         
-      - name: Create GUI Portable Binary
-        run: |
-          # The executable is named "RESO Launcher.exe" with spaces
-          $exePath = ".\target\release\RESO Launcher.exe"
-          
-          if (Test-Path $exePath) {
-            Write-Host "Found executable at: $exePath"
-            $fileSize = (Get-Item $exePath).Length / 1MB
-            Write-Host "File size: $([math]::Round($fileSize, 2)) MB"
-            
-            # Copy the executable
-            cp $exePath ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe"
-            Write-Host "Created portable executable: reso-launcher-${{ github.ref_name }}-windows-portable.exe"
-            
-            # Check for WebView2Loader.dll in various locations
-            $webview2Paths = @(
-              ".\target\release\WebView2Loader.dll",
-              ".\gui\src-tauri\target\release\WebView2Loader.dll"
-            )
-            
-            $webview2Found = $false
-            foreach ($path in $webview2Paths) {
-              if (Test-Path $path) {
-                cp $path ".\WebView2Loader.dll"
-                Write-Host "Copied WebView2Loader.dll from: $path"
-                $webview2Found = $true
-                break
-              }
-            }
-            
-            # Create a zip file with both files if WebView2Loader exists
-            if ($webview2Found) {
-              Compress-Archive -Path ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe", ".\WebView2Loader.dll" -DestinationPath ".\reso-launcher-${{ github.ref_name }}-windows-portable.zip" -Force
-              Write-Host "Created portable ZIP with executable and WebView2Loader.dll"
-            } else {
-              Write-Host "WebView2Loader.dll not found, creating ZIP with executable only"
-              Compress-Archive -Path ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe" -DestinationPath ".\reso-launcher-${{ github.ref_name }}-windows-portable.zip" -Force
-            }
-          } else {
-            Write-Error "GUI executable not found at expected location: $exePath"
-            exit 1
-          }
-        shell: pwsh
         
       # Find and prepare NSIS installer for updater
       # - name: Prepare updater files
@@ -349,11 +306,3 @@ jobs:
       #     TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
       #     TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
-      - name: Upload additional binaries to release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            ./reso-launcher-${{ github.ref_name }}-windows-portable.exe
-          tag_name: ${{ github.ref_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

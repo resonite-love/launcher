@@ -313,6 +313,10 @@
         "title": "自動アップデーター",
         "description": "アプリ内から直接アップデートをチェック・インストールできます"
       },
+      "portableVersion": {
+        "title": "ポータブル版",
+        "description": "設定とデータをアプリケーションフォルダに保存するポータブル版として実行"
+      },
       "checkUpdates": "アップデートをチェック",
       "installing": "インストール中",
       "installUpdate": "アップデートをインストール",

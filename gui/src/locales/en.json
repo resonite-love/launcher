@@ -313,6 +313,10 @@
         "title": "Auto Updater",
         "description": "Check and install updates directly from within the app"
       },
+      "portableVersion": {
+        "title": "Portable Version",
+        "description": "Run as a portable version that stores settings and data in the application folder"
+      },
       "checkUpdates": "Check for Updates",
       "installing": "Installing",
       "installUpdate": "Install Update",

@@ -1,0 +1,153 @@
+name: Release Portable
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release-portable:
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [windows-latest]
+
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install frontend dependencies
+        run: npm install
+        working-directory: ./gui
+
+      # Build frontend
+      - name: Build Frontend
+        run: npm run build
+        working-directory: ./gui
+          
+      # Build GUI executable for portable version with auto-update disabled
+      - name: Build GUI executable (portable)
+        run: |
+          Write-Host "=== Building GUI executable for portable version ==="
+          Write-Host "Current directory: $(Get-Location)"
+          
+          # Set environment variable to disable auto-update
+          $env:TAURI_UPDATER_ACTIVE = "false"
+          Write-Host "TAURI_UPDATER_ACTIVE set to: $env:TAURI_UPDATER_ACTIVE"
+          
+          cd gui/src-tauri
+          Write-Host "Changed to directory: $(Get-Location)"
+          
+          Write-Host "`nBuilding with cargo..."
+          cargo build --release --features custom-protocol
+          
+          Write-Host "`n=== Build complete ===="
+          
+          # Return to root directory
+          cd ..\..
+        shell: pwsh
+        
+      - name: Create Portable Package
+        run: |
+          Write-Host "=== Creating portable package ==="
+          
+          # The executable is named "RESO Launcher.exe" with spaces
+          $exePath = ".\gui\src-tauri\target\release\RESO Launcher.exe"
+          
+          if (Test-Path $exePath) {
+            Write-Host "Found executable at: $exePath"
+            $fileSize = (Get-Item $exePath).Length / 1MB
+            Write-Host "File size: $([math]::Round($fileSize, 2)) MB"
+            
+            # Create portable directory
+            $portableDir = ".\reso-launcher-portable"
+            New-Item -ItemType Directory -Force -Path $portableDir | Out-Null
+            
+            # Copy the executable
+            $portableExeName = "RESO Launcher Portable.exe"
+            cp $exePath "$portableDir\$portableExeName"
+            Write-Host "Copied executable to: $portableDir\$portableExeName"
+            
+            # Create portable marker file
+            "" | Out-File -FilePath "$portableDir\.portable" -Encoding UTF8
+            Write-Host "Created portable marker file"
+            
+            # Check for WebView2Loader.dll
+            $webview2Path = ".\gui\src-tauri\target\release\WebView2Loader.dll"
+            if (Test-Path $webview2Path) {
+              cp $webview2Path "$portableDir\WebView2Loader.dll"
+              Write-Host "Copied WebView2Loader.dll"
+            }
+            
+            # Create README for portable version
+            @"
+# RESO Launcher Portable
+
+This is the portable version of RESO Launcher.
+
+## Features
+- No installation required
+- Auto-update is disabled
+- All data is stored in the same directory as the executable
+
+## Usage
+1. Extract all files to your desired location
+2. Run "RESO Launcher Portable.exe"
+
+## Notes
+- Keep WebView2Loader.dll in the same directory as the executable
+- This version does not auto-update; download new versions manually
+"@ | Out-File -FilePath "$portableDir\README.txt" -Encoding UTF8
+            
+            # Create version file
+            $version = "${{ github.ref_name }}"
+            $version | Out-File -FilePath "$portableDir\version.txt" -Encoding UTF8
+            
+            # Create ZIP file
+            $zipName = "reso-launcher-${{ github.ref_name }}-windows-portable.zip"
+            Compress-Archive -Path "$portableDir\*" -DestinationPath ".\$zipName" -Force
+            Write-Host "Created portable ZIP: $zipName"
+            
+            # Verify ZIP contents
+            $zipSize = (Get-Item ".\$zipName").Length / 1MB
+            Write-Host "ZIP file size: $([math]::Round($zipSize, 2)) MB"
+            
+          } else {
+            Write-Error "GUI executable not found at expected location: $exePath"
+            exit 1
+          }
+        shell: pwsh
+        
+      - name: Upload portable version to release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ./reso-launcher-${{ github.ref_name }}-windows-portable.zip
+          tag_name: ${{ github.ref_name }}
+          name: 'RESO Launcher ${{ github.ref_name }}'
+          body: |
+            ## Portable Version
+            
+            The portable version of RESO Launcher is available as an additional download option.
+            
+            - **File**: `reso-launcher-${{ github.ref_name }}-windows-portable.zip`
+            - **Features**: No installation required, auto-update disabled
+            - **Usage**: Extract and run "RESO Launcher Portable.exe"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
