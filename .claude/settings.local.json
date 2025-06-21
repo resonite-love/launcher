@@ -35,7 +35,9 @@
       "Bash(git commit:*)",
       "Bash(npm run type-check:*)",
       "Bash(npm run:*)",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(pip install:*)",
+      "Bash(git filter-branch:*)"
     ],
     "deny": []
   }
