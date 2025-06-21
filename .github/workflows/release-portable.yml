@@ -1,7 +1,6 @@
 name: Release Portable
 
 on:
-  workflow_dispatch:
   push:
     tags:
       - 'v*'
@@ -96,23 +95,23 @@ jobs:
             
             # Create README for portable version
             @"
-# RESO Launcher Portable
+            # RESO Launcher Portable
 
-This is the portable version of RESO Launcher.
+            This is the portable version of RESO Launcher.
 
-## Features
-- No installation required
-- Auto-update is disabled
-- All data is stored in the same directory as the executable
+            ## Features
+            - No installation required
+            - Auto-update is disabled
+            - All data is stored in the same directory as the executable
 
-## Usage
-1. Extract all files to your desired location
-2. Run "RESO Launcher Portable.exe"
+            ## Usage
+            1. Extract all files to your desired location
+            2. Run "RESO Launcher Portable.exe"
 
-## Notes
-- Keep WebView2Loader.dll in the same directory as the executable
-- This version does not auto-update; download new versions manually
-"@ | Out-File -FilePath "$portableDir\README.txt" -Encoding UTF8
+            ## Notes
+            - Keep WebView2Loader.dll in the same directory as the executable
+            - This version does not auto-update; download new versions manually
+            "@ | Out-File -FilePath "$portableDir\README.txt" -Encoding UTF8
             
             # Create version file
             $version = "${{ github.ref_name }}"
@@ -132,22 +131,13 @@ This is the portable version of RESO Launcher.
             exit 1
           }
         shell: pwsh
-        
-      - name: Upload portable version to release
+
+      - name: Upload additional binaries to release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
+            ./reso-launcher-${{ github.ref_name }}-windows-portable.exe
             ./reso-launcher-${{ github.ref_name }}-windows-portable.zip
           tag_name: ${{ github.ref_name }}
-          name: 'RESO Launcher ${{ github.ref_name }}'
-          body: |
-            ## Portable Version
-            
-            The portable version of RESO Launcher is available as an additional download option.
-            
-            - **File**: `reso-launcher-${{ github.ref_name }}-windows-portable.zip`
-            - **Features**: No installation required, auto-update disabled
-            - **Usage**: Extract and run "RESO Launcher Portable.exe"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
