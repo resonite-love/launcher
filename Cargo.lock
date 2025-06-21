@@ -3155,7 +3155,7 @@ dependencies = [
 
 [[package]]
 name = "reso-launcher"
-version = "1.4.6"
+version = "1.4.7"
 dependencies = [
  "reqwest",
  "reso-launcher-lib",
