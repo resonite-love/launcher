@@ -220,10 +220,10 @@ jobs:
       - name: Upload portable version to existing release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.get_tag.outputs.tag_name }}
           files: |
             ./reso-launcher-${{ steps.get_tag.outputs.tag_name }}-windows-portable.exe
             ./reso-launcher-${{ steps.get_tag.outputs.tag_name }}-windows-portable.zip
-          tag_name: ${{ steps.get_tag.outputs.tag_name }}
           append_body: true
           body: |
             
