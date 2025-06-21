@@ -94,11 +94,23 @@ jobs:
             echo "Tag from ref: $TAG_NAME"
           fi
           
-          echo "Final tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
           echo "Using tag: $TAG_NAME"
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Debug tag output
+        run: |
+          Write-Host "=== Debug tag output ==="
+          Write-Host "Tag name from previous step: '${{ steps.get_tag.outputs.tag_name }}'"
+          Write-Host "Tag name length: $('${{ steps.get_tag.outputs.tag_name }}'.Length)"
+          if ([string]::IsNullOrEmpty('${{ steps.get_tag.outputs.tag_name }}')) {
+            Write-Host "ERROR: Tag name is empty or null"
+          } else {
+            Write-Host "Tag name is valid"
+          }
+        shell: pwsh
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
