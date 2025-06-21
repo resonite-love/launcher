@@ -64,6 +64,7 @@ jobs:
             - 初回起動時にDepotDownloaderが自動ダウンロードされます
             - Steam Guardが有効な場合、初回ダウンロード時に認証が必要です
           releaseDraft: false
+          draft: false
           prerelease: false
           includeDebug: false
           includeRelease: true
