@@ -1,12 +1,16 @@
 name: Release Portable
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_run:
+    workflows: ["Release"]
+    types:
+      - completed
+  workflow_dispatch:
 
 jobs:
   release-portable:
+    # Only run if the Release workflow completed successfully
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     permissions:
       contents: write
     strategy:
@@ -18,6 +22,27 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # For workflow_run events, we need to checkout the tag that triggered the original workflow
+          ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+      
+      - name: Get tag name
+        id: get_tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            # For workflow_run, get the tag from the triggering workflow
+            TAG_NAME=$(git tag --points-at ${{ github.event.workflow_run.head_sha }} | head -1)
+            if [ -z "$TAG_NAME" ]; then
+              # Fallback: try to get the latest tag
+              TAG_NAME=$(git describe --tags --abbrev=0)
+            fi
+          else
+            # For workflow_dispatch or direct tag push
+            TAG_NAME=${GITHUB_REF#refs/tags/}
+          fi
+          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          echo "Using tag: $TAG_NAME"
+        shell: bash
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -114,11 +139,11 @@ jobs:
             Write-Host "Copied executable to: $portableDir\$portableExeName"
             
             # Create version file
-            $version = "${{ github.ref_name }}"
+            $version = "${{ steps.get_tag.outputs.tag_name }}"
             $version | Out-File -FilePath "$portableDir\version.txt" -Encoding UTF8
             
             # Create ZIP file
-            $zipName = "reso-launcher-${{ github.ref_name }}-windows-portable.zip"
+            $zipName = "reso-launcher-${{ steps.get_tag.outputs.tag_name }}-windows-portable.zip"
             Compress-Archive -Path "$portableDir\*" -DestinationPath ".\$zipName" -Force
             Write-Host "Created portable ZIP: $zipName"
             
@@ -127,7 +152,7 @@ jobs:
             Write-Host "ZIP file size: $([math]::Round($zipSize, 2)) MB"
 
             # Copy the portable executable to the root directory
-            $portableExePath = ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe"
+            $portableExePath = ".\reso-launcher-${{ steps.get_tag.outputs.tag_name }}-windows-portable.exe"
             Copy-Item -Path "$portableDir\$portableExeName" -Destination $portableExePath -Force
             
           } else {
@@ -136,12 +161,23 @@ jobs:
           }
         shell: pwsh
 
-      - name: Upload additional binaries to release
+      - name: Upload portable version to existing release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./reso-launcher-${{ github.ref_name }}-windows-portable.exe
-            ./reso-launcher-${{ github.ref_name }}-windows-portable.zip
-          tag_name: ${{ github.ref_name }}
+            ./reso-launcher-${{ steps.get_tag.outputs.tag_name }}-windows-portable.exe
+            ./reso-launcher-${{ steps.get_tag.outputs.tag_name }}-windows-portable.zip
+          tag_name: ${{ steps.get_tag.outputs.tag_name }}
+          append_body: true
+          body: |
+            
+            ## 📦 Portable Version
+            
+            ポータブル版のRESOランチャーが追加ダウンロードオプションとして利用可能です。
+            
+            - **ファイル**: `reso-launcher-${{ steps.get_tag.outputs.tag_name }}-windows-portable.zip`
+            - **機能**: インストール不要、自動アップデート無効
+            - **使用方法**: ZIPを展開して"RESO Launcher Portable.exe"を実行
+            - **特徴**: 設定とデータをアプリケーションフォルダに保存
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
