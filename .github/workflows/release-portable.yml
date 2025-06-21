@@ -61,12 +61,43 @@ jobs:
           cd ..\..
         shell: pwsh
         
+      - name: Debug Build Results
+        run: |
+          Write-Host "=== Debugging build results ==="
+          Write-Host "Current directory: $(Get-Location)"
+          
+          Write-Host "`n=== Root directory contents ==="
+          Get-ChildItem -Path "." | Select-Object Mode, LastWriteTime, Length, Name | Format-Table -AutoSize
+          
+          Write-Host "`n=== Target directory contents ==="
+          if (Test-Path ".\target") {
+            Get-ChildItem -Path ".\target" -Recurse | Where-Object { $_.Name -like "*.exe" } | Select-Object FullName, Length | Format-Table -AutoSize
+          } else {
+            Write-Host "No target directory found"
+          }
+          
+          Write-Host "`n=== GUI src-tauri target directory contents ==="
+          if (Test-Path ".\gui\src-tauri\target") {
+            Get-ChildItem -Path ".\gui\src-tauri\target" -Recurse | Where-Object { $_.Name -like "*.exe" } | Select-Object FullName, Length | Format-Table -AutoSize
+          } else {
+            Write-Host "No gui/src-tauri/target directory found"
+          }
+          
+          Write-Host "`n=== All EXE files in the workspace ==="
+          Get-ChildItem -Path "." -Recurse -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object FullName, Length, LastWriteTime | Format-Table -AutoSize
+          
+          Write-Host "`n=== GUI directory contents ==="
+          if (Test-Path ".\gui") {
+            Get-ChildItem -Path ".\gui" | Select-Object Mode, LastWriteTime, Name | Format-Table -AutoSize
+          }
+        shell: pwsh
+        
       - name: Create Portable Package
         run: |
           Write-Host "=== Creating portable package ==="
           
           # The executable is named "RESO Launcher.exe" with spaces
-          $exePath = ".\target\release\RESO Launcher.exe"
+          $exePath = ".\gui\src-tauri\target\release\RESO Launcher.exe"
           
           if (Test-Path $exePath) {
             Write-Host "Found executable at: $exePath"
