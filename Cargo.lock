@@ -3155,7 +3155,7 @@ dependencies = [
 
 [[package]]
 name = "reso-launcher"
-version = "1.5.3"
+version = "1.5.4"
 dependencies = [
  "reqwest",
  "reso-launcher-lib",
@@ -3169,7 +3169,7 @@ dependencies = [
 
 [[package]]
 name = "reso-launcher-cli"
-version = "1.4.1"
+version = "1.5.4"
 dependencies = [
  "clap",
  "regex",
@@ -3178,7 +3178,7 @@ dependencies = [
 
 [[package]]
 name = "reso-launcher-lib"
-version = "1.4.1"
+version = "1.5.4"
 dependencies = [
  "anyhow",
  "chrono",
