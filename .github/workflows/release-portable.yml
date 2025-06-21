@@ -93,26 +93,6 @@ jobs:
               Write-Host "Copied WebView2Loader.dll"
             }
             
-            # Create README for portable version
-            @"
-            # RESO Launcher Portable
-
-            This is the portable version of RESO Launcher.
-
-            ## Features
-            - No installation required
-            - Auto-update is disabled
-            - All data is stored in the same directory as the executable
-
-            ## Usage
-            1. Extract all files to your desired location
-            2. Run "RESO Launcher Portable.exe"
-
-            ## Notes
-            - Keep WebView2Loader.dll in the same directory as the executable
-            - This version does not auto-update; download new versions manually
-            "@ | Out-File -FilePath "$portableDir\README.txt" -Encoding UTF8
-            
             # Create version file
             $version = "${{ github.ref_name }}"
             $version | Out-File -FilePath "$portableDir\version.txt" -Encoding UTF8
