@@ -457,7 +457,7 @@
     }
   },
   "titlebar": {
-    "poweredBy": "RESO Launcher powered by resonite.love"
+    "poweredBy": "powered by resonite.love"
   },
   "toasts": {
     "profileCreated": "プロファイル「{{name}}」を作成しました",
