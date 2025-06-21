@@ -25,24 +25,80 @@ jobs:
         with:
           # For workflow_run events, we need to checkout the tag that triggered the original workflow
           ref: ${{ github.event.workflow_run.head_sha || github.ref }}
+          fetch-depth: 0  # Fetch all history and tags
       
       - name: Get tag name
         id: get_tag
         run: |
           if [ "${{ github.event_name }}" = "workflow_run" ]; then
-            # For workflow_run, get the tag from the triggering workflow
-            TAG_NAME=$(git tag --points-at ${{ github.event.workflow_run.head_sha }} | head -1)
-            if [ -z "$TAG_NAME" ]; then
-              # Fallback: try to get the latest tag
-              TAG_NAME=$(git describe --tags --abbrev=0)
+            echo "Running in workflow_run mode"
+            echo "Triggering workflow: ${{ github.event.workflow_run.name }}"
+            echo "Head SHA: ${{ github.event.workflow_run.head_sha }}"
+            echo "Head branch: ${{ github.event.workflow_run.head_branch }}"
+            
+            # Method 1: Use GitHub API to get tag for specific commit
+            echo "Fetching tag from GitHub API..."
+            TAGS_RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/git/refs/tags")
+            
+            # Find tag that points to the trigger commit
+            TAG_NAME=$(echo "$TAGS_RESPONSE" | jq -r --arg sha "${{ github.event.workflow_run.head_sha }}" \
+              '.[] | select(.object.sha == $sha) | .ref | sub("refs/tags/"; "")')
+            
+            echo "Tag from API: '$TAG_NAME'"
+            
+            if [ -z "$TAG_NAME" ] || [ "$TAG_NAME" = "null" ]; then
+              echo "No direct tag found, checking for annotated tags..."
+              
+              # Check for annotated tags (they have a different SHA)
+              for tag_ref in $(echo "$TAGS_RESPONSE" | jq -r '.[].ref'); do
+                tag_name=$(echo "$tag_ref" | sed 's|refs/tags/||')
+                tag_sha=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                  "https://api.github.com/repos/${{ github.repository }}/git/tags/$tag_name" | \
+                  jq -r '.object.sha // empty' 2>/dev/null)
+                
+                if [ "$tag_sha" = "${{ github.event.workflow_run.head_sha }}" ]; then
+                  TAG_NAME="$tag_name"
+                  echo "Found annotated tag: $TAG_NAME"
+                  break
+                fi
+              done
+            fi
+            
+            if [ -z "$TAG_NAME" ] || [ "$TAG_NAME" = "null" ]; then
+              echo "Fallback: checking local git tags after fetch"
+              git fetch --tags
+              TAG_NAME=$(git tag --points-at ${{ github.event.workflow_run.head_sha }} | head -1)
+              echo "Local git tag: '$TAG_NAME'"
+            fi
+            
+            if [ -z "$TAG_NAME" ] || [ "$TAG_NAME" = "null" ]; then
+              echo "Final fallback: using head branch name as potential tag"
+              if [[ "${{ github.event.workflow_run.head_branch }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                TAG_NAME="${{ github.event.workflow_run.head_branch }}"
+                echo "Using branch name as tag: $TAG_NAME"
+              else
+                echo "ERROR: Could not determine tag name"
+                echo "Available workflow_run data:"
+                echo "  Head SHA: ${{ github.event.workflow_run.head_sha }}"
+                echo "  Head branch: ${{ github.event.workflow_run.head_branch }}"
+                echo "  Event: ${{ github.event.workflow_run.event }}"
+                echo "Available local tags:"
+                git tag -l | head -10
+                exit 1
+              fi
             fi
           else
             # For workflow_dispatch or direct tag push
             TAG_NAME=${GITHUB_REF#refs/tags/}
+            echo "Tag from ref: $TAG_NAME"
           fi
-          echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+          
+          echo "Final tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
           echo "Using tag: $TAG_NAME"
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
