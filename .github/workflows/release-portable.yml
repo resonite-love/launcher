@@ -113,17 +113,6 @@ jobs:
             cp $exePath "$portableDir\$portableExeName"
             Write-Host "Copied executable to: $portableDir\$portableExeName"
             
-            # Create portable marker file
-            "" | Out-File -FilePath "$portableDir\.portable" -Encoding UTF8
-            Write-Host "Created portable marker file"
-            
-            # Check for WebView2Loader.dll
-            $webview2Path = ".\gui\src-tauri\target\release\WebView2Loader.dll"
-            if (Test-Path $webview2Path) {
-              cp $webview2Path "$portableDir\WebView2Loader.dll"
-              Write-Host "Copied WebView2Loader.dll"
-            }
-            
             # Create version file
             $version = "${{ github.ref_name }}"
             $version | Out-File -FilePath "$portableDir\version.txt" -Encoding UTF8
@@ -136,6 +125,9 @@ jobs:
             # Verify ZIP contents
             $zipSize = (Get-Item ".\$zipName").Length / 1MB
             Write-Host "ZIP file size: $([math]::Round($zipSize, 2)) MB"
+
+            # Copy the portable executable to the root directory
+            $portableExePath = ".\reso-launcher-${{ github.ref_name }}-windows-portable.exe"
             
           } else {
             Write-Error "GUI executable not found at expected location: $exePath"
