@@ -306,6 +306,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       await invoke<string>('update_profile_config', { profile: updatedProfile });
       toast.success(t('toasts.profileUpdated'));
       setProfile(updatedProfile);
+      
+      // プロファイル一覧を更新
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
     } catch (err) {
       toast.error(t('toasts.error', { message: err }));
     } finally {
@@ -395,6 +398,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       toast.success(result);
       await loadModLoaderInfo();
       await loadProfile(); // 起動引数が更新される可能性がある
+      
+      // プロファイル一覧を更新（MODローダー情報を含む）
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
     } catch (err) {
       toast.error(t('toasts.error', { message: err }));
     } finally {
@@ -700,6 +706,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       toast.success(result);
       await loadModLoaderInfo();
       await loadProfile(); // 起動引数が更新される可能性がある
+      
+      // プロファイル一覧を更新（MODローダー情報を含む）
+      queryClient.invalidateQueries({ queryKey: ['profiles'] });
     } catch (err) {
       toast.error(t('toasts.error', { message: err }));
     } finally {
