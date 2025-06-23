@@ -29,7 +29,7 @@ interface SteamCredentials {
   password: string;
 }
 
-interface GameInstallRequest {
+export interface GameInstallRequest {
   profile_name: string;
   branch: string;
   manifest_id?: string;

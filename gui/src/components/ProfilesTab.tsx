@@ -24,8 +24,10 @@ import ProfileEditPage from './ProfileEditPage';
 import ModRiskWarningModal from './ModRiskWarningModal';
 import GameUpdateModal from './GameUpdateModal';
 import GameVersionSelector from './GameVersionSelector';
+import GameInstallModal from './GameInstallModal';
 import { useAppStore } from '../store/useAppStore';
 import { useProfiles, useCreateProfile } from '../hooks/useQueries';
+import { useGameInstallation } from '../hooks/useGameInstallation';
 import { BranchInfo } from './ProfileEditPage';
 
 interface ProfileInfo {
@@ -41,13 +43,6 @@ interface ProfileInfo {
   mod_loader_type?: 'ResoniteModLoader' | 'MonkeyLoader';
 }
 
-interface GameInstallRequest {
-  profile_name: string;
-  branch: string;
-  manifest_id?: string;
-  username?: string;
-  password?: string;
-}
 
 interface SteamCredentials {
   username: string;
@@ -67,12 +62,19 @@ function ProfilesTab() {
     editingProfileName, 
     navigateToProfileEdit, 
     navigateToProfileList,
-    isProfileInstalling
+    isProfileInstalling,
+    removeInstallingProfile
   } = useAppStore();
   
   // React Query hooks
   const { data: profiles = [], isLoading: profilesLoading, refetch: refetchProfiles } = useProfiles();
   const createProfileMutation = useCreateProfile();
+  const { installGame, updateGame, isLoading: getIsInstalling } = useGameInstallation({
+    onSuccess: async () => {
+      await refetchProfiles();
+      closeInstallModal();
+    },
+  });
   
   // Local loading state (for game installation, etc.)
   const [isLoading, setIsLoading] = useState(false);
@@ -90,10 +92,6 @@ function ProfilesTab() {
   // State for game installation
   const [showInstallModal, setShowInstallModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
-  const [installBranch, setInstallBranch] = useState('release');
-  const [manifestId, setManifestId] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   
   // State for Steam credentials management
   const [savedCredentials, setSavedCredentials] = useState<SteamCredentials | null>(null);
@@ -138,8 +136,10 @@ function ProfilesTab() {
       if (data.success) {
         toast.success(data.message);
         refetchProfiles(); // Using React Query
+        removeInstallingProfile(data.profile_name);
       } else {
         toast.error(data.message);
+        removeInstallingProfile(data.profile_name);
       }
     });
 
@@ -254,17 +254,12 @@ function ProfilesTab() {
       
       // If also installing game
       if (profileData.withGame) {
-        const request: GameInstallRequest = {
-          profile_name: profileData.name,
-          branch: profileData.branch,
-          manifest_id: profileData.manifestId || undefined,
-          username: savedCredentials?.username || undefined,
-          password: savedCredentials?.password || undefined,
-        };
-
         try {
-          const installResult = await invoke<string>('install_game_to_profile_interactive', { request });
-          toast.success(installResult);
+          await installGame(
+            profileData.name,
+            profileData.branch,
+            profileData.manifestId || undefined
+          );
           
           // If also installing MOD loader
           if (profileData.withModLoader) {
@@ -279,7 +274,7 @@ function ProfilesTab() {
             }
           }
         } catch (installErr) {
-          toast.error(t('toasts.error', { message: `ゲームのインストールに失敗しました: ${installErr}` }));
+          // Error is already handled by the hook
         }
       }
       
@@ -394,10 +389,6 @@ function ProfilesTab() {
 
   const openInstallModal = (profileName: string) => {
     setSelectedProfile(profileName);
-    setInstallBranch('release');
-    setManifestId('');
-    setUsername(savedCredentials?.username || '');
-    setPassword(savedCredentials?.password || '');
     setShowInstallModal(true);
   };
 
@@ -406,27 +397,9 @@ function ProfilesTab() {
     setSelectedProfile('');
   };
 
-  const installGame = async () => {
+  const handleInstallGame = async (branch: string, manifestId?: string) => {
     if (!selectedProfile) return;
-
-    try {
-      setIsLoading(true);
-      const request: GameInstallRequest = {
-        profile_name: selectedProfile,
-        branch: installBranch,
-        manifest_id: manifestId || undefined,
-        username: username || undefined,
-        password: password || undefined,
-      };
-
-      const result = await invoke<string>('install_game_to_profile_interactive', { request });
-      toast.success(result);
-      closeInstallModal();
-    } catch (err) {
-      toast.error(t('toasts.error', { message: `ゲームのインストールに失敗しました: ${err}` }));
-    } finally {
-      setIsLoading(false);
-    }
+    await installGame(selectedProfile, branch, manifestId);
   };
 
   const openUpdateModal = (profileId: string) => {
@@ -442,28 +415,16 @@ function ProfilesTab() {
     setSelectedUpdateProfile(null);
   };
 
-  const updateGame = async (manifestId?: string) => {
+  const handleUpdateGame = async (manifestId?: string) => {
     if (!selectedUpdateProfile) return;
-
-    try {
-      setIsLoading(true);
-      const request: GameInstallRequest = {
-        profile_name: selectedUpdateProfile.id,
-        branch: selectedUpdateProfile.branch || 'release',
-        manifest_id: manifestId || selectedUpdateProfile.manifest_id,
-        username: savedCredentials?.username || undefined,
-        password: savedCredentials?.password || undefined,
-      };
-
-      const result = await invoke<string>('update_profile_game_interactive', { request });
-      toast.success(result);
-      closeUpdateModal();
-      await refetchProfiles(); // Update profile list
-    } catch (err) {
-      toast.error(t('toasts.error', { message: `ゲームの更新に失敗しました: ${err}` }));
-    } finally {
-      setIsLoading(false);
-    }
+    
+    await updateGame(
+      selectedUpdateProfile.id,
+      selectedUpdateProfile.branch || 'release',
+      manifestId || selectedUpdateProfile.manifest_id
+    );
+    
+    closeUpdateModal();
   };
 
   // Steam credentials related functions
@@ -751,128 +712,13 @@ function ProfilesTab() {
       )}
 
       {/* Install Game Modal */}
-      <AnimatePresence>
-        {showInstallModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-            onClick={closeInstallModal}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-dark-900 border border-dark-600 rounded-xl p-6 max-w-md w-full"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-bold text-white">
-                  {t('profiles.installModal.title')}
-                </h3>
-                <button
-                  onClick={closeInstallModal}
-                  className="text-gray-400 hover:text-white"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    {t('common.profile')}: {selectedProfile}
-                  </label>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    {t('common.branch')}
-                  </label>
-                  <div className="flex space-x-4">
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        value="release"
-                        checked={installBranch === 'release'}
-                        onChange={(e) => setInstallBranch(e.target.value)}
-                        className="text-resonite-blue"
-                      />
-                      <span className="text-white">{t('profiles.installModal.release')}</span>
-                    </label>
-                    <label className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        value="prerelease"
-                        checked={installBranch === 'prerelease'}
-                        onChange={(e) => setInstallBranch(e.target.value)}
-                        className="text-resonite-blue"
-                      />
-                      <span className="text-white">{t('profiles.installModal.prerelease')}</span>
-                    </label>
-                  </div>
-                </div>
-
-                <GameVersionSelector
-                  branch={installBranch}
-                  selectedVersion={manifestId || null}
-                  onVersionSelect={(version) => setManifestId(version || '')}
-                  disabled={isLoading}
-                />
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    {t('settings.steam.credentialModal.usernameLabel')}
-                  </label>
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder={t('settings.steam.credentialModal.usernameLabel')}
-                    className="input-primary w-full"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    {t('settings.steam.credentialModal.passwordLabel')}
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder={t('settings.steam.credentialModal.passwordLabel')}
-                    className="input-primary w-full"
-                  />
-                </div>
-              </div>
-
-              <div className="flex space-x-3 mt-6">
-                <button
-                  className="btn-secondary flex-1"
-                  onClick={closeInstallModal}
-                  disabled={isLoading}
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  className="btn-primary flex-1 flex items-center justify-center space-x-2"
-                  onClick={installGame}
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Download className="w-4 h-4" />
-                  )}
-                  <span>{t('common.install')}</span>
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <GameInstallModal
+        isOpen={showInstallModal}
+        onClose={closeInstallModal}
+        onInstall={handleInstallGame}
+        profileName={selectedProfile}
+        isLoading={getIsInstalling(selectedProfile)}
+      />
 
 
       {/* Create Profile Modal */}
@@ -1121,7 +967,7 @@ function ProfilesTab() {
       <GameUpdateModal
         isOpen={showUpdateModal}
         onClose={closeUpdateModal}
-        onUpdate={updateGame}
+        onUpdate={handleUpdateGame}
         profileName={selectedUpdateProfile?.display_name || ''}
         currentVersion={selectedUpdateProfile?.version}
         currentBranch={selectedUpdateProfile?.branch}

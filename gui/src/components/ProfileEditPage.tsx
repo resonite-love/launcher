@@ -63,6 +63,7 @@ import {
   MultiFileInstallRequest,
   FileInstallChoice
 } from '../hooks/useQueries';
+import { useGameInstallation } from '../hooks/useGameInstallation';
 
 interface ProfileConfig {
   config_version?: number;
@@ -240,6 +241,16 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const migrateInstalledModsMutation = useMigrateInstalledMods();
   const migrateProfileConfigMutation = useMigrateProfileConfig();
   
+  // ゲームインストール用のフック
+  const { installGame, updateGame, isLoading: getIsInstalling } = useGameInstallation({
+    onSuccess: async () => {
+      await loadProfileInfo();
+      await loadModLoaderInfo();
+      setShowGameInstallModal(false);
+      setShowGameUpdateModal(false);
+    },
+  });
+  
   // ゲーム情報用の状態
   const [profileInfo, setProfileInfo] = useState<any>(null);
   const [showGameUpdateModal, setShowGameUpdateModal] = useState(false);
@@ -257,7 +268,6 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [duplicateDescription, setDuplicateDescription] = useState('');
   const [currentBranch, setCurrentBranch] = useState<string>('release');
   const [showGameInstallModal, setShowGameInstallModal] = useState(false);
-  const [isInstallingGame, setIsInstallingGame] = useState(false);
   const [gameVersions, setGameVersions] = useState<BranchInfo>({});
   
 
@@ -723,47 +733,11 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   );
   
   const handleGameUpdate = async (manifestId?: string) => {
-    try {
-      const request = {
-        profile_name: profileName,
-        branch: currentBranch,
-        manifest_id: manifestId,
-      };
-      
-      const result = await invoke<string>('update_profile_game_interactive', { request });
-      toast.success(result);
-      
-      // 更新後に情報を再読み込み
-      await loadProfileInfo();
-      setShowGameUpdateModal(false);
-    } catch (err) {
-      toast.error(t('toasts.error', { message: err }));
-    }
+    await updateGame(profileName, currentBranch, manifestId);
   };
   
   const handleGameInstall = async (branch: string, manifestId?: string) => {
-    try {
-      setIsInstallingGame(true);
-      const request = {
-        profile_name: profileName,
-        branch: branch,
-        manifest_id: manifestId,
-        username: steamCredentials?.username || null,
-        password: steamCredentials?.password || null,
-      };
-      
-      const result = await invoke<string>('install_game_to_profile_interactive', { request });
-      toast.success(result);
-      
-      // インストール後に情報を再読み込み
-      await loadProfileInfo();
-      await loadModLoaderInfo();
-      setShowGameInstallModal(false);
-    } catch (err) {
-      toast.error(t('toasts.error', { message: err }));
-    } finally {
-      setIsInstallingGame(false);
-    }
+    await installGame(profileName, branch, manifestId);
   };
   
   // ゲームの新しいバージョンが利用可能かチェック
@@ -975,8 +949,13 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     whileTap={{ scale: 0.98 }}
                     className="btn-primary flex items-center space-x-2"
                     onClick={() => setShowGameUpdateModal(true)}
+                    disabled={getIsInstalling(profileName)}
                   >
-                    <RefreshCw className="w-4 h-4" />
+                    {getIsInstalling(profileName) ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4" />
+                    )}
                     <span>{t('profiles.editPage.versionChange')}</span>
                   </motion.button>
                 </div>
@@ -1082,9 +1061,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     whileTap={{ scale: 0.98 }}
                     className="btn-primary w-full flex items-center justify-center space-x-2"
                     onClick={() => setShowGameInstallModal(true)}
-                    disabled={isInstallingGame}
+                    disabled={getIsInstalling(profileName)}
                   >
-                    {isInstallingGame ? (
+                    {getIsInstalling(profileName) ? (
                       <Loader2 className="w-5 h-5 animate-spin" />
                     ) : (
                       <Download className="w-5 h-5" />
@@ -2092,7 +2071,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         profileName={profile?.display_name || profileName}
         currentVersion={currentGameVersion || undefined}
         currentBranch={currentBranch}
-        isLoading={false}
+        isLoading={getIsInstalling(profileName)}
       />
       
       {/* Game Install Modal */}
@@ -2101,7 +2080,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         onClose={() => setShowGameInstallModal(false)}
         onInstall={handleGameInstall}
         profileName={profile?.display_name || profileName}
-        isLoading={isInstallingGame}
+        isLoading={getIsInstalling(profileName)}
       />
 
       {/* 利用可能なMODのバージョン選択モーダル */}
