@@ -5,15 +5,13 @@ Resonite Managerは、Resoniteのインストール、アップデート、起�
 ## セットアップ
 
 1. `resonite-manager.exe` を任意のディレクトリに配置します
-2. 同じディレクトリに `steamcmd` フォルダを作成し、その中にSteamCMDをインストールします:
+2. 同じディレクトリに `DepotDownloader.exe` を配置します:
    ```
    /your_directory/
    ├── resonite-manager.exe
-   └── steamcmd/
-       └── steamcmd.exe
+   └── DepotDownloader.exe
    ```
-https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip
-からダウンロードしてください。
+[DepotDownloader](https://github.com/SteamRE/DepotDownloader/releases) からダウンロードし、.NET 8.0 ランタイムがインストールされていることを確認してください。
 
 ## 基本的な使い方
 
@@ -23,7 +21,7 @@ https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip
 resonite-manager.exe steamlogin -u your_steam_username
 ```
 
-パスワードとSteam Guard認証コードの入力を求められます。ログイン情報はsteamcmdによって保存され、以降のコマンドでは認証情報を指定する必要がなくなります。
+パスワードとSteam Guard認証コードの入力を求められます。ログイン情報はDepotDownloaderによって保存され、以降のコマンドでは認証情報を指定する必要がなくなります。
 
 ### Resoniteのインストール
 
@@ -156,6 +154,7 @@ resonite-manager.exe install prerelease -p "D:\Games\Resonite-Beta"
 
 ## 注意事項
 
-1. steamcmdフォルダが存在し、その中にsteamcmd.exeがあることを確認してください
-2. プロファイル機能を使用する前に、対応するブランチのResoniteをインストールしておく必要があります
-3. launchconfig.jsonの`-DataPath`引数のパスを手動で変更する場合は、絶対パスを使用してください
+1. DepotDownloader.exeが実行ファイルと同じディレクトリに存在することを確認してください
+2. .NET 8.0 ランタイムがインストールされていることを確認してください
+3. プロファイル機能を使用する前に、対応するブランチのResoniteをインストールしておく必要があります
+4. launchconfig.jsonの`-DataPath`引数のパスを手動で変更する場合は、絶対パスを使用してください
