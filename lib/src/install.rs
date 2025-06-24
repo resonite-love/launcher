@@ -101,7 +101,7 @@ impl ResoniteInstall {
         );
 
         // プロファイルの存在確認
-        let profile = profile_manager.get_profile(&self.profile_name)?;
+        let _profile = profile_manager.get_profile(&self.profile_name)?;
         let profile_dir = profile_manager.get_profile_dir(&self.profile_name);
         let game_dir = profile_dir.join("Game");
 
@@ -135,7 +135,7 @@ impl ResoniteInstall {
         );
 
         // プロファイルの存在確認
-        let profile = profile_manager.get_profile(&self.profile_name)?;
+        let _profile = profile_manager.get_profile(&self.profile_name)?;
         let profile_dir = profile_manager.get_profile_dir(&self.profile_name);
         let game_dir = profile_dir.join("Game");
 
@@ -247,7 +247,7 @@ impl ResoniteInstall {
         );
 
         // プロファイルの存在確認
-        let profile = profile_manager.get_profile(&self.profile_name)?;
+        let _profile = profile_manager.get_profile(&self.profile_name)?;
         let profile_dir = profile_manager.get_profile_dir(&self.profile_name);
         let game_dir = profile_dir.join("Game");
 

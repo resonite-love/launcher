@@ -24,7 +24,6 @@ pub struct GitHubAsset {
 }
 
 const GITHUB_API_URL: &str = "https://api.github.com/repos/resonite-modding-group/ResoniteModLoader/releases/latest";
-const HARMONY_URL: &str = "https://github.com/pardeike/Harmony/releases/download/v2.3.3.0/Harmony.2.3.3.0.nupkg";
 
 pub struct ModLoader {
     game_path: PathBuf,
@@ -96,7 +95,6 @@ impl ModLoader {
         let libraries_path = self.game_path.join("Libraries");
         let mod_loader_dll = libraries_path.join("ResoniteModLoader.dll");
         let rml_libs_path = self.game_path.join("rml_libs");
-        let rml_mods_path = self.game_path.join("rml_mods");
 
         // ファイルを削除
         if mod_loader_dll.exists() {
@@ -189,15 +187,7 @@ impl ModLoader {
 
     /// Harmonyライブラリをダウンロードして展開
     async fn download_harmony(&self, rml_libs_path: &Path) -> Result<()> {
-        // 簡易実装：事前にビルドされた0Harmony.dllを直接ダウンロード
-        // 実際の実装では、NuGetパッケージを展開する必要がある
-        let _harmony_dll_url = "https://github.com/pardeike/Harmony/releases/download/v2.3.3.0/Harmony.2.3.3.0.zip";
-        
-        // 一時的な解決策として、既知の直接URLを使用
-        // 実際の実装では、zipファイルをダウンロードして展開する
-        let _harmony_direct_url = "https://www.nuget.org/api/v2/package/Lib.Harmony/2.3.3";
-        
-        // とりあえず簡単な実装として、Harmonyの公開されているDLLを使用
+        // とりあえず簡単な実装として、ResoniteModLoaderリポジトリから提供されているDLLを使用
         // 本来はNuGetパッケージから抽出する必要がある
         let harmony_url = "https://github.com/resonite-modding-group/ResoniteModLoader/releases/download/3.0.0/0Harmony.dll";
         

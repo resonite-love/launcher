@@ -3,7 +3,7 @@
 
 use std::sync::Mutex;
 use std::path::PathBuf;
-use tauri::{State, Window, AppHandle, Manager};
+use tauri::{State, Window, AppHandle};
 use reso_launcher_lib::{
     depotdownloader::DepotDownloader,
     install::{ResoniteInstall, ResoniteInstallManager},
@@ -1535,7 +1535,7 @@ async fn get_github_release_info(
     
     let mod_manager = ModManager::new(temp_dir);
     
-    let (version, download_url) = mod_manager.get_latest_release_info(&repo_url).await
+    let (version, _download_url) = mod_manager.get_latest_release_info(&repo_url).await
         .map_err(|e| format!("Failed to get release info: {}", e))?;
     
     // 簡易的なGitHubRelease構造体を作成
@@ -1683,7 +1683,7 @@ async fn update_yt_dlp(
     profile_name: String,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<String, String> {
-    let (profile_dir, game_path) = {
+    let (_profile_dir, game_path) = {
         let app_state = state.lock().unwrap();
         
         let profile_manager = app_state.profile_manager.as_ref()
