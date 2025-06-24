@@ -1937,6 +1937,12 @@ async fn install_app_update(app: AppHandle, window: Window) -> Result<String, St
     }
 }
 
+// Get application version
+#[tauri::command]
+fn get_app_version() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
+}
+
 // Check if the app is running in portable mode
 #[tauri::command]
 fn is_portable_version() -> bool {
@@ -1998,6 +2004,7 @@ fn main() {
             complete_first_run_setup,
             check_app_updates,
             install_app_update,
+            get_app_version,
             is_portable_version
         ])
         .run(tauri::generate_context!())

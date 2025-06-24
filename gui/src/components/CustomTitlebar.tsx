@@ -1,13 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Minus, X } from 'lucide-react';
 import { appWindow } from '@tauri-apps/api/window';
+import { invoke } from '@tauri-apps/api/tauri';
 import { useTranslation } from 'react-i18next';
 import iconPng from '../assets/icon.png';
 
 function CustomTitlebar() {
   const { t } = useTranslation();
   const [isHovered, setIsHovered] = useState<string | null>(null);
+  const [appVersion, setAppVersion] = useState<string>('');
+
+  useEffect(() => {
+    const fetchVersion = async () => {
+      try {
+        const version = await invoke<string>('get_app_version');
+        setAppVersion(version);
+      } catch (error) {
+        console.error('Failed to get app version:', error);
+      }
+    };
+    fetchVersion();
+  }, []);
 
   const handleMinimize = () => {
     appWindow.minimize();
@@ -33,7 +47,13 @@ function CustomTitlebar() {
             data-tauri-drag-region 
           />
           <span className="text-sm font-medium text-white" data-tauri-drag-region>
-            RESO Launcher&nbsp; 
+            RESO Launcher
+            {appVersion && (
+              <span className="text-xs text-gray-400 ml-1" data-tauri-drag-region>
+                v{appVersion}
+              </span>
+            )}
+            &nbsp;
             <span className="text-xs" data-tauri-drag-region>{t('titlebar.poweredBy')}</span>
           </span>
         </div>
