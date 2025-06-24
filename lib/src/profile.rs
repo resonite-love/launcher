@@ -296,7 +296,7 @@ impl Profile {
     /// デフォルトのGameInfo情報を作成
     fn create_default_game_info(profile_dir: &Path) -> Result<GameInfo, Box<dyn Error>> {
         let game_dir = profile_dir.join("Game");
-        let installed = game_dir.exists() && game_dir.is_dir();
+        let installed = game_dir.join("Resonite.exe").exists();
         
         // インストール済みの場合は既存のバージョンを検出を試行
         let (branch, version) = if installed {
