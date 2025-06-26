@@ -117,7 +117,7 @@
       "addAllToManagement": "Add All to Management System",
       "rescan": "Rescan",
       "unmangedModsWarning": "⚠️ These MODs were manually added to the rml_mods folder. Adding them to the management system enables version control.",
-      "fileSize": "File",
+      "fileName": "File Name",
       "size": "Size",
       "updated": "Updated",
       "detectedVersion": "🔍 Detected Version:",

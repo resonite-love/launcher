@@ -1489,7 +1489,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                               <div className="flex items-start justify-between mb-2">
                                 <div className="flex-1">
                                   <h4 className="text-orange-200 font-medium">{mod.dll_name}</h4>
-                                  <p className="text-gray-400 text-sm">{t('profiles.editPage.fileSize')}: {mod.file_name}</p>
+                                  <p className="text-gray-400 text-sm">{t('profiles.editPage.fileName')}: {mod.file_name}</p>
                                   <p className="text-gray-500 text-xs">
                                     {t('profiles.editPage.size')}: {(mod.file_size / 1024 / 1024).toFixed(2)}MB | 
                                     {t('profiles.editPage.updated')}: {mod.modified_time}

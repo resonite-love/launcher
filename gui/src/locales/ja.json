@@ -117,7 +117,7 @@
       "addAllToManagement": "すべて管理システムに追加",
       "rescan": "再スキャン",
       "unmangedModsWarning": "⚠️ これらのMODはrml_modsフォルダに手動で追加されたファイルです。管理システムに追加すると、バージョン管理が可能になります。",
-      "fileSize": "ファイル",
+      "fileName": "ファイル名",
       "size": "サイズ",
       "updated": "更新",
       "detectedVersion": "🔍 検出バージョン:",
