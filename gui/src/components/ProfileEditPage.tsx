@@ -25,7 +25,8 @@ import {
   Eye,
   EyeOff,
   Play,
-  Copy
+  Copy,
+  ArrowUp
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -1323,9 +1324,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                           {modsLoading ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
-                            <Search className="w-4 h-4" />
+                            <RefreshCw className="w-4 h-4" />
                           )}
-                          <span>{t('profiles.editPage.fetchModList')}</span>
+                          <span>{t('profiles.editPage.refreshModList')}</span>
                         </motion.button>
                       </div>
 
@@ -1350,8 +1351,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                         ) : availableMods.length === 0 ? (
                           <div className="text-center py-8">
                             <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                            <p className="text-gray-400 mb-2">{t('profiles.editPage.fetchModsFirst')}</p>
-                            <p className="text-gray-500 text-sm">{t('profiles.editPage.fetchModsHint')}</p>
+                            <p className="text-gray-400 mb-2">{t('profiles.editPage.loadingModList')}</p>
+                            <p className="text-gray-500 text-sm">{t('profiles.editPage.loadingModListHint')}</p>
                           </div>
                         ) : (
                           availableMods
@@ -1671,6 +1672,37 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                                     )}
                                   </motion.button>
+                                  
+                                  {/* アップグレードボタン（新しいバージョンが利用可能な場合のみ表示） */}
+                                  {hasNewerVersion(mod) && (
+                                    <motion.button
+                                      whileHover={{ scale: 1.02 }}
+                                      whileTap={{ scale: 0.98 }}
+                                      className="btn-primary text-xs flex items-center space-x-1 border-blue-500/50"
+                                      onClick={() => {
+                                        const manifestMod = availableMods.find(m => 
+                                          m.name === mod.name || m.source_location === mod.source_location
+                                        );
+                                        if (manifestMod?.latest_version) {
+                                          upgradeModMutation.mutate({
+                                            profileName,
+                                            modName: mod.name,
+                                            targetVersion: manifestMod.latest_version
+                                          });
+                                        }
+                                      }}
+                                      disabled={upgradeModMutation.isPending}
+                                      title={t('profiles.editPage.upgradeToLatest')}
+                                    >
+                                      {upgradeModMutation.isPending && upgradeModMutation.variables?.modName === mod.name ? (
+                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                      ) : (
+                                        <ArrowUp className="w-3 h-3" />
+                                      )}
+                                      <span>{t('profiles.editPage.upgrade')}</span>
+                                      <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                                    </motion.button>
+                                  )}
                                   
                                   {/* MOD有効化/無効化ボタン */}
                                   <motion.button

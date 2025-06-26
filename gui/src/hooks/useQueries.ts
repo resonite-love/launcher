@@ -393,8 +393,11 @@ export const useModManifest = (profileName: string) => {
     queryFn: async (): Promise<ModInfo[]> => {
       return await invoke<ModInfo[]>('fetch_mod_manifest', { profileName });
     },
-    enabled: false, // Disable auto-fetch
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    enabled: !!profileName, // Enable auto-fetch when profileName is available
+    staleTime: 10 * 60 * 1000, // 10 minutes - matches backend cache
+    refetchOnWindowFocus: false, // Don't refetch when window gains focus
+    refetchOnMount: false, // Don't refetch on component mount if data exists
+    retry: 3, // Retry failed requests
   });
 };
 

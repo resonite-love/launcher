@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
 use std::fs;
+use std::time::Duration;
 use reqwest;
 use sha2::{Sha256, Digest};
 
@@ -229,12 +230,54 @@ impl ModManager {
 
     /// キャッシュされたMOD一覧を取得
     pub async fn fetch_mod_manifest(&self) -> Result<Vec<ModInfo>, Box<dyn Error + Send + Sync>> {
-        // キャッシュされたMOD情報を取得
-        let cache_url = "https://raw.githubusercontent.com/resonite-love/resonite-mod-cache/refs/heads/master/cache/mods.json";
+        // ローカルキャッシュファイルのパス
+        let cache_file = self.profile_dir.join("mod_manifest_cache.json");
+        let cache_metadata_file = self.profile_dir.join("mod_manifest_cache_meta.json");
+        
+        // キャッシュの有効期限（10分）
+        let cache_duration = Duration::from_secs(10 * 60);
+        
+        // キャッシュの確認
+        if let Ok(metadata_content) = fs::read_to_string(&cache_metadata_file) {
+            if let Ok(cache_time) = serde_json::from_str::<u64>(&metadata_content) {
+                let cache_timestamp = std::time::UNIX_EPOCH + Duration::from_secs(cache_time);
+                let now = std::time::SystemTime::now();
+                
+                if let Ok(elapsed) = now.duration_since(cache_timestamp) {
+                    if elapsed < cache_duration {
+                        // キャッシュが有効な場合、キャッシュから読み込み
+                        if let Ok(cache_content) = fs::read_to_string(&cache_file) {
+                            if let Ok(cached_mods) = serde_json::from_str::<Vec<ModInfo>>(&cache_content) {
+                                println!("Using cached MOD manifest (age: {}s)", elapsed.as_secs());
+                                return Ok(cached_mods);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // キャッシュが無効または存在しない場合、リモートから取得
+        println!("Fetching MOD manifest from remote source...");
+        let cache_url = "https://raw.githubusercontent.com/resonite-love/resonite-mod-cache/master/cache/mods.json";
         
         let response = self.client.get(cache_url).send().await?;
         let mods_text = response.text().await?;
         let mods: Vec<ModInfo> = serde_json::from_str(&mods_text)?;
+        
+        // キャッシュに保存
+        if let Err(e) = fs::write(&cache_file, &mods_text) {
+            eprintln!("Failed to write MOD manifest cache: {}", e);
+        }
+        
+        let now_timestamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        
+        if let Err(e) = fs::write(&cache_metadata_file, serde_json::to_string(&now_timestamp).unwrap_or_default()) {
+            eprintln!("Failed to write MOD manifest cache metadata: {}", e);
+        }
         
         Ok(mods)
     }
@@ -921,11 +964,37 @@ impl ModManager {
             .find(|m| m.name == mod_name || m.source_location == existing_mod.source_location)
             .ok_or(format!("MOD '{}' not found in manifest", mod_name))?;
         
+        // ターゲットバージョンのリリース情報を取得してファイル形式を確認
+        let target_release = mod_info.releases.iter()
+            .find(|r| r.version == target_version)
+            .ok_or(format!("Target version {} not found", target_version))?;
+        
+        // ファイル名から形式を判定
+        let file_name = target_release.file_name.as_deref()
+            .or_else(|| target_release.download_url.as_ref().and_then(|url| url.split('/').last()))
+            .ok_or("Cannot determine file name for target version")?;
+        
+        // ターゲットバージョンのMODローダータイプを決定
+        let target_mod_loader_type = if file_name.ends_with(".nupkg") {
+            Some("MonkeyLoader")
+        } else if file_name.ends_with(".dll") {
+            Some("ResoniteModLoader")
+        } else {
+            None
+        };
+        
+        println!("Updating {} from {} to {} (old format: {}, new format: {})", 
+                mod_name, 
+                existing_mod.installed_version,
+                target_version,
+                existing_mod.file_format.as_deref().unwrap_or("unknown"),
+                if file_name.ends_with(".nupkg") { "nupkg" } else { "dll" });
+        
         // 既存のMODをアンインストール
         self.uninstall_mod(mod_name)?;
         
-        // 指定されたバージョンをインストール
-        self.install_mod_from_cache(mod_info, Some(target_version), None).await
+        // 指定されたバージョンをインストール（適切なMODローダータイプを指定）
+        self.install_mod_from_cache(mod_info, Some(target_version), target_mod_loader_type).await
     }
 
     /// MODのダウングレード
@@ -955,11 +1024,37 @@ impl ModManager {
                 .ok_or("No latest version available")?
         };
         
+        // 新しいバージョンのリリース情報を取得してファイル形式を確認
+        let target_release = mod_info.releases.iter()
+            .find(|r| r.version == upgrade_version)
+            .ok_or(format!("Target version {} not found", upgrade_version))?;
+        
+        // ファイル名から形式を判定
+        let file_name = target_release.file_name.as_deref()
+            .or_else(|| target_release.download_url.as_ref().and_then(|url| url.split('/').last()))
+            .ok_or("Cannot determine file name for target version")?;
+        
+        // 新しいバージョンのMODローダータイプを決定
+        let new_mod_loader_type = if file_name.ends_with(".nupkg") {
+            Some("MonkeyLoader")
+        } else if file_name.ends_with(".dll") {
+            Some("ResoniteModLoader")
+        } else {
+            None
+        };
+        
+        println!("Upgrading {} from {} to {} (old format: {}, new format: {})", 
+                mod_name, 
+                existing_mod.installed_version,
+                upgrade_version,
+                existing_mod.file_format.as_deref().unwrap_or("unknown"),
+                if file_name.ends_with(".nupkg") { "nupkg" } else { "dll" });
+        
         // 既存のMODをアンインストール
         self.uninstall_mod(mod_name)?;
         
-        // 新しいバージョンをインストール
-        self.install_mod_from_cache(mod_info, Some(upgrade_version), None).await
+        // 新しいバージョンをインストール（適切なMODローダータイプを指定）
+        self.install_mod_from_cache(mod_info, Some(upgrade_version), new_mod_loader_type).await
     }
 
     /// MODをアンインストール
