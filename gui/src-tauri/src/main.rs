@@ -11,7 +11,7 @@ use reso_launcher_lib::{
     mod_loader::ModLoader,
     mod_loader_type::ModLoaderType,
     monkey_loader::MonkeyLoader,
-    mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease, UnmanagedMod, MultiFileInstallRequest, FileInstallChoice},
+    mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease, UnmanagedMod, MultiFileInstallRequest, FileInstallChoice, UpgradeableMod},
     utils,
 };
 use std::process::Command;
@@ -1439,6 +1439,48 @@ async fn upgrade_mod(
         .map_err(|e| format!("Failed to upgrade mod: {}", e))
 }
 
+// Get list of upgradeable MODs
+#[tauri::command]
+async fn get_upgradeable_mods(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<UpgradeableMod>, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    };
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.get_upgradeable_mods().await
+        .map_err(|e| format!("Failed to get upgradeable mods: {}", e))
+}
+
+// Bulk upgrade MODs
+#[tauri::command]
+async fn bulk_upgrade_mods(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<InstalledMod>, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+        
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        
+        profile_manager.get_profile_dir(&profile_name)
+    };
+    
+    let mod_manager = ModManager::new(profile_dir);
+    
+    mod_manager.bulk_upgrade_mods().await
+        .map_err(|e| format!("Failed to bulk upgrade mods: {}", e))
+}
+
 // Get all releases for a GitHub repository
 #[tauri::command]
 async fn get_all_github_releases(
@@ -1991,6 +2033,8 @@ fn main() {
             update_mod,
             downgrade_mod,
             upgrade_mod,
+            get_upgradeable_mods,
+            bulk_upgrade_mods,
             get_all_github_releases,
             scan_unmanaged_mods,
             add_unmanaged_mod_to_system,

@@ -78,6 +78,16 @@ pub struct HashLookupEntry {
     pub file_size: u64,
 }
 
+/// アップグレード可能なMOD情報
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UpgradeableMod {
+    pub name: String,
+    pub current_version: String,
+    pub latest_version: String,
+    pub description: String,
+    pub source_location: String,
+}
+
 /// GitHubリリース情報
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GitHubRelease {
@@ -1000,6 +1010,108 @@ impl ModManager {
     /// MODのダウングレード
     pub async fn downgrade_mod(&self, mod_name: &str, target_version: &str) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
         self.update_mod(mod_name, target_version).await
+    }
+
+    /// アップグレード可能なMODのリストを取得
+    pub async fn get_upgradeable_mods(&self) -> Result<Vec<UpgradeableMod>, Box<dyn Error + Send + Sync>> {
+        // インストール済みMODとマニフェストを取得
+        let installed_mods = self.get_installed_mods()?;
+        let all_mods = self.fetch_mod_manifest().await?;
+        
+        println!("DEBUG: get_upgradeable_mods called");
+        println!("DEBUG: Found {} installed mods", installed_mods.len());
+        println!("DEBUG: Found {} manifest mods", all_mods.len());
+        
+        let mut upgradeable_mods = Vec::new();
+        
+        for installed_mod in &installed_mods {
+            // マニフェストから対応するMOD情報を探す
+            let manifest_mod = all_mods.iter().find(|m| 
+                m.name == installed_mod.name || m.source_location == installed_mod.source_location
+            );
+            
+            if let Some(mod_info) = manifest_mod {
+                if let Some(latest_version) = &mod_info.latest_version {
+                    println!("DEBUG: Checking mod '{}': current='{}', latest='{}'", 
+                             installed_mod.name, installed_mod.installed_version, latest_version);
+                    
+                    // バージョン比較（より新しいバージョンがあるか確認）
+                    if latest_version != &installed_mod.installed_version {
+                        println!("DEBUG: Found upgradeable mod: {} {} -> {}", 
+                                 installed_mod.name, installed_mod.installed_version, latest_version);
+                        upgradeable_mods.push(UpgradeableMod {
+                            name: installed_mod.name.clone(),
+                            current_version: installed_mod.installed_version.clone(),
+                            latest_version: latest_version.clone(),
+                            description: mod_info.description.clone(),
+                            source_location: mod_info.source_location.clone(),
+                        });
+                    }
+                }
+            } else {
+                println!("DEBUG: No manifest mod found for installed mod: {}", installed_mod.name);
+            }
+        }
+        
+        println!("DEBUG: Returning {} upgradeable mods", upgradeable_mods.len());
+        Ok(upgradeable_mods)
+    }
+
+    /// アップデート可能なMODを一括でアップグレード
+    pub async fn bulk_upgrade_mods(&self) -> Result<Vec<InstalledMod>, Box<dyn Error + Send + Sync>> {
+        // インストール済みMODとマニフェストを取得
+        let installed_mods = self.get_installed_mods()?;
+        let all_mods = self.fetch_mod_manifest().await?;
+        
+        let mut upgraded_mods = Vec::new();
+        let mut failed_upgrades = Vec::new();
+        
+        for installed_mod in &installed_mods {
+            // マニフェストから対応するMOD情報を探す
+            let manifest_mod = all_mods.iter().find(|m| 
+                m.name == installed_mod.name || m.source_location == installed_mod.source_location
+            );
+            
+            if let Some(mod_info) = manifest_mod {
+                if let Some(latest_version) = &mod_info.latest_version {
+                    // バージョン比較（簡易的にstring比較、より新しいバージョンがあるか確認）
+                    if latest_version != &installed_mod.installed_version {
+                        println!("Upgrading {} from {} to {}", 
+                                installed_mod.name, 
+                                installed_mod.installed_version, 
+                                latest_version);
+                        
+                        match self.upgrade_mod(&installed_mod.name, Some(latest_version)).await {
+                            Ok(upgraded_mod) => {
+                                upgraded_mods.push(upgraded_mod);
+                                println!("Successfully upgraded {}", installed_mod.name);
+                            }
+                            Err(e) => {
+                                let error_msg = format!("Failed to upgrade {}: {}", installed_mod.name, e);
+                                eprintln!("{}", error_msg);
+                                failed_upgrades.push(error_msg);
+                            }
+                        }
+                    } else {
+                        println!("{} is already up to date ({})", installed_mod.name, latest_version);
+                    }
+                } else {
+                    println!("No latest version available for {}", installed_mod.name);
+                }
+            } else {
+                println!("MOD {} not found in manifest, skipping", installed_mod.name);
+            }
+        }
+        
+        if !failed_upgrades.is_empty() {
+            println!("Failed upgrades: {}", failed_upgrades.join(", "));
+        }
+        
+        println!("Bulk upgrade completed: {} upgraded, {} failed", 
+                upgraded_mods.len(), 
+                failed_upgrades.len());
+        
+        Ok(upgraded_mods)
     }
 
     /// MODのアップグレード

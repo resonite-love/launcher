@@ -195,6 +195,17 @@
         "duplicating": "複製中..."
       }
     },
+    "bulkUpgrade": {
+      "button": "一括アップグレード ({{count}})",
+      "title": "MODの一括アップグレード",
+      "warning": "注意",
+      "warningDescription": "複数のMODを同時にアップグレードします。問題が発生した場合は、個別にダウングレードできます。",
+      "summary": "{{count}}個のMODをアップグレードできます:",
+      "allUpToDate": "すべてのMODが最新です",
+      "allUpToDateDescription": "アップグレード可能なMODはありません。",
+      "confirmUpgrade": "{{count}}個のMODをアップグレード",
+      "upgrading": "アップグレード中..."
+    },
     "createModal": {
       "title": "新規プロファイル作成",
       "nameLabel": "プロファイル名 *",

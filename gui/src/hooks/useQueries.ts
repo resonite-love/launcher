@@ -102,6 +102,7 @@ export const queryKeys = {
   installedMods: (profileName: string) => ['installedMods', profileName] as const,
   modVersions: (profileName: string, modName: string) => ['modVersions', profileName, modName] as const,
   unmanagedMods: (profileName: string) => ['unmanagedMods', profileName] as const,
+  upgradeableMods: (profileName: string) => ['upgradeableMods', profileName] as const,
   ytDlpStatus: (profileName: string) => ['ytDlpStatus', profileName] as const,
 };
 
@@ -504,6 +505,14 @@ export interface FileInstallChoice {
   destination_path: string;
 }
 
+export interface UpgradeableMod {
+  name: string;
+  current_version: string;
+  latest_version: string;
+  description: string;
+  source_location: string;
+}
+
 export const useCheckMultiFileInstall = () => {
   return useMutation({
     mutationFn: async ({ repoUrl, version }: { repoUrl: string; version?: string }) => {
@@ -685,6 +694,39 @@ export const useUpgradeMod = () => {
     },
     onError: (error) => {
       toast.error(`MODのアップグレードに失敗しました: ${error}`);
+    },
+  });
+};
+
+// Get upgradeable MODs
+export const useUpgradeableMods = (profileName: string) => {
+  return useQuery({
+    queryKey: queryKeys.upgradeableMods(profileName),
+    queryFn: async (): Promise<UpgradeableMod[]> => {
+      return await invoke<UpgradeableMod[]>('get_upgradeable_mods', { profileName });
+    },
+    enabled: !!profileName,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+};
+
+// Bulk upgrade MODs
+export const useBulkUpgradeMods = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ profileName }: { profileName: string }) => {
+      return await invoke<InstalledMod[]>('bulk_upgrade_mods', { profileName });
+    },
+    onSuccess: (result, variables) => {
+      const count = result.length;
+      toast.success(`${count}個のMODをアップグレードしました`);
+      queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(variables.profileName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.unmanagedMods(variables.profileName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.upgradeableMods(variables.profileName) });
+    },
+    onError: (error) => {
+      toast.error(`MODの一括アップグレードに失敗しました: ${error}`);
     },
   });
 };

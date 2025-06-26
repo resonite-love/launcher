@@ -39,6 +39,8 @@ import GameInstallModal from './GameInstallModal';
 import LaunchArgumentsEditor from './LaunchArgumentsEditor';
 import { ModVersionSelector } from './ModVersionSelector';
 import { ProfileDeleteConfirmModal } from './ProfileDeleteConfirmModal';
+import BulkUpgradeModal from './BulkUpgradeModal';
+import { UpgradeableModsDebug } from './UpgradeableModsDebug';
 import { 
   useModManifest, 
   useInstalledMods, 
@@ -50,6 +52,8 @@ import {
   useUpdateMod,
   useDowngradeMod,
   useUpgradeMod,
+  useUpgradeableMods,
+  useBulkUpgradeMods,
   useUnmanagedMods,
   useAddUnmanagedMod,
   useAddAllUnmanagedMods,
@@ -198,6 +202,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [selectedCustomModUrl, setSelectedCustomModUrl] = useState<string>('');
   const [customModVersions, setCustomModVersions] = useState<any[]>([]);
   const [modActiveTab, setModActiveTab] = useState<'install' | 'manage'>('install');
+  const [showBulkUpgradeModal, setShowBulkUpgradeModal] = useState(false);
 
   // React Query hooks - disable auto-fetch for available mods
   const { data: availableMods = [], isLoading: modsLoading, refetch: refetchMods } = useModManifest(profileName);
@@ -224,6 +229,17 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const updateModMutation = useUpdateMod();
   const downgradeModMutation = useDowngradeMod();
   const upgradeModMutation = useUpgradeMod();
+  const { data: upgradeableMods = [], refetch: refetchUpgradeableMods, isLoading: upgradeableModsLoading, error: upgradeableModsError } = useUpgradeableMods(profileName);
+  
+  // Debug logging for upgradeableMods
+  console.log('ProfileEditPage - upgradeableMods debug:', {
+    upgradeableMods,
+    length: upgradeableMods.length,
+    isLoading: upgradeableModsLoading,
+    error: upgradeableModsError,
+    profileName
+  });
+  const bulkUpgradeModsMutation = useBulkUpgradeMods();
   const addUnmanagedModMutation = useAddUnmanagedMod();
   const addAllUnmanagedModsMutation = useAddAllUnmanagedMods();
   
@@ -431,6 +447,21 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   // MOD関連の関数
   const loadAvailableMods = async () => {
     refetchMods();
+  };
+
+  const handleBulkUpgrade = () => {
+    setShowBulkUpgradeModal(true);
+  };
+
+  const confirmBulkUpgrade = async () => {
+    try {
+      await bulkUpgradeModsMutation.mutateAsync({ profileName });
+      setShowBulkUpgradeModal(false);
+      // Refresh upgradeable mods list
+      refetchUpgradeableMods();
+    } catch (error) {
+      // Error is handled by the mutation's onError
+    }
   };
 
   const installMod = async (modInfo: ModInfo, version?: string) => {
@@ -1576,7 +1607,31 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                   <div className="space-y-6">
                     {/* インストール済みMOD */}
                     <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-white mb-4">{t('profiles.editPage.installedMods')}</h3>
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-white">{t('profiles.editPage.installedMods')}</h3>
+                        <div className="flex items-center space-x-2">
+                          {/* Debug info */}
+                          <div className="text-xs text-gray-400">
+                            Debug: {upgradeableMods.length} upgradeable, Loading: {upgradeableModsLoading ? 'Yes' : 'No'}
+                            {upgradeableModsError && <span className="text-red-400"> Error: {String(upgradeableModsError)}</span>}
+                          </div>
+                          {upgradeableMods.length > 0 && (
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => setShowBulkUpgradeModal(true)}
+                              className="btn-primary text-xs flex items-center space-x-2 px-3 py-1.5"
+                              disabled={bulkUpgradeModsMutation.isPending}
+                            >
+                              <ArrowUp className="w-3 h-3" />
+                              <span>{t('profiles.bulkUpgrade.button', { count: upgradeableMods.length })}</span>
+                            </motion.button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Debug component */}
+                      {/* <UpgradeableModsDebug profileName={profileName} /> */}
                       
                       <div className="space-y-3">
                         {installedMods.length === 0 ? (
@@ -2361,6 +2416,24 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         onConfirm={handleMultiFileInstall}
         onVersionChange={handleMultiFileVersionChange}
         installRequest={multiFileInstallRequest}
+      />
+      
+      {/* 一括アップグレードモーダル */}
+      <BulkUpgradeModal
+        isOpen={showBulkUpgradeModal}
+        onClose={() => setShowBulkUpgradeModal(false)}
+        upgradeableMods={upgradeableMods}
+        onConfirm={async () => {
+          try {
+            await bulkUpgradeModsMutation.mutateAsync({ profileName });
+            setShowBulkUpgradeModal(false);
+            refetchInstalledMods();
+            refetchUpgradeableMods();
+          } catch (error) {
+            console.error('Bulk upgrade failed:', error);
+          }
+        }}
+        isUpgrading={bulkUpgradeModsMutation.isPending}
       />
       
       {/* 削除確認モーダル */}

@@ -195,6 +195,17 @@
         "duplicating": "Duplicating..."
       }
     },
+    "bulkUpgrade": {
+      "button": "Bulk Upgrade ({{count}})",
+      "title": "Bulk MOD Upgrade",
+      "warning": "Warning",
+      "warningDescription": "This will upgrade multiple MODs simultaneously. If issues occur, you can downgrade them individually.",
+      "summary": "{{count}} MODs can be upgraded:",
+      "allUpToDate": "All MODs are up to date",
+      "allUpToDateDescription": "No MODs available for upgrade.",
+      "confirmUpgrade": "Upgrade {{count}} MODs",
+      "upgrading": "Upgrading..."
+    },
     "createModal": {
       "title": "Create New Profile",
       "nameLabel": "Profile Name *",
