@@ -71,12 +71,10 @@ pub struct UnmanagedMod {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HashLookupEntry {
     pub mod_name: String,
-    pub mod_source: String,
     pub version: String,
+    pub download_url: String,
     pub file_name: String,
-    pub file_size: Option<u64>,
-    pub published_at: String,
-    pub download_url: Option<String>,
+    pub file_size: u64,
 }
 
 /// GitHubリリース情報
@@ -787,16 +785,22 @@ impl ModManager {
             if let Some(hash_entry) = hash_match {
                 // ハッシュマッチが見つかった場合、バージョンを設定
                 unmanaged_mod.detected_version = Some(hash_entry.version.clone());
+                println!("Hash match found for {}: version {}", unmanaged_mod.dll_name, hash_entry.version);
                 
-                // 対応するMOD情報を探す
+                // 対応するMOD情報を探す（MOD名ベースでマッチング）
                 let matched_mod = manifest_mods.iter().find(|manifest_mod| {
-                    manifest_mod.source_location == hash_entry.mod_source
+                    manifest_mod.name == hash_entry.mod_name
                 });
                 
                 if let Some(matched_mod) = matched_mod {
                     unmanaged_mod.matched_mod_info = Some(matched_mod.clone());
+                    println!("Matched mod info found for {}", unmanaged_mod.dll_name);
                     continue;
+                } else {
+                    println!("No matched mod info found for {} (looking for '{}')", unmanaged_mod.dll_name, hash_entry.mod_name);
                 }
+            } else {
+                println!("No hash match found for {} (hash: {})", unmanaged_mod.dll_name, file_hash);
             }
             
             // ハッシュでマッチしない場合は従来のファイル名ベースマッチング
@@ -823,14 +827,21 @@ impl ModManager {
 
     /// 未管理MODを管理システムに追加
     pub async fn add_unmanaged_mod_to_system(&self, unmanaged_mod: &UnmanagedMod) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
-        // ハッシュベースでバージョンを検出
-        let detected_version = if let Some(hash) = &unmanaged_mod.calculated_sha256 {
+        // 既に検出されたバージョンを使用、なければハッシュベースで検出
+        let detected_version = if let Some(version) = &unmanaged_mod.detected_version {
+            println!("Using pre-detected version for {}: {}", unmanaged_mod.dll_name, version);
+            Some(version.clone())
+        } else if let Some(hash) = &unmanaged_mod.calculated_sha256 {
+            println!("No pre-detected version, trying hash lookup for {}", unmanaged_mod.dll_name);
             if let Some(hash_entry) = self.find_mod_by_hash(hash).await {
+                println!("Hash lookup successful for {}: {}", unmanaged_mod.dll_name, hash_entry.version);
                 Some(hash_entry.version)
             } else {
+                println!("Hash lookup failed for {}", unmanaged_mod.dll_name);
                 None
             }
         } else {
+            println!("No hash available for {}", unmanaged_mod.dll_name);
             None
         };
         
@@ -861,7 +872,11 @@ impl ModManager {
                 .as_ref()
                 .map(|info| info.source_location.clone())
                 .unwrap_or_else(|| format!("file://{}", unmanaged_mod.file_path.display())),
-            installed_version: detected_version.unwrap_or_else(|| "unknown".to_string()),
+            installed_version: {
+                let version = detected_version.unwrap_or_else(|| "unknown".to_string());
+                println!("Final installed_version for {}: {}", unmanaged_mod.dll_name, version);
+                version
+            },
             installed_date: unmanaged_mod.modified_time.clone(),
             dll_path: unmanaged_mod.file_path.clone(),
             mod_loader_type: Some(mod_loader_type.to_string()),
@@ -1086,12 +1101,12 @@ impl ModManager {
     }
     
     /// ハッシュルックアップテーブルを取得
-    pub async fn fetch_hash_lookup_table(&self) -> Result<HashMap<String, Vec<HashLookupEntry>>, Box<dyn Error + Send + Sync>> {
-        let cache_url = "https://raw.githubusercontent.com/resonite-love/resonite-mod-cache/refs/heads/master/cache/hash-lookup.json";
+    pub async fn fetch_hash_lookup_table(&self) -> Result<HashMap<String, HashLookupEntry>, Box<dyn Error + Send + Sync>> {
+        let cache_url = "https://raw.githubusercontent.com/resonite-love/resonite-mod-cache/master/cache/hash-lookup.json";
         
         let response = self.client.get(cache_url).send().await?;
         let lookup_text = response.text().await?;
-        let lookup_table: HashMap<String, Vec<HashLookupEntry>> = serde_json::from_str(&lookup_text)?;
+        let lookup_table: HashMap<String, HashLookupEntry> = serde_json::from_str(&lookup_text)?;
         
         Ok(lookup_table)
     }
@@ -1100,11 +1115,22 @@ impl ModManager {
     pub async fn find_mod_by_hash(&self, hash: &str) -> Option<HashLookupEntry> {
         match self.fetch_hash_lookup_table().await {
             Ok(lookup_table) => {
-                lookup_table.get(hash)
-                    .and_then(|entries| entries.first())
-                    .cloned()
+                println!("Hash lookup table fetched successfully, {} entries", lookup_table.len());
+                match lookup_table.get(hash) {
+                    Some(entry) => {
+                        println!("Found hash match for {}: {}", hash, entry.mod_name);
+                        Some(entry.clone())
+                    }
+                    None => {
+                        println!("Hash {} not found in lookup table", hash);
+                        None
+                    }
+                }
             }
-            Err(_) => None
+            Err(e) => {
+                println!("Failed to fetch hash lookup table: {}", e);
+                None
+            }
         }
     }
     
