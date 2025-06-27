@@ -417,7 +417,9 @@
       "title": "{{modName}} - Version Selection",
       "installed": "Installed",
       "prerelease": "Pre-release",
-      "noVersions": "No versions available"
+      "noVersions": "No versions available",
+      "incompatible": "Incompatible",
+      "incompatibleRML": "RML doesn't support .nupkg"
     }
   },
   "launchArgs": {
@@ -496,6 +498,7 @@
     "profileFolderOpened": "Profile folder opened",
     "githubUrlRequired": "Please enter GitHub repository URL",
     "validGithubUrlRequired": "Please enter a valid GitHub repository URL",
-    "noReleasesFound": "No releases found in this repository"
+    "noReleasesFound": "No releases found in this repository",
+    "noCompatibleVersions": "This mod has no versions compatible with the current mod loader environment"
   }
 }

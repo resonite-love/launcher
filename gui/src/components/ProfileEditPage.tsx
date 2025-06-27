@@ -505,15 +505,46 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     return cleanA.localeCompare(cleanB, undefined, { numeric: true, sensitivity: 'base' });
   };
 
-  // 新しいバージョンが利用可能かチェック
+  // 新しいバージョンが利用可能かチェック（互換性を考慮）
   const hasNewerVersion = (mod: InstalledMod): boolean => {
     const manifestMod = availableMods.find(m => 
       m.name === mod.name || m.source_location === mod.source_location
     );
     
-    if (!manifestMod || !manifestMod.latest_version) return false;
+    if (!manifestMod || !manifestMod.releases) return false;
     
-    return compareVersions(manifestMod.latest_version, mod.installed_version) > 0;
+    // ResoniteModLoader環境では互換性のあるバージョンのみをチェック
+    const compatibleReleases = manifestMod.releases.filter(release => isReleaseCompatible(release));
+    if (compatibleReleases.length === 0) return false;
+    
+    // 最新の互換性のあるバージョンを取得
+    const latestCompatibleVersion = compatibleReleases[0].version;
+    
+    return compareVersions(latestCompatibleVersion, mod.installed_version) > 0;
+  };
+
+  // 互換性のあるアップグレード可能なMODのみをフィルタリング
+  const getCompatibleUpgradeableMods = () => {
+    return upgradeableMods.filter(upgradeable => {
+      const manifestMod = availableMods.find(m => 
+        m.name === upgradeable.name || m.source_location === upgradeable.source_location
+      );
+      
+      if (!manifestMod?.releases) return false;
+      
+      // 互換性のあるバージョンが存在するかチェック
+      const compatibleReleases = manifestMod.releases.filter(release => isReleaseCompatible(release));
+      if (compatibleReleases.length === 0) return false;
+      
+      // 現在のバージョンより新しい互換性のあるバージョンが存在するかチェック
+      const latestCompatibleVersion = compatibleReleases[0].version;
+      return compareVersions(latestCompatibleVersion, upgradeable.current_version) > 0;
+    });
+  };
+
+  // GitHubのURLかどうかをチェック
+  const isGitHubUrl = (url: string): boolean => {
+    return url.toLowerCase().includes('github.com');
   };
 
   // 手動インストールMODのバージョン一覧を取得
@@ -575,12 +606,29 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     }
   };
 
+  // Check if a release is compatible with the current mod loader
+  const isReleaseCompatible = (release: ModRelease): boolean => {
+    if (!modLoaderInfo?.loader_type) return true; // If no mod loader type is specified, allow all
+    
+    // ResoniteModLoader cannot use .nupkg files
+    if (modLoaderInfo.loader_type === 'ResoniteModLoader' && release.file_name?.endsWith('.nupkg')) {
+      return false;
+    }
+    
+    return true;
+  };
+
   // 利用可能なMODのインストールボタンクリック
-  // 最新版を自動インストール
+  // 最新版を自動インストール（互換性のあるもの）
   const handleInstallLatestClick = async (mod: ModInfo) => {
     if (mod.releases.length > 0) {
-      const latestVersion = mod.releases[0].version; // 配列の最初が最新版
-      await installMod(mod, latestVersion);
+      // Find the latest compatible version
+      const compatibleRelease = mod.releases.find(release => isReleaseCompatible(release));
+      if (compatibleRelease) {
+        await installMod(mod, compatibleRelease.version);
+      } else {
+        toast.error(t('toasts.noCompatibleVersions'));
+      }
     }
   };
 
@@ -1416,15 +1464,17 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                   </div>
                                   
                                   <div className="flex items-center space-x-2 ml-3">
-                                    <motion.button
-                                      whileHover={{ scale: 1.02 }}
-                                      whileTap={{ scale: 0.98 }}
-                                      className="btn-secondary text-xs p-1.5"
-                                      onClick={() => open(mod.source_location)}
-                                      title="Open in GitHub"
-                                    >
-                                      <ExternalLink className="w-3 h-3" />
-                                    </motion.button>
+                                    {isGitHubUrl(mod.source_location) && (
+                                      <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="btn-secondary text-xs p-1.5"
+                                        onClick={() => open(mod.source_location)}
+                                        title="Open in GitHub"
+                                      >
+                                        <ExternalLink className="w-3 h-3" />
+                                      </motion.button>
+                                    )}
                                     
                                     {/* カスタムインストールボタン */}
                                     <motion.button
@@ -1576,14 +1626,16 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       )}
                                     </div>
                                     <div className="flex space-x-2">
-                                      <motion.button
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="btn-secondary text-xs"
-                                        onClick={() => open(mod.matched_mod_info!.source_location)}
-                                      >
-                                        <ExternalLink className="w-3 h-3" />
-                                      </motion.button>
+                                      {isGitHubUrl(mod.matched_mod_info!.source_location) && (
+                                        <motion.button
+                                          whileHover={{ scale: 1.02 }}
+                                          whileTap={{ scale: 0.98 }}
+                                          className="btn-secondary text-xs"
+                                          onClick={() => open(mod.matched_mod_info!.source_location)}
+                                        >
+                                          <ExternalLink className="w-3 h-3" />
+                                        </motion.button>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
@@ -1612,10 +1664,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                         <div className="flex items-center space-x-2">
                           {/* Debug info */}
                           <div className="text-xs text-gray-400">
-                            Debug: {upgradeableMods.length} upgradeable, Loading: {upgradeableModsLoading ? 'Yes' : 'No'}
+                            Debug: {getCompatibleUpgradeableMods().length} upgradeable, Loading: {upgradeableModsLoading ? 'Yes' : 'No'}
                             {upgradeableModsError && <span className="text-red-400"> Error: {String(upgradeableModsError)}</span>}
                           </div>
-                          {upgradeableMods.length > 0 && (
+                          {getCompatibleUpgradeableMods().length > 0 && (
                             <motion.button
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
@@ -1624,7 +1676,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                               disabled={bulkUpgradeModsMutation.isPending}
                             >
                               <ArrowUp className="w-3 h-3" />
-                              <span>{t('profiles.bulkUpgrade.button', { count: upgradeableMods.length })}</span>
+                              <span>{t('profiles.bulkUpgrade.button', { count: getCompatibleUpgradeableMods().length })}</span>
                             </motion.button>
                           )}
                         </div>
@@ -1696,14 +1748,16 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                 </div>
                                 
                                 <div className="flex items-center space-x-2">
-                                  <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className="btn-secondary text-xs"
-                                    onClick={() => open(mod.source_location)}
-                                  >
-                                    <ExternalLink className="w-3 h-3" />
-                                  </motion.button>
+                                  {isGitHubUrl(mod.source_location) && (
+                                    <motion.button
+                                      whileHover={{ scale: 1.02 }}
+                                      whileTap={{ scale: 0.98 }}
+                                      className="btn-secondary text-xs"
+                                      onClick={() => open(mod.source_location)}
+                                    >
+                                      <ExternalLink className="w-3 h-3" />
+                                    </motion.button>
+                                  )}
                                   
                                   <motion.button
                                     whileHover={{ scale: 1.02 }}
@@ -1738,12 +1792,17 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                         const manifestMod = availableMods.find(m => 
                                           m.name === mod.name || m.source_location === mod.source_location
                                         );
-                                        if (manifestMod?.latest_version) {
-                                          upgradeModMutation.mutate({
-                                            profileName,
-                                            modName: mod.name,
-                                            targetVersion: manifestMod.latest_version
-                                          });
+                                        if (manifestMod?.releases) {
+                                          // 互換性のある最新バージョンを取得
+                                          const compatibleReleases = manifestMod.releases.filter(release => isReleaseCompatible(release));
+                                          if (compatibleReleases.length > 0) {
+                                            const latestCompatibleVersion = compatibleReleases[0].version;
+                                            upgradeModMutation.mutate({
+                                              profileName,
+                                              modName: mod.name,
+                                              targetVersion: latestCompatibleVersion
+                                            });
+                                          }
                                         }
                                       }}
                                       disabled={upgradeModMutation.isPending}
@@ -1817,6 +1876,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                         availableVersions={availableVersions}
                                         onVersionSelect={(version) => handleVersionChange(mod, version)}
                                         isLoading={updateModMutation.isPending || downgradeModMutation.isPending || upgradeModMutation.isPending}
+                                        modLoaderType={modLoaderInfo?.loader_type}
                                       />
                                     ) : (
                                       <div className="space-y-2">
@@ -2215,6 +2275,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                   availableVersions={availableModVersions}
                   onVersionSelect={handleAvailableModVersionSelect}
                   isLoading={installModMutation.isPending}
+                  modLoaderType={modLoaderInfo?.loader_type}
                 />
                 
                 <div className="flex justify-end">
@@ -2281,6 +2342,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 availableVersions={customModVersions}
                 onVersionSelect={handleAvailableModVersionSelect}
                 isLoading={isInstallingMod !== null}
+                modLoaderType={modLoaderInfo?.loader_type}
               />
               
               <div className="flex justify-end">
@@ -2422,7 +2484,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       <BulkUpgradeModal
         isOpen={showBulkUpgradeModal}
         onClose={() => setShowBulkUpgradeModal(false)}
-        upgradeableMods={upgradeableMods}
+        upgradeableMods={getCompatibleUpgradeableMods()}
         onConfirm={async () => {
           try {
             await bulkUpgradeModsMutation.mutateAsync({ profileName });

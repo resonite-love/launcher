@@ -28,13 +28,15 @@ interface ModVersionSelectorProps {
   availableVersions: ModRelease[];
   onVersionSelect: (version: string) => void;
   isLoading?: boolean;
+  modLoaderType?: 'ResoniteModLoader' | 'MonkeyLoader';
 }
 
 export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
   mod,
   availableVersions,
   onVersionSelect,
-  isLoading = false
+  isLoading = false,
+  modLoaderType
 }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -58,6 +60,18 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
     if (!bytes) return '';
     const mb = bytes / (1024 * 1024);
     return mb > 1 ? `${mb.toFixed(1)}MB` : `${(bytes / 1024).toFixed(0)}KB`;
+  };
+
+  // Check if a version is compatible with the current mod loader
+  const isVersionCompatible = (release: ModRelease): boolean => {
+    if (!modLoaderType) return true; // If no mod loader type is specified, allow all
+    
+    // ResoniteModLoader cannot use .nupkg files
+    if (modLoaderType === 'ResoniteModLoader' && release.file_name?.endsWith('.nupkg')) {
+      return false;
+    }
+    
+    return true;
   };
 
   return (
@@ -91,16 +105,22 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
           </div>
           
           <div className="max-h-80 overflow-y-auto">
-            {availableVersions.map((release) => (
-              <button
-                key={release.version}
-                onClick={() => handleVersionSelect(release.version)}
-                className={`w-full text-left px-3 py-2 hover:bg-gray-700 transition-colors
-                           border-b border-gray-700 last:border-b-0 
-                           ${release.version === mod.installed_version 
-                             ? 'bg-blue-900/30 text-blue-300' 
-                             : 'text-gray-300'}`}
-              >
+            {availableVersions.map((release) => {
+              const isCompatible = isVersionCompatible(release);
+              return (
+                <button
+                  key={release.version}
+                  onClick={() => isCompatible && handleVersionSelect(release.version)}
+                  disabled={!isCompatible}
+                  className={`w-full text-left px-3 py-2 transition-colors
+                             border-b border-gray-700 last:border-b-0 
+                             ${!isCompatible 
+                               ? 'bg-gray-800/50 text-gray-500 cursor-not-allowed' 
+                               : 'hover:bg-gray-700'} 
+                             ${release.version === mod.installed_version 
+                               ? 'bg-blue-900/30 text-blue-300' 
+                               : isCompatible ? 'text-gray-300' : ''}`}
+                >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{release.version}</span>
@@ -112,6 +132,13 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
                     {release.prerelease && (
                       <span className="text-xs bg-yellow-600 px-2 py-0.5 rounded">
                         {t('modLoader.versionSelector.prerelease')}
+                      </span>
+                    )}
+                    {!isCompatible && (
+                      <span className="text-xs bg-red-600/50 px-2 py-0.5 rounded">
+                        {modLoaderType === 'ResoniteModLoader' 
+                          ? t('modLoader.versionSelector.incompatibleRML')
+                          : t('modLoader.versionSelector.incompatible')}
                       </span>
                     )}
                   </div>
@@ -134,8 +161,9 @@ export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({
                     <span>({formatFileSize(release.file_size)})</span>
                   )}
                 </div>
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
           
           {availableVersions.length === 0 && (

@@ -417,7 +417,9 @@
       "title": "{{modName}} - バージョン選択",
       "installed": "インストール済み",
       "prerelease": "プレリリース",
-      "noVersions": "利用可能なバージョンがありません"
+      "noVersions": "利用可能なバージョンがありません",
+      "incompatible": "非対応",
+      "incompatibleRML": "RMLは.nupkg非対応"
     }
   },
   "launchArgs": {
@@ -496,6 +498,7 @@
     "profileFolderOpened": "プロファイルフォルダを開きました",
     "githubUrlRequired": "GitHubリポジトリURLを入力してください",
     "validGithubUrlRequired": "有効なGitHubリポジトリURLを入力してください",
-    "noReleasesFound": "このリポジトリにはリリースが見つかりませんでした"
+    "noReleasesFound": "このリポジトリにはリリースが見つかりませんでした",
+    "noCompatibleVersions": "このMODには現在のMODローダー環境と互換性のあるバージョンがありません"
   }
 }
