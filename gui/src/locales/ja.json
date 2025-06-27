@@ -28,7 +28,8 @@
     "profile": "プロファイル",
     "branch": "ブランチ",
     "status": "状態",
-    "download": "ダウンロード"
+    "download": "ダウンロード",
+    "openInGitHub": "GitHubで開く"
   },
   "app": {
     "initializing": "アプリケーションを初期化中...",

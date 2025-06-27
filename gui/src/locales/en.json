@@ -28,7 +28,8 @@
     "profile": "Profile",
     "branch": "Branch",
     "status": "Status",
-    "download": "Download"
+    "download": "Download",
+    "openInGitHub": "Open in GitHub"
   },
   "app": {
     "initializing": "Initializing application...",

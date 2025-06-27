@@ -1699,95 +1699,105 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: index * 0.05 }}
-                              className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-4"
+                              className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-3"
                             >
-                              <div className="flex items-start justify-between mb-2">
-                                <div className="flex-1">
-                                  <div className="flex items-center space-x-2 mb-1 flex-wrap gap-1">
-                                    <h4 className="text-white font-medium">{mod.name}</h4>
-                                    
-                                    {/* MODローダータイプとファイル形式のチップ */}
-                                    {(mod.mod_loader_type || mod.file_format) && (
-                                      <span className={`inline-flex items-center text-xs px-2 py-0.5 rounded-full ${
-                                        mod.file_format === 'nupkg'
-                                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
-                                          : 'bg-green-500/20 text-green-300 border border-green-500/30'
-                                      }`}>
-                                        {mod.file_format === 'nupkg' ? 'ML' : 'RML'}
-                                      </span>
-                                    )}
-                                    
-                                    {/* MOD有効/無効状態 */}
-                                    {mod.enabled === false && (
-                                      <span className="inline-flex items-center text-xs bg-gray-500/20 text-gray-400 border border-gray-500/30 px-2 py-0.5 rounded-full">
-                                        {t('profiles.editPage.disabled')}
-                                      </span>
-                                    )}
-                                    
-                                    {hasNewerVersion(mod) && (
-                                      <span className="inline-flex items-center text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-full">
-                                        <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
-                                        {t('profiles.editPage.updateAvailable')}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className="text-gray-400 text-sm">
-                                    {t('common.version')}: {mod.installed_version}
-                                    {hasNewerVersion(mod) && (() => {
-                                      const manifestMod = availableMods.find(m => 
-                                        m.name === mod.name || m.source_location === mod.source_location
-                                      );
-                                      return manifestMod?.latest_version && (
-                                        <span className="text-blue-300 ml-2">
-                                          → {manifestMod.latest_version} {t('profiles.editPage.available')}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center space-x-2">
+                                      <h4 className="text-white font-medium truncate">{mod.name}</h4>
+                                      
+                                      {/* MODローダータイプとファイル形式のチップ */}
+                                      {(mod.mod_loader_type || mod.file_format) && (
+                                        <span className={`inline-flex items-center text-xs px-1.5 py-0.5 rounded-full ${
+                                          mod.file_format === 'nupkg'
+                                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
+                                            : 'bg-green-500/20 text-green-300 border border-green-500/30'
+                                        }`}>
+                                          {mod.file_format === 'nupkg' ? 'ML' : 'RML'}
                                         </span>
-                                      );
-                                    })()}
-                                  </p>
-                                  <p className="text-gray-500 text-xs">{t('profiles.editPage.installDate')} {mod.installed_date}</p>
+                                      )}
+                                      
+                                      {/* MOD有効/無効状態 */}
+                                      {mod.enabled === false && (
+                                        <span className="inline-flex items-center text-xs bg-gray-500/20 text-gray-400 border border-gray-500/30 px-1.5 py-0.5 rounded-full">
+                                          {t('profiles.editPage.disabled')}
+                                        </span>
+                                      )}
+                                      
+                                      {hasNewerVersion(mod) && (
+                                        <span className="inline-flex items-center text-xs bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded-full">
+                                          <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-1"></span>
+                                          {t('profiles.editPage.updateAvailable')}
+                                        </span>
+                                      )}
+                                      
+                                      <span className="text-gray-400 text-xs">
+                                        {mod.installed_version}
+                                      </span>
+                                      
+                                      {hasNewerVersion(mod) && (() => {
+                                        const manifestMod = availableMods.find(m => 
+                                          m.name === mod.name || m.source_location === mod.source_location
+                                        );
+                                        return manifestMod?.latest_version && (
+                                          <span className="text-blue-300 text-xs">
+                                            → {manifestMod.latest_version}
+                                          </span>
+                                        );
+                                      })()}
+                                      
+                                      {/* MOD description */}
+                                      {mod.description && (
+                                        <span className="text-gray-400 text-xs truncate mx-6 flex-1">
+                                          {mod.description}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
                                 
                                 <div className="flex items-center space-x-2">
                                   {isGitHubUrl(mod.source_location) && (
                                     <motion.button
-                                      whileHover={{ scale: 1.02 }}
-                                      whileTap={{ scale: 0.98 }}
-                                      className="btn-secondary text-xs"
+                                      whileHover={{ scale: 1.1 }}
+                                      whileTap={{ scale: 0.95 }}
+                                      className="p-1.5 rounded-md bg-gray-600/30 hover:bg-gray-600/50 text-gray-300 transition-colors"
                                       onClick={() => open(mod.source_location)}
+                                      title={t('common.openInGitHub')}
                                     >
-                                      <ExternalLink className="w-3 h-3" />
+                                      <ExternalLink className="w-3.5 h-3.5" />
                                     </motion.button>
                                   )}
                                   
                                   <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className={`text-xs flex items-center space-x-1 ${
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className={`p-1.5 rounded-md transition-colors relative ${
                                       hasNewerVersion(mod) 
-                                        ? 'btn-primary border-blue-500/50' 
-                                        : 'btn-secondary'
+                                        ? 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-300' 
+                                        : 'bg-gray-600/30 hover:bg-gray-600/50 text-gray-300'
                                     }`}
                                     onClick={() => handleVersionChangeClick(mod)}
                                     disabled={versionsLoading || loadingManualVersions === mod.name}
                                     title={hasNewerVersion(mod) ? t('profiles.editPage.newVersionAvailable') : t('profiles.editPage.changeVersion')}
                                   >
                                     {loadingManualVersions === mod.name ? (
-                                      <Loader2 className="w-3 h-3 animate-spin" />
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                     ) : (
-                                      <Edit className="w-3 h-3" />
+                                      <Edit className="w-3.5 h-3.5" />
                                     )}
-                                    <span>{t('profiles.editPage.changeVersion')}</span>
                                     {hasNewerVersion(mod) && (
-                                      <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-blue-400 rounded-full"></span>
                                     )}
                                   </motion.button>
                                   
                                   {/* アップグレードボタン（新しいバージョンが利用可能な場合のみ表示） */}
                                   {hasNewerVersion(mod) && (
                                     <motion.button
-                                      whileHover={{ scale: 1.02 }}
-                                      whileTap={{ scale: 0.98 }}
-                                      className="btn-primary text-xs flex items-center space-x-1 border-blue-500/50"
+                                      whileHover={{ scale: 1.1 }}
+                                      whileTap={{ scale: 0.95 }}
+                                      className="p-1.5 rounded-md bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 transition-colors"
                                       onClick={() => {
                                         const manifestMod = availableMods.find(m => 
                                           m.name === mod.name || m.source_location === mod.source_location
@@ -1809,52 +1819,51 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       title={t('profiles.editPage.upgradeToLatest')}
                                     >
                                       {upgradeModMutation.isPending && upgradeModMutation.variables?.modName === mod.name ? (
-                                        <Loader2 className="w-3 h-3 animate-spin" />
+                                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                       ) : (
-                                        <ArrowUp className="w-3 h-3" />
+                                        <ArrowUp className="w-3.5 h-3.5" />
                                       )}
-                                      <span>{t('profiles.editPage.upgrade')}</span>
-                                      <span className="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
                                     </motion.button>
                                   )}
                                   
                                   {/* MOD有効化/無効化ボタン */}
                                   <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className={`text-xs flex items-center space-x-1 ${
-                                      mod.enabled === false ? 'btn-primary' : 'btn-secondary'
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className={`p-1.5 rounded-md transition-colors ${
+                                      mod.enabled === false 
+                                        ? 'bg-green-500/20 hover:bg-green-500/30 text-green-300' 
+                                        : 'bg-gray-600/30 hover:bg-gray-600/50 text-gray-300'
                                     }`}
                                     onClick={() => mod.enabled === false ? enableMod(mod.name) : disableMod(mod.name)}
                                     disabled={disableModMutation.isPending || enableModMutation.isPending}
                                     title={mod.enabled === false ? t('profiles.editPage.enableMod') : t('profiles.editPage.disableMod')}
                                   >
                                     {disableModMutation.isPending || enableModMutation.isPending ? (
-                                      <Loader2 className="w-3 h-3 animate-spin" />
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                     ) : mod.enabled === false ? (
-                                      <Eye className="w-3 h-3" />
+                                      <Eye className="w-3.5 h-3.5" />
                                     ) : (
-                                      <EyeOff className="w-3 h-3" />
+                                      <EyeOff className="w-3.5 h-3.5" />
                                     )}
-                                    <span>{mod.enabled === false ? t('profiles.editPage.enable') : t('profiles.editPage.disable')}</span>
                                   </motion.button>
                                   
                                   <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className="btn-danger text-xs flex items-center space-x-1"
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="p-1.5 rounded-md bg-red-500/20 hover:bg-red-500/30 text-red-300 transition-colors"
                                     onClick={() => uninstallMod(mod.name)}
                                     disabled={uninstallModMutation.isPending}
+                                    title={t('common.delete')}
                                   >
-                                    <Trash2 className="w-3 h-3" />
-                                    <span>{t('common.delete')}</span>
+                                    {uninstallModMutation.isPending ? (
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    )}
                                   </motion.button>
                                 </div>
                               </div>
-                              
-                              {mod.description && (
-                                <p className="text-gray-300 text-sm">{mod.description}</p>
-                              )}
                               
                               {/* バージョン選択UI */}
                               {selectedModForVersions?.name === mod.name && (
