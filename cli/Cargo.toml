@@ -1,6 +1,6 @@
 [package]
 name = "reso-launcher-cli"
-version = "1.5.6"
+version = "1.5.7"
 edition = "2021"
 authors = ["resonite.love community"]
 description = "RESO Launcher CLI - Community Resonite management CLI"
