@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { open } from '@tauri-apps/api/shell';
 import { motion } from 'framer-motion';
@@ -209,6 +209,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   
   // Launch dropdown state
   const [launchDropdownOpen, setLaunchDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // React Query hooks - disable auto-fetch for available mods
   const { data: availableMods = [], isLoading: modsLoading, refetch: refetchMods } = useModManifest(profileName);
@@ -307,6 +308,20 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     loadProfileInfo();
     loadGameVersions();
   }, [profileName]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (launchDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setLaunchDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [launchDropdownOpen]);
 
   const loadProfile = async () => {
     try {
@@ -2137,7 +2152,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
 
           {/* 起動ボタンとプルダウン */}
-          <div className="flex items-stretch relative">
+          <div className="flex items-stretch relative" ref={dropdownRef}>
             <div className="flex items-stretch flex-1 rounded-lg overflow-hidden">
               <motion.button
                 whileHover={{ scale: 1.02 }}

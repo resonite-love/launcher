@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { listen } from '@tauri-apps/api/event';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -84,6 +84,7 @@ function ProfilesTab() {
   
   // Launch dropdown state
   const [launchDropdownOpen, setLaunchDropdownOpen] = useState<string | null>(null);
+  const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   
   // State for profile creation modal
   const [showCreateProfileModal, setShowCreateProfileModal] = useState(false);
@@ -169,6 +170,23 @@ function ProfilesTab() {
       unlistenStatus.then(f => f());
     };
   }, [refetchProfiles]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (launchDropdownOpen) {
+        const dropdownElement = dropdownRefs.current[launchDropdownOpen];
+        if (dropdownElement && !dropdownElement.contains(event.target as Node)) {
+          setLaunchDropdownOpen(null);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [launchDropdownOpen]);
 
   
   const loadGameVersions = async () => {
@@ -642,11 +660,11 @@ function ProfilesTab() {
               <div className="flex space-x-2">
                 {profile.has_game ? (
                   <>
-                    <div className="flex items-center space-x-1 flex-1">
+                    <div className="flex items-stretch flex-1">
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`btn-primary flex-1 flex items-center justify-center space-x-2 ${
+                        className={`btn-primary flex-1 flex items-center justify-center space-x-2 rounded-r-none ${
                           isProfileInstalling(profile.id) ? 'opacity-50' : ''
                         }`}
                         onClick={() => launchProfile(profile.id)}
@@ -666,11 +684,14 @@ function ProfilesTab() {
                       </motion.button>
                       
                       {/* Launch Mode Dropdown */}
-                      <div className="relative">
+                      <div 
+                        className="relative"
+                        ref={(el) => dropdownRefs.current[profile.id] = el}
+                      >
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          className={`btn-primary px-2 py-2 ${
+                          className={`btn-primary h-full px-3 flex items-center justify-center rounded-l-none border-l border-blue-400 dark:border-blue-500 ${
                             isProfileInstalling(profile.id) ? 'opacity-50' : ''
                           }`}
                           onClick={() => setLaunchDropdownOpen(launchDropdownOpen === profile.id ? null : profile.id)}
