@@ -1,0 +1,56 @@
+Resonite Friends Debug Tool
+==========================
+Using credentials from file: kokoa0429
+
+Starting connection...
+[FRIENDS DEBUG] Starting connection process
+[FRIENDS DEBUG] Machine ID: MyC/+mHVQLa/18/J8/P9Mw==
+[FRIENDS DEBUG] Secret Machine ID: 784a28bb-4cab-48c8-99c9-69ebf5cb88e6
+[FRIENDS DEBUG] Generated UID: 7f3fcbfaf53f75db35d3ac97d2507feab3dae9a1185f6726106eefb6ac8617fd
+[FRIENDS DEBUG] Using username: kokoa0429
+[FRIENDS DEBUG] Login credentials prepared: {
+  "authentication": {
+    "$type": "password",
+    "password": ".44Ump-45"
+  },
+  "email": null,
+  "ownerId": null,
+  "rememberMe": false,
+  "secretMachineId": "784a28bb-4cab-48c8-99c9-69ebf5cb88e6",
+  "userName": "kokoa0429"
+}
+[FRIENDS DEBUG] Sending login request to https://api.resonite.com/userSessions
+[FRIENDS DEBUG] Login response status: 200 OK
+[FRIENDS DEBUG] Login result: {
+  "entity": {
+    "created": "2025-06-28T15:40:37.5440483Z",
+    "eTag": null,
+    "expire": "2025-06-29T15:40:37.5441008Z",
+    "isMachineBound": false,
+    "logoutUrlClientSide": false,
+    "originalLoginId": "Auth-75738097-8cd7-49dc-8b78-2081ec38e5b8",
+    "originalLoginType": "Password",
+    "partitionKey": "U-kokoa0429",
+    "rememberMe": false,
+    "rowKey": "nyplNSxdI0pTS8JDx2nCLOJ6O3ZQLZSaN09pZkcSQioPHy8_+j_FaSPcEMIfz3TSsgC4hJW_51YuAPJ1aUM85m6STmDMBVa2kIszvFKdB_qTG2ovW22QULpuZb3MAswrG4PJ6CHu5sOW3jyzsccKCb2CkICROsXFJqh_aMPWXvY=",
+    "secretMachineIdHash": "Y27gnNimS+oRv0eXWipXzRuNdYBFgyyZ1XcmBG9NTC8=",
+    "secretMachineIdSalt": "l71wJHlA+UL0arHTq3lO4lpdC17/13Sn/B4RWwNw8vz20Efqo5lFMX3cMkbcEbkJJb1XwsYGpe8RbXxoBSrpSg5kKk05s+87Rs8oMHQTdauNBac/KJO+4OcABTAQuZdGKBgoE45fhmoBmCQ/lueBbXypAL3ysI4i5XeAXRqLAFc=",
+    "sessionLoginCounter": 1,
+    "sourceIP": "229.51.144.78",
+    "token": "nyplNSxdI0pTS8JDx2nCLOJ6O3ZQLZSaN09pZkcSQioPHy8_+j_FaSPcEMIfz3TSsgC4hJW_51YuAPJ1aUM85m6STmDMBVa2kIszvFKdB_qTG2ovW22QULpuZb3MAswrG4PJ6CHu5sOW3jyzsccKCb2CkICROsXFJqh_aMPWXvY=",
+    "uidHash": "oR7hZ5pjvut8zEGRZa2dcd0PU5APn7GhSx3HUKYCO7E=",
+    "uidSalt": "JkVqyIZ0pOvftk5Dj0Tb/rRJJIXNPUwCuTGFyWgBWBD4u19+o3/LKFo95UzWD1nNVRiPqtR4WIar4/1mNMevHoGQpai2nGSYCiGA2D5/evD40+Mbens+N/H4ZG9w+g8YL1BGTe9nZUQdSmVvnwnaNUEaAzd1uK4XWsmmlgsGS2g=",
+    "userAgent": "",
+    "userId": "U-kokoa0429"
+  }
+}
+[FRIENDS DEBUG] Session token obtained: nyplNSxdI0pTS8JDx2nCLOJ6O3ZQLZSaN09pZkcSQioPHy8_+j_FaSPcEMIfz3TSsgC4hJW_51YuAPJ1aUM85m6STmDMBVa2kIszvFKdB_qTG2ovW22QULpuZb3MAswrG4PJ6CHu5sOW3jyzsccKCb2CkICROsXFJqh_aMPWXvY=
+[FRIENDS DEBUG] User ID: U-kokoa0429
+[FRIENDS DEBUG] Starting SignalR connection with auth: res U-kokoa0429:nyplNSxdI0pTS8JDx2nCLOJ6O3ZQLZSaN09pZkcSQioPHy8_+j_FaSPcEMIfz3TSsgC4hJW_51YuAPJ1aUM85m6STmDMBVa2kIszvFKdB_qTG2ovW22QULpuZb3MAswrG4PJ6CHu5sOW3jyzsccKCb2CkICROsXFJqh_aMPWXvY=
+[FRIENDS DEBUG] Attempting to connect to SignalR hub with auth: res U-kokoa0429:nyplNSxdI0pTS8JDx2nCLOJ6O3ZQLZSaN09pZkcSQioPHy8_+j_FaSPcEMIfz3TSsgC4hJW_51YuAPJ1aUM85m6STmDMBVa2kIszvFKdB_qTG2ovW22QULpuZb3MAswrG4PJ6CHu5sOW3jyzsccKCb2CkICROsXFJqh_aMPWXvY=
+[FRIENDS DEBUG] Performing SignalR negotiation with auth: res U-kokoa0429:nyplNSxdI0pTS8JDx2nCLOJ6O3ZQLZSaN09pZkcSQioPHy8_+j_FaSPcEMIfz3TSsgC4hJW_51YuAPJ1aUM85m6STmDMBVa2kIszvFKdB_qTG2ovW22QULpuZb3MAswrG4PJ6CHu5sOW3jyzsccKCb2CkICROsXFJqh_aMPWXvY=
+[FRIENDS DEBUG] Negotiation successful, connection token: 6JjafhjkRmUE45IFYpVe
+[FRIENDS DEBUG] SignalR negotiation completed: SignalRNegotiateResponse { connection_token: "6JjafhjkRmUE45IFYpVecA", connection_id: "6MuojihNQjBa1d4WliCgbQ", available_transports: [Object {"transferFormats": Array [String("Text"), String("Binary")], "transport": String("WebSockets")}, Object {"transferFormats": Array [String("Text")], "transport": String("ServerSentEvents")}, Object {"transferFormats": Array [String("Text"), String("Binary")], "transport": String("LongPolling")}] }
+[FRIENDS DEBUG] Connecting to WebSocket: wss://api.resonite.com/hub?id=...
+[FRIENDS DEBUG] SignalR connection failed: WebSocket protocol error: Missing, duplicated or incorrect header sec-websocket-key
+❌ Connection failed: SignalR connection failed: WebSocket protocol error: Missing, duplicated or incorrect header sec-websocket-key

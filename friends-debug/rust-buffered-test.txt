@@ -1,0 +1,2001 @@
+Resonite Friends Debug Tool
+==========================
+Using credentials from file: kokoa0429
+
+Starting connection...
+[FRIENDS DEBUG] Starting connection process
+[FRIENDS DEBUG] Machine ID: xCTEk/RwTQywBXjeZ2QKoA==
+[FRIENDS DEBUG] Secret Machine ID: dc7d26fc-b136-4ce5-8817-1bc8bc25c138
+[FRIENDS DEBUG] Generated UID: 71d49e31bdcde2512800e65e20d403edc6c59d6759826cd33c0cce44d7495d39
+[FRIENDS DEBUG] Using username: kokoa0429
+[FRIENDS DEBUG] Login credentials prepared: {
+  "authentication": {
+    "$type": "password",
+    "password": ".44Ump-45"
+  },
+  "email": null,
+  "ownerId": null,
+  "rememberMe": false,
+  "secretMachineId": "dc7d26fc-b136-4ce5-8817-1bc8bc25c138",
+  "userName": "kokoa0429"
+}
+[FRIENDS DEBUG] Sending login request to https://api.resonite.com/userSessions
+[FRIENDS DEBUG] Login response status: 200 OK
+[FRIENDS DEBUG] Login result: {
+  "entity": {
+    "created": "2025-06-28T15:03:29.7612533Z",
+    "eTag": null,
+    "expire": "2025-06-29T15:03:29.7613024Z",
+    "isMachineBound": false,
+    "logoutUrlClientSide": false,
+    "originalLoginId": "Auth-75738097-8cd7-49dc-8b78-2081ec38e5b8",
+    "originalLoginType": "Password",
+    "partitionKey": "U-kokoa0429",
+    "rememberMe": false,
+    "rowKey": "cAHyhEAV6ufaiwGrh3MyXaLAqHiLO8SQ8F_ba6sZguIc7wP7GeJaPD_Bg+I8jay3ngXjWnfygxIv92Chyv2VwmY7s5kv+NWdyoqElkXqCQV+Kl3hF_tTr9n51YFutsZgPD1PVc43bwNEJ5gFB5TGFnD4pxYV5jqe0qR_mQ1RfaM=",
+    "secretMachineIdHash": "03C/0uYG/CrkIahdeVA6MGag3zeK/mGBS8iP0FID4j0=",
+    "secretMachineIdSalt": "rmLt4Y6He8Qj37UQ3obZyCyTK8vVpUDFrADg7uIjwIfSx+gYgVEXZrfX8JrWa+dLBm3G3lpnqWC1Mi/w+i71yoHGXumBh5CQjM585LoyHQvQKXfRuf8HmMwlSAl26c6H+hEApt6Y7rpyjKYbYzw8m3TrjAKkS8QjukIn1oufzBg=",
+    "sessionLoginCounter": 1,
+    "sourceIP": "229.51.144.78",
+    "token": "cAHyhEAV6ufaiwGrh3MyXaLAqHiLO8SQ8F_ba6sZguIc7wP7GeJaPD_Bg+I8jay3ngXjWnfygxIv92Chyv2VwmY7s5kv+NWdyoqElkXqCQV+Kl3hF_tTr9n51YFutsZgPD1PVc43bwNEJ5gFB5TGFnD4pxYV5jqe0qR_mQ1RfaM=",
+    "uidHash": "AL4rirPpLCxLnuGdAIPLu6Ci8tMIM4R9m7NZMrkbzos=",
+    "uidSalt": "A6RgNiSzheB1dRijsPXIV1x6ltZA5dtyPnM9daDky3BQqyinuo5hm2vOsswpvDs8KUA2nwlLNW8+NTl1utT5mNt5Mz95sgl1BlnYWFrsb4T023mVsXkzJB92Pi7otyUUT0UK48s+uhiAUd+K+SZv7tT6k6KeX+CKS2Lcj7VHIzs=",
+    "userAgent": "",
+    "userId": "U-kokoa0429"
+  }
+}
+[FRIENDS DEBUG] Session token obtained: cAHyhEAV6ufaiwGrh3MyXaLAqHiLO8SQ8F_ba6sZguIc7wP7GeJaPD_Bg+I8jay3ngXjWnfygxIv92Chyv2VwmY7s5kv+NWdyoqElkXqCQV+Kl3hF_tTr9n51YFutsZgPD1PVc43bwNEJ5gFB5TGFnD4pxYV5jqe0qR_mQ1RfaM=
+[FRIENDS DEBUG] User ID: U-kokoa0429
+[FRIENDS DEBUG] Starting SignalR connection with auth: res U-kokoa0429:cAHyhEAV6ufaiwGrh3MyXaLAqHiLO8SQ8F_ba6sZguIc7wP7GeJaPD_Bg+I8jay3ngXjWnfygxIv92Chyv2VwmY7s5kv+NWdyoqElkXqCQV+Kl3hF_tTr9n51YFutsZgPD1PVc43bwNEJ5gFB5TGFnD4pxYV5jqe0qR_mQ1RfaM=
+[FRIENDS DEBUG] Attempting to connect to SignalR hub with auth: res U-kokoa0429:cAHyhEAV6ufaiwGrh3MyXaLAqHiLO8SQ8F_ba6sZguIc7wP7GeJaPD_Bg+I8jay3ngXjWnfygxIv92Chyv2VwmY7s5kv+NWdyoqElkXqCQV+Kl3hF_tTr9n51YFutsZgPD1PVc43bwNEJ5gFB5TGFnD4pxYV5jqe0qR_mQ1RfaM=
+[FRIENDS DEBUG] Performing SignalR negotiation
+[FRIENDS DEBUG] Negotiation successful, connection token: fBNT8nDpj0zK_q5C6MFH
+[FRIENDS DEBUG] SignalR negotiation completed: SignalRNegotiateResponse { connection_token: "fBNT8nDpj0zK_q5C6MFHgg", connection_id: "ENtiC37B2oB27puOiC5FDg", available_transports: [Object {"transferFormats": Array [String("Text"), String("Binary")], "transport": String("WebSockets")}, Object {"transferFormats": Array [String("Text")], "transport": String("ServerSentEvents")}, Object {"transferFormats": Array [String("Text"), String("Binary")], "transport": String("LongPolling")}] }
+[FRIENDS DEBUG] Connecting to WebSocket: wss://api.resonite.com/hub?id=...
+[FRIENDS DEBUG] WebSocket connection established
+[FRIENDS DEBUG] Sending handshake: {"protocol":"json","version":1}
+[FRIENDS DEBUG] Waiting for handshake completion...
+[FRIENDS DEBUG] Handshake successful: {}
+[FRIENDS DEBUG] Complete message received (total length: 118 bytes)
+[FRIENDS DEBUG] Raw message length: 118 bytes
+[FRIENDS DEBUG] Processing message part: {"type":1,"target":"Debug","arguments":["[ZFXARTVE] Connected! Server uptime: 2 days 13 hours 53 minutes 6 seconds"]}
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: Debug (original case)
+[FRIENDS DEBUG] Received invocation: debug (lowercase)
+[FRIENDS DEBUG] Received debug message
+[FRIENDS DEBUG] Debug arguments: [String("[ZFXARTVE] Connected! Server uptime: 2 days 13 hours 53 minutes 6 seconds")]
+[FRIENDS DEBUG] Complete message received (total length: 2184 bytes)
+[FRIENDS DEBUG] Raw message length: 2184 bytes
+[FRIENDS DEBUG] Processing large message part (2183 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2227 bytes)
+[FRIENDS DEBUG] Raw message length: 2227 bytes
+[FRIENDS DEBUG] Processing large message part (2226 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Handshake completed successfully!
+[FRIENDS DEBUG] Updating session cache before status requests...
+[FRIENDS DEBUG] Updating session cache
+[FRIENDS DEBUG] Complete message received (total length: 2086 bytes)
+[FRIENDS DEBUG] Raw message length: 2086 bytes
+[FRIENDS DEBUG] Processing large message part (2085 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2211 bytes)
+[FRIENDS DEBUG] Raw message length: 2211 bytes
+[FRIENDS DEBUG] Processing large message part (2210 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2212 bytes)
+[FRIENDS DEBUG] Raw message length: 2212 bytes
+[FRIENDS DEBUG] Processing large message part (2211 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2230 bytes)
+[FRIENDS DEBUG] Raw message length: 2230 bytes
+[FRIENDS DEBUG] Processing large message part (2229 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2234 bytes)
+[FRIENDS DEBUG] Raw message length: 2234 bytes
+[FRIENDS DEBUG] Processing large message part (2233 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2171 bytes)
+[FRIENDS DEBUG] Raw message length: 2171 bytes
+[FRIENDS DEBUG] Processing large message part (2170 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2121 bytes)
+[FRIENDS DEBUG] Raw message length: 2121 bytes
+[FRIENDS DEBUG] Processing large message part (2120 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2596 bytes)
+[FRIENDS DEBUG] Raw message length: 2596 bytes
+[FRIENDS DEBUG] Processing large message part (2595 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2183 bytes)
+[FRIENDS DEBUG] Raw message length: 2183 bytes
+[FRIENDS DEBUG] Processing large message part (2182 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2168 bytes)
+[FRIENDS DEBUG] Raw message length: 2168 bytes
+[FRIENDS DEBUG] Processing large message part (2167 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2305 bytes)
+[FRIENDS DEBUG] Raw message length: 2305 bytes
+[FRIENDS DEBUG] Processing large message part (2304 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2497 bytes)
+[FRIENDS DEBUG] Raw message length: 2497 bytes
+[FRIENDS DEBUG] Processing large message part (2496 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2305 bytes)
+[FRIENDS DEBUG] Raw message length: 2305 bytes
+[FRIENDS DEBUG] Processing large message part (2304 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2314 bytes)
+[FRIENDS DEBUG] Raw message length: 2314 bytes
+[FRIENDS DEBUG] Processing large message part (2313 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2150 bytes)
+[FRIENDS DEBUG] Raw message length: 2150 bytes
+[FRIENDS DEBUG] Processing large message part (2149 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2112 bytes)
+[FRIENDS DEBUG] Raw message length: 2112 bytes
+[FRIENDS DEBUG] Processing large message part (2111 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2179 bytes)
+[FRIENDS DEBUG] Raw message length: 2179 bytes
+[FRIENDS DEBUG] Processing large message part (2178 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2211 bytes)
+[FRIENDS DEBUG] Raw message length: 2211 bytes
+[FRIENDS DEBUG] Processing large message part (2210 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2177 bytes)
+[FRIENDS DEBUG] Raw message length: 2177 bytes
+[FRIENDS DEBUG] Processing large message part (2176 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2139 bytes)
+[FRIENDS DEBUG] Raw message length: 2139 bytes
+[FRIENDS DEBUG] Processing large message part (2138 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2199 bytes)
+[FRIENDS DEBUG] Raw message length: 2199 bytes
+[FRIENDS DEBUG] Processing large message part (2198 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2280 bytes)
+[FRIENDS DEBUG] Raw message length: 2280 bytes
+[FRIENDS DEBUG] Processing large message part (2279 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2116 bytes)
+[FRIENDS DEBUG] Raw message length: 2116 bytes
+[FRIENDS DEBUG] Processing large message part (2115 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2125 bytes)
+[FRIENDS DEBUG] Raw message length: 2125 bytes
+[FRIENDS DEBUG] Processing large message part (2124 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2431 bytes)
+[FRIENDS DEBUG] Raw message length: 2431 bytes
+[FRIENDS DEBUG] Processing large message part (2430 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Retrieved 17 sessions
+[FRIENDS DEBUG] Sending InitializeStatus: {"arguments":[],"target":"InitializeStatus","type":1}
+[FRIENDS DEBUG] Complete message received (total length: 2027 bytes)
+[FRIENDS DEBUG] Raw message length: 2027 bytes
+[FRIENDS DEBUG] Processing large message part (2026 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2053 bytes)
+[FRIENDS DEBUG] Raw message length: 2053 bytes
+[FRIENDS DEBUG] Processing large message part (2052 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2075 bytes)
+[FRIENDS DEBUG] Raw message length: 2075 bytes
+[FRIENDS DEBUG] Processing large message part (2074 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2333 bytes)
+[FRIENDS DEBUG] Raw message length: 2333 bytes
+[FRIENDS DEBUG] Processing large message part (2332 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2283 bytes)
+[FRIENDS DEBUG] Raw message length: 2283 bytes
+[FRIENDS DEBUG] Processing large message part (2282 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2377 bytes)
+[FRIENDS DEBUG] Raw message length: 2377 bytes
+[FRIENDS DEBUG] Processing large message part (2376 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3161 bytes)
+[FRIENDS DEBUG] Raw message length: 3161 bytes
+[FRIENDS DEBUG] Processing large message part (3160 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3019 bytes)
+[FRIENDS DEBUG] Raw message length: 3019 bytes
+[FRIENDS DEBUG] Processing large message part (3018 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2371 bytes)
+[FRIENDS DEBUG] Raw message length: 2371 bytes
+[FRIENDS DEBUG] Processing large message part (2370 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2256 bytes)
+[FRIENDS DEBUG] Raw message length: 2256 bytes
+[FRIENDS DEBUG] Processing large message part (2255 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2306 bytes)
+[FRIENDS DEBUG] Raw message length: 2306 bytes
+[FRIENDS DEBUG] Processing large message part (2305 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2176 bytes)
+[FRIENDS DEBUG] Raw message length: 2176 bytes
+[FRIENDS DEBUG] Processing large message part (2175 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2815 bytes)
+[FRIENDS DEBUG] Raw message length: 2815 bytes
+[FRIENDS DEBUG] Processing large message part (2814 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2093 bytes)
+[FRIENDS DEBUG] Raw message length: 2093 bytes
+[FRIENDS DEBUG] Processing large message part (2092 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2240 bytes)
+[FRIENDS DEBUG] Raw message length: 2240 bytes
+[FRIENDS DEBUG] Processing large message part (2239 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2109 bytes)
+[FRIENDS DEBUG] Raw message length: 2109 bytes
+[FRIENDS DEBUG] Processing large message part (2108 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2261 bytes)
+[FRIENDS DEBUG] Raw message length: 2261 bytes
+[FRIENDS DEBUG] Processing large message part (2260 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2422 bytes)
+[FRIENDS DEBUG] Raw message length: 2422 bytes
+[FRIENDS DEBUG] Processing large message part (2421 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3118 bytes)
+[FRIENDS DEBUG] Raw message length: 3118 bytes
+[FRIENDS DEBUG] Processing large message part (3117 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2110 bytes)
+[FRIENDS DEBUG] Raw message length: 2110 bytes
+[FRIENDS DEBUG] Processing large message part (2109 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2616 bytes)
+[FRIENDS DEBUG] Raw message length: 2616 bytes
+[FRIENDS DEBUG] Processing large message part (2615 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2132 bytes)
+[FRIENDS DEBUG] Raw message length: 2132 bytes
+[FRIENDS DEBUG] Processing large message part (2131 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2110 bytes)
+[FRIENDS DEBUG] Raw message length: 2110 bytes
+[FRIENDS DEBUG] Processing large message part (2109 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2112 bytes)
+[FRIENDS DEBUG] Raw message length: 2112 bytes
+[FRIENDS DEBUG] Processing large message part (2111 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2205 bytes)
+[FRIENDS DEBUG] Raw message length: 2205 bytes
+[FRIENDS DEBUG] Processing large message part (2204 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2170 bytes)
+[FRIENDS DEBUG] Raw message length: 2170 bytes
+[FRIENDS DEBUG] Processing large message part (2169 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2151 bytes)
+[FRIENDS DEBUG] Raw message length: 2151 bytes
+[FRIENDS DEBUG] Processing large message part (2150 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2020 bytes)
+[FRIENDS DEBUG] Raw message length: 2020 bytes
+[FRIENDS DEBUG] Processing large message part (2019 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2117 bytes)
+[FRIENDS DEBUG] Raw message length: 2117 bytes
+[FRIENDS DEBUG] Processing large message part (2116 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2318 bytes)
+[FRIENDS DEBUG] Raw message length: 2318 bytes
+[FRIENDS DEBUG] Processing large message part (2317 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2118 bytes)
+[FRIENDS DEBUG] Raw message length: 2118 bytes
+[FRIENDS DEBUG] Processing large message part (2117 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2071 bytes)
+[FRIENDS DEBUG] Raw message length: 2071 bytes
+[FRIENDS DEBUG] Processing large message part (2070 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2244 bytes)
+[FRIENDS DEBUG] Raw message length: 2244 bytes
+[FRIENDS DEBUG] Processing large message part (2243 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2203 bytes)
+[FRIENDS DEBUG] Raw message length: 2203 bytes
+[FRIENDS DEBUG] Processing large message part (2202 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2730 bytes)
+[FRIENDS DEBUG] Raw message length: 2730 bytes
+[FRIENDS DEBUG] Processing large message part (2729 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2370 bytes)
+[FRIENDS DEBUG] Raw message length: 2370 bytes
+[FRIENDS DEBUG] Processing large message part (2369 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2173 bytes)
+[FRIENDS DEBUG] Raw message length: 2173 bytes
+[FRIENDS DEBUG] Processing large message part (2172 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2161 bytes)
+[FRIENDS DEBUG] Raw message length: 2161 bytes
+[FRIENDS DEBUG] Processing large message part (2160 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2385 bytes)
+[FRIENDS DEBUG] Raw message length: 2385 bytes
+[FRIENDS DEBUG] Processing large message part (2384 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2350 bytes)
+[FRIENDS DEBUG] Raw message length: 2350 bytes
+[FRIENDS DEBUG] Processing large message part (2349 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2274 bytes)
+[FRIENDS DEBUG] Raw message length: 2274 bytes
+[FRIENDS DEBUG] Processing large message part (2273 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2219 bytes)
+[FRIENDS DEBUG] Raw message length: 2219 bytes
+[FRIENDS DEBUG] Processing large message part (2218 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2196 bytes)
+[FRIENDS DEBUG] Raw message length: 2196 bytes
+[FRIENDS DEBUG] Processing large message part (2195 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2073 bytes)
+[FRIENDS DEBUG] Raw message length: 2073 bytes
+[FRIENDS DEBUG] Processing large message part (2072 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2077 bytes)
+[FRIENDS DEBUG] Raw message length: 2077 bytes
+[FRIENDS DEBUG] Processing large message part (2076 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2186 bytes)
+[FRIENDS DEBUG] Raw message length: 2186 bytes
+[FRIENDS DEBUG] Processing large message part (2185 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2027 bytes)
+[FRIENDS DEBUG] Raw message length: 2027 bytes
+[FRIENDS DEBUG] Processing large message part (2026 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2128 bytes)
+[FRIENDS DEBUG] Raw message length: 2128 bytes
+[FRIENDS DEBUG] Processing large message part (2127 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2499 bytes)
+[FRIENDS DEBUG] Raw message length: 2499 bytes
+[FRIENDS DEBUG] Processing large message part (2498 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3142 bytes)
+[FRIENDS DEBUG] Raw message length: 3142 bytes
+[FRIENDS DEBUG] Processing large message part (3141 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2169 bytes)
+[FRIENDS DEBUG] Raw message length: 2169 bytes
+[FRIENDS DEBUG] Processing large message part (2168 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2281 bytes)
+[FRIENDS DEBUG] Raw message length: 2281 bytes
+[FRIENDS DEBUG] Processing large message part (2280 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3102 bytes)
+[FRIENDS DEBUG] Raw message length: 3102 bytes
+[FRIENDS DEBUG] Processing large message part (3101 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Sending RequestStatus: {"arguments":[null,false],"target":"RequestStatus","type":1}
+[FRIENDS DEBUG] Complete message received (total length: 2345 bytes)
+[FRIENDS DEBUG] Raw message length: 2345 bytes
+[FRIENDS DEBUG] Processing large message part (2344 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2353 bytes)
+[FRIENDS DEBUG] Raw message length: 2353 bytes
+[FRIENDS DEBUG] Processing large message part (2352 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2186 bytes)
+[FRIENDS DEBUG] Raw message length: 2186 bytes
+[FRIENDS DEBUG] Processing large message part (2185 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2139 bytes)
+[FRIENDS DEBUG] Raw message length: 2139 bytes
+[FRIENDS DEBUG] Processing large message part (2138 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2361 bytes)
+[FRIENDS DEBUG] Raw message length: 2361 bytes
+[FRIENDS DEBUG] Processing large message part (2360 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2491 bytes)
+[FRIENDS DEBUG] Raw message length: 2491 bytes
+[FRIENDS DEBUG] Processing large message part (2490 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2816 bytes)
+[FRIENDS DEBUG] Raw message length: 2816 bytes
+[FRIENDS DEBUG] Processing large message part (2815 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2160 bytes)
+[FRIENDS DEBUG] Raw message length: 2160 bytes
+[FRIENDS DEBUG] Processing large message part (2159 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2238 bytes)
+[FRIENDS DEBUG] Raw message length: 2238 bytes
+[FRIENDS DEBUG] Processing large message part (2237 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2176 bytes)
+[FRIENDS DEBUG] Raw message length: 2176 bytes
+[FRIENDS DEBUG] Processing large message part (2175 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2139 bytes)
+[FRIENDS DEBUG] Raw message length: 2139 bytes
+[FRIENDS DEBUG] Processing large message part (2138 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2113 bytes)
+[FRIENDS DEBUG] Raw message length: 2113 bytes
+[FRIENDS DEBUG] Processing large message part (2112 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2153 bytes)
+[FRIENDS DEBUG] Raw message length: 2153 bytes
+[FRIENDS DEBUG] Processing large message part (2152 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2561 bytes)
+[FRIENDS DEBUG] Raw message length: 2561 bytes
+[FRIENDS DEBUG] Processing large message part (2560 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2522 bytes)
+[FRIENDS DEBUG] Raw message length: 2522 bytes
+[FRIENDS DEBUG] Processing large message part (2521 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2247 bytes)
+[FRIENDS DEBUG] Raw message length: 2247 bytes
+[FRIENDS DEBUG] Processing large message part (2246 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2385 bytes)
+[FRIENDS DEBUG] Raw message length: 2385 bytes
+[FRIENDS DEBUG] Processing large message part (2384 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2330 bytes)
+[FRIENDS DEBUG] Raw message length: 2330 bytes
+[FRIENDS DEBUG] Processing large message part (2329 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2232 bytes)
+[FRIENDS DEBUG] Raw message length: 2232 bytes
+[FRIENDS DEBUG] Processing large message part (2231 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 4411 bytes)
+[FRIENDS DEBUG] Raw message length: 4411 bytes
+[FRIENDS DEBUG] Processing large message part (2183 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Processing large message part (2226 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3101 bytes)
+[FRIENDS DEBUG] Raw message length: 3101 bytes
+[FRIENDS DEBUG] Processing large message part (3100 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2085 bytes)
+[FRIENDS DEBUG] Raw message length: 2085 bytes
+[FRIENDS DEBUG] Processing large message part (2084 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2211 bytes)
+[FRIENDS DEBUG] Raw message length: 2211 bytes
+[FRIENDS DEBUG] Processing large message part (2210 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2234 bytes)
+[FRIENDS DEBUG] Raw message length: 2234 bytes
+[FRIENDS DEBUG] Processing large message part (2233 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2212 bytes)
+[FRIENDS DEBUG] Raw message length: 2212 bytes
+[FRIENDS DEBUG] Processing large message part (2211 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2230 bytes)
+[FRIENDS DEBUG] Raw message length: 2230 bytes
+[FRIENDS DEBUG] Processing large message part (2229 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 4292 bytes)
+[FRIENDS DEBUG] Raw message length: 4292 bytes
+[FRIENDS DEBUG] Processing large message part (2120 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Processing large message part (2170 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2596 bytes)
+[FRIENDS DEBUG] Raw message length: 2596 bytes
+[FRIENDS DEBUG] Processing large message part (2595 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2167 bytes)
+[FRIENDS DEBUG] Raw message length: 2167 bytes
+[FRIENDS DEBUG] Processing large message part (2166 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2183 bytes)
+[FRIENDS DEBUG] Raw message length: 2183 bytes
+[FRIENDS DEBUG] Processing large message part (2182 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2305 bytes)
+[FRIENDS DEBUG] Raw message length: 2305 bytes
+[FRIENDS DEBUG] Processing large message part (2304 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2304 bytes)
+[FRIENDS DEBUG] Raw message length: 2304 bytes
+[FRIENDS DEBUG] Processing large message part (2303 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2496 bytes)
+[FRIENDS DEBUG] Raw message length: 2496 bytes
+[FRIENDS DEBUG] Processing large message part (2495 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2315 bytes)
+[FRIENDS DEBUG] Raw message length: 2315 bytes
+[FRIENDS DEBUG] Processing large message part (2314 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2150 bytes)
+[FRIENDS DEBUG] Raw message length: 2150 bytes
+[FRIENDS DEBUG] Processing large message part (2149 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2112 bytes)
+[FRIENDS DEBUG] Raw message length: 2112 bytes
+[FRIENDS DEBUG] Processing large message part (2111 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2178 bytes)
+[FRIENDS DEBUG] Raw message length: 2178 bytes
+[FRIENDS DEBUG] Processing large message part (2177 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2210 bytes)
+[FRIENDS DEBUG] Raw message length: 2210 bytes
+[FRIENDS DEBUG] Processing large message part (2209 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2177 bytes)
+[FRIENDS DEBUG] Raw message length: 2177 bytes
+[FRIENDS DEBUG] Processing large message part (2176 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2139 bytes)
+[FRIENDS DEBUG] Raw message length: 2139 bytes
+[FRIENDS DEBUG] Processing large message part (2138 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2199 bytes)
+[FRIENDS DEBUG] Raw message length: 2199 bytes
+[FRIENDS DEBUG] Processing large message part (2198 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2280 bytes)
+[FRIENDS DEBUG] Raw message length: 2280 bytes
+[FRIENDS DEBUG] Processing large message part (2279 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2119 bytes)
+[FRIENDS DEBUG] Raw message length: 2119 bytes
+[FRIENDS DEBUG] Processing large message part (2118 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2125 bytes)
+[FRIENDS DEBUG] Raw message length: 2125 bytes
+[FRIENDS DEBUG] Processing large message part (2124 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Sending RequestUserStatusUpdate: {"arguments":[],"target":"RequestUserStatusUpdate","type":1}
+[FRIENDS DEBUG] SignalR connection is now active, waiting for messages...
+[FRIENDS DEBUG] Updating session cache
+[FRIENDS DEBUG] Sent ping to keep connection alive
+[FRIENDS DEBUG] Complete message received (total length: 2430 bytes)
+[FRIENDS DEBUG] Raw message length: 2430 bytes
+[FRIENDS DEBUG] Processing large message part (2429 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2027 bytes)
+[FRIENDS DEBUG] Raw message length: 2027 bytes
+[FRIENDS DEBUG] Processing large message part (2026 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2053 bytes)
+[FRIENDS DEBUG] Raw message length: 2053 bytes
+[FRIENDS DEBUG] Processing large message part (2052 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2075 bytes)
+[FRIENDS DEBUG] Raw message length: 2075 bytes
+[FRIENDS DEBUG] Processing large message part (2074 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2333 bytes)
+[FRIENDS DEBUG] Raw message length: 2333 bytes
+[FRIENDS DEBUG] Processing large message part (2332 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2283 bytes)
+[FRIENDS DEBUG] Raw message length: 2283 bytes
+[FRIENDS DEBUG] Processing large message part (2282 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2377 bytes)
+[FRIENDS DEBUG] Raw message length: 2377 bytes
+[FRIENDS DEBUG] Processing large message part (2376 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3160 bytes)
+[FRIENDS DEBUG] Raw message length: 3160 bytes
+[FRIENDS DEBUG] Processing large message part (3159 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3020 bytes)
+[FRIENDS DEBUG] Raw message length: 3020 bytes
+[FRIENDS DEBUG] Processing large message part (3019 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2371 bytes)
+[FRIENDS DEBUG] Raw message length: 2371 bytes
+[FRIENDS DEBUG] Processing large message part (2370 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2256 bytes)
+[FRIENDS DEBUG] Raw message length: 2256 bytes
+[FRIENDS DEBUG] Processing large message part (2255 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2306 bytes)
+[FRIENDS DEBUG] Raw message length: 2306 bytes
+[FRIENDS DEBUG] Processing large message part (2305 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2175 bytes)
+[FRIENDS DEBUG] Raw message length: 2175 bytes
+[FRIENDS DEBUG] Processing large message part (2174 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2814 bytes)
+[FRIENDS DEBUG] Raw message length: 2814 bytes
+[FRIENDS DEBUG] Processing large message part (2813 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 4333 bytes)
+[FRIENDS DEBUG] Raw message length: 4333 bytes
+[FRIENDS DEBUG] Processing large message part (2092 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Processing large message part (2239 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2109 bytes)
+[FRIENDS DEBUG] Raw message length: 2109 bytes
+[FRIENDS DEBUG] Processing large message part (2108 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2261 bytes)
+[FRIENDS DEBUG] Raw message length: 2261 bytes
+[FRIENDS DEBUG] Processing large message part (2260 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Retrieved 17 sessions
+[FRIENDS DEBUG] Session cache updated successfully
+[FRIENDS DEBUG] Complete message received (total length: 2422 bytes)
+[FRIENDS DEBUG] Raw message length: 2422 bytes
+[FRIENDS DEBUG] Processing large message part (2421 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3118 bytes)
+[FRIENDS DEBUG] Raw message length: 3118 bytes
+[FRIENDS DEBUG] Processing large message part (3117 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2110 bytes)
+[FRIENDS DEBUG] Raw message length: 2110 bytes
+[FRIENDS DEBUG] Processing large message part (2109 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2132 bytes)
+[FRIENDS DEBUG] Raw message length: 2132 bytes
+[FRIENDS DEBUG] Processing large message part (2131 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2110 bytes)
+[FRIENDS DEBUG] Raw message length: 2110 bytes
+[FRIENDS DEBUG] Processing large message part (2109 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2111 bytes)
+[FRIENDS DEBUG] Raw message length: 2111 bytes
+[FRIENDS DEBUG] Processing large message part (2110 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2616 bytes)
+[FRIENDS DEBUG] Raw message length: 2616 bytes
+[FRIENDS DEBUG] Processing large message part (2615 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2205 bytes)
+[FRIENDS DEBUG] Raw message length: 2205 bytes
+[FRIENDS DEBUG] Processing large message part (2204 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2170 bytes)
+[FRIENDS DEBUG] Raw message length: 2170 bytes
+[FRIENDS DEBUG] Processing large message part (2169 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2152 bytes)
+[FRIENDS DEBUG] Raw message length: 2152 bytes
+[FRIENDS DEBUG] Processing large message part (2151 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2021 bytes)
+[FRIENDS DEBUG] Raw message length: 2021 bytes
+[FRIENDS DEBUG] Processing large message part (2020 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2116 bytes)
+[FRIENDS DEBUG] Raw message length: 2116 bytes
+[FRIENDS DEBUG] Processing large message part (2115 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2318 bytes)
+[FRIENDS DEBUG] Raw message length: 2318 bytes
+[FRIENDS DEBUG] Processing large message part (2317 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2118 bytes)
+[FRIENDS DEBUG] Raw message length: 2118 bytes
+[FRIENDS DEBUG] Processing large message part (2117 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2071 bytes)
+[FRIENDS DEBUG] Raw message length: 2071 bytes
+[FRIENDS DEBUG] Processing large message part (2070 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2244 bytes)
+[FRIENDS DEBUG] Raw message length: 2244 bytes
+[FRIENDS DEBUG] Processing large message part (2243 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2204 bytes)
+[FRIENDS DEBUG] Raw message length: 2204 bytes
+[FRIENDS DEBUG] Processing large message part (2203 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2731 bytes)
+[FRIENDS DEBUG] Raw message length: 2731 bytes
+[FRIENDS DEBUG] Processing large message part (2730 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2371 bytes)
+[FRIENDS DEBUG] Raw message length: 2371 bytes
+[FRIENDS DEBUG] Processing large message part (2370 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2173 bytes)
+[FRIENDS DEBUG] Raw message length: 2173 bytes
+[FRIENDS DEBUG] Processing large message part (2172 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2161 bytes)
+[FRIENDS DEBUG] Raw message length: 2161 bytes
+[FRIENDS DEBUG] Processing large message part (2160 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2385 bytes)
+[FRIENDS DEBUG] Raw message length: 2385 bytes
+[FRIENDS DEBUG] Processing large message part (2384 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2350 bytes)
+[FRIENDS DEBUG] Raw message length: 2350 bytes
+[FRIENDS DEBUG] Processing large message part (2349 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2274 bytes)
+[FRIENDS DEBUG] Raw message length: 2274 bytes
+[FRIENDS DEBUG] Processing large message part (2273 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2219 bytes)
+[FRIENDS DEBUG] Raw message length: 2219 bytes
+[FRIENDS DEBUG] Processing large message part (2218 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2196 bytes)
+[FRIENDS DEBUG] Raw message length: 2196 bytes
+[FRIENDS DEBUG] Processing large message part (2195 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2077 bytes)
+[FRIENDS DEBUG] Raw message length: 2077 bytes
+[FRIENDS DEBUG] Processing large message part (2076 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2073 bytes)
+[FRIENDS DEBUG] Raw message length: 2073 bytes
+[FRIENDS DEBUG] Processing large message part (2072 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2186 bytes)
+[FRIENDS DEBUG] Raw message length: 2186 bytes
+[FRIENDS DEBUG] Processing large message part (2185 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2027 bytes)
+[FRIENDS DEBUG] Raw message length: 2027 bytes
+[FRIENDS DEBUG] Processing large message part (2026 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2128 bytes)
+[FRIENDS DEBUG] Raw message length: 2128 bytes
+[FRIENDS DEBUG] Processing large message part (2127 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2499 bytes)
+[FRIENDS DEBUG] Raw message length: 2499 bytes
+[FRIENDS DEBUG] Processing large message part (2498 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3142 bytes)
+[FRIENDS DEBUG] Raw message length: 3142 bytes
+[FRIENDS DEBUG] Processing large message part (3141 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2169 bytes)
+[FRIENDS DEBUG] Raw message length: 2169 bytes
+[FRIENDS DEBUG] Processing large message part (2168 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2281 bytes)
+[FRIENDS DEBUG] Raw message length: 2281 bytes
+[FRIENDS DEBUG] Processing large message part (2280 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2345 bytes)
+[FRIENDS DEBUG] Raw message length: 2345 bytes
+[FRIENDS DEBUG] Processing large message part (2344 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2353 bytes)
+[FRIENDS DEBUG] Raw message length: 2353 bytes
+[FRIENDS DEBUG] Processing large message part (2352 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2185 bytes)
+[FRIENDS DEBUG] Raw message length: 2185 bytes
+[FRIENDS DEBUG] Processing large message part (2184 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2361 bytes)
+[FRIENDS DEBUG] Raw message length: 2361 bytes
+[FRIENDS DEBUG] Processing large message part (2360 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2139 bytes)
+[FRIENDS DEBUG] Raw message length: 2139 bytes
+[FRIENDS DEBUG] Processing large message part (2138 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2491 bytes)
+[FRIENDS DEBUG] Raw message length: 2491 bytes
+[FRIENDS DEBUG] Processing large message part (2490 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2816 bytes)
+[FRIENDS DEBUG] Raw message length: 2816 bytes
+[FRIENDS DEBUG] Processing large message part (2815 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2160 bytes)
+[FRIENDS DEBUG] Raw message length: 2160 bytes
+[FRIENDS DEBUG] Processing large message part (2159 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2238 bytes)
+[FRIENDS DEBUG] Raw message length: 2238 bytes
+[FRIENDS DEBUG] Processing large message part (2237 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2835 bytes)
+[FRIENDS DEBUG] Raw message length: 2835 bytes
+[FRIENDS DEBUG] Processing large message part (2834 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2176 bytes)
+[FRIENDS DEBUG] Raw message length: 2176 bytes
+[FRIENDS DEBUG] Processing large message part (2175 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2139 bytes)
+[FRIENDS DEBUG] Raw message length: 2139 bytes
+[FRIENDS DEBUG] Processing large message part (2138 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2113 bytes)
+[FRIENDS DEBUG] Raw message length: 2113 bytes
+[FRIENDS DEBUG] Processing large message part (2112 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2153 bytes)
+[FRIENDS DEBUG] Raw message length: 2153 bytes
+[FRIENDS DEBUG] Processing large message part (2152 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2561 bytes)
+[FRIENDS DEBUG] Raw message length: 2561 bytes
+[FRIENDS DEBUG] Processing large message part (2560 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2522 bytes)
+[FRIENDS DEBUG] Raw message length: 2522 bytes
+[FRIENDS DEBUG] Processing large message part (2521 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2247 bytes)
+[FRIENDS DEBUG] Raw message length: 2247 bytes
+[FRIENDS DEBUG] Processing large message part (2246 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2385 bytes)
+[FRIENDS DEBUG] Raw message length: 2385 bytes
+[FRIENDS DEBUG] Processing large message part (2384 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2330 bytes)
+[FRIENDS DEBUG] Raw message length: 2330 bytes
+[FRIENDS DEBUG] Processing large message part (2329 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2183 bytes)
+[FRIENDS DEBUG] Raw message length: 2183 bytes
+[FRIENDS DEBUG] Processing large message part (2182 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2227 bytes)
+[FRIENDS DEBUG] Raw message length: 2227 bytes
+[FRIENDS DEBUG] Processing large message part (2226 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2232 bytes)
+[FRIENDS DEBUG] Raw message length: 2232 bytes
+[FRIENDS DEBUG] Processing large message part (2231 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3102 bytes)
+[FRIENDS DEBUG] Raw message length: 3102 bytes
+[FRIENDS DEBUG] Processing large message part (3101 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2086 bytes)
+[FRIENDS DEBUG] Raw message length: 2086 bytes
+[FRIENDS DEBUG] Processing large message part (2085 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2211 bytes)
+[FRIENDS DEBUG] Raw message length: 2211 bytes
+[FRIENDS DEBUG] Processing large message part (2210 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2213 bytes)
+[FRIENDS DEBUG] Raw message length: 2213 bytes
+[FRIENDS DEBUG] Processing large message part (2212 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2230 bytes)
+[FRIENDS DEBUG] Raw message length: 2230 bytes
+[FRIENDS DEBUG] Processing large message part (2229 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2121 bytes)
+[FRIENDS DEBUG] Raw message length: 2121 bytes
+[FRIENDS DEBUG] Processing large message part (2120 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 4403 bytes)
+[FRIENDS DEBUG] Raw message length: 4403 bytes
+[FRIENDS DEBUG] Processing large message part (2169 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Processing large message part (2232 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2596 bytes)
+[FRIENDS DEBUG] Raw message length: 2596 bytes
+[FRIENDS DEBUG] Processing large message part (2595 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2168 bytes)
+[FRIENDS DEBUG] Raw message length: 2168 bytes
+[FRIENDS DEBUG] Processing large message part (2167 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2497 bytes)
+[FRIENDS DEBUG] Raw message length: 2497 bytes
+[FRIENDS DEBUG] Processing large message part (2496 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2305 bytes)
+[FRIENDS DEBUG] Raw message length: 2305 bytes
+[FRIENDS DEBUG] Processing large message part (2304 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2182 bytes)
+[FRIENDS DEBUG] Raw message length: 2182 bytes
+[FRIENDS DEBUG] Processing large message part (2181 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2305 bytes)
+[FRIENDS DEBUG] Raw message length: 2305 bytes
+[FRIENDS DEBUG] Processing large message part (2304 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2315 bytes)
+[FRIENDS DEBUG] Raw message length: 2315 bytes
+[FRIENDS DEBUG] Processing large message part (2314 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2150 bytes)
+[FRIENDS DEBUG] Raw message length: 2150 bytes
+[FRIENDS DEBUG] Processing large message part (2149 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2097 bytes)
+[FRIENDS DEBUG] Raw message length: 2097 bytes
+[FRIENDS DEBUG] Processing large message part (2096 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2112 bytes)
+[FRIENDS DEBUG] Raw message length: 2112 bytes
+[FRIENDS DEBUG] Processing large message part (2111 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2179 bytes)
+[FRIENDS DEBUG] Raw message length: 2179 bytes
+[FRIENDS DEBUG] Processing large message part (2178 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2177 bytes)
+[FRIENDS DEBUG] Raw message length: 2177 bytes
+[FRIENDS DEBUG] Processing large message part (2176 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2211 bytes)
+[FRIENDS DEBUG] Raw message length: 2211 bytes
+[FRIENDS DEBUG] Processing large message part (2210 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2139 bytes)
+[FRIENDS DEBUG] Raw message length: 2139 bytes
+[FRIENDS DEBUG] Processing large message part (2138 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2199 bytes)
+[FRIENDS DEBUG] Raw message length: 2199 bytes
+[FRIENDS DEBUG] Processing large message part (2198 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2119 bytes)
+[FRIENDS DEBUG] Raw message length: 2119 bytes
+[FRIENDS DEBUG] Processing large message part (2118 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2279 bytes)
+[FRIENDS DEBUG] Raw message length: 2279 bytes
+[FRIENDS DEBUG] Processing large message part (2278 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2125 bytes)
+[FRIENDS DEBUG] Raw message length: 2125 bytes
+[FRIENDS DEBUG] Processing large message part (2124 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2431 bytes)
+[FRIENDS DEBUG] Raw message length: 2431 bytes
+[FRIENDS DEBUG] Processing large message part (2430 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2027 bytes)
+[FRIENDS DEBUG] Raw message length: 2027 bytes
+[FRIENDS DEBUG] Processing large message part (2026 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2053 bytes)
+[FRIENDS DEBUG] Raw message length: 2053 bytes
+[FRIENDS DEBUG] Processing large message part (2052 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2075 bytes)
+[FRIENDS DEBUG] Raw message length: 2075 bytes
+[FRIENDS DEBUG] Processing large message part (2074 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2332 bytes)
+[FRIENDS DEBUG] Raw message length: 2332 bytes
+[FRIENDS DEBUG] Processing large message part (2331 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2283 bytes)
+[FRIENDS DEBUG] Raw message length: 2283 bytes
+[FRIENDS DEBUG] Processing large message part (2282 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2376 bytes)
+[FRIENDS DEBUG] Raw message length: 2376 bytes
+[FRIENDS DEBUG] Processing large message part (2375 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3161 bytes)
+[FRIENDS DEBUG] Raw message length: 3161 bytes
+[FRIENDS DEBUG] Processing large message part (3160 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3020 bytes)
+[FRIENDS DEBUG] Raw message length: 3020 bytes
+[FRIENDS DEBUG] Processing large message part (3019 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2371 bytes)
+[FRIENDS DEBUG] Raw message length: 2371 bytes
+[FRIENDS DEBUG] Processing large message part (2370 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2256 bytes)
+[FRIENDS DEBUG] Raw message length: 2256 bytes
+[FRIENDS DEBUG] Processing large message part (2255 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2306 bytes)
+[FRIENDS DEBUG] Raw message length: 2306 bytes
+[FRIENDS DEBUG] Processing large message part (2305 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2176 bytes)
+[FRIENDS DEBUG] Raw message length: 2176 bytes
+[FRIENDS DEBUG] Processing large message part (2175 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2815 bytes)
+[FRIENDS DEBUG] Raw message length: 2815 bytes
+[FRIENDS DEBUG] Processing large message part (2814 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2240 bytes)
+[FRIENDS DEBUG] Raw message length: 2240 bytes
+[FRIENDS DEBUG] Processing large message part (2239 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2093 bytes)
+[FRIENDS DEBUG] Raw message length: 2093 bytes
+[FRIENDS DEBUG] Processing large message part (2092 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2109 bytes)
+[FRIENDS DEBUG] Raw message length: 2109 bytes
+[FRIENDS DEBUG] Processing large message part (2108 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3020 bytes)
+[FRIENDS DEBUG] Raw message length: 3020 bytes
+[FRIENDS DEBUG] Processing large message part (3019 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2261 bytes)
+[FRIENDS DEBUG] Raw message length: 2261 bytes
+[FRIENDS DEBUG] Processing large message part (2260 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2422 bytes)
+[FRIENDS DEBUG] Raw message length: 2422 bytes
+[FRIENDS DEBUG] Processing large message part (2421 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3117 bytes)
+[FRIENDS DEBUG] Raw message length: 3117 bytes
+[FRIENDS DEBUG] Processing large message part (3116 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2110 bytes)
+[FRIENDS DEBUG] Raw message length: 2110 bytes
+[FRIENDS DEBUG] Processing large message part (2109 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2132 bytes)
+[FRIENDS DEBUG] Raw message length: 2132 bytes
+[FRIENDS DEBUG] Processing large message part (2131 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2110 bytes)
+[FRIENDS DEBUG] Raw message length: 2110 bytes
+[FRIENDS DEBUG] Processing large message part (2109 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2112 bytes)
+[FRIENDS DEBUG] Raw message length: 2112 bytes
+[FRIENDS DEBUG] Processing large message part (2111 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2616 bytes)
+[FRIENDS DEBUG] Raw message length: 2616 bytes
+[FRIENDS DEBUG] Processing large message part (2615 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2205 bytes)
+[FRIENDS DEBUG] Raw message length: 2205 bytes
+[FRIENDS DEBUG] Processing large message part (2204 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2170 bytes)
+[FRIENDS DEBUG] Raw message length: 2170 bytes
+[FRIENDS DEBUG] Processing large message part (2169 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2152 bytes)
+[FRIENDS DEBUG] Raw message length: 2152 bytes
+[FRIENDS DEBUG] Processing large message part (2151 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2021 bytes)
+[FRIENDS DEBUG] Raw message length: 2021 bytes
+[FRIENDS DEBUG] Processing large message part (2020 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2118 bytes)
+[FRIENDS DEBUG] Raw message length: 2118 bytes
+[FRIENDS DEBUG] Processing large message part (2117 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2318 bytes)
+[FRIENDS DEBUG] Raw message length: 2318 bytes
+[FRIENDS DEBUG] Processing large message part (2317 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2118 bytes)
+[FRIENDS DEBUG] Raw message length: 2118 bytes
+[FRIENDS DEBUG] Processing large message part (2117 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2071 bytes)
+[FRIENDS DEBUG] Raw message length: 2071 bytes
+[FRIENDS DEBUG] Processing large message part (2070 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2244 bytes)
+[FRIENDS DEBUG] Raw message length: 2244 bytes
+[FRIENDS DEBUG] Processing large message part (2243 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2204 bytes)
+[FRIENDS DEBUG] Raw message length: 2204 bytes
+[FRIENDS DEBUG] Processing large message part (2203 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2731 bytes)
+[FRIENDS DEBUG] Raw message length: 2731 bytes
+[FRIENDS DEBUG] Processing large message part (2730 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2371 bytes)
+[FRIENDS DEBUG] Raw message length: 2371 bytes
+[FRIENDS DEBUG] Processing large message part (2370 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2125 bytes)
+[FRIENDS DEBUG] Raw message length: 2125 bytes
+[FRIENDS DEBUG] Processing large message part (2124 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2173 bytes)
+[FRIENDS DEBUG] Raw message length: 2173 bytes
+[FRIENDS DEBUG] Processing large message part (2172 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2161 bytes)
+[FRIENDS DEBUG] Raw message length: 2161 bytes
+[FRIENDS DEBUG] Processing large message part (2160 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2385 bytes)
+[FRIENDS DEBUG] Raw message length: 2385 bytes
+[FRIENDS DEBUG] Processing large message part (2384 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2219 bytes)
+[FRIENDS DEBUG] Raw message length: 2219 bytes
+[FRIENDS DEBUG] Processing large message part (2218 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2350 bytes)
+[FRIENDS DEBUG] Raw message length: 2350 bytes
+[FRIENDS DEBUG] Processing large message part (2349 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2274 bytes)
+[FRIENDS DEBUG] Raw message length: 2274 bytes
+[FRIENDS DEBUG] Processing large message part (2273 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2196 bytes)
+[FRIENDS DEBUG] Raw message length: 2196 bytes
+[FRIENDS DEBUG] Processing large message part (2195 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2077 bytes)
+[FRIENDS DEBUG] Raw message length: 2077 bytes
+[FRIENDS DEBUG] Processing large message part (2076 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2073 bytes)
+[FRIENDS DEBUG] Raw message length: 2073 bytes
+[FRIENDS DEBUG] Processing large message part (2072 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2186 bytes)
+[FRIENDS DEBUG] Raw message length: 2186 bytes
+[FRIENDS DEBUG] Processing large message part (2185 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2027 bytes)
+[FRIENDS DEBUG] Raw message length: 2027 bytes
+[FRIENDS DEBUG] Processing large message part (2026 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2128 bytes)
+[FRIENDS DEBUG] Raw message length: 2128 bytes
+[FRIENDS DEBUG] Processing large message part (2127 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2498 bytes)
+[FRIENDS DEBUG] Raw message length: 2498 bytes
+[FRIENDS DEBUG] Processing large message part (2497 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 3142 bytes)
+[FRIENDS DEBUG] Raw message length: 3142 bytes
+[FRIENDS DEBUG] Processing large message part (3141 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2169 bytes)
+[FRIENDS DEBUG] Raw message length: 2169 bytes
+[FRIENDS DEBUG] Processing large message part (2168 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2281 bytes)
+[FRIENDS DEBUG] Raw message length: 2281 bytes
+[FRIENDS DEBUG] Processing large message part (2280 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2345 bytes)
+[FRIENDS DEBUG] Raw message length: 2345 bytes
+[FRIENDS DEBUG] Processing large message part (2344 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2353 bytes)
+[FRIENDS DEBUG] Raw message length: 2353 bytes
+[FRIENDS DEBUG] Processing large message part (2352 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2186 bytes)
+[FRIENDS DEBUG] Raw message length: 2186 bytes
+[FRIENDS DEBUG] Processing large message part (2185 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2361 bytes)
+[FRIENDS DEBUG] Raw message length: 2361 bytes
+[FRIENDS DEBUG] Processing large message part (2360 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2139 bytes)
+[FRIENDS DEBUG] Raw message length: 2139 bytes
+[FRIENDS DEBUG] Processing large message part (2138 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2491 bytes)
+[FRIENDS DEBUG] Raw message length: 2491 bytes
+[FRIENDS DEBUG] Processing large message part (2490 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2816 bytes)
+[FRIENDS DEBUG] Raw message length: 2816 bytes
+[FRIENDS DEBUG] Processing large message part (2815 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2160 bytes)
+[FRIENDS DEBUG] Raw message length: 2160 bytes
+[FRIENDS DEBUG] Processing large message part (2159 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2238 bytes)
+[FRIENDS DEBUG] Raw message length: 2238 bytes
+[FRIENDS DEBUG] Processing large message part (2237 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2176 bytes)
+[FRIENDS DEBUG] Raw message length: 2176 bytes
+[FRIENDS DEBUG] Processing large message part (2175 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2139 bytes)
+[FRIENDS DEBUG] Raw message length: 2139 bytes
+[FRIENDS DEBUG] Processing large message part (2138 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2113 bytes)
+[FRIENDS DEBUG] Raw message length: 2113 bytes
+[FRIENDS DEBUG] Processing large message part (2112 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2153 bytes)
+[FRIENDS DEBUG] Raw message length: 2153 bytes
+[FRIENDS DEBUG] Processing large message part (2152 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2561 bytes)
+[FRIENDS DEBUG] Raw message length: 2561 bytes
+[FRIENDS DEBUG] Processing large message part (2560 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2522 bytes)
+[FRIENDS DEBUG] Raw message length: 2522 bytes
+[FRIENDS DEBUG] Processing large message part (2521 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2247 bytes)
+[FRIENDS DEBUG] Raw message length: 2247 bytes
+[FRIENDS DEBUG] Processing large message part (2246 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2329 bytes)
+[FRIENDS DEBUG] Raw message length: 2329 bytes
+[FRIENDS DEBUG] Processing large message part (2328 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2385 bytes)
+[FRIENDS DEBUG] Raw message length: 2385 bytes
+[FRIENDS DEBUG] Processing large message part (2384 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2184 bytes)
+[FRIENDS DEBUG] Raw message length: 2184 bytes
+[FRIENDS DEBUG] Processing large message part (2183 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2232 bytes)
+[FRIENDS DEBUG] Raw message length: 2232 bytes
+[FRIENDS DEBUG] Processing large message part (2231 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2227 bytes)
+[FRIENDS DEBUG] Raw message length: 2227 bytes
+[FRIENDS DEBUG] Processing large message part (2226 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 11 bytes)
+[FRIENDS DEBUG] Raw message length: 11 bytes
+[FRIENDS DEBUG] Processing message part: {"type":6}
+[FRIENDS DEBUG] Message type: 6
+[FRIENDS DEBUG] Received ping
+[FRIENDS DEBUG] Complete message received (total length: 3101 bytes)
+[FRIENDS DEBUG] Raw message length: 3101 bytes
+[FRIENDS DEBUG] Processing large message part (3100 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2086 bytes)
+[FRIENDS DEBUG] Raw message length: 2086 bytes
+[FRIENDS DEBUG] Processing large message part (2085 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2211 bytes)
+[FRIENDS DEBUG] Raw message length: 2211 bytes
+[FRIENDS DEBUG] Processing large message part (2210 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2212 bytes)
+[FRIENDS DEBUG] Raw message length: 2212 bytes
+[FRIENDS DEBUG] Processing large message part (2211 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2230 bytes)
+[FRIENDS DEBUG] Raw message length: 2230 bytes
+[FRIENDS DEBUG] Processing large message part (2229 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2171 bytes)
+[FRIENDS DEBUG] Raw message length: 2171 bytes
+[FRIENDS DEBUG] Processing large message part (2170 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2121 bytes)
+[FRIENDS DEBUG] Raw message length: 2121 bytes
+[FRIENDS DEBUG] Processing large message part (2120 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2233 bytes)
+[FRIENDS DEBUG] Raw message length: 2233 bytes
+[FRIENDS DEBUG] Processing large message part (2232 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2596 bytes)
+[FRIENDS DEBUG] Raw message length: 2596 bytes
+[FRIENDS DEBUG] Processing large message part (2595 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2168 bytes)
+[FRIENDS DEBUG] Raw message length: 2168 bytes
+[FRIENDS DEBUG] Processing large message part (2167 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2497 bytes)
+[FRIENDS DEBUG] Raw message length: 2497 bytes
+[FRIENDS DEBUG] Processing large message part (2496 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2183 bytes)
+[FRIENDS DEBUG] Raw message length: 2183 bytes
+[FRIENDS DEBUG] Processing large message part (2182 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2305 bytes)
+[FRIENDS DEBUG] Raw message length: 2305 bytes
+[FRIENDS DEBUG] Processing large message part (2304 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2305 bytes)
+[FRIENDS DEBUG] Raw message length: 2305 bytes
+[FRIENDS DEBUG] Processing large message part (2304 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2315 bytes)
+[FRIENDS DEBUG] Raw message length: 2315 bytes
+[FRIENDS DEBUG] Processing large message part (2314 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2111 bytes)
+[FRIENDS DEBUG] Raw message length: 2111 bytes
+[FRIENDS DEBUG] Processing large message part (2110 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2149 bytes)
+[FRIENDS DEBUG] Raw message length: 2149 bytes
+[FRIENDS DEBUG] Processing large message part (2148 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)
+[FRIENDS DEBUG] Complete message received (total length: 2179 bytes)
+[FRIENDS DEBUG] Raw message length: 2179 bytes
+[FRIENDS DEBUG] Processing large message part (2178 bytes)
+[FRIENDS DEBUG] Message type: 1
+[FRIENDS DEBUG] Received invocation: ReceiveSessionUpdate (original case)
+[FRIENDS DEBUG] Received invocation: receivesessionupdate (lowercase)

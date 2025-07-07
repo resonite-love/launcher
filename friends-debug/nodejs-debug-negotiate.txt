@@ -1,0 +1,625 @@
+Using credentials from file: kokoa0429
+SignalR connection created
+[2025-06-28T21:35:12.941Z] Debug: Starting HubConnection.
+[2025-06-28T21:35:12.942Z] Debug: Starting connection with transfer format 'Text'.
+[2025-06-28T21:35:12.943Z] Debug: Sending negotiation request: https://api.resonite.com/hub/negotiate?negotiateVersion=1.
+[2025-06-28T21:35:13.936Z] Debug: Selecting transport 'WebSockets'.
+[2025-06-28T21:35:14.867Z] Information: WebSocket connected to wss://api.resonite.com/hub?id=Xo4crSsrtDPSfafPv8d4WQ.
+[2025-06-28T21:35:14.867Z] Debug: The HttpConnection connected successfully.
+[2025-06-28T21:35:14.867Z] Debug: Sending handshake request.
+[2025-06-28T21:35:14.868Z] Information: Using HubProtocol 'json'.
+[2025-06-28T21:35:15.100Z] Debug: Server handshake complete.
+[2025-06-28T21:35:15.100Z] Debug: HubConnection connected successfully.
+Connected to SignalR hub successfully.
+Enter to stop
+┌──────────┬──────────┬───────────────────────────────────────────┐
+│ (index)  │ Status   │ World Name                                │
+├──────────┼──────────┼───────────────────────────────────────────┤
+│ Nordwick │ 'Online' │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+└──────────┴──────────┴───────────────────────────────────────────┘
+Enter to stop
+┌──────────┬────────────┬───────────────────────────────────────────┐
+│ (index)  │ Status     │ World Name                                │
+├──────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius │ 'Sociable' │ 'Private'                                 │
+└──────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌─────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)     │ Status     │ World Name                                │
+├─────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick    │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius    │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK │ 'Sociable' │ 'The Tipsy Table'                         │
+└─────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌─────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)     │ Status     │ World Name                                │
+├─────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick    │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius    │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4          │ 'Online'   │ 'Weird Phone Headless'                    │
+└─────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌─────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)     │ Status     │ World Name                                │
+├─────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick    │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius    │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4          │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo     │ 'Busy'     │ 'Private'                                 │
+└─────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌─────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)     │ Status     │ World Name                                │
+├─────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick    │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius    │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4          │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo     │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36    │ 'Offline'  │ 'Private'                                 │
+└─────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌─────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)     │ Status     │ World Name                                │
+├─────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick    │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius    │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4          │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo     │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36    │ 'Offline'  │ 'Private'                                 │
+│ Rucio       │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+└─────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌─────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)     │ Status     │ World Name                                │
+├─────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick    │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius    │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4          │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo     │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36    │ 'Offline'  │ 'Private'                                 │
+│ Rucio       │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+└─────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌─────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)     │ Status     │ World Name                                │
+├─────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick    │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius    │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4          │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo     │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36    │ 'Offline'  │ 'Private'                                 │
+│ Rucio       │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter      │ 'Online'   │ 'Private'                                 │
+└─────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌─────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)     │ Status     │ World Name                                │
+├─────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick    │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius    │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4          │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo     │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36    │ 'Offline'  │ 'Private'                                 │
+│ Rucio       │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter      │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee │ 'Online'   │ 'Private'                                 │
+└─────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+│ neko3          │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+│ neko3          │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ 1Ycmuvy7rBQ    │ 'Offline'  │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+│ neko3          │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ 1Ycmuvy7rBQ    │ 'Offline'  │ 'Private'                                 │
+│ Rabbuttz       │ 'Offline'  │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+│ neko3          │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ 1Ycmuvy7rBQ    │ 'Offline'  │ 'Private'                                 │
+│ Rabbuttz       │ 'Offline'  │ 'Private'                                 │
+│ MotoMaid       │ 'Online'   │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+│ neko3          │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ 1Ycmuvy7rBQ    │ 'Offline'  │ 'Private'                                 │
+│ Rabbuttz       │ 'Offline'  │ 'Private'                                 │
+│ MotoMaid       │ 'Online'   │ 'Private'                                 │
+│ 1Vpvqv2jujY    │ null       │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+│ neko3          │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ 1Ycmuvy7rBQ    │ 'Offline'  │ 'Private'                                 │
+│ Rabbuttz       │ 'Offline'  │ 'Private'                                 │
+│ MotoMaid       │ 'Online'   │ 'Private'                                 │
+│ 1Vpvqv2jujY    │ null       │ 'Private'                                 │
+│ kemonoserver   │ null       │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+│ neko3          │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ 1Ycmuvy7rBQ    │ 'Offline'  │ 'Private'                                 │
+│ Rabbuttz       │ 'Offline'  │ 'Private'                                 │
+│ MotoMaid       │ 'Online'   │ 'Private'                                 │
+│ 1Vpvqv2jujY    │ null       │ 'Private'                                 │
+│ kemonoserver   │ null       │ 'Private'                                 │
+│ GONT-3s        │ null       │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+│ neko3          │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ 1Ycmuvy7rBQ    │ 'Offline'  │ 'Private'                                 │
+│ Rabbuttz       │ 'Offline'  │ 'Private'                                 │
+│ MotoMaid       │ 'Online'   │ 'Private'                                 │
+│ 1Vpvqv2jujY    │ null       │ 'Private'                                 │
+│ kemonoserver   │ null       │ 'Private'                                 │
+│ GONT-3s        │ null       │ 'Private'                                 │
+│ orangeLess     │ null       │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+│ neko3          │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ 1Ycmuvy7rBQ    │ 'Offline'  │ 'Private'                                 │
+│ Rabbuttz       │ 'Offline'  │ 'Private'                                 │
+│ MotoMaid       │ 'Online'   │ 'Private'                                 │
+│ 1Vpvqv2jujY    │ null       │ 'Private'                                 │
+│ kemonoserver   │ null       │ 'Private'                                 │
+│ GONT-3s        │ null       │ 'Private'                                 │
+│ orangeLess     │ null       │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+│ neko3          │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ 1Ycmuvy7rBQ    │ 'Offline'  │ 'Private'                                 │
+│ Rabbuttz       │ 'Offline'  │ 'Private'                                 │
+│ MotoMaid       │ 'Online'   │ 'Private'                                 │
+│ 1Vpvqv2jujY    │ null       │ 'Private'                                 │
+│ kemonoserver   │ null       │ 'Private'                                 │
+│ GONT-3s        │ null       │ 'Private'                                 │
+│ orangeLess     │ null       │ 'Private'                                 │
+│ sakami         │ 'Online'   │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+│ neko3          │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ 1Ycmuvy7rBQ    │ 'Offline'  │ 'Private'                                 │
+│ Rabbuttz       │ 'Offline'  │ 'Private'                                 │
+│ MotoMaid       │ 'Online'   │ 'Private'                                 │
+│ 1Vpvqv2jujY    │ null       │ 'Private'                                 │
+│ kemonoserver   │ null       │ 'Private'                                 │
+│ GONT-3s        │ null       │ 'Private'                                 │
+│ orangeLess     │ null       │ 'Private'                                 │
+│ sakami         │ 'Online'   │ 'Private'                                 │
+│ Lexevo         │ 'Online'   │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop
+┌────────────────┬────────────┬───────────────────────────────────────────┐
+│ (index)        │ Status     │ World Name                                │
+├────────────────┼────────────┼───────────────────────────────────────────┤
+│ Nordwick       │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Frooxius       │ 'Sociable' │ 'Private'                                 │
+│ 1O8uOI9jqcK    │ 'Sociable' │ 'The Tipsy Table'                         │
+│ j4             │ 'Online'   │ 'Weird Phone Headless'                    │
+│ jasonmo        │ 'Busy'     │ 'Private'                                 │
+│ GhostZ36       │ 'Offline'  │ 'Private'                                 │
+│ Rucio          │ 'Online'   │ 'N1ARA Field Day Event 2025'              │
+│ Phant          │ 'Online'   │ '箕面大滝  (Minoh Waterfall) WIP v0.03.1' │
+│ Baxter         │ 'Online'   │ 'Private'                                 │
+│ 1NpQoxe8oee    │ 'Online'   │ 'Private'                                 │
+│ ultrawidegamer │ 'Offline'  │ 'Private'                                 │
+│ mrhedx         │ 'Sociable' │ 'Private'                                 │
+│ FoxBox         │ 'Sociable' │ 'N1ARA Field Day Event 2025'              │
+│ DJNightmares   │ 'Online'   │ 'Private'                                 │
+│ 1OrJlUoC86i    │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ MotoMaidHDL    │ null       │ 'Private'                                 │
+│ shizuku        │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ Nemnomi        │ 'Offline'  │ 'Private'                                 │
+│ neko3          │ 'Online'   │ 'Creator Jam 317 - Fight!!'               │
+│ 1Ycmuvy7rBQ    │ 'Offline'  │ 'Private'                                 │
+│ Rabbuttz       │ 'Offline'  │ 'Private'                                 │
+│ MotoMaid       │ 'Online'   │ 'Private'                                 │
+│ 1Vpvqv2jujY    │ null       │ 'Private'                                 │
+│ kemonoserver   │ null       │ 'Private'                                 │
+│ GONT-3s        │ null       │ 'Private'                                 │
+│ orangeLess     │ null       │ 'Private'                                 │
+│ sakami         │ 'Online'   │ 'Private'                                 │
+│ Lexevo         │ 'Online'   │ 'Private'                                 │
+│ konto          │ 'Offline'  │ 'Private'                                 │
+└────────────────┴────────────┴───────────────────────────────────────────┘
+Enter to stop

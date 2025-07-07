@@ -1,0 +1,3 @@
+Using credentials from file: kokoa0429
+SignalR connection created
+Connected to SignalR hub successfully.

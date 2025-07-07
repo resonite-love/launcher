@@ -45,7 +45,10 @@
       "Bash(cat:*)",
       "Bash(cargo clippy:*)",
       "Bash(git log:*)",
-      "Bash(touch:*)"
+      "Bash(touch:*)",
+      "mcp__rust-docs__lookup_crate_docs",
+      "WebFetch(domain:docs.rs)",
+      "WebFetch(domain:crates.io)"
     ],
     "deny": []
   }

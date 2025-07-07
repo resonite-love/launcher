@@ -1,0 +1,8 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@microsoft/signalr": "^8.0.7",
+    "crypto": "^1.0.1",
+    "node-fetch": "^3.3.2"
+  }
+}

@@ -1,0 +1,74 @@
+warning: fields `connection_id` and `available_transports` are never read
+   --> src\main.rs:186:5
+    |
+182 | struct SignalRNegotiateResponse {
+    |        ------------------------ fields in this struct
+...
+186 |     connection_id: String,
+    |     ^^^^^^^^^^^^^
+187 |     #[serde(rename = "availableTransports")]
+188 |     available_transports: Vec<serde_json::Value>,
+    |     ^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `SignalRNegotiateResponse` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` on by default
+
+warning: `friends-debug` (bin "friends-debug") generated 1 warning
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.15s
+     Running `target\debug\friends-debug.exe`
+Resonite Friends Debug Tool
+==========================
+Using credentials from file: kokoa0429
+
+Starting connection...
+[FRIENDS DEBUG] Starting connection process
+[FRIENDS DEBUG] Machine ID: poe4lw4aQ4ShgF9xuHQIQw==
+[FRIENDS DEBUG] Secret Machine ID: 34a86d33-d5b6-4bac-bc0d-1762e3beedd6
+[FRIENDS DEBUG] Generated UID: ea2b23ef7ba396662d38b3d6917742373b2b9e1cd8580ae14f2f36df42821b8e
+[FRIENDS DEBUG] Using username: kokoa0429
+[FRIENDS DEBUG] Login credentials prepared: {
+  "authentication": {
+    "$type": "password",
+    "password": ".44Ump-45"
+  },
+  "email": null,
+  "ownerId": null,
+  "rememberMe": false,
+  "secretMachineId": "34a86d33-d5b6-4bac-bc0d-1762e3beedd6",
+  "userName": "kokoa0429"
+}
+[FRIENDS DEBUG] Sending login request to https://api.resonite.com/userSessions
+[FRIENDS DEBUG] Login response status: 200 OK
+[FRIENDS DEBUG] Login result: {
+  "entity": {
+    "created": "2025-06-28T14:46:50.0785033Z",
+    "eTag": null,
+    "expire": "2025-06-29T14:46:50.0785507Z",
+    "isMachineBound": false,
+    "logoutUrlClientSide": false,
+    "originalLoginId": "Auth-75738097-8cd7-49dc-8b78-2081ec38e5b8",
+    "originalLoginType": "Password",
+    "partitionKey": "U-kokoa0429",
+    "rememberMe": false,
+    "rowKey": "c9aeRMfbbbg0b9byaIkoSzA99SwDQClirHiC51_FUdeNkS69o1QEMTJOh+olSawr9P9NFmYy6LgemknvLJuySzj9f54taHUZk_mvjivLNqxo7cINUtU8TBXuD5EgUB82tv5HzhTPjCf6amYzEIAUZzQkIe3XZZ4RijvRxBe4Z0c=",
+    "secretMachineIdHash": "VFolcgJsJVOjjkpeVNaTdq+AEdcuxQiocWFYpfh5M2Q=",
+    "secretMachineIdSalt": "oTET3KzNLd3gzrzzKSzAUs5v8VAKkJdTP8n13H0gL8+Jsz9H10oR8muJedju85Q1Li4xm4rhtDBsHG4MF3H9l6W/5CPBaBZNRBdlhQS0yCGp06LKJlDh7Tr5nvMP0JArQJt2qAvocr0p8Db9rm/6SLivFzIz1PsdQNrYPYZSJ4g=",
+    "sessionLoginCounter": 1,
+    "sourceIP": "229.51.144.78",
+    "token": "c9aeRMfbbbg0b9byaIkoSzA99SwDQClirHiC51_FUdeNkS69o1QEMTJOh+olSawr9P9NFmYy6LgemknvLJuySzj9f54taHUZk_mvjivLNqxo7cINUtU8TBXuD5EgUB82tv5HzhTPjCf6amYzEIAUZzQkIe3XZZ4RijvRxBe4Z0c=",
+    "uidHash": "CegIgPOVQEpM3V/9K9ecqRYObbQrEl1eKoXlTyvvVFA=",
+    "uidSalt": "l/o5+OeTRwiRoz7AfXfEUdi0j8I0PJvncQ/NAFqNRzhmufPOG/IRqOY6VSC0rzE3B6qh72OYFBaMftV6vMtpzsMZwfbCYg2CmB97gB23bsxzgKxTJg2CR/r9rqdhhIqe6kQ/AtSff7Q+H8XGJt+jW5tQj+4eAgkHwpKxQWoeVpE=",
+    "userAgent": "",
+    "userId": "U-kokoa0429"
+  }
+}
+[FRIENDS DEBUG] Session token obtained: c9aeRMfbbbg0b9byaIkoSzA99SwDQClirHiC51_FUdeNkS69o1QEMTJOh+olSawr9P9NFmYy6LgemknvLJuySzj9f54taHUZk_mvjivLNqxo7cINUtU8TBXuD5EgUB82tv5HzhTPjCf6amYzEIAUZzQkIe3XZZ4RijvRxBe4Z0c=
+[FRIENDS DEBUG] User ID: U-kokoa0429
+[FRIENDS DEBUG] Starting SignalR connection with auth: res U-kokoa0429:c9aeRMfbbbg0b9byaIkoSzA99SwDQClirHiC51_FUdeNkS69o1QEMTJOh+olSawr9P9NFmYy6LgemknvLJuySzj9f54taHUZk_mvjivLNqxo7cINUtU8TBXuD5EgUB82tv5HzhTPjCf6amYzEIAUZzQkIe3XZZ4RijvRxBe4Z0c=
+[FRIENDS DEBUG] Attempting to connect to SignalR hub with auth: res U-kokoa0429:c9aeRMfbbbg0b9byaIkoSzA99SwDQClirHiC51_FUdeNkS69o1QEMTJOh+olSawr9P9NFmYy6LgemknvLJuySzj9f54taHUZk_mvjivLNqxo7cINUtU8TBXuD5EgUB82tv5HzhTPjCf6amYzEIAUZzQkIe3XZZ4RijvRxBe4Z0c=
+[FRIENDS DEBUG] Performing SignalR negotiation
+[FRIENDS DEBUG] Negotiation successful, connection token: hzvlGMeMf4zWPDjVzrZN
+[FRIENDS DEBUG] SignalR negotiation completed: SignalRNegotiateResponse { connection_token: "hzvlGMeMf4zWPDjVzrZN8g", connection_id: "J4HRmJ-8897TMq29jrwjeA", available_transports: [Object {"transferFormats": Array [String("Text"), String("Binary")], "transport": String("WebSockets")}, Object {"transferFormats": Array [String("Text")], "transport": String("ServerSentEvents")}, Object {"transferFormats": Array [String("Text"), String("Binary")], "transport": String("LongPolling")}] }
+[FRIENDS DEBUG] Connecting to WebSocket: wss://api.resonite.com/hub?id=...
+[FRIENDS DEBUG] SignalR connection failed: WebSocket protocol error: Missing, duplicated or incorrect header sec-websocket-key
+❌ Connection failed: SignalR connection failed: WebSocket protocol error: Missing, duplicated or incorrect header sec-websocket-key

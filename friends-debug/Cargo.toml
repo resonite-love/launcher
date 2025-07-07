@@ -1,0 +1,22 @@
+[package]
+name = "friends-debug"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+uuid = { version = "1.0", features = ["v4"] }
+base64 = "0.21"
+tokio-tungstenite = { version = "0.21", features = ["native-tls"] }
+tungstenite = "0.21"
+futures-util = "0.3"
+urlencoding = "2.1"
+url = "2.4"
+rpassword = "7.3"
+http = "0.2"

@@ -38,6 +38,7 @@
   "nav": {
     "home": "Home",
     "profiles": "Profile Management",
+    "friends": "Friends",
     "settings": "Settings"
   },
   "home": {
@@ -501,5 +502,34 @@
     "validGithubUrlRequired": "Please enter a valid GitHub repository URL",
     "noReleasesFound": "No releases found in this repository",
     "noCompatibleVersions": "This mod has no versions compatible with the current mod loader environment"
+  },
+  "friends": {
+    "title": "Friends",
+    "description": "Check your friends' online status in Resonite",
+    "login": {
+      "title": "Login to Resonite",
+      "identity": "Username or Email",
+      "identityHelp": "Username, Email, or User ID (starting with U-)",
+      "password": "Password",
+      "connect": "Connect",
+      "connecting": "Connecting...",
+      "loginRequired": "Please enter username and password"
+    },
+    "status": {
+      "connecting": "Connecting to Resonite API...",
+      "connected": "Connected"
+    },
+    "disconnect": "Disconnect",
+    "list": {
+      "title": "Friends List",
+      "refresh": "Refresh",
+      "empty": "No friends are currently online",
+      "privateWorld": "Private World"
+    },
+    "errors": {
+      "loginRequired": "Please enter username and password",
+      "connectionFailed": "Connection failed",
+      "invalidCredentials": "Invalid credentials"
+    }
   }
 }

@@ -1,0 +1,5 @@
+Using credentials from file: kokoa0429
+SignalR connection created
+[2025-06-28T21:34:29.808Z] Information: WebSocket connected to wss://api.resonite.com/hub?id=0ilP5lRPwgq9uQuNPY9qXA.
+[2025-06-28T21:34:29.809Z] Information: Using HubProtocol 'json'.
+Connected to SignalR hub successfully.

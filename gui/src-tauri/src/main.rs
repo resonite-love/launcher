@@ -16,12 +16,16 @@ use reso_launcher_lib::{
 };
 use std::process::Command;
 
+mod friends;
+use friends::FriendsConnection;
+
 // Application state
-struct AppState {
+pub struct AppState {
     depot_downloader: Option<DepotDownloader>,
     profile_manager: Option<ProfileManager>,
     install_manager: Option<ResoniteInstallManager>,
     exe_dir: Option<PathBuf>,
+    pub friends_connection: FriendsConnection,
 }
 
 impl Default for AppState {
@@ -31,6 +35,7 @@ impl Default for AppState {
             profile_manager: None,
             install_manager: None,
             exe_dir: None,
+            friends_connection: FriendsConnection::default(),
         }
     }
 }
@@ -1991,6 +1996,7 @@ fn is_portable_version() -> bool {
     is_portable_build()
 }
 
+
 fn main() {
     tauri::Builder::default()
         .manage(Mutex::new(AppState::default()))
@@ -2049,7 +2055,10 @@ fn main() {
             check_app_updates,
             install_app_update,
             get_app_version,
-            is_portable_version
+            is_portable_version,
+            friends::connect_resonite_friends,
+            friends::disconnect_resonite_friends,
+            friends::refresh_friends_status
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

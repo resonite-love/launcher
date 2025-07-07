@@ -11,6 +11,10 @@
                 "--user=neo",
                 "--password=kobato"
             ]
-        }
+        },
+	"rust-docs": {
+      		"command": "node",
+		"args": ["/mnt/c/Users/neo/GitHub/mcp-rust-docs"]
+    	}
     }
 }

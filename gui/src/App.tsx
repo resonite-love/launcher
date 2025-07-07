@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Home, User, Settings, Loader2, AlertCircle } from 'lucide-react';
+import { Home, User, Settings, Users, Loader2, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import CustomTitlebar from './components/CustomTitlebar';
 import HomeTab from './components/HomeTab';
 import ProfilesTab from './components/ProfilesTab';
 import SettingsTab from './components/SettingsTab';
+import FriendsTab from './components/FriendsTab';
 import FirstRunSetupModal from './components/FirstRunSetupModal';
 import { useAppStore } from './store/useAppStore';
 import { useAppStatus } from './hooks/useQueries';
@@ -150,6 +151,27 @@ function App() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 ${
+                currentTab === 'friends' 
+                  ? 'text-white bg-resonite-blue/20 border border-resonite-blue/30 shadow-lg' 
+                  : 'text-gray-400 hover:text-white hover:bg-dark-800/50'
+              }`}
+              onClick={() => setCurrentTab('friends')}
+            >
+              <Users className="w-4 h-4" />
+              <span>{t('nav.friends')}</span>
+              {currentTab === 'friends' && (
+                <motion.div
+                  layoutId="activeTab"
+                  className="absolute inset-0 bg-resonite-blue/10 rounded-lg border border-resonite-blue/20"
+                  style={{ zIndex: -1 }}
+                />
+              )}
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center space-x-2 ${
                 currentTab === 'settings' 
                   ? 'text-white bg-resonite-blue/20 border border-resonite-blue/30 shadow-lg' 
                   : 'text-gray-400 hover:text-white hover:bg-dark-800/50'
@@ -182,6 +204,7 @@ function App() {
         >
           {currentTab === 'home' && <HomeTab />}
           {currentTab === 'profiles' && <ProfilesTab />}
+          {currentTab === 'friends' && <FriendsTab />}
           {currentTab === 'settings' && <SettingsTab />}
         </motion.div>
       </main>

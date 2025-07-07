@@ -38,6 +38,7 @@
   "nav": {
     "home": "ホーム",
     "profiles": "プロファイル管理",
+    "friends": "フレンド",
     "settings": "設定"
   },
   "home": {
@@ -501,5 +502,34 @@
     "validGithubUrlRequired": "有効なGitHubリポジトリURLを入力してください",
     "noReleasesFound": "このリポジトリにはリリースが見つかりませんでした",
     "noCompatibleVersions": "このMODには現在のMODローダー環境と互換性のあるバージョンがありません"
+  },
+  "friends": {
+    "title": "フレンド",
+    "description": "Resoniteでフレンドのオンライン状況を確認",
+    "login": {
+      "title": "Resoniteにログイン",
+      "identity": "ユーザー名またはメールアドレス",
+      "identityHelp": "ユーザー名、メールアドレス、またはUser ID (U-で始まる)",
+      "password": "パスワード",
+      "connect": "接続",
+      "connecting": "接続中...",
+      "loginRequired": "ユーザー名とパスワードを入力してください"
+    },
+    "status": {
+      "connecting": "Resonite APIに接続中...",
+      "connected": "接続済み"
+    },
+    "disconnect": "切断",
+    "list": {
+      "title": "フレンドリスト",
+      "refresh": "更新",
+      "empty": "フレンドがオンラインではありません",
+      "privateWorld": "プライベートワールド"
+    },
+    "errors": {
+      "loginRequired": "ユーザー名とパスワードを入力してください",
+      "connectionFailed": "接続に失敗しました",
+      "invalidCredentials": "認証情報が無効です"
+    }
   }
 }
