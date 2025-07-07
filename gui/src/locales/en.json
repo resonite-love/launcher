@@ -196,6 +196,10 @@
         "duplicating": "Duplicating..."
       }
     },
+    "launchModes": {
+      "screen": "Launch in Screen Mode",
+      "vr": "Launch in VR Mode"
+    },
     "bulkUpgrade": {
       "button": "Bulk Upgrade ({{count}})",
       "title": "Bulk MOD Upgrade",

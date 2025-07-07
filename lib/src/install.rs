@@ -429,4 +429,71 @@ impl ResoniteInstallManager {
         println!("Resonite launched successfully!");
         Ok(())
     }
+
+    /// プロファイルでResoniteを特定のモードで起動する（引数強制上書き）
+    pub fn launch_with_profile_mode(
+        &self,
+        profile_name: &str,
+        profile_manager: &ProfileManager,
+        mode: &str,
+    ) -> Result<(), Box<dyn Error>> {
+        use std::process::Command;
+
+        // プロファイルを読み込み
+        let profile = profile_manager.get_profile(profile_name)?;
+        let profile_dir = profile_manager.get_profile_dir(profile_name);
+
+        // ゲームがインストールされているかチェック
+        if !profile.has_game_installed() {
+            return Err(format!("Game is not installed in profile '{}'", profile_name).into());
+        }
+
+        // Resonite実行ファイルのパスを取得
+        let resonite_path = profile.get_resonite_exe(&profile_dir);
+        if !resonite_path.exists() {
+            return Err(format!("Resonite executable not found at {}", resonite_path.display()).into());
+        }
+
+        // 起動引数を展開
+        let mut expanded_args = profile.expand_args(&profile_dir);
+
+        // モードに応じて引数を強制上書き
+        match mode {
+            "screen" => {
+                // -Device SteamVRを削除し、-Screenを追加
+                expanded_args.retain(|arg| !arg.starts_with("-Device"));
+                if !expanded_args.iter().any(|arg| arg == "-Screen") {
+                    expanded_args.push("-Screen".to_string());
+                }
+            }
+            "vr" => {
+                // -Screenを削除し、-Device SteamVRを追加
+                expanded_args.retain(|arg| arg != "-Screen");
+                if !expanded_args.iter().any(|arg| arg.starts_with("-Device")) {
+                    expanded_args.push("-Device".to_string());
+                    expanded_args.push("SteamVR".to_string());
+                }
+            }
+            _ => {
+                return Err(format!("Invalid launch mode: '{}'. Use 'screen' or 'vr'", mode).into());
+            }
+        }
+
+        println!(
+            "Launching Resonite with profile '{}' in {} mode",
+            profile.name, mode
+        );
+        println!("Executable: {}", resonite_path.display());
+        println!("Arguments: {:?}", expanded_args);
+
+        // Resoniteを起動（Gameディレクトリをカレントディレクトリに設定）
+        let game_dir = profile_dir.join("Game");
+        Command::new(resonite_path)
+            .args(&expanded_args)
+            .current_dir(&game_dir)
+            .spawn()?;
+
+        println!("Resonite launched successfully in {} mode!", mode);
+        Ok(())
+    }
 }

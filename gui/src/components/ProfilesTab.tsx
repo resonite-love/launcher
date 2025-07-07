@@ -13,6 +13,9 @@ import {
   Check, 
   AlertCircle,
   User,
+  ChevronDown,
+  Monitor,
+  Headphones,
   Key,
   Edit3,
   Trash2,
@@ -78,6 +81,9 @@ function ProfilesTab() {
   
   // Local loading state (for game installation, etc.)
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Launch dropdown state
+  const [launchDropdownOpen, setLaunchDropdownOpen] = useState<string | null>(null);
   
   // State for profile creation modal
   const [showCreateProfileModal, setShowCreateProfileModal] = useState(false);
@@ -387,6 +393,22 @@ function ProfilesTab() {
     }
   };
 
+  const launchProfileWithMode = async (profileName: string, mode: string) => {
+    try {
+      setIsLoading(true);
+      const result = await invoke<string>('launch_resonite_with_mode', {
+        profileName,
+        mode,
+      });
+      
+      toast.success(result);
+    } catch (err) {
+      toast.error(t('toasts.gameLaunchFailed'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const openInstallModal = (profileName: string) => {
     setSelectedProfile(profileName);
     setShowInstallModal(true);
@@ -620,27 +642,69 @@ function ProfilesTab() {
               <div className="flex space-x-2">
                 {profile.has_game ? (
                   <>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`btn-primary flex-1 flex items-center justify-center space-x-2 ${
-                        isProfileInstalling(profile.id) ? 'opacity-50' : ''
-                      }`}
-                      onClick={() => launchProfile(profile.id)}
-                      disabled={isLoading || isProfileInstalling(profile.id)}
-                    >
-                      {isProfileInstalling(profile.id) ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>{t('common.installing')}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Play className="w-4 h-4" />
-                          <span>{t('common.launch')}</span>
-                        </>
-                      )}
-                    </motion.button>
+                    <div className="flex items-center space-x-1 flex-1">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`btn-primary flex-1 flex items-center justify-center space-x-2 ${
+                          isProfileInstalling(profile.id) ? 'opacity-50' : ''
+                        }`}
+                        onClick={() => launchProfile(profile.id)}
+                        disabled={isLoading || isProfileInstalling(profile.id)}
+                      >
+                        {isProfileInstalling(profile.id) ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>{t('common.installing')}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-4 h-4" />
+                            <span>{t('common.launch')}</span>
+                          </>
+                        )}
+                      </motion.button>
+                      
+                      {/* Launch Mode Dropdown */}
+                      <div className="relative">
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`btn-primary px-2 py-2 ${
+                            isProfileInstalling(profile.id) ? 'opacity-50' : ''
+                          }`}
+                          onClick={() => setLaunchDropdownOpen(launchDropdownOpen === profile.id ? null : profile.id)}
+                          disabled={isLoading || isProfileInstalling(profile.id)}
+                        >
+                          <ChevronDown className="w-4 h-4" />
+                        </motion.button>
+                        
+                        {launchDropdownOpen === profile.id && (
+                          <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50 min-w-40">
+                            <button
+                              className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-lg transition-colors duration-200 flex items-center space-x-2"
+                              onClick={() => {
+                                launchProfileWithMode(profile.id, 'screen');
+                                setLaunchDropdownOpen(null);
+                              }}
+                            >
+                              <Monitor className="w-4 h-4" />
+                              <span>{t('profiles.launchModes.screen')}</span>
+                            </button>
+                            <button
+                              className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 last:rounded-b-lg transition-colors duration-200 flex items-center space-x-2"
+                              onClick={() => {
+                                launchProfileWithMode(profile.id, 'vr');
+                                setLaunchDropdownOpen(null);
+                              }}
+                            >
+                              <Headphones className="w-4 h-4" />
+                              <span>{t('profiles.launchModes.vr')}</span>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     
                     <motion.button
                       whileHover={{ scale: 1.02 }}

@@ -454,6 +454,27 @@ async fn launch_resonite(
     Ok(format!("Resonite launched with profile '{}'", profile_name))
 }
 
+// Launch Resonite with specific mode override
+#[tauri::command]
+async fn launch_resonite_with_mode(
+    profile_name: String,
+    mode: String, // "screen" or "vr"
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let app_state = state.lock().unwrap();
+    
+    let install_manager = app_state.install_manager.as_ref()
+        .ok_or("Install manager not initialized")?;
+    
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
+    
+    install_manager.launch_with_profile_mode(&profile_name, profile_manager, &mode)
+        .map_err(|e| format!("Launch failed: {}", e))?;
+    
+    Ok(format!("Resonite launched with profile '{}' in {} mode", profile_name, mode))
+}
+
 // Interactive Steam login
 #[tauri::command]
 async fn steam_login(
@@ -2004,6 +2025,7 @@ fn main() {
             get_profiles,
             create_profile,
             launch_resonite,
+            launch_resonite_with_mode,
             steam_login,
             save_steam_credentials,
             load_steam_credentials,

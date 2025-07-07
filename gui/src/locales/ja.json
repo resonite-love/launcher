@@ -196,6 +196,10 @@
         "duplicating": "複製中..."
       }
     },
+    "launchModes": {
+      "screen": "ウィンドウモードで起動",
+      "vr": "VRモードで起動"
+    },
     "bulkUpgrade": {
       "button": "一括アップグレード ({{count}})",
       "title": "MODの一括アップグレード",

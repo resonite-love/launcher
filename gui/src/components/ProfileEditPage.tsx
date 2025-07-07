@@ -26,7 +26,10 @@ import {
   EyeOff,
   Play,
   Copy,
-  ArrowUp
+  ArrowUp,
+  ChevronDown,
+  Monitor,
+  Headphones
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -203,6 +206,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [customModVersions, setCustomModVersions] = useState<any[]>([]);
   const [modActiveTab, setModActiveTab] = useState<'install' | 'manage'>('install');
   const [showBulkUpgradeModal, setShowBulkUpgradeModal] = useState(false);
+  
+  // Launch dropdown state
+  const [launchDropdownOpen, setLaunchDropdownOpen] = useState(false);
 
   // React Query hooks - disable auto-fetch for available mods
   const { data: availableMods = [], isLoading: modsLoading, refetch: refetchMods } = useModManifest(profileName);
@@ -695,6 +701,23 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       return;
     }
     launchMutation.mutate(profileName);
+  };
+
+  const handleLaunchWithMode = async (mode: string) => {
+    if (!hasGame) {
+      toast.error(t('home.launcher.notInstalled'));
+      return;
+    }
+    
+    try {
+      const result = await invoke<string>('launch_resonite_with_mode', {
+        profileName,
+        mode,
+      });
+      toast.success(result);
+    } catch (error) {
+      toast.error(t('toasts.gameLaunchFailed'));
+    }
   };
 
   const installCustomMod = async () => {
@@ -2113,26 +2136,70 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
           </motion.button>
 
 
-          {/* 起動ボタン */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className={`flex items-center space-x-2 ${
-              hasGame 
-                ? 'bg-green-600 hover:bg-green-700 text-white border border-green-500 px-4 py-2 rounded-lg transition-colors duration-200' 
-                : 'btn-secondary opacity-50 cursor-not-allowed'
-            }`}
-            onClick={handleLaunch}
-            disabled={!hasGame || launchMutation.isPending}
-            title={hasGame ? t('profiles.editPage.launchResonite') : t('profiles.editPage.gameNotInstalledWarning')}
-          >
-            {launchMutation.isPending ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Play className="w-4 h-4" />
+          {/* 起動ボタンとプルダウン */}
+          <div className="flex items-stretch relative">
+            <div className="flex items-stretch flex-1 rounded-lg overflow-hidden">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`flex items-center space-x-2 flex-1 rounded-none ${
+                  hasGame 
+                    ? 'bg-green-600 hover:bg-green-700 text-white border border-green-500 px-4 py-2 transition-colors duration-200' 
+                    : 'btn-secondary opacity-50 cursor-not-allowed'
+                }`}
+                onClick={handleLaunch}
+                disabled={!hasGame || launchMutation.isPending}
+                title={hasGame ? t('profiles.editPage.launchResonite') : t('profiles.editPage.gameNotInstalledWarning')}
+              >
+                {launchMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4" />
+                )}
+                <span>{t('profiles.editPage.launch')}</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`h-full px-3 flex items-center justify-center rounded-none border-l ${
+                  hasGame 
+                    ? 'bg-green-600 hover:bg-green-700 text-white border border-green-500 border-l-green-400 transition-colors duration-200' 
+                    : 'btn-secondary opacity-50 cursor-not-allowed'
+                }`}
+                onClick={() => setLaunchDropdownOpen(!launchDropdownOpen)}
+                disabled={!hasGame || launchMutation.isPending}
+              >
+                <ChevronDown className="w-4 h-4" />
+              </motion.button>
+            </div>
+            
+            {/* Launch Mode Dropdown */}
+            {launchDropdownOpen && (
+              <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50 min-w-40">
+                <button
+                  className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-lg transition-colors duration-200 flex items-center space-x-2"
+                  onClick={() => {
+                    handleLaunchWithMode('screen');
+                    setLaunchDropdownOpen(false);
+                  }}
+                >
+                  <Monitor className="w-4 h-4" />
+                  <span>{t('profiles.launchModes.screen')}</span>
+                </button>
+                <button
+                  className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 last:rounded-b-lg transition-colors duration-200 flex items-center space-x-2"
+                  onClick={() => {
+                    handleLaunchWithMode('vr');
+                    setLaunchDropdownOpen(false);
+                  }}
+                >
+                  <Headphones className="w-4 h-4" />
+                  <span>{t('profiles.launchModes.vr')}</span>
+                </button>
+              </div>
             )}
-            <span>{t('profiles.editPage.launch')}</span>
-          </motion.button>
+          </div>
 
         </div>
       </motion.div>
