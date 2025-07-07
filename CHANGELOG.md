@@ -7,6 +7,12 @@
 
 ## [Unreleased]
 
+## [v1.5.8] - 2025-07-07
+
+### 📦 バージョン管理
+- **バージョン更新**: v1.5.8へのマイナーアップデート
+  - プロファイルで、VRとデスクトップの設定を上書きして起動できる機能を追加
+
 ## [v1.5.7] - 2025-06-27
 
 ### 🎯 MOD管理機能強化
@@ -749,7 +755,9 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.6...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.8...HEAD
+[v1.5.8]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.7...v1.5.8
+[v1.5.7]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.6...v1.5.7
 [v1.5.6]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.5...v1.5.6
 [v1.5.5]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.3...v1.5.5
 [v1.5.3]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.2...v1.5.3
