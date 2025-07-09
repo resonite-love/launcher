@@ -6,6 +6,8 @@
 このプロジェクトは [Semantic Versioning](https://semver.org/lang/ja/) に準拠しています。
 
 ## [Unreleased]
+- モバイル2FAを回避するように変更
+
 
 ## [v1.5.8] - 2025-07-07
 
