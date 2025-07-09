@@ -6,8 +6,20 @@
 このプロジェクトは [Semantic Versioning](https://semver.org/lang/ja/) に準拠しています。
 
 ## [Unreleased]
-- モバイル2FAを回避するように変更
 
+
+## [v1.5.9] - 2025-07-09
+
+### 🔧 認証改善
+- **Steam認証の改善**: モバイル2FA(二要素認証)を回避するオプションを追加
+  - DepotDownloaderに`-disable-mobile-auth`フラグを自動付与
+  - Steam Mobileアプリでの認証が不要になり、よりスムーズなインストール体験を提供
+  - エミュレーターコードの入力方式に自動切り替え
+
+### 🌐 多言語対応
+- **翻訳の微調整**: 日本語・英語の翻訳を改善
+  - より自然で分かりやすい表現に更新
+  - UIメッセージの一貫性を向上
 
 ## [v1.5.8] - 2025-07-07
 
@@ -757,7 +769,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.8...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.9...HEAD
+[v1.5.9]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.8...v1.5.9
 [v1.5.8]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.7...v1.5.8
 [v1.5.7]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.6...v1.5.7
 [v1.5.6]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.5...v1.5.6
