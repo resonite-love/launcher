@@ -95,6 +95,7 @@ impl DepotDownloader {
         // DepotDownloaderでは認証情報を保存するために-remember-passwordオプションを使用
         let args = vec![
             "-app".to_string(),
+            "-no-mobile".to_string(), // モバイル認証を無効化
             "1".to_string(), // ダミーアプリID（認証テスト用）
             "-username".to_string(),
             username.to_string(),
@@ -134,6 +135,7 @@ impl DepotDownloader {
         let mut args = Vec::new();
 
         // Resonite AppID
+        args.push("-no-mobile".to_string()); // モバイル認証を無効化
         args.push("-app".to_string());
         args.push("2519830".to_string());
 
