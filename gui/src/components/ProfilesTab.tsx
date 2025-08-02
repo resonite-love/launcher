@@ -1056,7 +1056,7 @@ function ProfilesTab() {
         profileName={selectedUpdateProfile?.display_name || ''}
         currentVersion={selectedUpdateProfile?.version}
         currentBranch={selectedUpdateProfile?.branch}
-        isLoading={isLoading}
+        isLoading={isLoading || (selectedUpdateProfile?.id != null && getIsInstalling(selectedUpdateProfile?.id))}
       />
     </div>
   );
