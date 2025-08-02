@@ -316,7 +316,6 @@ function HomeTab() {
             animate={{ opacity: 1 }}
             className="mt-3 text-yellow-400 text-xs flex items-center gap-2"
           >
-            <span>⚠️</span>
             <span>{t('home.launcher.notInstalledWarning')}</span>
           </motion.div>
         )}
@@ -327,7 +326,6 @@ function HomeTab() {
             animate={{ opacity: 1 }}
             className="mt-3 text-gray-400 text-xs flex items-center gap-2"
           >
-            <span>📝</span>
             <span>{t('home.launcher.createProfileHint')}</span>
           </motion.div>
         )}
