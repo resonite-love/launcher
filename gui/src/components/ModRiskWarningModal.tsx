@@ -75,15 +75,12 @@ function ModRiskWarningModal({
                 
                 <ul className="space-y-2 pl-4">
                   <li className="flex items-start space-x-2">
-                    <span className="text-orange-400 mt-1">•</span>
                     <span>{t('modLoader.riskWarning.risks.unstable')}</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <span className="text-orange-400 mt-1">•</span>
                     <span>{t('modLoader.riskWarning.risks.security')}</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <span className="text-orange-400 mt-1">•</span>
                     <span>{t('modLoader.riskWarning.risks.compatibility')}</span>
                   </li>
                 </ul>
