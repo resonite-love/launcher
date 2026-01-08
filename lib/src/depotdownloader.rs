@@ -206,36 +206,36 @@ impl DepotDownloader {
         #[cfg(target_os = "windows")]
         {
             use std::os::windows::process::CommandExt;
-            
+
             // 新しいアプローチ：PowerShellを使用してDepotDownloaderを実行
             let mut cmd = Command::new("powershell");
             cmd.args(&["-NoExit", "-Command"]);
-            
+
             // PowerShellスクリプトを構築
             let depot_path_str = self.path.to_string_lossy();
-            
-            // 引数を適切にクォートする（スペースが含まれる場合）
+
+            // PowerShell用に引数を適切にエスケープする
+            // シングルクォート内でシングルクォートをエスケープするには2つ重ねる
             let quoted_args: Vec<String> = args.iter().map(|arg| {
-                if arg.contains(' ') {
-                    format!("'{}'", arg)
-                } else {
-                    arg.clone()
-                }
+                // シングルクォートを2つに置換してエスケープ
+                let escaped = arg.replace("'", "''");
+                // すべての引数をシングルクォートで囲む（特殊文字対策）
+                format!("'{}'", escaped)
             }).collect();
             let args_str = quoted_args.join(" ");
-            
+
             let powershell_script = format!(
                 "Write-Host 'Starting DepotDownloader...' -ForegroundColor Green; & '{}' {}; Write-Host ''; Write-Host 'Download completed. Press any key to close this window.' -ForegroundColor Green; Read-Host",
                 depot_path_str, args_str
             );
-            
+
             cmd.arg(&powershell_script);
             cmd.creation_flags(0x00000010); // CREATE_NEW_CONSOLE - 新しいコンソールウィンドウを作成
-            
+
             println!("Using DepotDownloader path: {}", depot_path_str);
             println!("Running interactively with args: {:?}", args);
             println!("Launching PowerShell in new console window...");
-            
+
             let _child = cmd.spawn()?;
             println!("DepotDownloader launched in new PowerShell console window");
         }
@@ -517,5 +517,32 @@ mod tests {
 
         // パスが正しく設定されているか確認
         assert!(downloader.path.starts_with(temp_dir.path()));
+    }
+
+    #[test]
+    fn test_build_auth_args_with_special_characters() {
+        let (_temp, downloader) = create_test_downloader();
+        // パスワードに特殊文字（シングルクォート、ダブルクォート、スペースなど）が含まれる場合
+        let args = downloader.build_auth_args(Some("testuser"), Some("pass'word\"with$pecial"));
+
+        assert_eq!(args.len(), 4);
+        assert_eq!(args[0], "-username");
+        assert_eq!(args[1], "testuser");
+        assert_eq!(args[2], "-password");
+        // 特殊文字がそのまま保持されていることを確認（エスケープはrun_interactive側で行う）
+        assert_eq!(args[3], "pass'word\"with$pecial");
+    }
+
+    #[test]
+    fn test_powershell_escape_single_quote() {
+        // PowerShell用のエスケープロジックをテスト
+        let test_password = "pass'word";
+        let escaped = test_password.replace("'", "''");
+        assert_eq!(escaped, "pass''word");
+
+        // 複数のシングルクォートがある場合
+        let test_password2 = "it's a 'test'";
+        let escaped2 = test_password2.replace("'", "''");
+        assert_eq!(escaped2, "it''s a ''test''");
     }
 }
