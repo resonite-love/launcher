@@ -277,6 +277,24 @@ const getArgumentPresets = (t: any): ArgumentPreset[] => [
     category: 'debug',
     arg: '-ForceNoVoice',
     tooltip: 'Disables voice functionality for local presentations'
+  },
+  {
+    id: 'never-save-settings',
+    name: 'Never Save Settings',
+    description: 'Prevent settings from being saved',
+    icon: Settings,
+    category: 'debug',
+    arg: '-NeverSaveSettings',
+    tooltip: 'Prevents any settings changes from being saved to disk'
+  },
+  {
+    id: 'never-save-dash',
+    name: 'Never Save Dash',
+    description: 'Prevent dash settings from being saved',
+    icon: Settings,
+    category: 'debug',
+    arg: '-NeverSaveDash',
+    tooltip: 'Prevents dash layout and settings from being saved to disk'
   }
 ];
 
