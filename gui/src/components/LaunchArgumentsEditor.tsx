@@ -216,48 +216,6 @@ const getArgumentPresets = (t: any): ArgumentPreset[] => [
     arg: '-ctaa',
     tooltip: t('launchArgs.presets.ctaa')
   },
-  {
-    id: 'screen-fullscreen-0',
-    name: 'Windowed Mode',
-    description: 'Launch in windowed mode',
-    icon: Monitor,
-    category: 'graphics',
-    arg: '-screen-fullscreen 0',
-    tooltip: 'Launch in windowed mode instead of fullscreen'
-  },
-  {
-    id: 'screen-fullscreen-1',
-    name: 'Fullscreen Mode',
-    description: 'Launch in fullscreen',
-    icon: Monitor,
-    category: 'graphics',
-    arg: '-screen-fullscreen 1',
-    tooltip: 'Launch in fullscreen mode'
-  },
-  {
-    id: 'screen-width',
-    name: 'Screen Width',
-    description: 'Set horizontal resolution',
-    icon: Monitor,
-    category: 'graphics',
-    arg: '-screen-width',
-    hasValue: true,
-    valueType: 'number',
-    placeholder: '1920',
-    tooltip: 'Set horizontal resolution of window or screen'
-  },
-  {
-    id: 'screen-height',
-    name: 'Screen Height',
-    description: 'Set vertical resolution',
-    icon: Monitor,
-    category: 'graphics',
-    arg: '-screen-height',
-    hasValue: true,
-    valueType: 'number',
-    placeholder: '1080',
-    tooltip: 'Set vertical resolution of window or screen'
-  },
   
   // Advanced/Debug
   {
