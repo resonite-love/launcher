@@ -7,3 +7,8 @@
 /gen/schemas
 
 **/node_modules
+
+.env
+
+nul
+**/*/nul
