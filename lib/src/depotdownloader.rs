@@ -368,7 +368,7 @@ impl DepotDownloader {
         password: Option<&str>,
     ) -> Result<bool, Box<dyn Error>> {
         let mut args = self.build_resonite_args(install_dir, branch, manifest_id, username, password);
-        
+
         // manifest-onlyオプションを追加してマニフェストのみを取得
         args.push("-manifest-only".to_string());
 
@@ -382,9 +382,140 @@ impl DepotDownloader {
         // DepotDownloaderの出力を解析して更新の有無を判定
         // 実装は実際の出力形式に応じて調整が必要
         let stdout = String::from_utf8_lossy(&output.stdout);
-        
+
         // 簡易的な実装: 出力に特定のキーワードがあるかチェック
         // 実際の実装では、マニフェストIDやタイムスタンプを比較する必要がある
         Ok(stdout.contains("manifest"))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::TempDir;
+
+    fn create_test_downloader() -> (TempDir, DepotDownloader) {
+        let temp_dir = TempDir::new().unwrap();
+        let downloader = DepotDownloader::new(temp_dir.path());
+        (temp_dir, downloader)
+    }
+
+    #[test]
+    fn test_build_auth_args_with_credentials() {
+        let (_temp, downloader) = create_test_downloader();
+        let args = downloader.build_auth_args(Some("testuser"), Some("testpass"));
+
+        assert_eq!(args.len(), 4);
+        assert_eq!(args[0], "-username");
+        assert_eq!(args[1], "testuser");
+        assert_eq!(args[2], "-password");
+        assert_eq!(args[3], "testpass");
+    }
+
+    #[test]
+    fn test_build_auth_args_username_only() {
+        let (_temp, downloader) = create_test_downloader();
+        let args = downloader.build_auth_args(Some("testuser"), None);
+
+        assert_eq!(args.len(), 2);
+        assert_eq!(args[0], "-username");
+        assert_eq!(args[1], "testuser");
+    }
+
+    #[test]
+    fn test_build_auth_args_no_credentials() {
+        let (_temp, downloader) = create_test_downloader();
+        let args = downloader.build_auth_args(None, None);
+
+        assert!(args.is_empty());
+    }
+
+    #[test]
+    fn test_build_resonite_args_release_branch() {
+        let (_temp, downloader) = create_test_downloader();
+        let args = downloader.build_resonite_args(
+            "/install/path",
+            "release",
+            None,
+            None,
+            None,
+        );
+
+        assert!(args.contains(&"-no-mobile".to_string()));
+        assert!(args.contains(&"-app".to_string()));
+        assert!(args.contains(&"2519830".to_string())); // Resonite AppID
+        assert!(args.contains(&"-depot".to_string()));
+        assert!(args.contains(&"2519832".to_string())); // Depot ID
+        assert!(args.contains(&"-dir".to_string()));
+        assert!(args.contains(&"/install/path".to_string()));
+
+        // releaseブランチでは-branchが含まれない
+        assert!(!args.contains(&"-branch".to_string()));
+    }
+
+    #[test]
+    fn test_build_resonite_args_prerelease_branch() {
+        let (_temp, downloader) = create_test_downloader();
+        let args = downloader.build_resonite_args(
+            "/install/path",
+            "prerelease",
+            None,
+            None,
+            None,
+        );
+
+        // prereleaseブランチでは-branchが含まれる
+        assert!(args.contains(&"-branch".to_string()));
+        assert!(args.contains(&"prerelease".to_string()));
+    }
+
+    #[test]
+    fn test_build_resonite_args_with_manifest() {
+        let (_temp, downloader) = create_test_downloader();
+        let args = downloader.build_resonite_args(
+            "/install/path",
+            "release",
+            Some("12345678901234567890"),
+            None,
+            None,
+        );
+
+        assert!(args.contains(&"-manifest".to_string()));
+        assert!(args.contains(&"12345678901234567890".to_string()));
+    }
+
+    #[test]
+    fn test_build_resonite_args_with_auth() {
+        let (_temp, downloader) = create_test_downloader();
+        let args = downloader.build_resonite_args(
+            "/install/path",
+            "release",
+            None,
+            Some("testuser"),
+            Some("testpass"),
+        );
+
+        assert!(args.contains(&"-username".to_string()));
+        assert!(args.contains(&"testuser".to_string()));
+        assert!(args.contains(&"-password".to_string()));
+        assert!(args.contains(&"testpass".to_string()));
+    }
+
+    #[test]
+    fn test_check_exists_fails_for_missing() {
+        // 存在しないパスを明示的に指定
+        let nonexistent_path = std::path::Path::new("C:\\nonexistent\\path\\DepotDownloader.exe");
+        let downloader = DepotDownloader::new(nonexistent_path);
+        // 存在しないパスなのでエラーになるはず
+        assert!(downloader.check_exists().is_err());
+    }
+
+    #[test]
+    fn test_new_sets_correct_path() {
+        let temp_dir = TempDir::new().unwrap();
+        let downloader = DepotDownloader::new(temp_dir.path());
+
+        // パスが正しく設定されているか確認
+        assert!(downloader.path.starts_with(temp_dir.path()));
     }
 }

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run tauri:*)",
+      "Bash(where:*)",
+      "Bash(echo:*)",
+      "Bash(export PATH=\"/c/Users/neo/.cargo/bin:$PATH\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

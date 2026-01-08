@@ -1,7 +1,10 @@
 // resonite-tools-lib
-// 
+//
 // このライブラリは、Resoniteのインストール、更新、プロファイル管理のための
 // 機能を提供します。
+
+#[cfg(test)]
+pub mod test_utils;
 
 pub mod profile;
 pub mod install;

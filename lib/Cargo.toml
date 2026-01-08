@@ -16,3 +16,7 @@ anyhow = "1.0"  # エラーハンドリング
 tokio = { version = "1.0", features = ["full"] }  # 非同期ランタイム
 sha2 = "0.10"  # SHA256ハッシュ計算
 zip = "0.6"  # ZIPファイル処理
+
+[dev-dependencies]
+dotenvy = "0.15"  # .envファイル読み込み
+tempfile = "3.10"  # テスト用一時ディレクトリ
