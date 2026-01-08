@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
 import { open } from '@tauri-apps/api/shell';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { 
   ArrowLeft,
@@ -284,7 +284,12 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   // 削除確認モーダル用の状態
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  
+
+  // キャッシュ・データベース削除確認モーダル用の状態
+  const [showClearCacheConfirm, setShowClearCacheConfirm] = useState(false);
+  const [showClearDatabaseConfirm, setShowClearDatabaseConfirm] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+
   // 複製モーダル用の状態
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [isDuplicating, setIsDuplicating] = useState(false);
@@ -824,6 +829,32 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       toast.success(t('toasts.profileFolderOpened'));
     } catch (err) {
       toast.error(t('toasts.error', { message: err }));
+    }
+  };
+
+  const clearCache = async () => {
+    try {
+      setIsClearing(true);
+      const result = await invoke<string>('clear_profile_cache', { profileName });
+      toast.success(result);
+      setShowClearCacheConfirm(false);
+    } catch (err) {
+      toast.error(t('toasts.error', { message: err }));
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
+  const clearDatabase = async () => {
+    try {
+      setIsClearing(true);
+      const result = await invoke<string>('clear_profile_database', { profileName });
+      toast.success(result);
+      setShowClearDatabaseConfirm(false);
+    } catch (err) {
+      toast.error(t('toasts.error', { message: err }));
+    } finally {
+      setIsClearing(false);
     }
   };
 
@@ -2067,11 +2098,52 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 )}
               </div>
 
-              {/* その他の設定エリア */}
-              <div className="bg-dark-800/30 rounded-lg p-8 text-center">
-                <Settings className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                <p className="text-gray-400 text-lg mb-2">{t('profiles.editPage.detailedSettings')}</p>
-                <p className="text-gray-500">{t('profiles.editPage.detailedSettingsNote')}</p>
+              {/* データ管理 */}
+              <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                  <Trash2 className="w-5 h-5 text-orange-400" />
+                  <span>{t('profiles.editPage.dataManagement', 'Data Management')}</span>
+                </h3>
+
+                <div className="space-y-4">
+                  {/* キャッシュ削除 */}
+                  <div className="flex items-center justify-between p-4 bg-dark-700/30 border border-dark-600/30 rounded-lg">
+                    <div>
+                      <h4 className="text-white font-medium">{t('profiles.editPage.clearCache', 'Clear Cache')}</h4>
+                      <p className="text-gray-400 text-sm">
+                        {t('profiles.editPage.clearCacheDescription', 'Delete cached assets and temporary files')}
+                      </p>
+                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="btn-danger text-sm flex items-center space-x-2"
+                      onClick={() => setShowClearCacheConfirm(true)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>{t('profiles.editPage.clearCache', 'Clear Cache')}</span>
+                    </motion.button>
+                  </div>
+
+                  {/* データベース削除 */}
+                  <div className="flex items-center justify-between p-4 bg-dark-700/30 border border-dark-600/30 rounded-lg">
+                    <div>
+                      <h4 className="text-white font-medium">{t('profiles.editPage.clearDatabase', 'Clear Database')}</h4>
+                      <p className="text-gray-400 text-sm">
+                        {t('profiles.editPage.clearDatabaseDescription', 'Delete local database files (contacts, messages, etc.)')}
+                      </p>
+                    </div>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="btn-danger text-sm flex items-center space-x-2"
+                      onClick={() => setShowClearDatabaseConfirm(true)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>{t('profiles.editPage.clearDatabase', 'Clear Database')}</span>
+                    </motion.button>
+                  </div>
+                </div>
               </div>
             </div>
             )}
@@ -2597,6 +2669,112 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         onCancel={() => setShowDeleteConfirmModal(false)}
         isDeleting={isDeleting}
       />
+
+      {/* キャッシュ削除確認モーダル */}
+      <AnimatePresence>
+        {showClearCacheConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            onClick={() => !isClearing && setShowClearCacheConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-dark-800 border border-dark-600 rounded-xl p-6 max-w-md mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-bold text-white mb-4">
+                {t('profiles.editPage.clearCacheConfirmTitle', 'Clear Cache?')}
+              </h3>
+              <p className="text-gray-400 mb-6">
+                {t('profiles.editPage.clearCacheConfirmMessage', 'This will delete all cached assets and temporary files. This action cannot be undone.')}
+              </p>
+              <div className="flex justify-end space-x-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="btn-secondary"
+                  onClick={() => setShowClearCacheConfirm(false)}
+                  disabled={isClearing}
+                >
+                  {t('common.cancel')}
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="btn-danger flex items-center space-x-2"
+                  onClick={clearCache}
+                  disabled={isClearing}
+                >
+                  {isClearing ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                  <span>{t('profiles.editPage.clearCache', 'Clear Cache')}</span>
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* データベース削除確認モーダル */}
+      <AnimatePresence>
+        {showClearDatabaseConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            onClick={() => !isClearing && setShowClearDatabaseConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-dark-800 border border-dark-600 rounded-xl p-6 max-w-md mx-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-bold text-white mb-4">
+                {t('profiles.editPage.clearDatabaseConfirmTitle', 'Clear Database?')}
+              </h3>
+              <p className="text-gray-400 mb-6">
+                {t('profiles.editPage.clearDatabaseConfirmMessage', 'This will delete all local database files including contacts, messages, and settings. This action cannot be undone.')}
+              </p>
+              <div className="flex justify-end space-x-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="btn-secondary"
+                  onClick={() => setShowClearDatabaseConfirm(false)}
+                  disabled={isClearing}
+                >
+                  {t('common.cancel')}
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="btn-danger flex items-center space-x-2"
+                  onClick={clearDatabase}
+                  disabled={isClearing}
+                >
+                  {isClearing ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                  <span>{t('profiles.editPage.clearDatabase', 'Clear Database')}</span>
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

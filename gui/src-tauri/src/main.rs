@@ -963,6 +963,76 @@ fn delete_profile(
     Ok(format!("Profile '{}' deleted successfully", profile_name))
 }
 
+// Helper function to get DataPath from profile args
+fn get_data_path_from_profile(profile: &reso_launcher_lib::profile::Profile, profile_dir: &std::path::Path) -> std::path::PathBuf {
+    // Look for -DataPath in args
+    let args = &profile.args;
+    for i in 0..args.len() {
+        if args[i] == "-DataPath" && i + 1 < args.len() {
+            let data_path = &args[i + 1];
+            // Expand %PROFILE_DIR% variable
+            let expanded = data_path
+                .replace("%PROFILE_DIR%", &profile_dir.to_string_lossy())
+                .replace("%GAME_DIR%", &profile_dir.join("Game").to_string_lossy());
+            return std::path::PathBuf::from(expanded);
+        }
+    }
+    // Default to DataPath subdirectory
+    profile_dir.join("DataPath")
+}
+
+// Clear profile cache directory
+#[tauri::command]
+fn clear_profile_cache(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let app_state = state.lock().unwrap();
+
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
+
+    let profile = profile_manager.get_profile(&profile_name)
+        .map_err(|e| format!("Failed to get profile: {}", e))?;
+    let profile_dir = profile_manager.get_profile_dir(&profile_name);
+    let data_path = get_data_path_from_profile(&profile, &profile_dir);
+    let cache_dir = data_path.join("Cache");
+
+    if cache_dir.exists() {
+        std::fs::remove_dir_all(&cache_dir)
+            .map_err(|e| format!("Failed to delete cache directory: {}", e))?;
+        Ok(format!("Cache cleared: {}", cache_dir.display()))
+    } else {
+        Ok(format!("No cache directory found: {}", cache_dir.display()))
+    }
+}
+
+// Clear profile database directory
+#[tauri::command]
+fn clear_profile_database(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let app_state = state.lock().unwrap();
+
+    let profile_manager = app_state.profile_manager.as_ref()
+        .ok_or("Profile manager not initialized")?;
+
+    let profile = profile_manager.get_profile(&profile_name)
+        .map_err(|e| format!("Failed to get profile: {}", e))?;
+    let profile_dir = profile_manager.get_profile_dir(&profile_name);
+    let data_path = get_data_path_from_profile(&profile, &profile_dir);
+    let db_dir = data_path.join("Databases");
+
+    if db_dir.exists() {
+        std::fs::remove_dir_all(&db_dir)
+            .map_err(|e| format!("Failed to delete database directory: {}", e))?;
+        Ok(format!("Database cleared: {}", db_dir.display()))
+    } else {
+        Ok(format!("No database directory found: {}", db_dir.display()))
+    }
+}
+
 // Check for application updates
 #[tauri::command]
 async fn check_for_app_update() -> Result<AppUpdateInfo, String> {
@@ -2038,6 +2108,8 @@ fn main() {
             open_profile_folder,
             duplicate_profile,
             delete_profile,
+            clear_profile_cache,
+            clear_profile_database,
             check_for_app_update,
             fetch_mod_manifest,
             get_installed_mods,

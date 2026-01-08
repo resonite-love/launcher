@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Copy, Trash2, FolderOpen, RefreshCw, MoreHorizontal } from 'lucide-react';
+import { ChevronDown, Copy, Trash2, FolderOpen, RefreshCw, Database, HardDrive } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface ProfileActionsDropdownProps {
@@ -10,6 +10,8 @@ interface ProfileActionsDropdownProps {
   onDelete: () => void;
   onOpenFolder: () => void;
   onReload: () => void;
+  onClearCache?: () => void;
+  onClearDatabase?: () => void;
   showDeleteOption?: boolean;
 }
 
@@ -20,6 +22,8 @@ export default function ProfileActionsDropdown({
   onDelete,
   onOpenFolder,
   onReload,
+  onClearCache,
+  onClearDatabase,
   showDeleteOption = true,
 }: ProfileActionsDropdownProps) {
   const { t } = useTranslation();
@@ -51,6 +55,30 @@ export default function ProfileActionsDropdown({
       className: 'text-green-400 hover:text-green-300',
     },
   ];
+
+  // キャッシュ削除オプションを追加
+  if (onClearCache) {
+    menuItems.push({
+      id: 'clearCache',
+      label: t('profiles.editPage.clearCache', 'Clear Cache'),
+      icon: HardDrive,
+      onClick: onClearCache,
+      disabled: false,
+      className: 'text-orange-400 hover:text-orange-300',
+    });
+  }
+
+  // データベース削除オプションを追加
+  if (onClearDatabase) {
+    menuItems.push({
+      id: 'clearDatabase',
+      label: t('profiles.editPage.clearDatabase', 'Clear Database'),
+      icon: Database,
+      onClick: onClearDatabase,
+      disabled: false,
+      className: 'text-orange-400 hover:text-orange-300',
+    });
+  }
 
   // デフォルトプロファイル以外の場合は削除オプションを追加
   if (showDeleteOption && profileName !== 'default') {
