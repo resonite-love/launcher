@@ -308,30 +308,61 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
     const newPresetValues: {[key: string]: string} = {};
     const newCustomArgs: string[] = [];
 
-    args.forEach(arg => {
+    // Process arguments with index to handle split format (e.g., ["-DataPath", "value"])
+    let i = 0;
+    while (i < args.length) {
+      const arg = args[i];
       let matched = false;
-      
-      argumentPresets.forEach(preset => {
+
+      for (const preset of argumentPresets) {
         if (preset.hasValue) {
-          // For arguments with values
+          // Check for split format: ["-DataPath", "value"]
+          if (arg === preset.arg && i + 1 < args.length) {
+            const nextArg = args[i + 1];
+            // Next arg should not start with '-' (unless it's a path like -DataPath)
+            if (!nextArg.startsWith('-') || nextArg.includes('\\') || nextArg.includes('/') || nextArg.includes('%')) {
+              newActivePresets.add(preset.id);
+              newPresetValues[preset.id] = nextArg;
+              matched = true;
+              i += 2; // Skip both the flag and the value
+              break;
+            }
+          }
+          // Check for combined format: "-DataPath value"
           if (arg.startsWith(preset.arg + ' ')) {
             newActivePresets.add(preset.id);
             newPresetValues[preset.id] = arg.substring(preset.arg.length + 1);
             matched = true;
+            i++;
+            break;
           }
         } else {
-          // For arguments without values
+          // For arguments without values (but may contain spaces like "-Device SteamVR")
+          // Check for exact match first (combined format)
           if (arg === preset.arg) {
             newActivePresets.add(preset.id);
             matched = true;
+            i++;
+            break;
+          }
+          // Check for split format: ["-Device", "SteamVR"] -> "-Device SteamVR"
+          if (preset.arg.includes(' ')) {
+            const parts = preset.arg.split(' ');
+            if (arg === parts[0] && i + 1 < args.length && args[i + 1] === parts.slice(1).join(' ')) {
+              newActivePresets.add(preset.id);
+              matched = true;
+              i += 2; // Skip both parts
+              break;
+            }
           }
         }
-      });
+      }
 
       if (!matched) {
         newCustomArgs.push(arg);
+        i++;
       }
-    });
+    }
 
     setActivePresets(newActivePresets);
     setPresetValues(newPresetValues);
@@ -344,14 +375,20 @@ function LaunchArgumentsEditor({ args, onArgsChange }: LaunchArgumentsEditorProp
 
     const newArgs: string[] = [];
 
-    // Add preset arguments
+    // Add preset arguments (split format for Rust compatibility)
     argumentPresets.forEach(preset => {
       if (activePresets.has(preset.id)) {
         if (preset.hasValue) {
           const value = presetValues[preset.id] || '';
           if (value.trim()) {
-            newArgs.push(`${preset.arg} ${value.trim()}`);
+            // Split format: push flag and value as separate elements
+            newArgs.push(preset.arg);
+            newArgs.push(value.trim());
           }
+        } else if (preset.arg.includes(' ')) {
+          // Split arguments with spaces (e.g., "-Device SteamVR" -> ["-Device", "SteamVR"])
+          const parts = preset.arg.split(' ');
+          parts.forEach(part => newArgs.push(part));
         } else {
           newArgs.push(preset.arg);
         }
