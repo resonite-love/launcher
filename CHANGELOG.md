@@ -8,6 +8,22 @@
 ## [Unreleased]
 
 
+## [v1.6.0] - 2026-01-09
+
+### ✨ 新機能
+- **キャッシュ・データベース削除機能**: プロファイル設定画面からキャッシュとデータベースを削除可能に
+  - 設定タブの「データ管理」セクションに削除ボタンを追加
+  - 確認ダイアログ付きで誤操作を防止
+  - 起動引数で指定された-DataPathを自動検出して正しいディレクトリを削除
+
+### 🔧 バグ修正
+- **認証情報の特殊文字対応**: パスワードにシングルクォート(`'`)などの特殊文字が含まれる場合のエラーを修正
+  - PowerShell実行時の引数エスケープを改善
+  - シングルクォートを適切にエスケープ(`'` → `''`)
+
+### 🌐 多言語対応
+- **翻訳追加**: キャッシュ・データベース削除機能の日本語・英語翻訳を追加
+
 ## [v1.5.9] - 2025-07-09
 
 ### 🔧 認証改善
@@ -769,7 +785,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.9...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.6.0...HEAD
+[v1.6.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.9...v1.6.0
 [v1.5.9]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.8...v1.5.9
 [v1.5.8]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.7...v1.5.8
 [v1.5.7]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.6...v1.5.7

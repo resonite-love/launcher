@@ -1,6 +1,6 @@
 [package]
 name = "reso-launcher"
-version = "1.5.9"
+version = "1.6.0"
 edition = "2021"
 authors = ["resonite.love community"]
 description = "RESO Launcher - Community Resonite management tool"
