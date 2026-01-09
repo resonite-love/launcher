@@ -69,7 +69,10 @@ import {
   useMigrateProfileConfig,
   useSteamCredentials,
   MultiFileInstallRequest,
-  FileInstallChoice
+  FileInstallChoice,
+  useThunderstorePackages,
+  useInstallThunderstoreMod,
+  ThunderstorePackage
 } from '../hooks/useQueries';
 import { useGameInstallation } from '../hooks/useGameInstallation';
 
@@ -212,9 +215,12 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // React Query hooks - disable auto-fetch for available mods
+  const isBepisLoader = modLoaderInfo?.loader_type === 'BepisLoader';
   const { data: availableMods = [], isLoading: modsLoading, refetch: refetchMods } = useModManifest(profileName);
+  const { data: thunderstorePackages = [], isLoading: thunderstoreLoading, refetch: refetchThunderstore } = useThunderstorePackages(profileName, isBepisLoader);
   const { data: installedMods = [], isLoading: installedModsLoading, refetch: refetchInstalledMods } = useInstalledMods(profileName);
   const { data: unmanagedMods = [], isLoading: unmanagedModsLoading, refetch: refetchUnmanagedMods } = useUnmanagedMods(profileName);
+  const installThunderstoreModMutation = useInstallThunderstoreMod();
   // MODバージョン取得用のstate
   const [manualModVersions, setManualModVersions] = useState<{[modName: string]: ModRelease[]}>({});
   const [loadingManualVersions, setLoadingManualVersions] = useState<string | null>(null);
@@ -472,7 +478,11 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
   // MOD関連の関数
   const loadAvailableMods = async () => {
-    refetchMods();
+    if (isBepisLoader) {
+      refetchThunderstore();
+    } else {
+      refetchMods();
+    }
   };
 
   const handleBulkUpgrade = () => {
@@ -496,6 +506,15 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       profileName,
       modInfo,
       version: selectedVersion
+    });
+  };
+
+  // Thunderstoreパッケージのインストール
+  const installThunderstorePackage = async (pkg: ThunderstorePackage, version?: string) => {
+    await installThunderstoreModMutation.mutateAsync({
+      profileName,
+      packageFullName: pkg.full_name,
+      version
     });
   };
 
@@ -533,35 +552,41 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
 
   // 新しいバージョンが利用可能かチェック（互換性を考慮）
   const hasNewerVersion = (mod: InstalledMod): boolean => {
-    const manifestMod = availableMods.find(m => 
+    // BepisLoader時はThunderstoreからのバージョンチェックが未実装なので無効
+    if (isBepisLoader) return false;
+
+    const manifestMod = availableMods.find(m =>
       m.name === mod.name || m.source_location === mod.source_location
     );
-    
+
     if (!manifestMod || !manifestMod.releases) return false;
-    
+
     // ResoniteModLoader環境では互換性のあるバージョンのみをチェック
     const compatibleReleases = manifestMod.releases.filter(release => isReleaseCompatible(release));
     if (compatibleReleases.length === 0) return false;
-    
+
     // 最新の互換性のあるバージョンを取得
     const latestCompatibleVersion = compatibleReleases[0].version;
-    
+
     return compareVersions(latestCompatibleVersion, mod.installed_version) > 0;
   };
 
   // 互換性のあるアップグレード可能なMODのみをフィルタリング
   const getCompatibleUpgradeableMods = () => {
+    // BepisLoader時はアップグレードチェック未実装
+    if (isBepisLoader) return [];
+
     return upgradeableMods.filter(upgradeable => {
-      const manifestMod = availableMods.find(m => 
+      const manifestMod = availableMods.find(m =>
         m.name === upgradeable.name || m.source_location === upgradeable.source_location
       );
-      
+
       if (!manifestMod?.releases) return false;
-      
+
       // 互換性のあるバージョンが存在するかチェック
       const compatibleReleases = manifestMod.releases.filter(release => isReleaseCompatible(release));
       if (compatibleReleases.length === 0) return false;
-      
+
       // 現在のバージョンより新しい互換性のあるバージョンが存在するかチェック
       const latestCompatibleVersion = compatibleReleases[0].version;
       return compareVersions(latestCompatibleVersion, upgradeable.current_version) > 0;
@@ -1435,54 +1460,58 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 {/* インストールタブのコンテンツ */}
                 {modActiveTab === 'install' && (
                   <div className="space-y-6">
-                    {/* 手動MODインストール */}
-                    <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
-                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
-                        <Github className="w-5 h-5" />
-                        <span>{t('profiles.editPage.manualModInstall')}</span>
-                      </h3>
-                      
-                      <div className="flex space-x-3 mb-4">
-                        <input
-                          type="text"
-                          value={customRepoUrl}
-                          onChange={(e) => setCustomRepoUrl(e.target.value)}
-                          placeholder="https://github.com/author/mod-name"
-                          className="input-primary flex-1"
-                        />
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className="btn-primary flex items-center space-x-2"
-                          onClick={installCustomMod}
-                          disabled={isInstallingMod !== null || !customRepoUrl.trim()}
-                        >
-                          {isInstallingMod === customRepoUrl ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Download className="w-4 h-4" />
-                          )}
-                          <span>インストール</span>
-                        </motion.button>
+                    {/* 手動MODインストール - BepisLoader時は非表示 */}
+                    {!isBepisLoader && (
+                      <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
+                        <h3 className="text-lg font-semibold text-white mb-4 flex items-center space-x-2">
+                          <Github className="w-5 h-5" />
+                          <span>{t('profiles.editPage.manualModInstall')}</span>
+                        </h3>
+
+                        <div className="flex space-x-3 mb-4">
+                          <input
+                            type="text"
+                            value={customRepoUrl}
+                            onChange={(e) => setCustomRepoUrl(e.target.value)}
+                            placeholder="https://github.com/author/mod-name"
+                            className="input-primary flex-1"
+                          />
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="btn-primary flex items-center space-x-2"
+                            onClick={installCustomMod}
+                            disabled={isInstallingMod !== null || !customRepoUrl.trim()}
+                          >
+                            {isInstallingMod === customRepoUrl ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Download className="w-4 h-4" />
+                            )}
+                            <span>インストール</span>
+                          </motion.button>
+                        </div>
+
+                        <p className="text-gray-400 text-sm">
+                          {t('profiles.editPage.githubUrlHint')}
+                        </p>
                       </div>
-                      
-                      <p className="text-gray-400 text-sm">
-                        {t('profiles.editPage.githubUrlHint')}
-                      </p>
-                    </div>
+                    )}
 
                     {/* 利用可能なMOD一覧 */}
                     <div className="bg-dark-800/30 border border-dark-600/30 rounded-lg p-6">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-white">{t('profiles.editPage.availableMods')}</h3>
+                        <h3 className="text-lg font-semibold text-white">
+                          {isBepisLoader ? 'Thunderstore' : t('profiles.editPage.availableMods')}
+                        </h3>
                         <motion.button
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
                           className="btn-secondary flex items-center space-x-2"
                           onClick={loadAvailableMods}
-                          disabled={modsLoading}
+                          disabled={isBepisLoader ? thunderstoreLoading : modsLoading}
                         >
-                          {modsLoading ? (
+                          {(isBepisLoader ? thunderstoreLoading : modsLoading) ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
                             <RefreshCw className="w-4 h-4" />
@@ -1491,7 +1520,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                         </motion.button>
                       </div>
 
-                      {availableMods.length > 0 && (
+                      {(isBepisLoader ? thunderstorePackages.length > 0 : availableMods.length > 0) && (
                         <div className="mb-4">
                           <input
                             type="text"
@@ -1504,98 +1533,182 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                       )}
 
                       <div className="space-y-3 max-h-96 overflow-y-auto">
-                        {modsLoading ? (
-                          <div className="text-center py-8">
-                            <Loader2 className="w-8 h-8 text-resonite-blue animate-spin mx-auto mb-4" />
-                            <p className="text-gray-400">{t('profiles.editPage.fetchingMods')}</p>
-                          </div>
-                        ) : availableMods.length === 0 ? (
-                          <div className="text-center py-8">
-                            <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-                            <p className="text-gray-400 mb-2">{t('profiles.editPage.loadingModList')}</p>
-                            <p className="text-gray-500 text-sm">{t('profiles.editPage.loadingModListHint')}</p>
-                          </div>
-                        ) : (
-                          availableMods
-                            .filter(mod => 
-                              !modSearchQuery || 
-                              mod.name.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
-                              mod.description.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
-                              mod.author.toLowerCase().includes(modSearchQuery.toLowerCase())
-                            )
-                            .map((mod, index) => (
-                              <motion.div
-                                key={`${mod.source_location}-${mod.name}-${index}`}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.05 }}
-                                className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-3"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center space-x-2 mb-1">
-                                      <h4 className="text-white font-medium text-sm truncate">{mod.name}</h4>
-                                      {mod.category && (
-                                        <span className="inline-block bg-resonite-blue/20 text-resonite-blue text-xs px-1.5 py-0.5 rounded shrink-0">
-                                          {mod.category}
+                        {/* BepisLoader時: Thunderstoreパッケージを表示 */}
+                        {isBepisLoader ? (
+                          thunderstoreLoading ? (
+                            <div className="text-center py-8">
+                              <Loader2 className="w-8 h-8 text-resonite-blue animate-spin mx-auto mb-4" />
+                              <p className="text-gray-400">{t('profiles.editPage.fetchingMods')}</p>
+                            </div>
+                          ) : thunderstorePackages.length === 0 ? (
+                            <div className="text-center py-8">
+                              <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                              <p className="text-gray-400 mb-2">{t('profiles.editPage.loadingModList')}</p>
+                              <p className="text-gray-500 text-sm">{t('profiles.editPage.loadingModListHint')}</p>
+                            </div>
+                          ) : (
+                            thunderstorePackages
+                              .filter(pkg =>
+                                !modSearchQuery ||
+                                pkg.name.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
+                                pkg.full_name.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
+                                pkg.owner.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
+                                (pkg.versions[0]?.description || '').toLowerCase().includes(modSearchQuery.toLowerCase())
+                              )
+                              .filter(pkg => !pkg.is_deprecated)
+                              .map((pkg, index) => (
+                                <motion.div
+                                  key={`${pkg.uuid4}-${index}`}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: Math.min(index * 0.02, 0.5) }}
+                                  className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-3"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center space-x-2 mb-1">
+                                        <h4 className="text-white font-medium text-sm truncate">{pkg.name}</h4>
+                                        <span className="inline-block bg-purple-500/20 text-purple-300 text-xs px-1.5 py-0.5 rounded shrink-0">
+                                          BepInEx
                                         </span>
-                                      )}
+                                        {pkg.categories.slice(0, 2).map(cat => (
+                                          <span key={cat} className="inline-block bg-resonite-blue/20 text-resonite-blue text-xs px-1.5 py-0.5 rounded shrink-0">
+                                            {cat}
+                                          </span>
+                                        ))}
+                                      </div>
+                                      <p className="text-gray-400 text-xs">
+                                        {t('profiles.editPage.byAuthor')} {pkg.owner} • {pkg.versions[0]?.version_number || 'N/A'} • {pkg.versions[0]?.downloads?.toLocaleString() || 0} DL
+                                      </p>
+                                      <p className="text-gray-300 text-xs truncate">{pkg.versions[0]?.description || ''}</p>
                                     </div>
-                                    <p className="text-gray-400 text-xs">{t('profiles.editPage.byAuthor')} {mod.author} • {mod.releases.length} {t('profiles.editPage.releases')}</p>
-                                    <p className="text-gray-300 text-xs truncate">{mod.description}</p>
-                                  </div>
-                                  
-                                  <div className="flex items-center space-x-2 ml-3">
-                                    {isGitHubUrl(mod.source_location) && (
+
+                                    <div className="flex items-center space-x-2 ml-3">
                                       <motion.button
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
                                         className="btn-secondary text-xs p-1.5"
-                                        onClick={() => open(mod.source_location)}
-                                        title="Open in GitHub"
+                                        onClick={() => open(pkg.package_url)}
+                                        title="Open in Thunderstore"
                                       >
                                         <ExternalLink className="w-3 h-3" />
                                       </motion.button>
-                                    )}
-                                    
-                                    {/* カスタムインストールボタン */}
-                                    <motion.button
-                                      whileHover={{ scale: 1.02 }}
-                                      whileTap={{ scale: 0.98 }}
-                                      className="btn-secondary text-xs p-1.5"
-                                      onClick={() => handleAvailableModInstallClick(mod)}
-                                      disabled={installModMutation.isPending || mod.releases.length === 0}
-                                      title={t('profiles.editPage.selectVersionToInstall')}
-                                    >
-                                      <Settings className="w-3 h-3" />
-                                    </motion.button>
-                                    
-                                    {/* 最新版インストールボタン */}
-                                    <motion.button
-                                      whileHover={{ scale: 1.02 }}
-                                      whileTap={{ scale: 0.98 }}
-                                      className="btn-primary text-xs flex items-center space-x-1 px-3 py-1.5"
-                                      onClick={() => handleInstallLatestClick(mod)}
-                                      disabled={installModMutation.isPending || mod.releases.length === 0}
-                                      title={t('profiles.editPage.installLatest')}
-                                    >
-                                      {installModMutation.isPending ? (
-                                        <Loader2 className="w-3 h-3 animate-spin" />
-                                      ) : (
-                                        <Download className="w-3 h-3" />
-                                      )}
-                                      <span>インストール</span>
-                                    </motion.button>
+
+                                      <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="btn-primary text-xs flex items-center space-x-1 px-3 py-1.5"
+                                        onClick={() => installThunderstorePackage(pkg)}
+                                        disabled={installThunderstoreModMutation.isPending}
+                                        title={t('profiles.editPage.installLatest')}
+                                      >
+                                        {installThunderstoreModMutation.isPending ? (
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                        ) : (
+                                          <Download className="w-3 h-3" />
+                                        )}
+                                        <span>インストール</span>
+                                      </motion.button>
+                                    </div>
                                   </div>
-                                </div>
-                              </motion.div>
-                            ))
+                                </motion.div>
+                              ))
+                          )
+                        ) : (
+                          /* RML/MonkeyLoader時: resonite-mod-cacheを表示 */
+                          modsLoading ? (
+                            <div className="text-center py-8">
+                              <Loader2 className="w-8 h-8 text-resonite-blue animate-spin mx-auto mb-4" />
+                              <p className="text-gray-400">{t('profiles.editPage.fetchingMods')}</p>
+                            </div>
+                          ) : availableMods.length === 0 ? (
+                            <div className="text-center py-8">
+                              <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                              <p className="text-gray-400 mb-2">{t('profiles.editPage.loadingModList')}</p>
+                              <p className="text-gray-500 text-sm">{t('profiles.editPage.loadingModListHint')}</p>
+                            </div>
+                          ) : (
+                            availableMods
+                              .filter(mod =>
+                                !modSearchQuery ||
+                                mod.name.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
+                                mod.description.toLowerCase().includes(modSearchQuery.toLowerCase()) ||
+                                mod.author.toLowerCase().includes(modSearchQuery.toLowerCase())
+                              )
+                              .map((mod, index) => (
+                                <motion.div
+                                  key={`${mod.source_location}-${mod.name}-${index}`}
+                                  initial={{ opacity: 0, y: 10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  transition={{ delay: index * 0.05 }}
+                                  className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-3"
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-center space-x-2 mb-1">
+                                        <h4 className="text-white font-medium text-sm truncate">{mod.name}</h4>
+                                        {mod.category && (
+                                          <span className="inline-block bg-resonite-blue/20 text-resonite-blue text-xs px-1.5 py-0.5 rounded shrink-0">
+                                            {mod.category}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-gray-400 text-xs">{t('profiles.editPage.byAuthor')} {mod.author} • {mod.releases.length} {t('profiles.editPage.releases')}</p>
+                                      <p className="text-gray-300 text-xs truncate">{mod.description}</p>
+                                    </div>
+
+                                    <div className="flex items-center space-x-2 ml-3">
+                                      {isGitHubUrl(mod.source_location) && (
+                                        <motion.button
+                                          whileHover={{ scale: 1.02 }}
+                                          whileTap={{ scale: 0.98 }}
+                                          className="btn-secondary text-xs p-1.5"
+                                          onClick={() => open(mod.source_location)}
+                                          title="Open in GitHub"
+                                        >
+                                          <ExternalLink className="w-3 h-3" />
+                                        </motion.button>
+                                      )}
+
+                                      {/* カスタムインストールボタン */}
+                                      <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="btn-secondary text-xs p-1.5"
+                                        onClick={() => handleAvailableModInstallClick(mod)}
+                                        disabled={installModMutation.isPending || mod.releases.length === 0}
+                                        title={t('profiles.editPage.selectVersionToInstall')}
+                                      >
+                                        <Settings className="w-3 h-3" />
+                                      </motion.button>
+
+                                      {/* 最新版インストールボタン */}
+                                      <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="btn-primary text-xs flex items-center space-x-1 px-3 py-1.5"
+                                        onClick={() => handleInstallLatestClick(mod)}
+                                        disabled={installModMutation.isPending || mod.releases.length === 0}
+                                        title={t('profiles.editPage.installLatest')}
+                                      >
+                                        {installModMutation.isPending ? (
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                        ) : (
+                                          <Download className="w-3 h-3" />
+                                        )}
+                                        <span>インストール</span>
+                                      </motion.button>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              ))
+                          )
                         )}
                       </div>
                     </div>
 
-                    {/* 未管理MOD（手動で追加されたMOD） */}
-                    {unmanagedMods.length > 0 && (
+                    {/* 未管理MOD（手動で追加されたMOD）- BepisLoader時は非表示 */}
+                    {!isBepisLoader && unmanagedMods.length > 0 && (
                       <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-6">
                         <div className="flex items-center justify-between mb-4">
                           <h3 className="text-lg font-semibold text-orange-400">{t('profiles.editPage.unmangedMods')}</h3>
@@ -1790,13 +1903,15 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                       <h4 className="text-white font-medium truncate">{mod.name}</h4>
                                       
                                       {/* MODローダータイプとファイル形式のチップ */}
-                                      {(mod.mod_loader_type || mod.file_format) && (
+                                      {(mod.mod_loader_type || mod.file_format || isBepisLoader) && (
                                         <span className={`inline-flex items-center text-xs px-1.5 py-0.5 rounded-full ${
-                                          mod.file_format === 'nupkg'
-                                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
-                                            : 'bg-green-500/20 text-green-300 border border-green-500/30'
+                                          isBepisLoader
+                                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                            : mod.file_format === 'nupkg'
+                                              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                                              : 'bg-green-500/20 text-green-300 border border-green-500/30'
                                         }`}>
-                                          {mod.file_format === 'nupkg' ? 'ML' : 'RML'}
+                                          {isBepisLoader ? 'BepInEx' : mod.file_format === 'nupkg' ? 'ML' : 'RML'}
                                         </span>
                                       )}
                                       

@@ -54,6 +54,33 @@ struct CacheMetadata {
     timestamp: u64,
 }
 
+/// thunderstore.toml の構造
+#[derive(Debug, Deserialize)]
+struct ThunderstoreToml {
+    #[serde(default)]
+    build: Option<ThunderstoreBuild>,
+    #[serde(default)]
+    publish: Option<ThunderstorePublish>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ThunderstoreBuild {
+    #[serde(default)]
+    copy: Vec<ThunderstoreCopy>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ThunderstoreCopy {
+    source: String,
+    target: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct ThunderstorePublish {
+    #[serde(default)]
+    categories: Vec<String>,
+}
+
 /// Thunderstore APIクライアント
 pub struct ThunderstoreClient {
     base_url: String,
@@ -236,48 +263,221 @@ impl ThunderstoreClient {
     }
 
     /// ZIPパッケージを展開
-    fn extract_package(&self, zip_path: &PathBuf, dest_dir: &PathBuf) -> Result<Vec<PathBuf>, Box<dyn Error + Send + Sync>> {
+    /// game_dir: ゲームディレクトリ（Renderer等のフォルダ用）
+    /// plugins_dir: プラグインディレクトリ（.dll用）
+    pub fn extract_package_with_game_dir(
+        &self,
+        zip_path: &PathBuf,
+        game_dir: &PathBuf,
+        plugins_dir: &PathBuf,
+    ) -> Result<Vec<PathBuf>, Box<dyn Error + Send + Sync>> {
         use std::io::Read;
 
         let file = fs::File::open(zip_path)?;
         let mut archive = zip::ZipArchive::new(file)?;
 
         let mut extracted_files = Vec::new();
+        fs::create_dir_all(plugins_dir)?;
 
-        fs::create_dir_all(dest_dir)?;
+        // thunderstore.tomlを探してパース
+        let mut copy_rules: Vec<ThunderstoreCopy> = Vec::new();
+        let mut toml_found = false;
 
         for i in 0..archive.len() {
             let mut file = archive.by_index(i)?;
             let file_name = file.name().to_string();
 
-            // plugins/ フォルダ内のファイルのみ抽出（または.dllファイル）
-            if file_name.starts_with("plugins/") || file_name.ends_with(".dll") {
-                let dest_name = if file_name.starts_with("plugins/") {
-                    file_name.strip_prefix("plugins/").unwrap_or(&file_name)
-                } else {
-                    &file_name
-                };
+            if file_name == "thunderstore.toml" || file_name.ends_with("/thunderstore.toml") {
+                let mut contents = String::new();
+                file.read_to_string(&mut contents)?;
 
-                if dest_name.is_empty() || file.is_dir() {
+                if let Ok(config) = toml::from_str::<ThunderstoreToml>(&contents) {
+                    if let Some(build) = config.build {
+                        copy_rules = build.copy;
+                        toml_found = true;
+                        println!("Found thunderstore.toml with {} copy rules", copy_rules.len());
+                    }
+                }
+                break;
+            }
+        }
+
+        // アーカイブを再度開く
+        let file = fs::File::open(zip_path)?;
+        let mut archive = zip::ZipArchive::new(file)?;
+
+        // スキップするファイル
+        let skip_files = ["icon.png", "README.md", "CHANGELOG.md", "manifest.json", "thunderstore.toml"];
+
+        // thunderstore.tomlがある場合はコピールールに従う
+        if toml_found && !copy_rules.is_empty() {
+            // ファイル名からコピールールを検索するためのマップを作成
+            // source の最後の部分（ファイル名）をキーにする
+            let mut file_to_target: HashMap<String, String> = HashMap::new();
+            for rule in &copy_rules {
+                let source_file = rule.source.rsplit('/').next().unwrap_or(&rule.source);
+                file_to_target.insert(source_file.to_string(), rule.target.clone());
+            }
+
+            for i in 0..archive.len() {
+                let mut file = archive.by_index(i)?;
+                let file_name = file.name().to_string();
+
+                if file.is_dir() {
                     continue;
                 }
 
-                let dest_path = dest_dir.join(dest_name);
+                let file_base = file_name.rsplit('/').next().unwrap_or(&file_name);
 
-                // 親ディレクトリを作成
-                if let Some(parent) = dest_path.parent() {
-                    fs::create_dir_all(parent)?;
+                // スキップするファイル
+                if skip_files.iter().any(|&f| file_base == f) {
+                    continue;
                 }
 
-                let mut contents = Vec::new();
-                file.read_to_end(&mut contents)?;
-                fs::write(&dest_path, contents)?;
+                // コピールールに一致するか確認
+                if let Some(target) = file_to_target.get(file_base) {
+                    let dest_path = self.resolve_target_path(game_dir, plugins_dir, target, file_base);
+                    if let Some(parent) = dest_path.parent() {
+                        fs::create_dir_all(parent)?;
+                    }
+                    let mut contents = Vec::new();
+                    file.read_to_end(&mut contents)?;
+                    fs::write(&dest_path, &contents)?;
+                    println!("Extracted (toml rule): {} -> {}", file_name, dest_path.display());
+                    extracted_files.push(dest_path);
+                }
+            }
+        } else {
+            // thunderstore.tomlがない場合はフォールバックロジック
+            for i in 0..archive.len() {
+                let mut file = archive.by_index(i)?;
+                let file_name = file.name().to_string();
 
-                extracted_files.push(dest_path);
+                if file.is_dir() {
+                    continue;
+                }
+
+                // BepInExPack/ プレフィックスを除去（Thunderstoreパッケージ形式）
+                let normalized_path = file_name
+                    .strip_prefix("BepInExPack/")
+                    .unwrap_or(&file_name);
+
+                let file_base = normalized_path.rsplit('/').next().unwrap_or(normalized_path);
+
+                // スキップするファイル
+                if skip_files.iter().any(|&f| file_base == f) {
+                    continue;
+                }
+
+                // Renderer/BepInEx/ の場合 → game_dir/Renderer/BepInEx/
+                if normalized_path.starts_with("Renderer/BepInEx/") {
+                    let relative_path = normalized_path.strip_prefix("Renderer/").unwrap_or(normalized_path);
+                    if !relative_path.is_empty() {
+                        let dest_path = game_dir.join("Renderer").join(relative_path);
+                        if let Some(parent) = dest_path.parent() {
+                            fs::create_dir_all(parent)?;
+                        }
+                        let mut contents = Vec::new();
+                        file.read_to_end(&mut contents)?;
+                        fs::write(&dest_path, &contents)?;
+                        println!("Extracted: {} -> {}", file_name, dest_path.display());
+                        extracted_files.push(dest_path);
+                    }
+                    continue;
+                }
+
+                // Rendererフォルダの場合 → game_dir/Renderer/
+                if normalized_path.starts_with("Renderer/") {
+                    let relative_path = normalized_path.strip_prefix("Renderer/").unwrap_or(normalized_path);
+                    if !relative_path.is_empty() {
+                        let dest_path = game_dir.join("Renderer").join(relative_path);
+                        if let Some(parent) = dest_path.parent() {
+                            fs::create_dir_all(parent)?;
+                        }
+                        let mut contents = Vec::new();
+                        file.read_to_end(&mut contents)?;
+                        fs::write(&dest_path, &contents)?;
+                        println!("Extracted: {} -> {}", file_name, dest_path.display());
+                        extracted_files.push(dest_path);
+                    }
+                    continue;
+                }
+
+                // BepInExフォルダの場合 → game_dir/BepInEx/
+                if normalized_path.starts_with("BepInEx/") {
+                    let relative_path = normalized_path.strip_prefix("BepInEx/").unwrap_or(normalized_path);
+                    if !relative_path.is_empty() {
+                        let dest_path = game_dir.join("BepInEx").join(relative_path);
+                        if let Some(parent) = dest_path.parent() {
+                            fs::create_dir_all(parent)?;
+                        }
+                        let mut contents = Vec::new();
+                        file.read_to_end(&mut contents)?;
+                        fs::write(&dest_path, &contents)?;
+                        println!("Extracted: {} -> {}", file_name, dest_path.display());
+                        extracted_files.push(dest_path);
+                    }
+                    continue;
+                }
+
+                // pluginsフォルダの場合 → plugins_dir/
+                if normalized_path.starts_with("plugins/") {
+                    let relative_path = normalized_path.strip_prefix("plugins/").unwrap_or(normalized_path);
+                    if !relative_path.is_empty() {
+                        let dest_path = plugins_dir.join(relative_path);
+                        if let Some(parent) = dest_path.parent() {
+                            fs::create_dir_all(parent)?;
+                        }
+                        let mut contents = Vec::new();
+                        file.read_to_end(&mut contents)?;
+                        fs::write(&dest_path, &contents)?;
+                        println!("Extracted: {} -> {}", file_name, dest_path.display());
+                        extracted_files.push(dest_path);
+                    }
+                    continue;
+                }
+
+                // .dllファイルはpluginsに配置
+                if file_base.ends_with(".dll") {
+                    let dest_path = plugins_dir.join(file_base);
+                    if let Some(parent) = dest_path.parent() {
+                        fs::create_dir_all(parent)?;
+                    }
+                    let mut contents = Vec::new();
+                    file.read_to_end(&mut contents)?;
+                    fs::write(&dest_path, &contents)?;
+                    println!("Extracted: {} -> {}", file_name, dest_path.display());
+                    extracted_files.push(dest_path);
+                }
             }
         }
 
         Ok(extracted_files)
+    }
+
+    /// targetパスを解決
+    fn resolve_target_path(&self, game_dir: &PathBuf, plugins_dir: &PathBuf, target: &str, file_name: &str) -> PathBuf {
+        let target_normalized = target.trim_end_matches('/');
+
+        match target_normalized {
+            "plugins" | "BepInEx/plugins" => plugins_dir.join(file_name),
+            "Renderer" => game_dir.join("Renderer").join(file_name),
+            "BepInEx" => game_dir.join("BepInEx").join(file_name),
+            _ if target_normalized.starts_with("BepInEx/") => {
+                game_dir.join(target_normalized).join(file_name)
+            }
+            _ if target_normalized.starts_with("Renderer/") => {
+                game_dir.join(target_normalized).join(file_name)
+            }
+            // その他のターゲットはgame_dir配下に配置
+            _ => game_dir.join(target_normalized).join(file_name),
+        }
+    }
+
+    /// ZIPパッケージを展開（後方互換性のため）
+    fn extract_package(&self, zip_path: &PathBuf, dest_dir: &PathBuf) -> Result<Vec<PathBuf>, Box<dyn Error + Send + Sync>> {
+        // game_dirとplugins_dirを同じにして呼び出し
+        self.extract_package_with_game_dir(zip_path, dest_dir, dest_dir)
     }
 
     /// 依存関係を解決

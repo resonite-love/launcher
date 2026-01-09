@@ -21,7 +21,7 @@ interface Profile {
   manifest_id?: string;
   version?: string;
   has_mod_loader: boolean;
-  mod_loader_type?: 'ResoniteModLoader' | 'MonkeyLoader';
+  mod_loader_type?: 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader';
 }
 
 interface SteamCredentials {
@@ -104,6 +104,8 @@ export const queryKeys = {
   unmanagedMods: (profileName: string) => ['unmanagedMods', profileName] as const,
   upgradeableMods: (profileName: string) => ['upgradeableMods', profileName] as const,
   ytDlpStatus: (profileName: string) => ['ytDlpStatus', profileName] as const,
+  thunderstorePackages: (profileName: string) => ['thunderstorePackages', profileName] as const,
+  bepisLoaderStatus: (profileName: string) => ['bepisLoaderStatus', profileName] as const,
 };
 
 // App Status
@@ -851,5 +853,93 @@ export const useAppUpdate = () => {
     staleTime: 1000 * 60 * 60, // 1 hour
     gcTime: 1000 * 60 * 60 * 24, // 24 hours
     retry: 1,
+  });
+};
+
+// Thunderstore Types
+export interface ThunderstoreVersion {
+  version_number: string;
+  download_url: string;
+  downloads: number;
+  file_size: number;
+  dependencies: string[];
+  description: string;
+  icon: string;
+  date_created: string;
+}
+
+export interface ThunderstorePackage {
+  name: string;
+  full_name: string;
+  owner: string;
+  package_url: string;
+  uuid4: string;
+  rating_score: number;
+  is_deprecated: boolean;
+  categories: string[];
+  versions: ThunderstoreVersion[];
+}
+
+export interface BepisLoaderStatus {
+  installed: boolean;
+  version?: string;
+  hookfxr_enabled: boolean;
+  plugins_dir: string;
+  plugins_count: number;
+}
+
+// Thunderstore Packages Query
+export const useThunderstorePackages = (profileName: string, enabled: boolean = true) => {
+  return useQuery({
+    queryKey: queryKeys.thunderstorePackages(profileName),
+    queryFn: async (): Promise<ThunderstorePackage[]> => {
+      return await invoke<ThunderstorePackage[]>('fetch_thunderstore_packages', { profileName });
+    },
+    enabled: !!profileName && enabled,
+    staleTime: 15 * 60 * 1000, // 15 minutes (matches backend cache)
+    refetchOnWindowFocus: false,
+    retry: 3,
+  });
+};
+
+// BepisLoader Status Query
+export const useBepisLoaderStatus = (profileName: string) => {
+  return useQuery({
+    queryKey: queryKeys.bepisLoaderStatus(profileName),
+    queryFn: async (): Promise<BepisLoaderStatus> => {
+      return await invoke<BepisLoaderStatus>('get_bepis_loader_status', { profileName });
+    },
+    enabled: !!profileName,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+  });
+};
+
+// Install MOD from Thunderstore
+export const useInstallThunderstoreMod = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      profileName,
+      packageFullName,
+      version
+    }: {
+      profileName: string;
+      packageFullName: string;
+      version?: string;
+    }) => {
+      return await invoke<string[]>('install_mod_from_thunderstore', {
+        profileName,
+        packageFullName,
+        version
+      });
+    },
+    onSuccess: (result, variables) => {
+      toast.success(`${variables.packageFullName} をインストールしました`);
+      queryClient.invalidateQueries({ queryKey: queryKeys.bepisLoaderStatus(variables.profileName) });
+    },
+    onError: (error) => {
+      toast.error(`MODのインストールに失敗しました: ${error}`);
+    },
   });
 };

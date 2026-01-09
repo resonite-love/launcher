@@ -285,6 +285,14 @@ impl BepisLoader {
             }
         }
 
+        // Rendererフォルダの場合
+        if normalized_path.starts_with("Renderer/") {
+            let relative_path = normalized_path.strip_prefix("Renderer/").unwrap_or(normalized_path);
+            if !relative_path.is_empty() {
+                return Ok(Some(self.game_dir.join("Renderer").join(relative_path)));
+            }
+        }
+
         // plugins/フォルダの場合
         if normalized_path.starts_with("plugins/") {
             let relative_path = normalized_path.strip_prefix("plugins/").unwrap_or(normalized_path);
@@ -391,15 +399,39 @@ impl BepisLoader {
                 continue;
             }
             println!("Installing dependency: {}", dep.full_name);
-            self.thunderstore.install_package(dep, None, &self.get_plugins_dir()).await?;
+            self.install_mod_package(dep, None).await?;
         }
 
         // MOD本体をインストール
-        let files = self.thunderstore
-            .install_package(package, version, &self.get_plugins_dir())
-            .await?;
+        let files = self.install_mod_package(package, version).await?;
 
         Ok(files)
+    }
+
+    /// 単一のMODパッケージをインストール（game_dirにRenderer等も展開）
+    async fn install_mod_package(
+        &self,
+        package: &ThunderstorePackage,
+        version: Option<&str>,
+    ) -> Result<Vec<PathBuf>, Box<dyn Error + Send + Sync>> {
+        // ダウンロード
+        let temp_dir = self.profile_dir.join("temp");
+        let zip_path = self.thunderstore
+            .download_package(package, version, &temp_dir)
+            .await?;
+
+        // 展開（game_dirとplugins_dirを別々に指定）
+        let extracted_files = self.thunderstore.extract_package_with_game_dir(
+            &zip_path,
+            &self.game_dir,
+            &self.get_plugins_dir(),
+        )?;
+
+        // 一時ファイルを削除
+        let _ = fs::remove_file(&zip_path);
+        let _ = fs::remove_dir_all(&temp_dir);
+
+        Ok(extracted_files)
     }
 
     /// インストール済みプラグイン一覧を取得

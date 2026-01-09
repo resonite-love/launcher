@@ -3216,6 +3216,7 @@ dependencies = [
  "sha2",
  "tempfile",
  "tokio",
+ "toml 0.8.20",
  "zip",
 ]
 

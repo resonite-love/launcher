@@ -43,7 +43,7 @@ interface ProfileInfo {
   manifest_id?: string;
   version?: string;
   has_mod_loader: boolean;
-  mod_loader_type?: 'ResoniteModLoader' | 'MonkeyLoader';
+  mod_loader_type?: 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader';
 }
 
 
@@ -94,7 +94,7 @@ function ProfilesTab() {
   const [createGameBranch, setCreateGameBranch] = useState('release');
   const [createManifestId, setCreateManifestId] = useState('');
   const [createWithModLoader, setCreateWithModLoader] = useState(false);
-  const [createModLoaderType, setCreateModLoaderType] = useState<'ResoniteModLoader' | 'MonkeyLoader'>('ResoniteModLoader');
+  const [createModLoaderType, setCreateModLoaderType] = useState<'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader'>('ResoniteModLoader');
   
   // State for game installation
   const [showInstallModal, setShowInstallModal] = useState(false);
@@ -607,15 +607,23 @@ function ProfilesTab() {
                   )}
                   
                   {profile.has_game && profile.has_mod_loader && (
-                    <span 
+                    <span
                       className={`text-xs px-2 py-1 rounded-full font-medium ${
-                        profile.mod_loader_type === 'MonkeyLoader' 
-                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
-                          : 'bg-green-500/20 text-green-300 border border-green-500/30'
+                        profile.mod_loader_type === 'BepisLoader'
+                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                          : profile.mod_loader_type === 'MonkeyLoader'
+                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                            : 'bg-green-500/20 text-green-300 border border-green-500/30'
                       }`}
-                      title={profile.mod_loader_type === 'MonkeyLoader' ? 'MonkeyLoader' : 'Resonite Mod Loader'}
+                      title={
+                        profile.mod_loader_type === 'BepisLoader' ? 'BepisLoader (BepInEx)'
+                          : profile.mod_loader_type === 'MonkeyLoader' ? 'MonkeyLoader'
+                          : 'Resonite Mod Loader'
+                      }
                     >
-                      {profile.mod_loader_type === 'MonkeyLoader' ? 'ML' : 'RML'}
+                      {profile.mod_loader_type === 'BepisLoader' ? 'BepInEx'
+                        : profile.mod_loader_type === 'MonkeyLoader' ? 'ML'
+                        : 'RML'}
                     </span>
                   )}
                 </div>
@@ -938,14 +946,14 @@ function ProfilesTab() {
                           
                           {createWithModLoader && (
                             <div className="ml-7 space-y-3">
-                              <div className="flex space-x-4">
+                              <div className="flex flex-wrap gap-4">
                                 <label className="flex items-center">
                                   <input
                                     type="radio"
                                     name="createModLoaderType"
                                     value="ResoniteModLoader"
                                     checked={createModLoaderType === 'ResoniteModLoader'}
-                                    onChange={(e) => setCreateModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader')}
+                                    onChange={(e) => setCreateModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader')}
                                     className="mr-2"
                                   />
                                   <span className="text-sm text-gray-300">Resonite Mod Loader (RML)</span>
@@ -956,23 +964,38 @@ function ProfilesTab() {
                                     name="createModLoaderType"
                                     value="MonkeyLoader"
                                     checked={createModLoaderType === 'MonkeyLoader'}
-                                    onChange={(e) => setCreateModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader')}
+                                    onChange={(e) => setCreateModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader')}
                                     className="mr-2"
                                   />
                                   <span className="text-sm text-gray-300">MonkeyLoader</span>
                                 </label>
+                                <label className="flex items-center">
+                                  <input
+                                    type="radio"
+                                    name="createModLoaderType"
+                                    value="BepisLoader"
+                                    checked={createModLoaderType === 'BepisLoader'}
+                                    onChange={(e) => setCreateModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader')}
+                                    className="mr-2"
+                                  />
+                                  <span className="text-sm text-gray-300">BepisLoader (BepInEx)</span>
+                                </label>
                               </div>
-                              
+
                               <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
                                 <p className="text-sm text-blue-400">
-                                  📝 {createModLoaderType === 'MonkeyLoader' 
-                                    ? 'MonkeyLoaderがゲームと同時にインストールされ、MODを使用できるようになります。' 
-                                    : 'ResoniteModLoaderがゲームと同時にインストールされ、MODを使用できるようになります。'}
+                                  {createModLoaderType === 'BepisLoader'
+                                    ? 'BepisLoader (BepInEx) がゲームと同時にインストールされ、Thunderstoreから MOD を使用できるようになります。'
+                                    : createModLoaderType === 'MonkeyLoader'
+                                      ? 'MonkeyLoaderがゲームと同時にインストールされ、MODを使用できるようになります。'
+                                      : 'ResoniteModLoaderがゲームと同時にインストールされ、MODを使用できるようになります。'}
                                 </p>
                                 <p className="text-xs text-blue-300 mt-1">
-                                  {createModLoaderType === 'MonkeyLoader' 
-                                    ? 'MonkeyLoaderは新しいMODローダーで、より高度な機能を提供します。' 
-                                    : 'RMLは従来のMODローダーで、多くのMODが対応しています。'}
+                                  {createModLoaderType === 'BepisLoader'
+                                    ? 'BepisLoaderはBepInExベースのMODローダーで、Thunderstoreから MOD をインストールできます。'
+                                    : createModLoaderType === 'MonkeyLoader'
+                                      ? 'MonkeyLoaderは新しいMODローダーで、より高度な機能を提供します。'
+                                      : 'RMLは従来のMODローダーで、多くのMODが対応しています。'}
                                 </p>
                               </div>
                             </div>
@@ -1018,8 +1041,8 @@ function ProfilesTab() {
                         ? 'インストール中...' 
                         : '作成中...'
                     ) : (
-                      createWithGame && createWithModLoader 
-                        ? `プロファイル作成＆ゲーム＆${createModLoaderType === 'MonkeyLoader' ? 'MonkeyLoader' : 'RML'}インストール`
+                      createWithGame && createWithModLoader
+                        ? `プロファイル作成＆ゲーム＆${createModLoaderType === 'BepisLoader' ? 'BepInEx' : createModLoaderType === 'MonkeyLoader' ? 'MonkeyLoader' : 'RML'}インストール`
                         : createWithGame 
                         ? 'プロファイル作成＆ゲームインストール' 
                         : 'プロファイル作成'
