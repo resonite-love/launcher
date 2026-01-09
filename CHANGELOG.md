@@ -8,6 +8,50 @@
 ## [Unreleased]
 
 
+## [v1.8.0] - 2026-01-10
+
+### 🎉 新機能
+- **BepisLoader (BepInEx) 対応**: 新しいMODローダーとしてBepisLoaderを追加
+  - プロファイル作成時にResoniteModLoader / MonkeyLoader / BepisLoaderから選択可能
+  - Thunderstoreからワンクリックでインストール
+  - `--hookfxr-enable` 起動引数の自動管理
+
+- **Thunderstore MOD管理**: ThunderstoreからのMODインストールに完全対応
+  - Thunderstore APIからMOD一覧を取得・表示
+  - MODの検索・フィルター機能
+  - 依存関係の自動解決とインストール
+  - `thunderstore.toml`のパース対応でファイル配置を正確に処理
+  - BepInEx/plugins、Renderer/BepInEx等の複雑なフォルダ構造に対応
+
+### ✨ 改善
+- **インストール済みMOD管理の強化**:
+  - BepisLoaderでインストールしたMODの追跡・管理
+  - MOD一覧で「インストール済み」バッジを表示
+  - インストール済みバージョン情報の表示
+  - アンインストール機能（インストールしたファイルを自動削除）
+
+- **UI/UX向上**:
+  - BepisLoaderプロファイルで「BepInEx」バッジを表示
+  - Thunderstore MODカードにカテゴリ・ダウンロード数を表示
+  - インストール済みMODは緑色のボーダーでハイライト
+
+### 🔧 技術的改善
+- **Thunderstoreクライアント実装** (`lib/src/thunderstore.rs`):
+  - パッケージ取得・ダウンロード・展開機能
+  - キャッシュ機能によるAPI負荷軽減
+  - `thunderstore.toml`のcopyルール解析
+
+- **BepisLoaderモジュール実装** (`lib/src/bepis_loader.rs`):
+  - インストール・アンインストール処理
+  - インストール済みMOD情報の永続化 (`bepis_installed_mods.json`)
+  - hookfxr.ini設定管理
+
+- **Tauriコマンド拡張**:
+  - `fetch_thunderstore_packages`: Thunderstoreパッケージ一覧取得
+  - `install_mod_from_thunderstore`: ThunderstoreからMODインストール
+  - `get_bepis_loader_status`: BepisLoaderステータス取得
+  - `get_installed_mods`: MODローダータイプに応じた分岐処理
+
 ## [v1.7.0] - 2026-01-09
 
 ### ✨ 新機能
@@ -800,7 +844,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.8.0...HEAD
+[v1.8.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.7.0...v1.8.0
 [v1.7.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.6.0...v1.7.0
 [v1.6.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.9...v1.6.0
 [v1.5.9]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.8...v1.5.9
