@@ -3177,7 +3177,7 @@ dependencies = [
 
 [[package]]
 name = "reso-launcher"
-version = "1.6.0"
+version = "1.7.0"
 dependencies = [
  "base64 0.21.7",
  "futures-util",
@@ -3195,7 +3195,7 @@ dependencies = [
 
 [[package]]
 name = "reso-launcher-cli"
-version = "1.6.0"
+version = "1.7.0"
 dependencies = [
  "clap",
  "regex",
@@ -3204,7 +3204,7 @@ dependencies = [
 
 [[package]]
 name = "reso-launcher-lib"
-version = "1.6.0"
+version = "1.7.0"
 dependencies = [
  "anyhow",
  "chrono",

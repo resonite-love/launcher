@@ -8,6 +8,21 @@
 ## [Unreleased]
 
 
+## [v1.7.0] - 2026-01-09
+
+### ✨ 新機能
+- **プラグインシステム**: ランチャーにプラグイン機能を追加
+  - 新しい「プラグイン」タブをナビゲーションに追加
+- **WebSocket リレープラグイン**: ユーザー間でWebSocket接続を共有する機能
+  - ホストモード: ローカルのWebSocketサーバーを公開し、アクセスキーを生成
+  - クライアントモード: アクセスキーを入力してリモートのWebSocketサーバーに接続
+  - NAT越えを中継サーバー経由で実現
+  - リアルタイムで接続クライアント数を表示
+
+### 🔧 技術的改善
+- 中継サーバーとの通信プロトコルを実装
+- Tauriイベントによるリアルタイム状態更新
+
 ## [v1.6.0] - 2026-01-09
 
 ### ✨ 新機能
@@ -785,7 +800,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.7.0...HEAD
+[v1.7.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.6.0...v1.7.0
 [v1.6.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.9...v1.6.0
 [v1.5.9]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.8...v1.5.9
 [v1.5.8]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.7...v1.5.8
