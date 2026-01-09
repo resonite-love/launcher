@@ -38,7 +38,8 @@
   "nav": {
     "home": "ホーム",
     "profiles": "プロファイル管理",
-    "settings": "設定"
+    "settings": "設定",
+    "plugins": "プラグイン"
   },
   "home": {
     "updateInfo": {
@@ -352,6 +353,48 @@
       "installing": "インストール中",
       "installUpdate": "アップデートをインストール",
       "updateInstalled": "アップデートがインストールされました。アプリを再起動してください。"
+    }
+  },
+  "plugins": {
+    "title": "プラグイン",
+    "wsRelay": {
+      "title": "WebSocket リレー",
+      "description": "ユーザー間でWebSocket接続を共有します",
+      "mode": {
+        "host": "ホスト（公開する）",
+        "client": "クライアント（接続する）"
+      },
+      "status": {
+        "connected": "接続中",
+        "connecting": "接続中...",
+        "error": "エラー"
+      },
+      "host": {
+        "targetAddress": "宛先アドレス",
+        "start": "公開開始",
+        "stop": "公開停止",
+        "accessKey": "アクセスキー",
+        "connectedClients": "接続中のクライアント"
+      },
+      "client": {
+        "accessKey": "アクセスキー",
+        "localPort": "ローカルポート",
+        "connect": "接続",
+        "disconnect": "切断",
+        "localAddress": "接続先アドレス",
+        "useThisAddress": "このアドレスを使用してください"
+      },
+      "copied": "コピーしました",
+      "copyFailed": "コピーに失敗しました",
+      "copy": "コピー",
+      "enterTargetAddress": "宛先アドレスを入力してください",
+      "enterAccessKey": "アクセスキーを入力してください",
+      "hostStarted": "公開を開始しました",
+      "hostStopped": "公開を停止しました",
+      "clientConnected": "接続しました",
+      "clientDisconnected": "切断しました",
+      "hostDisconnected": "ホスト接続が切断されました",
+      "tunnelClosed": "トンネルが閉じられました"
     }
   },
   "firstRun": {

@@ -38,7 +38,8 @@
   "nav": {
     "home": "Home",
     "profiles": "Profile Management",
-    "settings": "Settings"
+    "settings": "Settings",
+    "plugins": "Plugins"
   },
   "home": {
     "updateInfo": {
@@ -352,6 +353,48 @@
       "installing": "Installing",
       "installUpdate": "Install Update",
       "updateInstalled": "Update installed successfully. Please restart the application."
+    }
+  },
+  "plugins": {
+    "title": "Plugins",
+    "wsRelay": {
+      "title": "WebSocket Relay",
+      "description": "Share WebSocket connections between users",
+      "mode": {
+        "host": "Host (Publish)",
+        "client": "Client (Connect)"
+      },
+      "status": {
+        "connected": "Connected",
+        "connecting": "Connecting...",
+        "error": "Error"
+      },
+      "host": {
+        "targetAddress": "Target Address",
+        "start": "Start Publishing",
+        "stop": "Stop Publishing",
+        "accessKey": "Access Key",
+        "connectedClients": "Connected Clients"
+      },
+      "client": {
+        "accessKey": "Access Key",
+        "localPort": "Local Port",
+        "connect": "Connect",
+        "disconnect": "Disconnect",
+        "localAddress": "Connection Address",
+        "useThisAddress": "Use this address"
+      },
+      "copied": "Copied",
+      "copyFailed": "Copy failed",
+      "copy": "Copy",
+      "enterTargetAddress": "Please enter target address",
+      "enterAccessKey": "Please enter access key",
+      "hostStarted": "Started publishing",
+      "hostStopped": "Stopped publishing",
+      "clientConnected": "Connected",
+      "clientDisconnected": "Disconnected",
+      "hostDisconnected": "Host connection disconnected",
+      "tunnelClosed": "Tunnel closed"
     }
   },
   "firstRun": {

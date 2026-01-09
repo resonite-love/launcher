@@ -1,6 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod wsrelay;
+
 use std::sync::Mutex;
 use std::path::PathBuf;
 use tauri::{State, Window, AppHandle};
@@ -34,6 +36,9 @@ impl Default for AppState {
         }
     }
 }
+
+// WebSocket Relay state (separate from AppState for async access)
+type WsRelayStateHandle = std::sync::Arc<tokio::sync::RwLock<wsrelay::WsRelayState>>;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct ProfileInfo {
@@ -2082,9 +2087,49 @@ fn is_portable_version() -> bool {
     is_portable_build()
 }
 
+// WebSocket Relay Commands
+#[tauri::command]
+async fn ws_relay_start_host(
+    state: State<'_, WsRelayStateHandle>,
+    app_handle: tauri::AppHandle,
+    target_address: String,
+) -> Result<wsrelay::HostStartResult, String> {
+    wsrelay::start_host(state.inner().clone(), target_address, app_handle).await
+}
+
+#[tauri::command]
+async fn ws_relay_stop_host(
+    state: State<'_, WsRelayStateHandle>,
+) -> Result<(), String> {
+    wsrelay::stop_host(state.inner().clone()).await
+}
+
+#[tauri::command]
+async fn ws_relay_connect_client(
+    state: State<'_, WsRelayStateHandle>,
+    app_handle: tauri::AppHandle,
+    access_key: String,
+    local_port: u16,
+) -> Result<wsrelay::ClientConnectResult, String> {
+    wsrelay::connect_client(state.inner().clone(), access_key, local_port, app_handle).await
+}
+
+#[tauri::command]
+async fn ws_relay_disconnect_client(
+    state: State<'_, WsRelayStateHandle>,
+) -> Result<(), String> {
+    wsrelay::disconnect_client(state.inner().clone()).await
+}
+
 fn main() {
+    // Initialize WebSocket Relay state
+    let ws_relay_state: WsRelayStateHandle = std::sync::Arc::new(
+        tokio::sync::RwLock::new(wsrelay::WsRelayState::default())
+    );
+
     tauri::Builder::default()
         .manage(Mutex::new(AppState::default()))
+        .manage(ws_relay_state)
         .invoke_handler(tauri::generate_handler![
             initialize_app,
             install_game_to_profile,
@@ -2143,7 +2188,11 @@ fn main() {
             check_app_updates,
             install_app_update,
             get_app_version,
-            is_portable_version
+            is_portable_version,
+            ws_relay_start_host,
+            ws_relay_stop_host,
+            ws_relay_connect_client,
+            ws_relay_disconnect_client
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

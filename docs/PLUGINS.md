@@ -434,7 +434,8 @@ WebSocketはテキストとバイナリの両方をサポート。選択肢:
 | プロトコル | WebSocket (RFC 6455) |
 | データ形式 | JSON (UTF-8) |
 | バイナリデータ | Base64エンコード |
-| サーバーURL | `wss://relay.example.com/ws` |
+| サーバーURL | `wss://wsproxy.kokoa.dev/ws` |
+| ヘルスチェック | `https://wsproxy.kokoa.dev/health` |
 
 ## 接続シーケンス
 

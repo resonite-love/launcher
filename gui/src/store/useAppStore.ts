@@ -38,7 +38,7 @@ interface AppState {
   steamCredentials: SteamCredentials | null;
   
   // UI State
-  currentTab: 'home' | 'profiles' | 'settings';
+  currentTab: 'home' | 'profiles' | 'settings' | 'plugins';
   
   // Profile management page navigation
   profilesPage: 'list' | 'edit';
@@ -62,7 +62,7 @@ interface AppState {
   
   setSteamCredentials: (credentials: SteamCredentials | null) => void;
   
-  setCurrentTab: (tab: 'home' | 'profiles' | 'settings') => void;
+  setCurrentTab: (tab: 'home' | 'profiles' | 'settings' | 'plugins') => void;
   
   // Profile page navigation
   setProfilesPage: (page: 'list' | 'edit') => void;
