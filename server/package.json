@@ -1,0 +1,22 @@
+{
+  "name": "ws-relay-server",
+  "version": "1.0.0",
+  "description": "WebSocket relay server for reso-launcher",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "ws": "^8.18.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.12",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.6.0",
+    "ts-node": "^10.9.2"
+  }
+}
