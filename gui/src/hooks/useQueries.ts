@@ -456,10 +456,10 @@ export const useInstallMod = () => {
 
 export const useUninstallMod = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async ({ profileName, modName }: { profileName: string; modName: string }) => {
-      return await invoke<string>('uninstall_mod', { profileName, modName });
+    mutationFn: async ({ profileName, modName, sourceLocation }: { profileName: string; modName: string; sourceLocation?: string }) => {
+      return await invoke<string>('uninstall_mod', { profileName, modName, sourceLocation });
     },
     onSuccess: (result, variables) => {
       toast.success(result);
@@ -934,9 +934,10 @@ export const useInstallThunderstoreMod = () => {
         version
       });
     },
-    onSuccess: (result, variables) => {
+    onSuccess: (_result, variables) => {
       toast.success(`${variables.packageFullName} をインストールしました`);
       queryClient.invalidateQueries({ queryKey: queryKeys.bepisLoaderStatus(variables.profileName) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.installedMods(variables.profileName) });
     },
     onError: (error) => {
       toast.error(`MODのインストールに失敗しました: ${error}`);

@@ -24,6 +24,24 @@ pub struct BepisLoaderInfo {
     pub package_full_name: String,
 }
 
+/// BepisLoaderでインストールしたMOD情報
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstalledBepisMod {
+    pub name: String,
+    pub full_name: String,
+    pub description: String,
+    pub version: String,
+    pub install_date: String,
+    pub installed_files: Vec<PathBuf>,
+    pub is_dependency: bool,
+}
+
+/// インストール済みMODリスト
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+struct InstalledBepisModList {
+    pub mods: Vec<InstalledBepisMod>,
+}
+
 /// BepisLoader管理
 pub struct BepisLoader {
     game_dir: PathBuf,
@@ -57,6 +75,32 @@ impl BepisLoader {
     /// BepisLoader情報ファイルのパスを取得
     fn get_info_file_path(&self) -> PathBuf {
         self.profile_dir.join("bepisloader_info.json")
+    }
+
+    /// インストール済みMODリストファイルのパスを取得
+    fn get_installed_mods_file_path(&self) -> PathBuf {
+        self.profile_dir.join("bepis_installed_mods.json")
+    }
+
+    /// インストール済みMODリストを読み込む
+    fn load_installed_mods_list(&self) -> InstalledBepisModList {
+        let file_path = self.get_installed_mods_file_path();
+        if file_path.exists() {
+            if let Ok(content) = fs::read_to_string(&file_path) {
+                if let Ok(list) = serde_json::from_str(&content) {
+                    return list;
+                }
+            }
+        }
+        InstalledBepisModList::default()
+    }
+
+    /// インストール済みMODリストを保存する
+    fn save_installed_mods_list(&self, list: &InstalledBepisModList) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let file_path = self.get_installed_mods_file_path();
+        let content = serde_json::to_string_pretty(list)?;
+        fs::write(&file_path, content)?;
+        Ok(())
     }
 
     /// BepisLoaderのステータスを取得
@@ -391,6 +435,8 @@ impl BepisLoader {
         package: &ThunderstorePackage,
         version: Option<&str>,
     ) -> Result<Vec<PathBuf>, Box<dyn Error + Send + Sync>> {
+        let mut all_files = Vec::new();
+
         // 依存関係をインストール
         let dependencies = self.thunderstore.resolve_dependencies(package, version).await?;
         for dep in &dependencies {
@@ -399,13 +445,15 @@ impl BepisLoader {
                 continue;
             }
             println!("Installing dependency: {}", dep.full_name);
-            self.install_mod_package(dep, None).await?;
+            let files = self.install_mod_package_internal(dep, None, true).await?;
+            all_files.extend(files);
         }
 
         // MOD本体をインストール
-        let files = self.install_mod_package(package, version).await?;
+        let files = self.install_mod_package_internal(package, version, false).await?;
+        all_files.extend(files);
 
-        Ok(files)
+        Ok(all_files)
     }
 
     /// 単一のMODパッケージをインストール（game_dirにRenderer等も展開）
@@ -413,6 +461,16 @@ impl BepisLoader {
         &self,
         package: &ThunderstorePackage,
         version: Option<&str>,
+    ) -> Result<Vec<PathBuf>, Box<dyn Error + Send + Sync>> {
+        self.install_mod_package_internal(package, version, false).await
+    }
+
+    /// 単一のMODパッケージをインストール（内部実装）
+    async fn install_mod_package_internal(
+        &self,
+        package: &ThunderstorePackage,
+        version: Option<&str>,
+        is_dependency: bool,
     ) -> Result<Vec<PathBuf>, Box<dyn Error + Send + Sync>> {
         // ダウンロード
         let temp_dir = self.profile_dir.join("temp");
@@ -430,6 +488,35 @@ impl BepisLoader {
         // 一時ファイルを削除
         let _ = fs::remove_file(&zip_path);
         let _ = fs::remove_dir_all(&temp_dir);
+
+        // インストール済みMODリストに追加
+        let installed_version = if let Some(v) = version {
+            v.to_string()
+        } else {
+            package.versions.first()
+                .map(|v| v.version_number.clone())
+                .unwrap_or_else(|| "unknown".to_string())
+        };
+
+        let description = package.versions.first()
+            .map(|v| v.description.clone())
+            .unwrap_or_default();
+
+        let installed_mod = InstalledBepisMod {
+            name: package.name.clone(),
+            full_name: package.full_name.clone(),
+            description,
+            version: installed_version,
+            install_date: chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+            installed_files: extracted_files.clone(),
+            is_dependency,
+        };
+
+        // 既存のリストに追加（同名MODは上書き）
+        let mut mod_list = self.load_installed_mods_list();
+        mod_list.mods.retain(|m| m.full_name != package.full_name);
+        mod_list.mods.push(installed_mod);
+        self.save_installed_mods_list(&mod_list)?;
 
         Ok(extracted_files)
     }
@@ -453,5 +540,34 @@ impl BepisLoader {
             .collect();
 
         Ok(plugins)
+    }
+
+    /// インストール済みMODリストを取得
+    pub fn get_installed_mods(&self) -> Vec<InstalledBepisMod> {
+        self.load_installed_mods_list().mods
+    }
+
+    /// MODをアンインストール
+    pub fn uninstall_mod(&self, full_name: &str) -> Result<(), Box<dyn Error + Send + Sync>> {
+        let mut mod_list = self.load_installed_mods_list();
+
+        // 該当MODを検索
+        let mod_to_remove = mod_list.mods.iter().find(|m| m.full_name == full_name).cloned();
+
+        if let Some(installed_mod) = mod_to_remove {
+            // ファイルを削除
+            for file_path in &installed_mod.installed_files {
+                if file_path.exists() {
+                    let _ = fs::remove_file(file_path);
+                    println!("Removed: {}", file_path.display());
+                }
+            }
+
+            // リストから削除
+            mod_list.mods.retain(|m| m.full_name != full_name);
+            self.save_installed_mods_list(&mod_list)?;
+        }
+
+        Ok(())
     }
 }

@@ -29,7 +29,8 @@ import {
   ArrowUp,
   ChevronDown,
   Monitor,
-  Headphones
+  Headphones,
+  Check
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -728,8 +729,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     }
   };
 
-  const uninstallMod = async (modName: string) => {
-    await uninstallModMutation.mutateAsync({ profileName, modName });
+  const uninstallMod = async (modName: string, sourceLocation?: string) => {
+    await uninstallModMutation.mutateAsync({ profileName, modName, sourceLocation });
   };
 
   const disableMod = async (modName: string) => {
@@ -1556,13 +1557,16 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                 (pkg.versions[0]?.description || '').toLowerCase().includes(modSearchQuery.toLowerCase())
                               )
                               .filter(pkg => !pkg.is_deprecated)
-                              .map((pkg, index) => (
+                              .map((pkg, index) => {
+                                const installedMod = installedMods.find(m => m.source_location === `thunderstore:${pkg.full_name}`);
+                                const isInstalled = !!installedMod;
+                                return (
                                 <motion.div
                                   key={`${pkg.uuid4}-${index}`}
                                   initial={{ opacity: 0, y: 10 }}
                                   animate={{ opacity: 1, y: 0 }}
                                   transition={{ delay: Math.min(index * 0.02, 0.5) }}
-                                  className="bg-dark-700/30 border border-dark-600/30 rounded-lg p-3"
+                                  className={`bg-dark-700/30 border rounded-lg p-3 ${isInstalled ? 'border-green-500/30' : 'border-dark-600/30'}`}
                                 >
                                   <div className="flex items-center justify-between">
                                     <div className="flex-1 min-w-0">
@@ -1571,6 +1575,11 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                         <span className="inline-block bg-purple-500/20 text-purple-300 text-xs px-1.5 py-0.5 rounded shrink-0">
                                           BepInEx
                                         </span>
+                                        {isInstalled && (
+                                          <span className="inline-block bg-green-500/20 text-green-300 text-xs px-1.5 py-0.5 rounded shrink-0">
+                                            インストール済み
+                                          </span>
+                                        )}
                                         {pkg.categories.slice(0, 2).map(cat => (
                                           <span key={cat} className="inline-block bg-resonite-blue/20 text-resonite-blue text-xs px-1.5 py-0.5 rounded shrink-0">
                                             {cat}
@@ -1578,7 +1587,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                         ))}
                                       </div>
                                       <p className="text-gray-400 text-xs">
-                                        {t('profiles.editPage.byAuthor')} {pkg.owner} • {pkg.versions[0]?.version_number || 'N/A'} • {pkg.versions[0]?.downloads?.toLocaleString() || 0} DL
+                                        {t('profiles.editPage.byAuthor')} {pkg.owner} • {pkg.versions[0]?.version_number || 'N/A'}{isInstalled && installedMod ? ` (installed: ${installedMod.installed_version})` : ''} • {pkg.versions[0]?.downloads?.toLocaleString() || 0} DL
                                       </p>
                                       <p className="text-gray-300 text-xs truncate">{pkg.versions[0]?.description || ''}</p>
                                     </div>
@@ -1594,25 +1603,32 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                         <ExternalLink className="w-3 h-3" />
                                       </motion.button>
 
-                                      <motion.button
-                                        whileHover={{ scale: 1.02 }}
-                                        whileTap={{ scale: 0.98 }}
-                                        className="btn-primary text-xs flex items-center space-x-1 px-3 py-1.5"
-                                        onClick={() => installThunderstorePackage(pkg)}
-                                        disabled={installThunderstoreModMutation.isPending}
-                                        title={t('profiles.editPage.installLatest')}
-                                      >
-                                        {installThunderstoreModMutation.isPending ? (
-                                          <Loader2 className="w-3 h-3 animate-spin" />
-                                        ) : (
-                                          <Download className="w-3 h-3" />
-                                        )}
-                                        <span>インストール</span>
-                                      </motion.button>
+                                      {isInstalled ? (
+                                        <span className="text-green-400 text-xs flex items-center space-x-1 px-3 py-1.5">
+                                          <Check className="w-3 h-3" />
+                                          <span>インストール済み</span>
+                                        </span>
+                                      ) : (
+                                        <motion.button
+                                          whileHover={{ scale: 1.02 }}
+                                          whileTap={{ scale: 0.98 }}
+                                          className="btn-primary text-xs flex items-center space-x-1 px-3 py-1.5"
+                                          onClick={() => installThunderstorePackage(pkg)}
+                                          disabled={installThunderstoreModMutation.isPending}
+                                          title={t('profiles.editPage.installLatest')}
+                                        >
+                                          {installThunderstoreModMutation.isPending ? (
+                                            <Loader2 className="w-3 h-3 animate-spin" />
+                                          ) : (
+                                            <Download className="w-3 h-3" />
+                                          )}
+                                          <span>インストール</span>
+                                        </motion.button>
+                                      )}
                                     </div>
                                   </div>
                                 </motion.div>
-                              ))
+                              );})
                           )
                         ) : (
                           /* RML/MonkeyLoader時: resonite-mod-cacheを表示 */
@@ -2049,7 +2065,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.95 }}
                                     className="p-1.5 rounded-md bg-red-500/20 hover:bg-red-500/30 text-red-300 transition-colors"
-                                    onClick={() => uninstallMod(mod.name)}
+                                    onClick={() => uninstallMod(mod.name, mod.source_location)}
                                     disabled={uninstallModMutation.isPending}
                                     title={t('common.delete')}
                                   >

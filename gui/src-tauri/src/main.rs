@@ -15,7 +15,7 @@ use reso_launcher_lib::{
     monkey_loader::MonkeyLoader,
     mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease, UnmanagedMod, MultiFileInstallRequest, FileInstallChoice, UpgradeableMod},
     thunderstore::{ThunderstoreClient, ThunderstorePackage},
-    bepis_loader::{BepisLoader, BepisLoaderStatus, BepisLoaderInfo},
+    bepis_loader::{BepisLoader, BepisLoaderStatus, BepisLoaderInfo, InstalledBepisMod},
     utils,
 };
 use std::process::Command;
@@ -1179,17 +1179,43 @@ async fn get_installed_mods(
     profile_name: String,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<Vec<InstalledMod>, String> {
-    let profile_dir = {
+    let (profile_dir, mod_loader_type) = {
         let app_state = state.lock().unwrap();
-        
+
         let profile_manager = app_state.profile_manager.as_ref()
             .ok_or("Profile manager not initialized")?;
-        
-        profile_manager.get_profile_dir(&profile_name)
+
+        let profile = profile_manager.get_profile(&profile_name)
+            .map_err(|e| format!("Failed to get profile: {}", e))?;
+
+        (profile_manager.get_profile_dir(&profile_name), profile.mod_loader_type)
     }; // MutexGuard is dropped here
-    
+
+    // BepisLoaderの場合は別の処理
+    if mod_loader_type == Some(ModLoaderType::BepisLoader) {
+        let bepis_loader = BepisLoader::new(profile_dir);
+        let bepis_mods = bepis_loader.get_installed_mods();
+
+        // InstalledBepisModをInstalledModに変換
+        let installed_mods: Vec<InstalledMod> = bepis_mods.iter().map(|m| {
+            InstalledMod {
+                name: m.name.clone(),
+                description: m.description.clone(),
+                source_location: format!("thunderstore:{}", m.full_name),
+                installed_version: m.version.clone(),
+                installed_date: m.install_date.clone(),
+                dll_path: m.installed_files.first().cloned().unwrap_or_default(),
+                mod_loader_type: Some("BepisLoader".to_string()),
+                file_format: Some("dll".to_string()),
+                enabled: Some(true),
+            }
+        }).collect();
+
+        return Ok(installed_mods);
+    }
+
     let mod_manager = ModManager::new(profile_dir);
-    
+
     mod_manager.get_installed_mods()
         .map_err(|e| format!("Failed to get installed mods: {}", e))
 }
@@ -1311,22 +1337,41 @@ async fn install_multiple_files(
 async fn uninstall_mod(
     profile_name: String,
     mod_name: String,
+    source_location: Option<String>,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<String, String> {
-    let profile_dir = {
+    let (profile_dir, mod_loader_type) = {
         let app_state = state.lock().unwrap();
-        
+
         let profile_manager = app_state.profile_manager.as_ref()
             .ok_or("Profile manager not initialized")?;
-        
-        profile_manager.get_profile_dir(&profile_name)
+
+        let profile = profile_manager.get_profile(&profile_name)
+            .map_err(|e| format!("Failed to get profile: {}", e))?;
+
+        (profile_manager.get_profile_dir(&profile_name), profile.mod_loader_type)
     }; // MutexGuard is dropped here
-    
+
+    // BepisLoaderの場合は別の処理
+    if mod_loader_type == Some(ModLoaderType::BepisLoader) {
+        // source_locationからfull_nameを取得
+        let full_name = source_location
+            .as_ref()
+            .and_then(|s| s.strip_prefix("thunderstore:"))
+            .unwrap_or(&mod_name);
+
+        let bepis_loader = BepisLoader::new(profile_dir);
+        bepis_loader.uninstall_mod(full_name)
+            .map_err(|e| format!("Failed to uninstall mod: {}", e))?;
+
+        return Ok(format!("Successfully uninstalled mod: {}", mod_name));
+    }
+
     let mod_manager = ModManager::new(profile_dir);
-    
+
     mod_manager.uninstall_mod(&mod_name)
         .map_err(|e| format!("Failed to uninstall mod: {}", e))?;
-    
+
     Ok(format!("Successfully uninstalled mod: {}", mod_name))
 }
 

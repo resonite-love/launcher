@@ -28,7 +28,7 @@ interface ModVersionSelectorProps {
   availableVersions: ModRelease[];
   onVersionSelect: (version: string) => void;
   isLoading?: boolean;
-  modLoaderType?: 'ResoniteModLoader' | 'MonkeyLoader';
+  modLoaderType?: 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader';
 }
 
 export const ModVersionSelector: React.FC<ModVersionSelectorProps> = ({

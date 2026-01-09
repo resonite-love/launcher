@@ -116,7 +116,7 @@ function ProfilesTab() {
     branch: string;
     manifestId: string;
     withModLoader: boolean;
-    modLoaderType: 'ResoniteModLoader' | 'MonkeyLoader';
+    modLoaderType: 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader';
   } | null>(null);
   
   // State for game update modal
@@ -264,7 +264,7 @@ function ProfilesTab() {
       branch: string;
       manifestId: string;
       withModLoader: boolean;
-      modLoaderType: 'ResoniteModLoader' | 'MonkeyLoader';
+      modLoaderType: 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader';
     }
   ) => {
     try {

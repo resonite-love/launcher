@@ -26,4 +26,4 @@ pub use mod_loader_type::{ModLoaderType, ModSource};
 pub use monkey_loader::{MonkeyLoader, MonkeyLoaderInfo};
 pub use mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease};
 pub use thunderstore::{ThunderstoreClient, ThunderstorePackage, ThunderstoreVersion, ThunderstoreCategory};
-pub use bepis_loader::{BepisLoader, BepisLoaderStatus, BepisLoaderInfo};
+pub use bepis_loader::{BepisLoader, BepisLoaderStatus, BepisLoaderInfo, InstalledBepisMod};
