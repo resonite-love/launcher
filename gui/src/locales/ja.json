@@ -99,6 +99,7 @@
       "selectModLoader": "MODローダーを選択:",
       "rmlDescription": "RMLは従来のMODローダーで、多くのMODが対応しています。",
       "monkeyLoaderDescription": "MonkeyLoaderは新しいMODローダーで、より高度な機能を提供します。",
+      "bepisLoaderDescription": "BepisLoaderはBepInExベースのMODローダーで、ThunderstoreからMODをインストールできます。",
       "installModLoader": "{{type}}をインストール",
       "modLoaderInstalled": "{{type}} インストール済み",
       "migrated": "マイグレーション済み",

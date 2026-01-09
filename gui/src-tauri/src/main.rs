@@ -14,6 +14,8 @@ use reso_launcher_lib::{
     mod_loader_type::ModLoaderType,
     monkey_loader::MonkeyLoader,
     mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease, UnmanagedMod, MultiFileInstallRequest, FileInstallChoice, UpgradeableMod},
+    thunderstore::{ThunderstoreClient, ThunderstorePackage},
+    bepis_loader::{BepisLoader, BepisLoaderStatus, BepisLoaderInfo},
     utils,
 };
 use std::process::Command;
@@ -615,35 +617,41 @@ async fn get_mod_loader_status(
     state: State<'_, Mutex<AppState>>,
 ) -> Result<UnifiedModLoaderInfo, String> {
     let app_state = state.lock().unwrap();
-    
+
     let profile_manager = app_state.profile_manager.as_ref()
         .ok_or("Profile manager not initialized")?;
-    
+
     let profile = profile_manager.get_profile(&profile_name)
         .map_err(|e| format!("Failed to get profile: {}", e))?;
-    
+
     let profile_dir = profile_manager.get_profile_dir(&profile_name);
     let game_path = find_game_path(&profile_dir)?;
-    
+
     // Check ResoniteModLoader
     let rml = ModLoader::new(game_path.clone());
     let rml_status = rml.get_status()
         .map_err(|e| format!("Failed to get RML status: {}", e))?;
-    
+
     // Check MonkeyLoader
     let ml = MonkeyLoader::new(game_path);
     let ml_status = ml.get_status()
         .map_err(|e| format!("Failed to get MonkeyLoader status: {}", e))?;
-    
+
+    // Check BepisLoader
+    let bepis = BepisLoader::new(profile_dir);
+    let bepis_status = bepis.get_status();
+
     // Determine which loader is installed
     let (installed, loader_type, version) = if rml_status.installed {
         (true, Some(ModLoaderType::ResoniteModLoader), rml_status.version)
     } else if ml_status.installed {
         (true, Some(ModLoaderType::MonkeyLoader), ml_status.version)
+    } else if bepis_status.installed {
+        (true, Some(ModLoaderType::BepisLoader), bepis_status.version)
     } else {
         (false, None, None)
     };
-    
+
     // If profile has a loader type stored, use that, otherwise use detected
     let loader_type = if installed {
         profile.mod_loader_type.or(loader_type)
@@ -651,7 +659,7 @@ async fn get_mod_loader_status(
         // プロファイルにローダータイプが保存されているが実際にはインストールされていない場合
         profile.mod_loader_type
     };
-    
+
     Ok(UnifiedModLoaderInfo {
         installed,
         loader_type,
@@ -666,16 +674,17 @@ async fn install_mod_loader(
     loader_type: ModLoaderType,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<String, String> {
-    let game_path = {
+    let (game_path, profile_dir) = {
         let app_state = state.lock().unwrap();
-        
+
         let profile_manager = app_state.profile_manager.as_ref()
             .ok_or("Profile manager not initialized")?;
-        
+
         let profile_dir = profile_manager.get_profile_dir(&profile_name);
-        find_game_path(&profile_dir)?
+        let game_path = find_game_path(&profile_dir)?;
+        (game_path, profile_dir)
     };
-    
+
     let result = match loader_type {
         ModLoaderType::ResoniteModLoader => {
             let mod_loader = ModLoader::new(game_path.clone());
@@ -686,18 +695,24 @@ async fn install_mod_loader(
             let monkey_loader = MonkeyLoader::new(game_path.clone());
             monkey_loader.install().await
                 .map_err(|e| format!("Failed to install MonkeyLoader: {}", e))?
+        },
+        ModLoaderType::BepisLoader => {
+            let bepis_loader = BepisLoader::new(profile_dir.clone());
+            let info = bepis_loader.install().await
+                .map_err(|e| format!("Failed to install BepisLoader: {}", e))?;
+            format!("BepisLoader {} installed successfully", info.version)
         }
     };
-    
+
     // プロファイルの起動引数も更新
     {
         let app_state = state.lock().unwrap();
         let profile_manager = app_state.profile_manager.as_ref()
             .ok_or("Profile manager not initialized")?;
-            
+
         let mut profile = profile_manager.get_profile(&profile_name)
             .map_err(|e| format!("Failed to get profile: {}", e))?;
-        
+
         // Update launch args based on loader type
         match loader_type {
             ModLoaderType::ResoniteModLoader => {
@@ -708,16 +723,25 @@ async fn install_mod_loader(
                 // MonkeyLoader doesn't need special launch args
                 let monkey_loader = MonkeyLoader::new(game_path.clone());
                 monkey_loader.remove_disable_args(&mut profile.args);
+            },
+            ModLoaderType::BepisLoader => {
+                // Add --hookfxr-enable if not present
+                let bepis_args = vec!["--hookfxr-enable".to_string()];
+                for arg in bepis_args {
+                    if !profile.args.contains(&arg) {
+                        profile.args.push(arg);
+                    }
+                }
             }
         }
-        
+
         // Save the mod loader type to the profile
         profile.mod_loader_type = Some(loader_type);
-        
+
         profile_manager.update_profile(&profile)
             .map_err(|e| format!("Failed to update profile args: {}", e))?;
     }
-    
+
     Ok(result)
 }
 
@@ -727,21 +751,21 @@ async fn uninstall_mod_loader(
     profile_name: String,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<String, String> {
-    let (game_path, mod_loader_type) = {
+    let (game_path, profile_dir, mod_loader_type) = {
         let app_state = state.lock().unwrap();
-        
+
         let profile_manager = app_state.profile_manager.as_ref()
             .ok_or("Profile manager not initialized")?;
-        
+
         let profile = profile_manager.get_profile(&profile_name)
             .map_err(|e| format!("Failed to get profile: {}", e))?;
-        
+
         let profile_dir = profile_manager.get_profile_dir(&profile_name);
         let game_path = find_game_path(&profile_dir)?;
-        
-        (game_path, profile.mod_loader_type)
+
+        (game_path, profile_dir, profile.mod_loader_type)
     };
-    
+
     // Detect which loader is installed if not specified in profile
     let loader_type = if let Some(loader_type) = mod_loader_type {
         loader_type
@@ -749,16 +773,19 @@ async fn uninstall_mod_loader(
         // Auto-detect
         let rml = ModLoader::new(game_path.clone());
         let ml = MonkeyLoader::new(game_path.clone());
-        
+        let bepis = BepisLoader::new(profile_dir.clone());
+
         if rml.get_status().map_or(false, |s| s.installed) {
             ModLoaderType::ResoniteModLoader
         } else if ml.get_status().map_or(false, |s| s.installed) {
             ModLoaderType::MonkeyLoader
+        } else if bepis.get_status().installed {
+            ModLoaderType::BepisLoader
         } else {
             return Err("No mod loader installed".to_string());
         }
     };
-    
+
     // Uninstall the appropriate loader
     let result = match loader_type {
         ModLoaderType::ResoniteModLoader => {
@@ -770,18 +797,24 @@ async fn uninstall_mod_loader(
             let monkey_loader = MonkeyLoader::new(game_path.clone());
             monkey_loader.uninstall()
                 .map_err(|e| format!("Failed to uninstall MonkeyLoader: {}", e))?
+        },
+        ModLoaderType::BepisLoader => {
+            let bepis_loader = BepisLoader::new(profile_dir.clone());
+            bepis_loader.uninstall()
+                .map_err(|e| format!("Failed to uninstall BepisLoader: {}", e))?;
+            "BepisLoader uninstalled successfully".to_string()
         }
     };
-    
+
     // プロファイルの起動引数からも削除
     {
         let app_state = state.lock().unwrap();
         let profile_manager = app_state.profile_manager.as_ref()
             .ok_or("Profile manager not initialized")?;
-            
+
         let mut profile = profile_manager.get_profile(&profile_name)
             .map_err(|e| format!("Failed to get profile: {}", e))?;
-        
+
         // Remove launch args based on loader type
         match loader_type {
             ModLoaderType::ResoniteModLoader => {
@@ -790,16 +823,20 @@ async fn uninstall_mod_loader(
             },
             ModLoaderType::MonkeyLoader => {
                 // MonkeyLoader doesn't have special launch args to remove
+            },
+            ModLoaderType::BepisLoader => {
+                // Remove --hookfxr-enable
+                profile.args.retain(|arg| arg != "--hookfxr-enable");
             }
         }
-        
+
         // Clear mod loader type from profile
         profile.mod_loader_type = None;
-        
+
         profile_manager.update_profile(&profile)
             .map_err(|e| format!("Failed to update profile args: {}", e))?;
     }
-    
+
     Ok(result)
 }
 
@@ -1167,24 +1204,25 @@ async fn install_mod_from_cache(
 ) -> Result<InstalledMod, String> {
     let (profile_dir, mod_loader_type) = {
         let app_state = state.lock().unwrap();
-        
+
         let profile_manager = app_state.profile_manager.as_ref()
             .ok_or("Profile manager not initialized")?;
-        
+
         let profile_dir = profile_manager.get_profile_dir(&profile_name);
         let profile = profile_manager.get_profile(&profile_name)
             .map_err(|e| format!("Failed to get profile: {}", e))?;
-        
+
         let mod_loader_type = profile.mod_loader_type.map(|t| match t {
-            crate::ModLoaderType::ResoniteModLoader => "ResoniteModLoader".to_string(),
-            crate::ModLoaderType::MonkeyLoader => "MonkeyLoader".to_string(),
+            ModLoaderType::ResoniteModLoader => "ResoniteModLoader".to_string(),
+            ModLoaderType::MonkeyLoader => "MonkeyLoader".to_string(),
+            ModLoaderType::BepisLoader => "BepisLoader".to_string(),
         });
-        
+
         (profile_dir, mod_loader_type)
     }; // MutexGuard is dropped here
-    
+
     let mod_manager = ModManager::new(profile_dir);
-    
+
     mod_manager.install_mod_from_cache(&mod_info, version.as_deref(), mod_loader_type.as_deref()).await
         .map_err(|e| format!("Failed to install mod: {}", e))
 }
@@ -1199,24 +1237,25 @@ async fn install_mod_from_github(
 ) -> Result<InstalledMod, String> {
     let (profile_dir, mod_loader_type) = {
         let app_state = state.lock().unwrap();
-        
+
         let profile_manager = app_state.profile_manager.as_ref()
             .ok_or("Profile manager not initialized")?;
-        
+
         let profile_dir = profile_manager.get_profile_dir(&profile_name);
         let profile = profile_manager.get_profile(&profile_name)
             .map_err(|e| format!("Failed to get profile: {}", e))?;
-        
+
         let mod_loader_type = profile.mod_loader_type.map(|t| match t {
-            crate::ModLoaderType::ResoniteModLoader => "ResoniteModLoader".to_string(),
-            crate::ModLoaderType::MonkeyLoader => "MonkeyLoader".to_string(),
+            ModLoaderType::ResoniteModLoader => "ResoniteModLoader".to_string(),
+            ModLoaderType::MonkeyLoader => "MonkeyLoader".to_string(),
+            ModLoaderType::BepisLoader => "BepisLoader".to_string(),
         });
-        
+
         (profile_dir, mod_loader_type)
     }; // MutexGuard is dropped here
-    
+
     let mod_manager = ModManager::new(profile_dir);
-    
+
     mod_manager.install_mod_from_github(&repo_url, version.as_deref(), mod_loader_type.as_deref()).await
         .map_err(|e| format!("Failed to install mod: {}", e))
 }
@@ -2121,6 +2160,100 @@ async fn ws_relay_disconnect_client(
     wsrelay::disconnect_client(state.inner().clone()).await
 }
 
+// Thunderstore: Fetch all packages
+#[tauri::command]
+async fn fetch_thunderstore_packages(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<ThunderstorePackage>, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+
+        profile_manager.get_profile_dir(&profile_name)
+    };
+
+    let client = ThunderstoreClient::new(profile_dir);
+    client.fetch_packages().await
+        .map_err(|e| format!("Failed to fetch Thunderstore packages: {}", e))
+}
+
+// Thunderstore: Install MOD
+#[tauri::command]
+async fn install_mod_from_thunderstore(
+    profile_name: String,
+    package_full_name: String,
+    version: Option<String>,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<String>, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+
+        profile_manager.get_profile_dir(&profile_name)
+    };
+
+    let bepis_loader = BepisLoader::new(profile_dir);
+
+    // Find the package
+    let package = bepis_loader.thunderstore()
+        .find_package_by_full_name(&package_full_name)
+        .await
+        .map_err(|e| format!("Failed to find package: {}", e))?
+        .ok_or(format!("Package {} not found", package_full_name))?;
+
+    // Install the MOD
+    let installed_files = bepis_loader.install_mod(&package, version.as_deref()).await
+        .map_err(|e| format!("Failed to install MOD: {}", e))?;
+
+    Ok(installed_files.iter().map(|p| p.to_string_lossy().to_string()).collect())
+}
+
+// BepisLoader: Get status
+#[tauri::command]
+async fn get_bepis_loader_status(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<BepisLoaderStatus, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+
+        profile_manager.get_profile_dir(&profile_name)
+    };
+
+    let bepis_loader = BepisLoader::new(profile_dir);
+    Ok(bepis_loader.get_status())
+}
+
+// BepisLoader: Get installed info
+#[tauri::command]
+async fn get_bepis_loader_info(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Option<BepisLoaderInfo>, String> {
+    let profile_dir = {
+        let app_state = state.lock().unwrap();
+
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+
+        profile_manager.get_profile_dir(&profile_name)
+    };
+
+    let bepis_loader = BepisLoader::new(profile_dir);
+    match bepis_loader.get_installed_info() {
+        Ok(info) => Ok(Some(info)),
+        Err(_) => Ok(None),
+    }
+}
+
 fn main() {
     // Initialize WebSocket Relay state
     let ws_relay_state: WsRelayStateHandle = std::sync::Arc::new(
@@ -2192,7 +2325,11 @@ fn main() {
             ws_relay_start_host,
             ws_relay_stop_host,
             ws_relay_connect_client,
-            ws_relay_disconnect_client
+            ws_relay_disconnect_client,
+            fetch_thunderstore_packages,
+            install_mod_from_thunderstore,
+            get_bepis_loader_status,
+            get_bepis_loader_info
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

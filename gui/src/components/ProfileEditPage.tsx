@@ -84,7 +84,7 @@ interface ProfileConfig {
     branch: string;
     manifest_id?: string;
   };
-  mod_loader_type?: 'ResoniteModLoader' | 'MonkeyLoader';
+  mod_loader_type?: 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader';
 }
 
 interface ProfileEditPageProps {
@@ -94,7 +94,7 @@ interface ProfileEditPageProps {
 
 interface UnifiedModLoaderInfo {
   installed: boolean;
-  loader_type?: 'ResoniteModLoader' | 'MonkeyLoader';
+  loader_type?: 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader';
   version?: string;
 }
 
@@ -191,7 +191,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [modLoaderInfo, setModLoaderInfo] = useState<UnifiedModLoaderInfo | null>(null);
   const [isLoadingModLoader, setIsLoadingModLoader] = useState(false);
   const [showModRiskModal, setShowModRiskModal] = useState(false);
-  const [selectedModLoaderType, setSelectedModLoaderType] = useState<'ResoniteModLoader' | 'MonkeyLoader'>('ResoniteModLoader');
+  const [selectedModLoaderType, setSelectedModLoaderType] = useState<'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader'>('ResoniteModLoader');
   
   // MOD管理用の状態
   const [isLoadingMods, setIsLoadingMods] = useState(false);
@@ -1302,14 +1302,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     {/* MODローダータイプ選択 */}
                     <div className="mb-4">
                       <label className="text-gray-300 text-sm mb-2 block">{t('profiles.editPage.selectModLoader')}</label>
-                      <div className="flex space-x-4">
+                      <div className="flex flex-wrap gap-4">
                         <label className="flex items-center">
                           <input
                             type="radio"
                             name="modLoaderType"
                             value="ResoniteModLoader"
                             checked={selectedModLoaderType === 'ResoniteModLoader'}
-                            onChange={(e) => setSelectedModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader')}
+                            onChange={(e) => setSelectedModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader')}
                             className="mr-2"
                           />
                           <span className="text-sm text-gray-300">Resonite Mod Loader (RML)</span>
@@ -1320,16 +1320,29 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                             name="modLoaderType"
                             value="MonkeyLoader"
                             checked={selectedModLoaderType === 'MonkeyLoader'}
-                            onChange={(e) => setSelectedModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader')}
+                            onChange={(e) => setSelectedModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader')}
                             className="mr-2"
                           />
                           <span className="text-sm text-gray-300">MonkeyLoader</span>
                         </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="modLoaderType"
+                            value="BepisLoader"
+                            checked={selectedModLoaderType === 'BepisLoader'}
+                            onChange={(e) => setSelectedModLoaderType(e.target.value as 'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader')}
+                            className="mr-2"
+                          />
+                          <span className="text-sm text-gray-300">BepisLoader (BepInEx)</span>
+                        </label>
                       </div>
                       <p className="text-xs text-gray-400 mt-2">
-                        {selectedModLoaderType === 'ResoniteModLoader' 
+                        {selectedModLoaderType === 'ResoniteModLoader'
                           ? t('profiles.editPage.rmlDescription')
-                          : t('profiles.editPage.monkeyLoaderDescription')}
+                          : selectedModLoaderType === 'MonkeyLoader'
+                          ? t('profiles.editPage.monkeyLoaderDescription')
+                          : t('profiles.editPage.bepisLoaderDescription')}
                       </p>
                     </div>
                     
@@ -1361,7 +1374,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                         <Package className="w-5 h-5 text-green-400" />
                         <div>
                           <h4 className="text-green-400 font-medium">
-                            {t('profiles.editPage.modLoaderInstalled', { type: modLoaderInfo.loader_type === 'MonkeyLoader' ? 'MonkeyLoader' : 'Resonite Mod Loader' })}
+                            {t('profiles.editPage.modLoaderInstalled', { type: modLoaderInfo.loader_type === 'MonkeyLoader' ? 'MonkeyLoader' : modLoaderInfo.loader_type === 'BepisLoader' ? 'BepisLoader' : 'Resonite Mod Loader' })}
                           </h4>
                           <p className="text-green-200 text-sm">
                             {t('common.version')}: {modLoaderInfo.version || t('profiles.editPage.unknown')}

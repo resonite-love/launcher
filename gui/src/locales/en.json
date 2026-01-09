@@ -99,6 +99,7 @@
       "selectModLoader": "Select MOD loader:",
       "rmlDescription": "RML is a traditional MOD loader supported by many MODs.",
       "monkeyLoaderDescription": "MonkeyLoader is a new MOD loader that provides advanced features.",
+      "bepisLoaderDescription": "BepisLoader is a BepInEx-based MOD loader that allows installing MODs from Thunderstore.",
       "installModLoader": "Install {{type}}",
       "modLoaderInstalled": "{{type}} Installed",
       "migrated": "Migrated",
