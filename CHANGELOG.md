@@ -8,6 +8,41 @@
 ## [Unreleased]
 
 
+## [v1.9.0] - 2026-01-17
+
+### 🎉 新機能
+- **ログビューワ**: 実行中のResoniteからリアルタイムでログを確認できる新機能
+  - プロファイルごとに別ウィンドウで開く
+  - 複数ログソース対応（Resonite本体、BepInEx、Renderer）
+  - ログレベルに応じた色分け表示（Debug/Info/Warning/Error/Message）
+  - **フィルタ機能**: テキスト検索と正規表現モードをサポート
+  - 一時停止/再開機能（バッファリング対応）
+  - 自動スクロール（手動スクロール時は自動解除）
+  - ログフォルダを開くボタン（各ソースごと）
+  - **Resonite強制終了ボタン**: プロファイルに紐づいたプロセスのみを終了
+  - **起動ボタン**: Screen/VRモード選択ドロップダウン付き
+  - プロファイル一覧・編集画面からワンクリックでアクセス
+
+### ✨ 改善
+- **i18n対応強化**: ログビューワの全テキストを日本語/英語に対応
+- **UIスタイル修正**: プロファイル一覧の起動モードドロップダウンの背景色を修正
+
+### 🔧 技術的改善
+- **ログ監視モジュール実装** (`gui/src-tauri/src/logviewer.rs`):
+  - ファイル監視とポーリングによるリアルタイム更新
+  - UTF-8/Shift-JIS両対応のエンコーディング処理
+  - BepInExログフォーマット `[Level :Source]` のパース
+  - Resoniteログフォーマット（絵文字ベース）のパース
+
+- **Tauriコマンド追加**:
+  - `open_log_viewer`: ログビューワウィンドウを開く
+  - `get_log_sources`: プロファイルのログソース一覧を取得
+  - `kill_resonite`: プロファイルに紐づいたResoniteプロセスを終了
+  - `open_folder`: 任意のフォルダをエクスプローラーで開く
+
+- **マルチページビルド対応**: Viteでログビューワ用の別エントリーポイントを追加
+
+
 ## [v1.8.0] - 2026-01-10
 
 ### 🎉 新機能
@@ -844,7 +879,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.9.0...HEAD
+[v1.9.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.8.0...v1.9.0
 [v1.8.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.7.0...v1.8.0
 [v1.7.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.6.0...v1.7.0
 [v1.6.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.5.9...v1.6.0

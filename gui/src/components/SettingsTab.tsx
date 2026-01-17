@@ -398,23 +398,40 @@ function SettingsTab() {
                         </div>
                       </div>
                       
-                      {/* Install Update Button */}
-                      <div className="mt-4">
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className="btn-primary flex items-center space-x-2"
-                          onClick={installUpdate}
-                          disabled={isInstalling || isCheckingUpdates}
-                        >
-                          {isInstalling ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Download className="w-4 h-4" />
-                          )}
-                          <span>{t('settings.app.installUpdate')}</span>
-                        </motion.button>
-                      </div>
+                      {/* Install Update Button - Hidden for portable version */}
+                      {!isPortableVersion && (
+                        <div className="mt-4">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="btn-primary flex items-center space-x-2"
+                            onClick={installUpdate}
+                            disabled={isInstalling || isCheckingUpdates}
+                          >
+                            {isInstalling ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Download className="w-4 h-4" />
+                            )}
+                            <span>{t('settings.app.installUpdate')}</span>
+                          </motion.button>
+                        </div>
+                      )}
+
+                      {/* Portable version: Show download link instead */}
+                      {isPortableVersion && (
+                        <div className="mt-4">
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="btn-primary flex items-center space-x-2"
+                            onClick={() => shell.open(updateInfo.download_url)}
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            <span>{t('settings.app.releasePage')}</span>
+                          </motion.button>
+                        </div>
+                      )}
                       
                       {/* リリースノート */}
                       {updateInfo.release_notes && (
