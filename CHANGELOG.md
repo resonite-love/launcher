@@ -8,6 +8,12 @@
 ## [Unreleased]
 
 
+## [v1.9.1] - 2026-01-17
+
+### 🐛 バグ修正
+- **ポータブル版アップデートUI修正**: ポータブル版で動作しない「インストール」ボタンを非表示にし、代わりに「リリースページ」ボタンを表示するよう修正
+
+
 ## [v1.9.0] - 2026-01-17
 
 ### 🎉 新機能
@@ -879,7 +885,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.9.0...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.9.1...HEAD
+[v1.9.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.9.0...v1.9.1
 [v1.9.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.8.0...v1.9.0
 [v1.8.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.7.0...v1.8.0
 [v1.7.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.6.0...v1.7.0
