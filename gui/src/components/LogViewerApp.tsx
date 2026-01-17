@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/tauri';
-import { open } from '@tauri-apps/api/shell';
 import { useTranslation } from 'react-i18next';
 import { 
   Terminal, 
@@ -262,7 +261,7 @@ export default function LogViewerApp() {
                 onClick={() => {
                   // パスからディレクトリを取得して開く
                   const dir = source.path.replace(/[/\\][^/\\]+$/, '');
-                  open(dir).catch(console.error);
+                  invoke('open_folder', { path: dir }).catch(console.error);
                 }}
                 className={`px-2 rounded-r text-sm transition-colors flex items-center ${
                   activeSource === source.id

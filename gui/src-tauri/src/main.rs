@@ -892,6 +892,46 @@ async fn open_profile_folder(
     Ok(format!("Opened profile folder: {}", profile_dir.display()))
 }
 
+// Open any folder in system file explorer
+#[tauri::command]
+async fn open_folder(path: String) -> Result<String, String> {
+    let folder_path = std::path::PathBuf::from(&path);
+
+    if !folder_path.exists() {
+        return Err(format!("Folder '{}' does not exist", path));
+    }
+
+    // Open folder in system file explorer
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+
+        std::process::Command::new("explorer")
+            .arg(&folder_path)
+            .creation_flags(if cfg!(debug_assertions) { 0 } else { 0x08000000 }) // CREATE_NO_WINDOW in release
+            .spawn()
+            .map_err(|e| format!("Failed to open folder: {}", e))?;
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        std::process::Command::new("open")
+            .arg(&folder_path)
+            .spawn()
+            .map_err(|e| format!("Failed to open folder: {}", e))?;
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        std::process::Command::new("xdg-open")
+            .arg(&folder_path)
+            .spawn()
+            .map_err(|e| format!("Failed to open folder: {}", e))?;
+    }
+
+    Ok(format!("Opened folder: {}", folder_path.display()))
+}
+
 // Duplicate a profile and all its data
 #[tauri::command]
 async fn duplicate_profile(
@@ -2436,6 +2476,7 @@ fn main() {
             install_mod_loader,
             uninstall_mod_loader,
             open_profile_folder,
+            open_folder,
             duplicate_profile,
             delete_profile,
             clear_profile_cache,
