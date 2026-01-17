@@ -538,6 +538,23 @@
   "titlebar": {
     "poweredBy": "powered by resonite.love"
   },
+  "logViewer": {
+    "kill": "Kill",
+    "killing": "Killing...",
+    "waitingForLogs": "Waiting for logs...",
+    "startResoniteHint": "Logs will appear when Resonite starts",
+    "lines": "{{count}} lines",
+    "activeSources": "{{count}} active source(s)",
+    "paused": "Paused",
+    "newLinesBuffered": "{{count}} new lines buffered",
+    "pause": "Pause",
+    "resume": "Resume",
+    "clearLogs": "Clear logs",
+    "autoScrollEnabled": "Auto-scroll enabled",
+    "scrollToBottom": "Scroll to bottom",
+    "openLogFolder": "Open {{name}} log folder",
+    "all": "All"
+  },
   "toasts": {
     "profileCreated": "Profile \"{{name}}\" created",
     "profileDeleted": "Profile \"{{name}}\" deleted",

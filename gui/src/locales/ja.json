@@ -358,6 +358,23 @@
       "updateInstalled": "アップデートがインストールされました。アプリを再起動してください。"
     }
   },
+  "logViewer": {
+    "kill": "強制終了",
+    "killing": "強制終了中...",
+    "waitingForLogs": "ログを待機中...",
+    "startResoniteHint": "Resoniteを起動するとログが表示されます",
+    "lines": "{{count}}行",
+    "activeSources": "{{count}}個のソース",
+    "paused": "一時停止中",
+    "newLinesBuffered": "{{count}}行がバッファされています",
+    "pause": "一時停止",
+    "resume": "再開",
+    "clearLogs": "ログをクリア",
+    "autoScrollEnabled": "自動スクロール有効",
+    "scrollToBottom": "下にスクロール",
+    "openLogFolder": "{{name}}のログフォルダを開く",
+    "all": "すべて"
+  },
   "plugins": {
     "title": "プラグイン",
     "wsRelay": {

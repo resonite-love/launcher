@@ -207,14 +207,14 @@ export default function LogViewerApp() {
                     onClick={() => launchResonite('screen')}
                   >
                     <Monitor className="w-4 h-4" />
-                    <span>Screen Mode</span>
+                    <span>{t('profiles.launchModes.screen')}</span>
                   </button>
                   <button
                     className="w-full px-4 py-2 text-left hover:bg-dark-700 last:rounded-b-lg transition-colors flex items-center space-x-2 text-sm"
                     onClick={() => launchResonite('vr')}
                   >
                     <Headphones className="w-4 h-4" />
-                    <span>VR Mode</span>
+                    <span>{t('profiles.launchModes.vr')}</span>
                   </button>
                 </div>
               )}
@@ -227,7 +227,7 @@ export default function LogViewerApp() {
               className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 border border-red-600/30 rounded text-red-400 text-sm flex items-center space-x-1.5 transition-colors disabled:opacity-50"
             >
               <XCircle className="w-4 h-4" />
-              <span>{isKilling ? 'Killing...' : 'Kill'}</span>
+              <span>{isKilling ? t('logViewer.killing') : t('logViewer.kill')}</span>
             </button>
           </div>
         </div>
@@ -244,7 +244,7 @@ export default function LogViewerApp() {
                 : 'text-gray-400 hover:text-white hover:bg-dark-800/50'
             }`}
           >
-            All
+            {t('logViewer.all')}
           </button>
           {sources.filter(s => s.exists).map(source => (
             <div key={source.id} className="flex items-stretch">
@@ -269,7 +269,7 @@ export default function LogViewerApp() {
                     ? 'bg-resonite-blue/20 text-resonite-blue border border-resonite-blue/30 border-l-0'
                     : 'text-gray-500 hover:text-white hover:bg-dark-800/50'
                 }`}
-                title={`Open ${source.name} log folder`}
+                title={t('logViewer.openLogFolder', { name: source.name })}
               >
                 <FolderOpen className="w-3.5 h-3.5" />
               </button>
@@ -286,7 +286,7 @@ export default function LogViewerApp() {
                 ? 'bg-yellow-600/20 text-yellow-400 border border-yellow-600/30' 
                 : 'text-gray-400 hover:text-white hover:bg-dark-800/50'
             }`}
-            title={isPaused ? 'Resume' : 'Pause'}
+            title={isPaused ? t('logViewer.resume') : t('logViewer.pause')}
           >
             {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
           </button>
@@ -295,7 +295,7 @@ export default function LogViewerApp() {
           <button
             onClick={clearLogs}
             className="p-1.5 rounded text-gray-400 hover:text-white hover:bg-dark-800/50 transition-colors"
-            title="Clear logs"
+            title={t('logViewer.clearLogs')}
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -313,7 +313,7 @@ export default function LogViewerApp() {
                 ? 'text-green-400' 
                 : 'text-gray-500 hover:text-white hover:bg-dark-800/50'
             }`}
-            title={autoScroll ? 'Auto-scroll enabled' : 'Click to scroll to bottom'}
+            title={autoScroll ? t('logViewer.autoScrollEnabled') : t('logViewer.scrollToBottom')}
           >
             <ChevronDown className="w-4 h-4" />
           </button>
@@ -325,7 +325,7 @@ export default function LogViewerApp() {
         <div className="bg-yellow-600/20 border-b border-yellow-600/30 px-4 py-1.5 flex items-center space-x-2">
           <Pause className="w-4 h-4 text-yellow-400" />
           <span className="text-yellow-200 text-sm">
-            Paused - {pausedLogsRef.current.length} new lines buffered
+            {t('logViewer.paused')} - {t('logViewer.newLinesBuffered', { count: pausedLogsRef.current.length })}
           </span>
         </div>
       )}
@@ -340,8 +340,8 @@ export default function LogViewerApp() {
           <div className="flex items-center justify-center h-full text-gray-500">
             <div className="text-center">
               <Terminal className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>Waiting for logs...</p>
-              <p className="text-xs mt-1">Start Resonite to see logs here</p>
+              <p>{t('logViewer.waitingForLogs')}</p>
+              <p className="text-xs mt-1">{t('logViewer.startResoniteHint')}</p>
             </div>
           </div>
         ) : (
@@ -371,9 +371,9 @@ export default function LogViewerApp() {
 
       {/* Status Bar */}
       <footer className="bg-dark-900/50 border-t border-dark-700/30 px-4 py-1.5 flex items-center justify-between text-xs text-gray-500">
-        <span>{filteredLogs.length} lines</span>
+        <span>{t('logViewer.lines', { count: filteredLogs.length })}</span>
         <span>
-          {sources.filter(s => s.exists).length} active source(s)
+          {t('logViewer.activeSources', { count: sources.filter(s => s.exists).length })}
         </span>
       </footer>
     </div>
