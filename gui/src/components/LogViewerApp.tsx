@@ -55,6 +55,8 @@ export default function LogViewerApp() {
   const [isPaused, setIsPaused] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
   const [isKilling, setIsKilling] = useState(false);
+  const [isLaunching, setIsLaunching] = useState(false);
+  const [launchDropdownOpen, setLaunchDropdownOpen] = useState(false);
   const logContainerRef = useRef<HTMLDivElement>(null);
   const pausedLogsRef = useRef<LogLine[]>([]);
 
@@ -147,6 +149,24 @@ export default function LogViewerApp() {
     }
   };
 
+  // Resoniteを起動
+  const launchResonite = async (mode?: string) => {
+    if (!profileName) return;
+    setIsLaunching(true);
+    setLaunchDropdownOpen(false);
+    try {
+      if (mode) {
+        await invoke('launch_resonite_with_mode', { profileName, mode });
+      } else {
+        await invoke('launch_resonite', { profileName });
+      }
+    } catch (e) {
+      console.error('Failed to launch Resonite:', e);
+    } finally {
+      setIsLaunching(false);
+    }
+  };
+
   return (
     <div className="h-screen bg-dark-950 flex flex-col text-white">
       {/* Header */}
@@ -158,6 +178,48 @@ export default function LogViewerApp() {
           </div>
           
           <div className="flex items-center space-x-2">
+            {/* Launch Resonite */}
+            <div className="relative flex items-stretch">
+              <button
+                onClick={() => launchResonite()}
+                disabled={isLaunching}
+                className="px-3 py-1.5 bg-green-600/20 hover:bg-green-600/30 border border-green-600/30 border-r-0 rounded-l text-green-400 text-sm flex items-center space-x-1.5 transition-colors disabled:opacity-50"
+              >
+                {isLaunching ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4" />
+                )}
+                <span>{isLaunching ? t('common.starting') : t('common.launch')}</span>
+              </button>
+              <button
+                onClick={() => setLaunchDropdownOpen(!launchDropdownOpen)}
+                disabled={isLaunching}
+                className="px-2 py-1.5 bg-green-600/20 hover:bg-green-600/30 border border-green-600/30 rounded-r text-green-400 text-sm flex items-center transition-colors disabled:opacity-50"
+              >
+                <ChevronDown className="w-3.5 h-3.5" />
+              </button>
+              
+              {launchDropdownOpen && (
+                <div className="absolute right-0 top-full mt-1 bg-dark-800 border border-dark-600 rounded-lg shadow-lg z-50 min-w-40">
+                  <button
+                    className="w-full px-4 py-2 text-left hover:bg-dark-700 first:rounded-t-lg transition-colors flex items-center space-x-2 text-sm"
+                    onClick={() => launchResonite('screen')}
+                  >
+                    <Monitor className="w-4 h-4" />
+                    <span>Screen Mode</span>
+                  </button>
+                  <button
+                    className="w-full px-4 py-2 text-left hover:bg-dark-700 last:rounded-b-lg transition-colors flex items-center space-x-2 text-sm"
+                    onClick={() => launchResonite('vr')}
+                  >
+                    <Headphones className="w-4 h-4" />
+                    <span>VR Mode</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Kill Resonite */}
             <button
               onClick={killResonite}
@@ -165,7 +227,7 @@ export default function LogViewerApp() {
               className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 border border-red-600/30 rounded text-red-400 text-sm flex items-center space-x-1.5 transition-colors disabled:opacity-50"
             >
               <XCircle className="w-4 h-4" />
-              <span>{isKilling ? 'Killing...' : 'Kill Resonite'}</span>
+              <span>{isKilling ? 'Killing...' : 'Kill'}</span>
             </button>
           </div>
         </div>
