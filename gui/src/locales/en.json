@@ -553,7 +553,10 @@
     "autoScrollEnabled": "Auto-scroll enabled",
     "scrollToBottom": "Scroll to bottom",
     "openLogFolder": "Open {{name}} log folder",
-    "all": "All"
+    "all": "All",
+    "filterPlaceholder": "Filter logs...",
+    "regexMode": "Toggle regex mode",
+    "matchCount": "{{count}} matches"
   },
   "toasts": {
     "profileCreated": "Profile \"{{name}}\" created",

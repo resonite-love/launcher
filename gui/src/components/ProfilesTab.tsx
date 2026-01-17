@@ -710,9 +710,9 @@ function ProfilesTab() {
                         </motion.button>
                         
                         {launchDropdownOpen === profile.id && (
-                          <div className="absolute right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg z-50 min-w-40">
+                          <div className="absolute right-0 top-full mt-1 bg-dark-800 border border-dark-600 rounded-lg shadow-lg z-50 min-w-40">
                             <button
-                              className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 first:rounded-t-lg transition-colors duration-200 flex items-center space-x-2"
+                              className="w-full px-4 py-2 text-left text-gray-200 hover:bg-dark-700 first:rounded-t-lg transition-colors duration-200 flex items-center space-x-2"
                               onClick={() => {
                                 launchProfileWithMode(profile.id, 'screen');
                                 setLaunchDropdownOpen(null);
@@ -722,7 +722,7 @@ function ProfilesTab() {
                               <span>{t('profiles.launchModes.screen')}</span>
                             </button>
                             <button
-                              className="w-full px-4 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 last:rounded-b-lg transition-colors duration-200 flex items-center space-x-2"
+                              className="w-full px-4 py-2 text-left text-gray-200 hover:bg-dark-700 last:rounded-b-lg transition-colors duration-200 flex items-center space-x-2"
                               onClick={() => {
                                 launchProfileWithMode(profile.id, 'vr');
                                 setLaunchDropdownOpen(null);

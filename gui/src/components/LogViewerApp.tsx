@@ -1,14 +1,14 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/tauri';
 import { useTranslation } from 'react-i18next';
-import { 
-  Terminal, 
-  Pause, 
-  Play, 
-  Trash2, 
-  XCircle, 
+import {
+  Terminal,
+  Pause,
+  Play,
+  Trash2,
+  XCircle,
   ChevronDown,
   AlertCircle,
   Info,
@@ -18,7 +18,10 @@ import {
   FolderOpen,
   Monitor,
   Headphones,
-  Loader2
+  Loader2,
+  Search,
+  X,
+  Regex
 } from 'lucide-react';
 
 interface LogLine {
@@ -56,6 +59,9 @@ export default function LogViewerApp() {
   const [isKilling, setIsKilling] = useState(false);
   const [isLaunching, setIsLaunching] = useState(false);
   const [launchDropdownOpen, setLaunchDropdownOpen] = useState(false);
+  const [filterText, setFilterText] = useState('');
+  const [isRegexMode, setIsRegexMode] = useState(false);
+  const [regexError, setRegexError] = useState<string | null>(null);
   const logContainerRef = useRef<HTMLDivElement>(null);
   const pausedLogsRef = useRef<LogLine[]>([]);
 
@@ -116,6 +122,18 @@ export default function LogViewerApp() {
     }
   }, [logs, autoScroll]);
 
+  // フィルタ変更時も自動スクロールを維持
+  useEffect(() => {
+    if (autoScroll && logContainerRef.current) {
+      // 少し遅延させてDOM更新後にスクロール
+      requestAnimationFrame(() => {
+        if (logContainerRef.current) {
+          logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+        }
+      });
+    }
+  }, [filterText, isRegexMode, activeSource]);
+
   // スクロールイベントで自動スクロールを制御
   const handleScroll = useCallback(() => {
     if (!logContainerRef.current) return;
@@ -124,10 +142,44 @@ export default function LogViewerApp() {
     setAutoScroll(isAtBottom);
   }, []);
 
+  // 正規表現のバリデーション
+  useEffect(() => {
+    if (isRegexMode && filterText.trim()) {
+      try {
+        new RegExp(filterText, 'i');
+        setRegexError(null);
+      } catch (e) {
+        if (e instanceof Error) {
+          setRegexError(e.message);
+        }
+      }
+    } else {
+      setRegexError(null);
+    }
+  }, [filterText, isRegexMode]);
+
   // フィルタリングされたログ
-  const filteredLogs = activeSource === 'all' 
-    ? logs 
-    : logs.filter(log => log.source_id === activeSource);
+  const filteredLogs = useMemo(() => {
+    let result = activeSource === 'all'
+      ? logs
+      : logs.filter(log => log.source_id === activeSource);
+
+    if (filterText.trim()) {
+      if (isRegexMode) {
+        try {
+          const regex = new RegExp(filterText, 'i');
+          result = result.filter(log => regex.test(log.line));
+        } catch {
+          // 正規表現エラー時はフィルタリングしない
+        }
+      } else {
+        const lowerFilter = filterText.toLowerCase();
+        result = result.filter(log => log.line.toLowerCase().includes(lowerFilter));
+      }
+    }
+
+    return result;
+  }, [logs, activeSource, filterText, isRegexMode]);
 
   // ログをクリア
   const clearLogs = () => {
@@ -317,6 +369,50 @@ export default function LogViewerApp() {
             <ChevronDown className="w-4 h-4" />
           </button>
         </div>
+      </div>
+
+      {/* Filter Bar */}
+      <div className="bg-dark-900/30 border-b border-dark-700/30 px-4 py-1.5 flex items-center space-x-2">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+          <input
+            type="text"
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            placeholder={t('logViewer.filterPlaceholder')}
+            className={`w-full pl-8 pr-7 py-1 bg-dark-800 border rounded text-xs text-white placeholder-gray-500 focus:outline-none focus:border-resonite-blue/50 ${
+              regexError ? 'border-red-500/50' : 'border-dark-600'
+            }`}
+          />
+          {filterText && (
+            <button
+              onClick={() => setFilterText('')}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+        <button
+          onClick={() => setIsRegexMode(!isRegexMode)}
+          className={`px-1.5 py-1 rounded text-xs flex items-center space-x-1 transition-colors ${
+            isRegexMode
+              ? 'bg-purple-600/20 text-purple-400 border border-purple-600/30'
+              : 'text-gray-400 hover:text-white hover:bg-dark-800/50'
+          }`}
+          title={t('logViewer.regexMode')}
+        >
+          <Regex className="w-3.5 h-3.5" />
+          <span>Regex</span>
+        </button>
+        {regexError && (
+          <span className="text-red-400 text-xs">{regexError}</span>
+        )}
+        {filterText && (
+          <span className="text-gray-500 text-xs">
+            {t('logViewer.matchCount', { count: filteredLogs.length })}
+          </span>
+        )}
       </div>
 
       {/* Paused Banner */}

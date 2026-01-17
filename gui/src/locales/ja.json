@@ -373,7 +373,10 @@
     "autoScrollEnabled": "自動スクロール有効",
     "scrollToBottom": "下にスクロール",
     "openLogFolder": "{{name}}のログフォルダを開く",
-    "all": "すべて"
+    "all": "すべて",
+    "filterPlaceholder": "ログをフィルタ...",
+    "regexMode": "正規表現モード切替",
+    "matchCount": "{{count}}件一致"
   },
   "plugins": {
     "title": "プラグイン",
