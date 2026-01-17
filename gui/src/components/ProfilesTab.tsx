@@ -19,7 +19,8 @@ import {
   Key,
   Edit3,
   Trash2,
-  Loader2
+  Loader2,
+  ScrollText
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import ProfileEditModal from './ProfileEditModal';
@@ -734,6 +735,17 @@ function ProfilesTab() {
                         )}
                       </div>
                     </div>
+                    
+                    {/* ログボタン */}
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="btn-secondary px-3"
+                      onClick={() => invoke('open_log_viewer', { profileName: profile.id }).catch(console.error)}
+                      title={t('profiles.editPage.openLogViewer')}
+                    >
+                      <ScrollText className="w-4 h-4" />
+                    </motion.button>
                     
                     <motion.button
                       whileHover={{ scale: 1.02 }}

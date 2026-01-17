@@ -165,6 +165,8 @@
       "reloadMods": "MODフォルダの変更を反映",
       "launch": "起動",
       "launchResonite": "Resoniteを起動",
+      "logs": "ログ",
+      "openLogViewer": "ログビューアーを開く",
       "duplicate": "複製",
       "duplicateProfile": "プロファイルを複製",
       "actions": "アクション",

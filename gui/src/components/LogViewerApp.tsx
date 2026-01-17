@@ -1,0 +1,319 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { listen } from '@tauri-apps/api/event';
+import { invoke } from '@tauri-apps/api/tauri';
+import { open } from '@tauri-apps/api/shell';
+import { useTranslation } from 'react-i18next';
+import { 
+  Terminal, 
+  Pause, 
+  Play, 
+  Trash2, 
+  XCircle, 
+  ChevronDown,
+  AlertCircle,
+  Info,
+  AlertTriangle,
+  Bug,
+  MessageSquare,
+  FolderOpen,
+  Monitor,
+  Headphones,
+  Loader2
+} from 'lucide-react';
+
+interface LogLine {
+  source_id: string;
+  line: string;
+  level: 'debug' | 'info' | 'warning' | 'error' | 'message' | 'unknown';
+  timestamp?: string;
+}
+
+interface LogSource {
+  id: string;
+  name: string;
+  path: string;
+  exists: boolean;
+}
+
+// ログレベルに応じた色とアイコン
+const levelConfig = {
+  debug: { color: 'text-gray-400', bgColor: 'bg-gray-800/30', icon: Bug },
+  info: { color: 'text-blue-400', bgColor: 'bg-blue-900/20', icon: Info },
+  warning: { color: 'text-yellow-400', bgColor: 'bg-yellow-900/20', icon: AlertTriangle },
+  error: { color: 'text-red-400', bgColor: 'bg-red-900/20', icon: AlertCircle },
+  message: { color: 'text-green-400', bgColor: 'bg-green-900/20', icon: MessageSquare },
+  unknown: { color: 'text-gray-300', bgColor: 'bg-transparent', icon: Terminal },
+};
+
+export default function LogViewerApp() {
+  const { t } = useTranslation();
+  const [profileName, setProfileName] = useState<string>('');
+  const [logs, setLogs] = useState<LogLine[]>([]);
+  const [sources, setSources] = useState<LogSource[]>([]);
+  const [activeSource, setActiveSource] = useState<string>('all');
+  const [isPaused, setIsPaused] = useState(false);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const [isKilling, setIsKilling] = useState(false);
+  const logContainerRef = useRef<HTMLDivElement>(null);
+  const pausedLogsRef = useRef<LogLine[]>([]);
+
+  // URLからプロファイル名を取得
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const profile = params.get('profile');
+    if (profile) {
+      setProfileName(decodeURIComponent(profile));
+    }
+  }, []);
+
+  // ログソースを取得
+  useEffect(() => {
+    if (!profileName) return;
+
+    invoke<LogSource[]>('get_log_sources', { profileName })
+      .then(setSources)
+      .catch(console.error);
+  }, [profileName]);
+
+  // ログイベントをリッスン
+  useEffect(() => {
+    const unlisten = listen<LogLine[]>('log-lines', (event) => {
+      const newLines = event.payload;
+      
+      if (isPaused) {
+        pausedLogsRef.current = [...pausedLogsRef.current, ...newLines];
+      } else {
+        setLogs(prev => {
+          const combined = [...prev, ...newLines];
+          // 最大10000行を保持
+          return combined.slice(-10000);
+        });
+      }
+    });
+
+    return () => {
+      unlisten.then(fn => fn());
+    };
+  }, [isPaused]);
+
+  // 一時停止解除時にバッファしたログを追加
+  useEffect(() => {
+    if (!isPaused && pausedLogsRef.current.length > 0) {
+      setLogs(prev => {
+        const combined = [...prev, ...pausedLogsRef.current];
+        pausedLogsRef.current = [];
+        return combined.slice(-10000);
+      });
+    }
+  }, [isPaused]);
+
+  // 自動スクロール
+  useEffect(() => {
+    if (autoScroll && logContainerRef.current) {
+      logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+    }
+  }, [logs, autoScroll]);
+
+  // スクロールイベントで自動スクロールを制御
+  const handleScroll = useCallback(() => {
+    if (!logContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = logContainerRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 50;
+    setAutoScroll(isAtBottom);
+  }, []);
+
+  // フィルタリングされたログ
+  const filteredLogs = activeSource === 'all' 
+    ? logs 
+    : logs.filter(log => log.source_id === activeSource);
+
+  // ログをクリア
+  const clearLogs = () => {
+    setLogs([]);
+    pausedLogsRef.current = [];
+  };
+
+  // Resoniteを終了
+  const killResonite = async () => {
+    if (!profileName) return;
+    setIsKilling(true);
+    try {
+      await invoke('kill_resonite', { profileName });
+    } catch (e) {
+      console.error('Failed to kill Resonite:', e);
+    } finally {
+      setIsKilling(false);
+    }
+  };
+
+  return (
+    <div className="h-screen bg-dark-950 flex flex-col text-white">
+      {/* Header */}
+      <header className="bg-dark-900/80 border-b border-dark-700/50 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Terminal className="w-5 h-5 text-resonite-blue" />
+            <h1 className="font-medium">{profileName || 'Log Viewer'}</h1>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            {/* Kill Resonite */}
+            <button
+              onClick={killResonite}
+              disabled={isKilling}
+              className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 border border-red-600/30 rounded text-red-400 text-sm flex items-center space-x-1.5 transition-colors disabled:opacity-50"
+            >
+              <XCircle className="w-4 h-4" />
+              <span>{isKilling ? 'Killing...' : 'Kill Resonite'}</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Tab Bar */}
+      <div className="bg-dark-900/50 border-b border-dark-700/30 px-4 py-2 flex items-center justify-between">
+        <div className="flex items-center space-x-1">
+          <button
+            onClick={() => setActiveSource('all')}
+            className={`px-3 py-1.5 rounded text-sm transition-colors ${
+              activeSource === 'all'
+                ? 'bg-resonite-blue/20 text-resonite-blue border border-resonite-blue/30'
+                : 'text-gray-400 hover:text-white hover:bg-dark-800/50'
+            }`}
+          >
+            All
+          </button>
+          {sources.filter(s => s.exists).map(source => (
+            <div key={source.id} className="flex items-stretch">
+              <button
+                onClick={() => setActiveSource(source.id)}
+                className={`px-3 py-1.5 rounded-l text-sm transition-colors flex items-center ${
+                  activeSource === source.id
+                    ? 'bg-resonite-blue/20 text-resonite-blue border border-resonite-blue/30 border-r-0'
+                    : 'text-gray-400 hover:text-white hover:bg-dark-800/50'
+                }`}
+              >
+                {source.name}
+              </button>
+              <button
+                onClick={() => {
+                  // パスからディレクトリを取得して開く
+                  const dir = source.path.replace(/[/\\][^/\\]+$/, '');
+                  open(dir).catch(console.error);
+                }}
+                className={`px-2 rounded-r text-sm transition-colors flex items-center ${
+                  activeSource === source.id
+                    ? 'bg-resonite-blue/20 text-resonite-blue border border-resonite-blue/30 border-l-0'
+                    : 'text-gray-500 hover:text-white hover:bg-dark-800/50'
+                }`}
+                title={`Open ${source.name} log folder`}
+              >
+                <FolderOpen className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center space-x-2">
+          {/* Pause/Resume */}
+          <button
+            onClick={() => setIsPaused(!isPaused)}
+            className={`p-1.5 rounded transition-colors ${
+              isPaused 
+                ? 'bg-yellow-600/20 text-yellow-400 border border-yellow-600/30' 
+                : 'text-gray-400 hover:text-white hover:bg-dark-800/50'
+            }`}
+            title={isPaused ? 'Resume' : 'Pause'}
+          >
+            {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+          </button>
+
+          {/* Clear */}
+          <button
+            onClick={clearLogs}
+            className="p-1.5 rounded text-gray-400 hover:text-white hover:bg-dark-800/50 transition-colors"
+            title="Clear logs"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+
+          {/* Auto-scroll indicator */}
+          <button
+            onClick={() => {
+              setAutoScroll(true);
+              if (logContainerRef.current) {
+                logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+              }
+            }}
+            className={`p-1.5 rounded transition-colors ${
+              autoScroll 
+                ? 'text-green-400' 
+                : 'text-gray-500 hover:text-white hover:bg-dark-800/50'
+            }`}
+            title={autoScroll ? 'Auto-scroll enabled' : 'Click to scroll to bottom'}
+          >
+            <ChevronDown className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Paused Banner */}
+      {isPaused && (
+        <div className="bg-yellow-600/20 border-b border-yellow-600/30 px-4 py-1.5 flex items-center space-x-2">
+          <Pause className="w-4 h-4 text-yellow-400" />
+          <span className="text-yellow-200 text-sm">
+            Paused - {pausedLogsRef.current.length} new lines buffered
+          </span>
+        </div>
+      )}
+
+      {/* Log Content */}
+      <div
+        ref={logContainerRef}
+        onScroll={handleScroll}
+        className="flex-1 overflow-y-auto font-mono text-sm p-2 space-y-0.5"
+      >
+        {filteredLogs.length === 0 ? (
+          <div className="flex items-center justify-center h-full text-gray-500">
+            <div className="text-center">
+              <Terminal className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p>Waiting for logs...</p>
+              <p className="text-xs mt-1">Start Resonite to see logs here</p>
+            </div>
+          </div>
+        ) : (
+          filteredLogs.map((log, index) => {
+            const config = levelConfig[log.level];
+            const Icon = config.icon;
+            
+            return (
+              <div
+                key={index}
+                className={`flex items-start space-x-2 px-2 py-0.5 rounded ${config.bgColor} hover:bg-dark-800/50`}
+              >
+                <Icon className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${config.color}`} />
+                {activeSource === 'all' && (
+                  <span className="text-gray-500 text-xs w-16 flex-shrink-0">
+                    [{log.source_id}]
+                  </span>
+                )}
+                <span className={`${config.color} break-all whitespace-pre-wrap`}>
+                  {log.line}
+                </span>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Status Bar */}
+      <footer className="bg-dark-900/50 border-t border-dark-700/30 px-4 py-1.5 flex items-center justify-between text-xs text-gray-500">
+        <span>{filteredLogs.length} lines</span>
+        <span>
+          {sources.filter(s => s.exists).length} active source(s)
+        </span>
+      </footer>
+    </div>
+  );
+}

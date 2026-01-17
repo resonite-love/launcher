@@ -165,6 +165,8 @@
       "reloadMods": "Reflect MOD folder changes",
       "launch": "Launch",
       "launchResonite": "Launch Resonite",
+      "logs": "Logs",
+      "openLogViewer": "Open Log Viewer",
       "duplicate": "Duplicate",
       "duplicateProfile": "Duplicate profile",
       "actions": "Actions",

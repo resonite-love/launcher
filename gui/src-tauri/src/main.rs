@@ -2,10 +2,11 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod wsrelay;
+mod logviewer;
 
 use std::sync::Mutex;
 use std::path::PathBuf;
-use tauri::{State, Window, AppHandle};
+use tauri::{State, Window, AppHandle, Manager};
 use reso_launcher_lib::{
     depotdownloader::DepotDownloader,
     install::{ResoniteInstall, ResoniteInstallManager},
@@ -41,6 +42,9 @@ impl Default for AppState {
 
 // WebSocket Relay state (separate from AppState for async access)
 type WsRelayStateHandle = std::sync::Arc<tokio::sync::RwLock<wsrelay::WsRelayState>>;
+
+// Log Viewer state
+type LogWatcherStateHandle = logviewer::LogWatcherStateHandle;
 
 #[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct ProfileInfo {
@@ -2299,15 +2303,118 @@ async fn get_bepis_loader_info(
     }
 }
 
+// ==================== Log Viewer Commands ====================
+
+/// ログビューアーウィンドウを開く
+#[tauri::command]
+async fn open_log_viewer(
+    app_handle: AppHandle,
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+    log_state: State<'_, LogWatcherStateHandle>,
+) -> Result<(), String> {
+    use tauri::WindowBuilder;
+
+    let window_label = format!("logviewer-{}", profile_name);
+    
+    // 既存のウィンドウがあれば前面に
+    if let Some(window) = app_handle.get_window(&window_label) {
+        window.set_focus().map_err(|e| e.to_string())?;
+        return Ok(());
+    }
+
+    // プロファイルのゲームディレクトリを取得
+    let game_dir = {
+        let app_state = state.lock().unwrap();
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        profile_manager.get_profile_dir(&profile_name).join("Game")
+    };
+
+    if !game_dir.exists() {
+        return Err("Game directory does not exist".to_string());
+    }
+
+    // 別ウィンドウを作成
+    let window = WindowBuilder::new(
+        &app_handle,
+        &window_label,
+        tauri::WindowUrl::App(format!("logviewer.html?profile={}", urlencoding::encode(&profile_name)).into()),
+    )
+    .title(format!("Logs - {}", profile_name))
+    .inner_size(900.0, 600.0)
+    .min_inner_size(600.0, 400.0)
+    .decorations(true)
+    .resizable(true)
+    .build()
+    .map_err(|e| format!("Failed to create window: {}", e))?;
+
+    // ログ監視を開始
+    let log_state_inner = log_state.inner().clone();
+    logviewer::start_log_watcher(
+        app_handle.clone(),
+        profile_name,
+        game_dir,
+        log_state_inner,
+    ).await;
+
+    Ok(())
+}
+
+/// プロファイルのログソース一覧を取得
+#[tauri::command]
+async fn get_log_sources(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<Vec<logviewer::LogSource>, String> {
+    let game_dir = {
+        let app_state = state.lock().unwrap();
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        profile_manager.get_profile_dir(&profile_name).join("Game")
+    };
+
+    if !game_dir.exists() {
+        return Ok(Vec::new());
+    }
+
+    Ok(logviewer::detect_log_sources(&game_dir))
+}
+
+/// 指定プロファイルのResoniteプロセスをKill
+#[tauri::command]
+async fn kill_resonite(
+    profile_name: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let game_dir = {
+        let app_state = state.lock().unwrap();
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        profile_manager.get_profile_dir(&profile_name).join("Game")
+    };
+
+    match logviewer::kill_resonite_for_profile(&game_dir) {
+        Ok(count) => Ok(format!("Killed {} process(es)", count)),
+        Err(e) => Err(e),
+    }
+}
+
 fn main() {
     // Initialize WebSocket Relay state
     let ws_relay_state: WsRelayStateHandle = std::sync::Arc::new(
         tokio::sync::RwLock::new(wsrelay::WsRelayState::default())
     );
 
+    // Initialize Log Watcher state
+    let log_watcher_state: LogWatcherStateHandle = std::sync::Arc::new(
+        tokio::sync::RwLock::new(logviewer::LogWatcherState::default())
+    );
+
     tauri::Builder::default()
         .manage(Mutex::new(AppState::default()))
         .manage(ws_relay_state)
+        .manage(log_watcher_state)
         .invoke_handler(tauri::generate_handler![
             initialize_app,
             install_game_to_profile,
@@ -2374,7 +2481,11 @@ fn main() {
             fetch_thunderstore_packages,
             install_mod_from_thunderstore,
             get_bepis_loader_status,
-            get_bepis_loader_info
+            get_bepis_loader_info,
+            // Log Viewer commands
+            open_log_viewer,
+            get_log_sources,
+            kill_resonite
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -31,6 +31,9 @@ tokio-tungstenite = { version = "0.21", features = ["native-tls"] }
 futures-util = "0.3"
 base64 = "0.21"
 uuid = { version = "1.0", features = ["v4"] }
+notify = { version = "6.1", default-features = false, features = ["macos_kqueue"] }
+encoding_rs = "0.8"
+urlencoding = "2.1"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

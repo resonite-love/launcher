@@ -30,7 +30,9 @@ import {
   ChevronDown,
   Monitor,
   Headphones,
-  Check
+  Check,
+  XCircle,
+  ScrollText
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
@@ -2366,6 +2368,26 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             <span>{t('common.save')}</span>
           </motion.button>
 
+          {/* ログビューアーボタン */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+              hasGame
+                ? 'bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 border border-purple-500/30'
+                : 'bg-gray-700/30 text-gray-500 cursor-not-allowed'
+            }`}
+            onClick={() => {
+              if (hasGame) {
+                invoke('open_log_viewer', { profileName }).catch(console.error);
+              }
+            }}
+            disabled={!hasGame}
+            title={hasGame ? t('profiles.editPage.openLogViewer') : t('profiles.editPage.gameNotInstalledWarning')}
+          >
+            <ScrollText className="w-4 h-4" />
+            <span>{t('profiles.editPage.logs')}</span>
+          </motion.button>
 
           {/* 起動ボタンとプルダウン */}
           <div className="flex items-stretch relative" ref={dropdownRef}>
