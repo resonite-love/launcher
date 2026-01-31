@@ -8,6 +8,22 @@
 ## [Unreleased]
 
 
+## [v1.10.0] - 2026-02-01
+
+### 🎉 新機能
+- **プロファイルのエクスポート/インポート機能**: プロファイル設定をファイルとして共有可能に
+  - `.rlprofile`形式でプロファイル設定をエクスポート
+  - MODリスト、MODローダー情報、設定ファイルを含めてエクスポート
+  - インポート時にMODを自動ダウンロード・インストール
+  - エクスポート時のResoniteバージョン情報を保持
+  - インポート時に同じバージョンのResoniteを自動インストール（バージョンからmanifest_idを自動検索）
+
+### 🐛 バグ修正
+- **ゲーム更新機能の修正**: 「最新版に更新」ボタンで同じバージョンが再インストールされる問題を修正
+  - 更新時にプロファイルの既存manifest_idを使用しないように修正
+  - 最新版を正しくダウンロードできるように改善
+
+
 ## [v1.9.1] - 2026-01-17
 
 ### 🐛 バグ修正
@@ -885,7 +901,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.9.1...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.10.0...HEAD
+[v1.10.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.9.1...v1.10.0
 [v1.9.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.9.0...v1.9.1
 [v1.9.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.8.0...v1.9.0
 [v1.8.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.7.0...v1.8.0

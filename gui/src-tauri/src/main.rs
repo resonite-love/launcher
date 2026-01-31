@@ -1130,6 +1130,26 @@ async fn import_profile(
 
     // Resonite をインストール（game_info がある場合、await 後なので再度 lock）
     if let Some(ref game_info) = result.game_info {
+        // manifest_id がない場合、バージョン情報から検索
+        let manifest_id = match &game_info.manifest_id {
+            Some(id) => Some(id.clone()),
+            None => {
+                // バージョン情報がある場合、対応する manifest_id を検索
+                if let Some(ref version) = game_info.version {
+                    println!("manifest_id not found in export, looking up from version: {}", version);
+                    lookup_manifest_id_by_version(&game_info.branch, version).await
+                } else {
+                    None
+                }
+            }
+        };
+
+        if manifest_id.is_some() {
+            println!("Using manifest_id: {:?}", manifest_id);
+        } else {
+            println!("Warning: No manifest_id found, will install latest version");
+        }
+
         let app_state = state.lock().unwrap();
         let depot_downloader = app_state.depot_downloader.as_ref()
             .ok_or("DepotDownloader not initialized")?;
@@ -1139,7 +1159,7 @@ async fn import_profile(
         let install = ResoniteInstall::new(
             result.profile_id.clone(),
             game_info.branch.clone(),
-            game_info.manifest_id.clone(),
+            manifest_id,
             steam_username,
             steam_password,
         );
@@ -1933,23 +1953,42 @@ async fn get_github_release_info(
 // Get available game versions from version monitor
 #[tauri::command]
 async fn get_game_versions() -> Result<serde_json::Value, String> {
+    fetch_game_versions_json().await
+}
+
+// Internal helper to fetch game versions JSON
+async fn fetch_game_versions_json() -> Result<serde_json::Value, String> {
     let client = reqwest::Client::new();
     let url = "https://raw.githubusercontent.com/resonite-love/resonite-version-monitor/refs/heads/master/data/versions.json";
-    
+
     let response = client.get(url)
         .send()
         .await
         .map_err(|e| format!("Failed to fetch game versions: {}", e))?;
-    
+
     if !response.status().is_success() {
         return Err(format!("Failed to fetch game versions: HTTP {}", response.status()));
     }
-    
+
     let json_data = response.json::<serde_json::Value>()
         .await
         .map_err(|e| format!("Failed to parse game versions: {}", e))?;
-    
+
     Ok(json_data)
+}
+
+// Helper to lookup manifest_id from game version
+async fn lookup_manifest_id_by_version(branch: &str, version: &str) -> Option<String> {
+    let versions = fetch_game_versions_json().await.ok()?;
+    let branch_versions = versions.get(branch)?.as_array()?;
+
+    for entry in branch_versions {
+        let game_version = entry.get("gameVersion")?.as_str()?;
+        if game_version == version {
+            return entry.get("manifestId")?.as_str().map(|s| s.to_string());
+        }
+    }
+    None
 }
 
 // Get Resonite steam news from version monitor

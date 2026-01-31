@@ -463,13 +463,15 @@ function ProfilesTab() {
 
   const handleUpdateGame = async (manifestId?: string) => {
     if (!selectedUpdateProfile) return;
-    
+
+    // manifestIdが未指定の場合は最新版に更新（undefinedを渡す）
+    // 特定のバージョンに更新したい場合のみmanifestIdを指定する
     await updateGame(
       selectedUpdateProfile.id,
       selectedUpdateProfile.branch || 'release',
-      manifestId || selectedUpdateProfile.manifest_id
+      manifestId
     );
-    
+
     closeUpdateModal();
   };
 

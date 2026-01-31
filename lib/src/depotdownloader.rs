@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::error::Error;
 use std::process::{Command, Output, Stdio};
+use std::fs;
 
 /// DepotDownloaderを操作するための構造体
 pub struct DepotDownloader {
@@ -260,7 +261,86 @@ impl DepotDownloader {
         Ok(())
     }
 
+    /// DepotDownloaderの出力からmanifest_idを抽出する
+    fn extract_manifest_id_from_output(&self, output: &str) -> Option<String> {
+        // DepotDownloaderの出力例: "Got manifest ID 1234567890123456789 for ..."
+        // または "Manifest ID: 1234567890123456789"
+        for line in output.lines() {
+            // "Got manifest" パターン
+            if line.contains("Got manifest") {
+                if let Some(idx) = line.find("Got manifest ID") {
+                    let after = &line[idx + 15..]; // "Got manifest ID " の後
+                    let manifest_id: String = after.trim_start().chars()
+                        .take_while(|c| c.is_ascii_digit())
+                        .collect();
+                    if !manifest_id.is_empty() {
+                        return Some(manifest_id);
+                    }
+                }
+            }
+            // "Manifest ID:" パターン
+            if let Some(idx) = line.find("Manifest ID:") {
+                let after = &line[idx + 12..];
+                let manifest_id: String = after.trim().chars()
+                    .take_while(|c| c.is_ascii_digit())
+                    .collect();
+                if !manifest_id.is_empty() {
+                    return Some(manifest_id);
+                }
+            }
+        }
+        None
+    }
+
+    /// ダウンロードディレクトリ内の.DepotDownloaderフォルダから最新のmanifest_idを取得する
+    pub fn get_manifest_id_from_cache(&self, install_dir: &str, depot_id: &str) -> Option<String> {
+        let cache_dir = Path::new(install_dir).join(".DepotDownloader");
+        if !cache_dir.exists() {
+            return None;
+        }
+
+        let prefix = format!("{}_", depot_id);
+
+        // .manifestファイルを探して最新のものを取得
+        let mut latest_manifest: Option<(String, std::time::SystemTime)> = None;
+
+        if let Ok(entries) = fs::read_dir(&cache_dir) {
+            for entry in entries.filter_map(|e| e.ok()) {
+                let file_name = entry.file_name().to_string_lossy().to_string();
+
+                // <depot_id>_<manifest_id>.manifest 形式のファイルを探す
+                if file_name.starts_with(&prefix) && file_name.ends_with(".manifest") {
+                    // manifest_idを抽出
+                    let manifest_id = file_name
+                        .strip_prefix(&prefix)
+                        .and_then(|s| s.strip_suffix(".manifest"))
+                        .map(|s| s.to_string());
+
+                    if let Some(manifest_id) = manifest_id {
+                        // ファイルの更新時刻を取得
+                        if let Ok(metadata) = entry.metadata() {
+                            if let Ok(modified) = metadata.modified() {
+                                match &latest_manifest {
+                                    None => {
+                                        latest_manifest = Some((manifest_id, modified));
+                                    }
+                                    Some((_, latest_time)) if modified > *latest_time => {
+                                        latest_manifest = Some((manifest_id, modified));
+                                    }
+                                    _ => {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        latest_manifest.map(|(id, _)| id)
+    }
+
     /// Resoniteをダウンロード/更新する（バックグラウンド）
+    /// 戻り値は実際にダウンロードされたmanifest_id（取得できた場合）
     pub fn download_resonite(
         &self,
         install_dir: &str,
@@ -268,9 +348,9 @@ impl DepotDownloader {
         manifest_id: Option<&str>,
         username: Option<&str>,
         password: Option<&str>,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<Option<String>, Box<dyn Error>> {
         let args = self.build_resonite_args(install_dir, branch, manifest_id, username, password);
-        
+
         let output = self.run(&args)?;
 
         if !output.status.success() {
@@ -278,8 +358,18 @@ impl DepotDownloader {
             return Err(format!("DepotDownloader failed: {}", stderr).into());
         }
 
+        // 出力からmanifest_idを抽出
+        // 1. stdoutの出力から
+        // 2. 引数で指定されたmanifest_id（特定バージョンインストール時）
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let actual_manifest_id = self.extract_manifest_id_from_output(&stdout)
+            .or_else(|| manifest_id.map(|s| s.to_string()));
+
         println!("Resonite download completed successfully");
-        Ok(())
+        if let Some(ref mid) = actual_manifest_id {
+            println!("Manifest ID: {}", mid);
+        }
+        Ok(actual_manifest_id)
     }
 
     /// Resoniteをダウンロード/更新する（インタラクティブ、2FA対応）

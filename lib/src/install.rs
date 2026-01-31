@@ -67,7 +67,7 @@ impl ResoniteInstall {
         }
 
         // DepotDownloaderでResoniteをダウンロード
-        depot_downloader.download_resonite(
+        let actual_manifest_id = depot_downloader.download_resonite(
             &game_dir.to_string_lossy(),
             &self.branch,
             self.manifest_id.as_deref(),
@@ -79,7 +79,7 @@ impl ResoniteInstall {
         let version = profile.get_game_version(&profile_dir);
         let game_info = GameInfo {
             branch: self.branch.clone(),
-            manifest_id: self.manifest_id.clone(),
+            manifest_id: actual_manifest_id.or_else(|| self.manifest_id.clone()),
             depot_id: "2519832".to_string(),
             installed: true,
             last_updated: Some(Utc::now().to_rfc3339()),
@@ -268,17 +268,17 @@ impl ResoniteInstall {
         );
 
         match background_result {
-            Ok(_) => {
+            Ok(actual_manifest_id) => {
                 // バックグラウンドインストールが成功
                 println!("Background installation succeeded for profile: {}", self.profile_name);
-                
+
                 // プロファイル情報を更新
                 let mut profile = profile_manager.get_profile(&self.profile_name)?;
                 let profile_dir = profile_manager.get_profile_dir(&self.profile_name);
                 let version = profile.get_game_version(&profile_dir);
                 let game_info = GameInfo {
                     branch: self.branch.clone(),
-                    manifest_id: self.manifest_id.clone(),
+                    manifest_id: actual_manifest_id.or_else(|| self.manifest_id.clone()),
                     depot_id: "2519832".to_string(),
                     installed: true,
                     last_updated: Some(Utc::now().to_rfc3339()),
