@@ -47,6 +47,7 @@ import { ModVersionSelector } from './ModVersionSelector';
 import { ProfileDeleteConfirmModal } from './ProfileDeleteConfirmModal';
 import BulkUpgradeModal from './BulkUpgradeModal';
 import { UpgradeableModsDebug } from './UpgradeableModsDebug';
+import ProfileExportModal from './ProfileExportModal';
 import { 
   useModManifest, 
   useInstalledMods, 
@@ -293,6 +294,9 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   // 削除確認モーダル用の状態
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // エクスポートモーダル用の状態
+  const [showExportModal, setShowExportModal] = useState(false);
 
   // キャッシュ・データベース削除確認モーダル用の状態
   const [showClearCacheConfirm, setShowClearCacheConfirm] = useState(false);
@@ -2350,6 +2354,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               refetchUnmanagedMods();
             }}
             showDeleteOption={profileName !== 'default'}
+            onExport={() => setShowExportModal(true)}
           />
 
           
@@ -2834,6 +2839,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
         onConfirm={handleDeleteProfile}
         onCancel={() => setShowDeleteConfirmModal(false)}
         isDeleting={isDeleting}
+      />
+
+      {/* エクスポートモーダル */}
+      <ProfileExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        profileId={profileName}
+        profileName={profile?.display_name || profileName}
       />
 
       {/* キャッシュ削除確認モーダル */}

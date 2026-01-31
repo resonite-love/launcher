@@ -17,6 +17,7 @@ use reso_launcher_lib::{
     mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease, UnmanagedMod, MultiFileInstallRequest, FileInstallChoice, UpgradeableMod},
     thunderstore::{ThunderstoreClient, ThunderstorePackage},
     bepis_loader::{BepisLoader, BepisLoaderStatus, BepisLoaderInfo, InstalledBepisMod},
+    profile_transfer::{ProfileTransfer, ExportManifest, ImportResult},
     utils,
 };
 use std::process::Command;
@@ -1047,6 +1048,119 @@ fn delete_profile(
     }
     
     Ok(format!("Profile '{}' deleted successfully", profile_name))
+}
+
+// Export profile to .rlprofile file
+#[tauri::command]
+async fn export_profile(
+    profile_id: String,
+    output_path: String,
+    include_config: bool,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let base_dir = {
+        let app_state = state.lock().unwrap();
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        profile_manager.get_profiles_dir()
+            .parent()
+            .ok_or("Failed to get base directory")?
+            .to_path_buf()
+    };
+
+    let app_version = env!("CARGO_PKG_VERSION").to_string();
+    let transfer = ProfileTransfer::new(base_dir, app_version);
+    
+    transfer.export_profile(&profile_id, std::path::Path::new(&output_path), include_config)
+        .await
+        .map_err(|e| format!("Failed to export profile: {}", e))?;
+
+    Ok(format!("Profile exported to {}", output_path))
+}
+
+// Preview import from .rlprofile file
+#[tauri::command]
+fn preview_profile_import(
+    archive_path: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<ExportManifest, String> {
+    let base_dir = {
+        let app_state = state.lock().unwrap();
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        profile_manager.get_profiles_dir()
+            .parent()
+            .ok_or("Failed to get base directory")?
+            .to_path_buf()
+    };
+
+    let app_version = env!("CARGO_PKG_VERSION").to_string();
+    let transfer = ProfileTransfer::new(base_dir, app_version);
+    
+    transfer.preview_import(std::path::Path::new(&archive_path))
+        .map_err(|e| format!("Failed to preview import: {}", e))
+}
+
+// Import profile from .rlprofile file
+#[tauri::command]
+async fn import_profile(
+    archive_path: String,
+    new_profile_name: Option<String>,
+    steam_username: Option<String>,
+    steam_password: Option<String>,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<ImportResult, String> {
+    // base_dir を取得（lock を await 前に解放）
+    let base_dir = {
+        let app_state = state.lock().unwrap();
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        profile_manager.get_profiles_dir()
+            .parent()
+            .ok_or("Failed to get base directory")?
+            .to_path_buf()
+    };
+
+    // プロファイルをインポート（await を含む）
+    let app_version = env!("CARGO_PKG_VERSION").to_string();
+    let transfer = ProfileTransfer::new(base_dir, app_version);
+    let mut result = transfer.import_profile(std::path::Path::new(&archive_path), new_profile_name)
+        .await
+        .map_err(|e| format!("Failed to import profile: {}", e))?;
+
+    // Resonite をインストール（game_info がある場合、await 後なので再度 lock）
+    if let Some(ref game_info) = result.game_info {
+        let app_state = state.lock().unwrap();
+        let depot_downloader = app_state.depot_downloader.as_ref()
+            .ok_or("DepotDownloader not initialized")?;
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+
+        let install = ResoniteInstall::new(
+            result.profile_id.clone(),
+            game_info.branch.clone(),
+            game_info.manifest_id.clone(),
+            steam_username,
+            steam_password,
+        );
+
+        match install.install(depot_downloader, profile_manager) {
+            Ok(_) => {
+                // インストール後のバージョンを取得
+                if let Ok(profile) = profile_manager.get_profile(&result.profile_id) {
+                    let version = profile.game_info
+                        .and_then(|gi| gi.version)
+                        .unwrap_or_else(|| game_info.branch.clone());
+                    result.resonite_installed = Some(format!("Resonite {} ({})", version, game_info.branch));
+                }
+            }
+            Err(e) => {
+                eprintln!("Warning: Failed to install Resonite: {}. You may need to install manually.", e);
+            }
+        }
+    }
+
+    Ok(result)
 }
 
 // Helper function to get DataPath from profile args
@@ -2479,6 +2593,9 @@ fn main() {
             open_folder,
             duplicate_profile,
             delete_profile,
+            export_profile,
+            preview_profile_import,
+            import_profile,
             clear_profile_cache,
             clear_profile_database,
             check_for_app_update,

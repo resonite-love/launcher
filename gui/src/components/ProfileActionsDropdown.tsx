@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Copy, Trash2, FolderOpen, RefreshCw, Database, HardDrive } from 'lucide-react';
+import { ChevronDown, Copy, Trash2, FolderOpen, RefreshCw, Database, HardDrive, Download } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface ProfileActionsDropdownProps {
@@ -12,6 +12,7 @@ interface ProfileActionsDropdownProps {
   onReload: () => void;
   onClearCache?: () => void;
   onClearDatabase?: () => void;
+  onExport?: () => void;
   showDeleteOption?: boolean;
 }
 
@@ -24,6 +25,7 @@ export default function ProfileActionsDropdown({
   onReload,
   onClearCache,
   onClearDatabase,
+  onExport,
   showDeleteOption = true,
 }: ProfileActionsDropdownProps) {
   const { t } = useTranslation();
@@ -55,6 +57,18 @@ export default function ProfileActionsDropdown({
       className: 'text-green-400 hover:text-green-300',
     },
   ];
+
+  // エクスポートオプションを追加
+  if (onExport) {
+    menuItems.push({
+      id: 'export',
+      label: t('profiles.editPage.export', 'Export'),
+      icon: Download,
+      onClick: onExport,
+      disabled: false,
+      className: 'text-purple-400 hover:text-purple-300',
+    });
+  }
 
   // キャッシュ削除オプションを追加
   if (onClearCache) {

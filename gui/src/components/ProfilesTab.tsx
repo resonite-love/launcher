@@ -33,6 +33,8 @@ import { useAppStore } from '../store/useAppStore';
 import { useProfiles, useCreateProfile } from '../hooks/useQueries';
 import { useGameInstallation } from '../hooks/useGameInstallation';
 import { BranchInfo } from './ProfileEditPage';
+import ProfileImportModal from './ProfileImportModal';
+import { Upload } from 'lucide-react';
 
 interface ProfileInfo {
   id: string;
@@ -127,6 +129,9 @@ function ProfilesTab() {
   // Version info management
   const [gameVersions, setGameVersions] = useState<BranchInfo>({});
   const [loadingVersions, setLoadingVersions] = useState(false);
+
+  // Import modal state
+  const [showImportModal, setShowImportModal] = useState(false);
 
   useEffect(() => {
     loadSavedCredentials();
@@ -542,6 +547,16 @@ function ProfilesTab() {
           >
             <Plus className="w-4 h-4" />
             <span>{t('profiles.newProfile')}</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="btn-secondary flex items-center space-x-2"
+            onClick={() => setShowImportModal(true)}
+          >
+            <Upload className="w-4 h-4" />
+            <span>{t('profiles.importButton', 'Import')}</span>
           </motion.button>
           
           <motion.button
@@ -1092,6 +1107,13 @@ function ProfilesTab() {
         currentVersion={selectedUpdateProfile?.version}
         currentBranch={selectedUpdateProfile?.branch}
         isLoading={isLoading || (selectedUpdateProfile?.id != null && getIsInstalling(selectedUpdateProfile?.id))}
+      />
+
+      {/* Profile Import Modal */}
+      <ProfileImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportComplete={() => refetchProfiles()}
       />
     </div>
   );

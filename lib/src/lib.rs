@@ -15,6 +15,7 @@ pub mod monkey_loader;
 pub mod mod_manager;
 pub mod thunderstore;
 pub mod bepis_loader;
+pub mod profile_transfer;
 pub mod utils;
 
 // 必要に応じて公開APIをエクスポートする
@@ -27,3 +28,4 @@ pub use monkey_loader::{MonkeyLoader, MonkeyLoaderInfo};
 pub use mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease};
 pub use thunderstore::{ThunderstoreClient, ThunderstorePackage, ThunderstoreVersion, ThunderstoreCategory};
 pub use bepis_loader::{BepisLoader, BepisLoaderStatus, BepisLoaderInfo, InstalledBepisMod};
+pub use profile_transfer::{ProfileTransfer, ExportManifest, ExportedMod, ImportResult, ModImportResult, ModImportStatus, ModSource as ExportModSource};
