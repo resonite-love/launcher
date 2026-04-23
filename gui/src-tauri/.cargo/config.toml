@@ -1,0 +1,9 @@
+# Statically link the MSVC C runtime so the resulting exe runs on machines
+# that do not have Microsoft Visual C++ Redistributable installed.
+# Without this, Windows reports "VCRUNTIME140.dll is missing" on a fresh PC
+# and the launcher fails to start (issue #23).
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.i686-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
