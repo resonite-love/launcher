@@ -24,6 +24,7 @@ pub struct GitHubAsset {
 }
 
 const GITHUB_API_URL: &str = "https://api.github.com/repos/resonite-modding-group/ResoniteModLoader/releases/latest";
+const RML_VERSION_FILE: &str = ".resonite_mod_loader_version";
 
 pub struct ModLoader {
     game_path: PathBuf,
@@ -45,7 +46,7 @@ impl ModLoader {
         
         let version = if installed {
             // ここではファイルのバージョン情報を取得するか、既知のバージョンを返す
-            Some("3.0.0".to_string())
+            self.read_installed_version()
         } else {
             None
         };
@@ -82,12 +83,20 @@ impl ModLoader {
             .find(|asset| asset.name == "ResoniteModLoader.dll")
             .ok_or_else(|| anyhow!("ResoniteModLoader.dll not found in release assets"))?;
 
-        self.download_file(&mod_loader_asset.browser_download_url, &libraries_path.join("ResoniteModLoader.dll")).await?;
+        self.download_file(
+            &mod_loader_asset.browser_download_url,
+            &libraries_path.join("ResoniteModLoader.dll"),
+        )
+        .await?;
 
         // 0Harmony.dllをダウンロードして展開
-        self.download_harmony(&rml_libs_path).await?;
+        self.download_harmony(&release, &rml_libs_path).await?;
+        fs::write(rml_libs_path.join(RML_VERSION_FILE), &release.tag_name)?;
 
-        Ok(format!("ResoniteModLoader {} をインストールしました", release.tag_name))
+        Ok(format!(
+            "ResoniteModLoader {} をインストールしました",
+            release.tag_name
+        ))
     }
 
     /// ResoniteModLoaderをアンインストール
@@ -185,13 +194,32 @@ impl ModLoader {
         Ok(())
     }
 
+    fn read_installed_version(&self) -> Option<String> {
+        let version_path = self.game_path.join("rml_libs").join(RML_VERSION_FILE);
+        fs::read_to_string(version_path)
+            .ok()
+            .map(|version| version.trim().to_string())
+            .filter(|version| !version.is_empty())
+    }
+
     /// Harmonyライブラリをダウンロードして展開
-    async fn download_harmony(&self, rml_libs_path: &Path) -> Result<()> {
-        // とりあえず簡単な実装として、ResoniteModLoaderリポジトリから提供されているDLLを使用
-        // 本来はNuGetパッケージから抽出する必要がある
-        let harmony_url = "https://github.com/resonite-modding-group/ResoniteModLoader/releases/download/3.0.0/0Harmony.dll";
-        
-        self.download_file(harmony_url, &rml_libs_path.join("0Harmony.dll")).await?;
+    async fn download_harmony(&self, release: &GitHubRelease, rml_libs_path: &Path) -> Result<()> {
+        let harmony_asset = release
+            .assets
+            .iter()
+            .find(|asset| asset.name.eq_ignore_ascii_case("0Harmony.dll"))
+            .ok_or_else(|| {
+                anyhow!(
+                    "0Harmony.dll not found in ResoniteModLoader {} release assets",
+                    release.tag_name
+                )
+            })?;
+
+        self.download_file(
+            &harmony_asset.browser_download_url,
+            &rml_libs_path.join("0Harmony.dll"),
+        )
+        .await?;
         Ok(())
     }
 }
