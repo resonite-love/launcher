@@ -9,7 +9,10 @@
       "Bash(powershell.exe -Command \"rustc --version; cargo --version\")",
       "Bash(powershell.exe -Command \"winget install Rustlang.Rustup --accept-package-agreements --accept-source-agreements\")",
       "Bash(powershell.exe -Command \"$env:Path = [System.Environment]::GetEnvironmentVariable(''Path'',''Machine'') + '';'' + [System.Environment]::GetEnvironmentVariable(''Path'',''User''); rustc --version; cargo --version\")",
-      "Bash(powershell.exe -Command:*)"
+      "Bash(powershell.exe -Command:*)",
+      "Bash(git log *)",
+      "Bash(python *)",
+      "PowerShell(cargo metadata *)"
     ],
     "deny": [],
     "ask": []

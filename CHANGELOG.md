@@ -8,6 +8,13 @@
 ## [Unreleased]
 
 
+## [v1.11.0] - 2026-08-07
+
+### 🐛 バグ修正
+- **ResoniteModLoaderのHarmonyダウンロード修正**: 0Harmony.dllを3.0.0固定URLからではなく、インストールするRMLリリースのアセットから取得するように修正
+  - インストール済みRMLのバージョンを`rml_libs/.resonite_mod_loader_version`に記録し、実際のバージョンを表示するように修正（従来は常に`3.0.0`と表示）
+
+
 ## [v1.10.0] - 2026-02-01
 
 ### 🎉 新機能
@@ -901,7 +908,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.10.0...HEAD
+[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.11.0...HEAD
+[v1.11.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.10.0...v1.11.0
 [v1.10.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.9.1...v1.10.0
 [v1.9.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.9.0...v1.9.1
 [v1.9.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.8.0...v1.9.0
