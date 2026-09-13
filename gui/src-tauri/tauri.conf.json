@@ -56,6 +56,12 @@
       "active": true,
       "targets": ["nsis","updater"],
       "identifier": "love.resonite.launcher",
+      "publisher": "resonite.love community",
+      "windows": {
+        "nsis": {
+          "template": "windows/installer.nsi"
+        }
+      },
       "icon": [
         "icons/icon.png",
         "icons/icon.ico"
