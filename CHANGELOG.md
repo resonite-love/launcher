@@ -7,6 +7,13 @@
 
 ## [Unreleased]
 
+## [v1.11.1] - 2026-09-15
+
+### 🐛 バグ修正
+- **Windows版の発行元表示を修正**: アプリ一覧の発行元を `resonite.love community` に変更（[#29](https://github.com/resonite-love/launcher/pull/29)）
+- **旧版からの移行処理を改善**: 旧発行元のインストール先を引き継ぎ、MSI版からの移行時の復旧情報保存と必要な権限への昇格に対応
+- **アンインストールの再試行に対応**: アプリのファイル削除に失敗した場合、アンインストーラーとアプリ一覧の登録を保持
+
 
 ## [v1.11.0] - 2026-08-07
 
@@ -908,7 +915,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.11.0...HEAD
+[Unreleased]: https://github.com/resonite-love/launcher/compare/v1.11.1...HEAD
+[v1.11.1]: https://github.com/resonite-love/launcher/compare/v1.11.0...v1.11.1
 [v1.11.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.10.0...v1.11.0
 [v1.10.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.9.1...v1.10.0
 [v1.9.1]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.9.0...v1.9.1
