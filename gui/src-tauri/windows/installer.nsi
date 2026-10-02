@@ -853,6 +853,7 @@ Section Install
   WriteRegStr SHCTX "${UNINSTKEY}" "Publisher" "${MANUFACTURER}"
   WriteRegStr SHCTX "${UNINSTKEY}" "InstallLocation" "$\"$INSTDIR$\""
   WriteRegStr SHCTX "${UNINSTKEY}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
+  WriteRegStr SHCTX "${UNINSTKEY}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
   WriteRegDWORD SHCTX "${UNINSTKEY}" "NoModify" "1"
   WriteRegDWORD SHCTX "${UNINSTKEY}" "NoRepair" "1"
   WriteRegDWORD SHCTX "${UNINSTKEY}" "EstimatedSize" "${ESTIMATEDSIZE}"
@@ -896,6 +897,8 @@ Function .onInstSuccess
 FunctionEnd
 
 Function un.onInit
+  ; Silent uninstall skips the confirmation page; keep user data by default.
+  StrCpy $DeleteAppDataCheckboxState 0
   Call un.CheckElevationUser
   !insertmacro SetContext
 
