@@ -9,11 +9,12 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import GameVersionSelector from './GameVersionSelector';
+import GameBranchSelector from './GameBranchSelector';
 
 interface GameInstallModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onInstall: (branch: string, manifestId?: string) => void;
+  onInstall: (branch: string, manifestId?: string) => void | Promise<void>;
   profileName: string;
   isLoading?: boolean;
 }
@@ -26,11 +27,13 @@ function GameInstallModal({
   isLoading = false
 }: GameInstallModalProps) {
   const { t } = useTranslation();
-  const [branch, setBranch] = useState<'release' | 'prerelease'>('release');
+  const [branch, setBranch] = useState('release');
+  const [branchValid, setBranchValid] = useState(true);
   const [manifestId, setManifestId] = useState<string | null>(null);
 
   const handleInstall = () => {
-    onInstall(branch, manifestId || undefined);
+    if (isLoading || !branchValid) return;
+    void Promise.resolve(onInstall(branch, manifestId || undefined)).catch(() => {});
   };
 
   const resetForm = () => {
@@ -87,56 +90,19 @@ function GameInstallModal({
 
             {/* インストール設定 */}
             <div className="space-y-4 mb-6">
-              <div>
-                <h4 className="text-white font-medium mb-3">{t('profiles.installModal.branchSelection')}</h4>
-                <div className="flex space-x-3">
-                  <label className="flex-1">
-                    <input
-                      type="radio"
-                      value="release"
-                      checked={branch === 'release'}
-                      onChange={(e) => setBranch(e.target.value as 'release')}
-                      className="sr-only"
-                      disabled={isLoading}
-                    />
-                    <div className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      branch === 'release'
-                        ? 'border-resonite-blue bg-resonite-blue/20'
-                        : 'border-dark-600 hover:border-dark-500'
-                    }`}>
-                      <div className="font-medium text-white mb-1">{t('profiles.installModal.release')}</div>
-                      <div className="text-sm text-gray-400">{t('profiles.installModal.releaseDescription')}</div>
-                    </div>
-                  </label>
-                  
-                  <label className="flex-1">
-                    <input
-                      type="radio"
-                      value="prerelease"
-                      checked={branch === 'prerelease'}
-                      onChange={(e) => setBranch(e.target.value as 'prerelease')}
-                      className="sr-only"
-                      disabled={isLoading}
-                    />
-                    <div className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                      branch === 'prerelease'
-                        ? 'border-resonite-blue bg-resonite-blue/20'
-                        : 'border-dark-600 hover:border-dark-500'
-                    }`}>
-                      <div className="font-medium text-white mb-1">{t('profiles.installModal.prerelease')}</div>
-                      <div className="text-sm text-gray-400">{t('profiles.installModal.prereleaseDescription')}</div>
-                    </div>
-                  </label>
-                </div>
-              </div>
+              <GameBranchSelector value={branch} onChange={nextBranch => {
+                setBranch(nextBranch);
+                setManifestId(null);
+              }} disabled={isLoading} onValidityChange={setBranchValid} />
 
               {/* バージョン選択 */}
-              <GameVersionSelector
+              {branch && <GameVersionSelector
+                key={branch}
                 branch={branch}
                 selectedVersion={manifestId}
                 onVersionSelect={setManifestId}
                 disabled={isLoading}
-              />
+              />}
             </div>
 
             {/* 情報 */}
@@ -170,7 +136,7 @@ function GameInstallModal({
                 whileTap={{ scale: 0.98 }}
                 className="btn-primary flex-1 flex items-center justify-center space-x-2"
                 onClick={handleInstall}
-                disabled={isLoading}
+                disabled={isLoading || !branchValid}
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

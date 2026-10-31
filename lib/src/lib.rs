@@ -17,6 +17,7 @@ pub mod thunderstore;
 pub mod bepis_loader;
 pub mod profile_transfer;
 pub mod utils;
+pub mod steam_branches;
 
 // 必要に応じて公開APIをエクスポートする
 pub use profile::Profile;

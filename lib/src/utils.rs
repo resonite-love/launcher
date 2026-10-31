@@ -14,9 +14,10 @@ pub fn get_executable_directory() -> Result<PathBuf, Box<dyn Error>> {
 
 /// ブランチ名が有効かチェックする
 pub fn validate_branch(branch: &str) -> Result<(), Box<dyn Error>> {
-    if branch != "release" && branch != "prerelease" {
+    if branch.is_empty() || branch.starts_with('-') || branch == "." || branch == ".."
+        || !branch.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.')) {
         return Err(format!(
-            "Invalid branch '{}'. Must be 'release' or 'prerelease'",
+                "Invalid branch '{}'. Use a Steam branch name containing letters, numbers, '-', '_' or '.'",
             branch
         )
         .into());
@@ -49,9 +50,17 @@ mod tests {
 
     #[test]
     fn test_validate_branch_invalid() {
-        assert!(validate_branch("invalid").is_err());
         assert!(validate_branch("").is_err());
-        assert!(validate_branch("beta").is_err());
+        for branch in ["../beta", "..", ".", "-beta", "beta test", "beta\n"] {
+            assert!(validate_branch(branch).is_err());
+        }
+    }
+
+    #[test]
+    fn test_validate_dynamic_branches() {
+        for branch in ["public", "beta", "alpha-prime", "pre-splittening", "test_1.2"] {
+            assert!(validate_branch(branch).is_ok());
+        }
     }
 
     #[test]

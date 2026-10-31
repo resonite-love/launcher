@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   RefreshCw, 
@@ -11,11 +11,12 @@ import {
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import GameVersionSelector from './GameVersionSelector';
+import GameBranchSelector from './GameBranchSelector';
 
 interface GameUpdateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (manifestId?: string) => void;
+  onUpdate: (branch: string, manifestId?: string) => void | Promise<void>;
   profileName: string;
   currentVersion?: string;
   currentBranch?: string;
@@ -34,15 +35,32 @@ function GameUpdateModal({
   const { t } = useTranslation();
   const [updateType, setUpdateType] = useState<'latest' | 'specific'>('latest');
   const [manifestId, setManifestId] = useState('');
+  const [branch, setBranch] = useState(currentBranch);
+  const [branchValid, setBranchValid] = useState(true);
+
+  useEffect(() => {
+    if (isOpen) {
+      setBranch(currentBranch);
+      setUpdateType('latest');
+      setManifestId('');
+    }
+  }, [isOpen, currentBranch, profileName]);
+
+  const changeBranch = (nextBranch: string) => {
+    setBranch(nextBranch);
+    setManifestId('');
+    setUpdateType('latest');
+  };
 
   const handleUpdate = () => {
+    if (isLoading || !branchValid) return;
     if (updateType === 'latest') {
-      onUpdate();
+      void Promise.resolve(onUpdate(branch)).catch(() => {});
     } else {
       if (!manifestId.trim()) {
         return;
       }
-      onUpdate(manifestId.trim());
+      void Promise.resolve(onUpdate(branch, manifestId.trim())).catch(() => {});
     }
   };
 
@@ -52,6 +70,7 @@ function GameUpdateModal({
   };
 
   const handleClose = () => {
+    if (isLoading) return;
     resetForm();
     onClose();
   };
@@ -70,7 +89,7 @@ function GameUpdateModal({
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="bg-dark-900 border border-dark-600 rounded-xl p-6 max-w-md w-full shadow-2xl"
+            className="bg-dark-900 border border-dark-600 rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* ヘッダー */}
@@ -113,68 +132,76 @@ function GameUpdateModal({
 
             {/* アップデート方法選択 */}
             <div className="space-y-4 mb-6">
-              <h4 className="text-white font-medium">{t('profiles.updateModal.updateMethod')}</h4>
-              
-              <div className="space-y-3">
-                {/* 最新版にアップデート */}
-                <label className="flex items-start space-x-3 cursor-pointer">
-                  <input
-                    type="radio"
-                    value="latest"
-                    checked={updateType === 'latest'}
-                    onChange={(e) => setUpdateType(e.target.value as 'latest')}
-                    className="mt-1 w-4 h-4 text-resonite-blue bg-dark-800 border-dark-600 focus:ring-resonite-blue focus:ring-2"
-                    disabled={isLoading}
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <ArrowUp className="w-4 h-4 text-green-400" />
-                      <span className="text-white font-medium">{t('profiles.updateModal.latestVersion')}</span>
-                    </div>
-                    <p className="text-gray-400 text-sm mt-1">
-                      {t('profiles.updateModal.latestVersionDescription', { branch: currentBranch })}
-                    </p>
-                  </div>
-                </label>
-
-                {/* 特定バージョンを指定 */}
-                <label className="flex items-start space-x-3 cursor-pointer">
-                  <input
-                    type="radio"
-                    value="specific"
-                    checked={updateType === 'specific'}
-                    onChange={(e) => setUpdateType(e.target.value as 'specific')}
-                    className="mt-1 w-4 h-4 text-resonite-blue bg-dark-800 border-dark-600 focus:ring-resonite-blue focus:ring-2"
-                    disabled={isLoading}
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center space-x-2">
-                      <ArrowDown className="w-4 h-4 text-yellow-400" />
-                      <span className="text-white font-medium">{t('profiles.updateModal.specificVersion')}</span>
-                    </div>
-                    <p className="text-gray-400 text-sm mt-1">
-                      {t('profiles.updateModal.specificVersionDescription')}
-                    </p>
-                  </div>
-                </label>
-              </div>
-
-              {/* マニフェストID入力 */}
-              {updateType === 'specific' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="ml-7 space-y-3"
-                >
-                  <GameVersionSelector
-                    branch={currentBranch}
-                    selectedVersion={manifestId || null}
-                    onVersionSelect={(version) => setManifestId(version || '')}
-                    disabled={isLoading}
-                  />
-                </motion.div>
+              <GameBranchSelector value={branch} onChange={changeBranch}
+                disabled={isLoading} onValidityChange={setBranchValid} />
+              {branch && branch !== currentBranch && (
+                <p className="text-sm text-yellow-300">{t('gameBranch.changeNotice', { from: currentBranch, to: branch })}</p>
               )}
+              {branch && <>
+                <h4 className="text-white font-medium">{t('profiles.updateModal.updateMethod')}</h4>
+
+                <div className="space-y-3">
+                  {/* 最新版にアップデート */}
+                  <label className="flex items-start space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      value="latest"
+                      checked={updateType === 'latest'}
+                      onChange={(e) => setUpdateType(e.target.value as 'latest')}
+                      className="mt-1 w-4 h-4 text-resonite-blue bg-dark-800 border-dark-600 focus:ring-resonite-blue focus:ring-2"
+                      disabled={isLoading}
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <ArrowUp className="w-4 h-4 text-green-400" />
+                        <span className="text-white font-medium">{t('profiles.updateModal.latestVersion')}</span>
+                      </div>
+                      <p className="text-gray-400 text-sm mt-1">
+                        {t('profiles.updateModal.latestVersionDescription', { branch })}
+                      </p>
+                    </div>
+                  </label>
+
+                  {/* 特定バージョンを指定 */}
+                  <label className="flex items-start space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      value="specific"
+                      checked={updateType === 'specific'}
+                      onChange={(e) => setUpdateType(e.target.value as 'specific')}
+                      className="mt-1 w-4 h-4 text-resonite-blue bg-dark-800 border-dark-600 focus:ring-resonite-blue focus:ring-2"
+                      disabled={isLoading}
+                    />
+                    <div className="flex-1">
+                      <div className="flex items-center space-x-2">
+                        <ArrowDown className="w-4 h-4 text-yellow-400" />
+                        <span className="text-white font-medium">{t('profiles.updateModal.specificVersion')}</span>
+                      </div>
+                      <p className="text-gray-400 text-sm mt-1">
+                        {t('profiles.updateModal.specificVersionDescription')}
+                      </p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* マニフェストID入力 */}
+                {updateType === 'specific' && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="ml-7 space-y-3"
+                  >
+                    <GameVersionSelector
+                      key={branch}
+                      branch={branch}
+                      selectedVersion={manifestId || null}
+                      onVersionSelect={(version) => setManifestId(version || '')}
+                      disabled={isLoading}
+                    />
+                  </motion.div>
+                )}
+              </>}
             </div>
 
             {/* 警告 */}
@@ -208,7 +235,7 @@ function GameUpdateModal({
                 whileTap={{ scale: 0.98 }}
                 className="btn-primary flex-1 flex items-center justify-center space-x-2"
                 onClick={handleUpdate}
-                disabled={isLoading || (updateType === 'specific' && !manifestId.trim())}
+                disabled={isLoading || !branchValid || (updateType === 'specific' && !manifestId.trim())}
               >
                 {isLoading ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
@@ -216,7 +243,7 @@ function GameUpdateModal({
                   <Download className="w-4 h-4" />
                 )}
                 <span>
-                  {updateType === 'latest' ? t('profiles.updateModal.updateButton') : t('common.apply')}
+                  {branch && branch !== currentBranch ? t('gameBranch.changeButton') : updateType === 'latest' ? t('profiles.updateModal.updateButton') : t('common.apply')}
                 </span>
               </motion.button>
             </div>

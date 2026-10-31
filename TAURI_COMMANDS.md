@@ -363,6 +363,42 @@ interface SteamCredentials {
 
 ## バージョン情報
 
+### `get_game_branches`
+
+Fetches Resonite (Steam App ID `2519830`) branch names from the public
+[SteamCMD API](https://www.steamcmd.net/), a third-party service providing Steam app metadata.
+No Steam credentials are sent to this service. Requests time out after 20 seconds.
+
+**Parameters:** None.
+
+**Returns:** `Result<Vec<SteamBranch>, String>`. Network, HTTP and malformed-data failures return an error.
+
+```typescript
+interface SteamBranch {
+  name: string;
+  description: string;
+  password_required: boolean;
+}
+const branches = await invoke<SteamBranch[]>('get_game_branches');
+```
+
+Names are passed unchanged to DepotDownloader using `-branch`; `public` and `release`
+remain distinct. The GUI defaults to Release (recommended). It only fetches and displays
+the alternative branch list when Other branches is selected; existing non-release profiles
+open with their branch selected. The list is cached for five minutes with manual refresh.
+If fetching fails, it retains cached choices, or falls back to prerelease and the current
+branch. Release remains available separately. Password-protected branches are displayed but cannot be selected;
+beta-password authentication is not supported by this UI.
+
+### Branch changes through `update_profile_game_interactive`
+
+The existing `GameInstallRequest.branch` accepts Steam branch names beyond release/prerelease.
+The update dialog resets the selected manifest when the branch changes. Omit `manifest_id`
+to download the latest build of the selected branch, or select a version of that branch.
+`game_info.branch` is updated only after a successful download. Interactive fallback now
+uses the downloader process exit status instead of detecting an existing `Resonite.exe`.
+Closing the dialog without applying does not change the installed branch.
+
 ### `get_game_versions`
 利用可能なゲームバージョンの一覧を取得します。
 

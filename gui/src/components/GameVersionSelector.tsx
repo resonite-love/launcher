@@ -24,26 +24,23 @@ function GameVersionSelector({ branch, selectedVersion, onVersionSelect, disable
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadVersions();
+    let cancelled = false;
+    setVersions([]);
+    setIsLoading(true);
+    setError(null);
+    void invoke<Record<string, GameVersion[]>>('get_game_versions').then(response => {
+      if (!cancelled) {
+        const branchVersions = response[branch];
+        setVersions(Array.isArray(branchVersions) ? [...branchVersions].reverse() : []);
+      }
+    }).catch(err => {
+      if (!cancelled) {
+        console.error('Failed to load game versions:', err);
+        setError(t('gameVersion.fetchFailed'));
+      }
+    }).finally(() => { if (!cancelled) setIsLoading(false); });
+    return () => { cancelled = true; };
   }, [branch]);
-
-  const loadVersions = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const response = await invoke<any>('get_game_versions');
-      
-      // Filter versions by branch
-      const branchVersions = response[branch] || [];
-      setVersions(branchVersions.reverse());
-    } catch (err) {
-      console.error('Failed to load game versions:', err);
-      setError(t('gameVersion.fetchFailed'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
 
   const formatVersionForDisplay = (version: GameVersion) => {
@@ -91,6 +88,10 @@ function GameVersionSelector({ branch, selectedVersion, onVersionSelect, disable
           </>
         )}
       </div>
+
+      {!isLoading && !error && versions.length === 0 && (
+        <p className="text-xs text-gray-400">{t('gameBranch.noVersionHistory')}</p>
+      )}
 
       {selectedVersion && (
         <motion.div
