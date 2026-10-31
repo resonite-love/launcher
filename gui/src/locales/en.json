@@ -554,6 +554,7 @@
       "kiosk": "Kiosk mode (hide exit button)",
       "logPath": "Specify log file save location",
       "resetDash": "Reset dash menu",
+      "neverSaveAnythingDescription": "For testing: prevents all records from being saved. Changes will be lost while enabled.",
       "resetUserspace": "Reset userspace",
       "forceLANOnly": "LAN only mode (disable internet connection)",
       "forceRelay": "Force relay connection",

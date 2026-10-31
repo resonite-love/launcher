@@ -126,6 +126,11 @@
 | `-NoVR` | VRモードを無効化 | デスクトップモード用 |
 | `-ForceVR` | VRモードを強制 | VR専用プロファイル |
 | `-LogLevel` | ログレベルを設定 | `-LogLevel Debug` |
+| `-NeverSaveAnything` | すべてのレコードの保存を無効化（検証用・変更内容は失われます） | 値なしで指定 |
+
+`-NeverSaveAnything` は、プロファイル編集画面の「起動引数」のデバッグカテゴリで
+有効・無効を切り替え、プロファイルを保存して適用します。既定では無効です。
+仕様は [Resonite の公式更新情報](https://steamcommunity.com/app/2519830/allnews/) を参照してください。
 
 ### プロファイル操作
 

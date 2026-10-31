@@ -574,6 +574,7 @@
       "kiosk": "キオスクモード（終了ボタンを非表示）",
       "logPath": "ログファイルの保存先を指定",
       "resetDash": "ダッシュメニューをリセット",
+      "neverSaveAnythingDescription": "検証用：有効な間はレコードが保存されず、変更内容が失われます。",
       "resetUserspace": "ユーザースペースをリセット",
       "forceLANOnly": "LANのみモード（インターネット接続を無効化）",
       "forceRelay": "リレー接続を強制使用",

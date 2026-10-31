@@ -253,6 +253,15 @@ const getArgumentPresets = (t: any): ArgumentPreset[] => [
     category: 'debug',
     arg: '-NeverSaveDash',
     tooltip: 'Prevents dash layout and settings from being saved to disk'
+  },
+  {
+    id: 'never-save-anything',
+    name: 'Never Save Anything',
+    description: t('launchArgs.presets.neverSaveAnythingDescription'),
+    icon: Settings,
+    category: 'debug',
+    arg: '-NeverSaveAnything',
+    tooltip: t('launchArgs.presets.neverSaveAnythingDescription')
   }
 ];
 
