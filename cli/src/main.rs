@@ -32,7 +32,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .about("Installs or updates Resonite")
                 .arg(
                     Arg::with_name("branch")
-                        .help("Branch to install: 'release' or 'prerelease' (default: release)")
+                        .help("Steam branch to install (default: release)")
                         .takes_value(true)
                         .default_value("release"),
                 )
@@ -68,7 +68,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .about("Updates an existing Resonite installation")
                 .arg(
                     Arg::with_name("branch")
-                        .help("Branch to update: 'release' or 'prerelease' (default: release)")
+                        .help("Steam branch to update (default: release)")
                         .takes_value(true)
                         .default_value("release"),
                 )
@@ -104,7 +104,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .about("Checks if updates are available")
                 .arg(
                     Arg::with_name("branch")
-                        .help("Branch to check: 'release' or 'prerelease' (default: release)")
+                        .help("Steam branch to check (default: release)")
                         .takes_value(true)
                         .default_value("release"),
                 )
@@ -167,7 +167,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .about("Launch Resonite with a profile")
                 .arg(
                     Arg::with_name("branch")
-                        .help("Branch to launch: 'release' or 'prerelease' (default: release)")
+                        .help("Steam branch to launch (default: release)")
                         .takes_value(true)
                         .default_value("release"),
                 )

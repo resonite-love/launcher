@@ -1950,7 +1950,13 @@ async fn get_github_release_info(
     })
 }
 
-// Get available game versions from version monitor
+// Get Steam branches from public SteamCMD app metadata.
+#[tauri::command]
+async fn get_game_branches() -> Result<Vec<reso_launcher_lib::steam_branches::SteamBranch>, String> {
+    reso_launcher_lib::steam_branches::fetch_game_branches().await
+}
+
+// Get available game versions from version monitor.
 #[tauri::command]
 async fn get_game_versions() -> Result<serde_json::Value, String> {
     fetch_game_versions_json().await
@@ -2662,6 +2668,7 @@ fn main() {
             add_all_unmanaged_mods_to_system,
             get_github_release_info,
             get_game_versions,
+            get_game_branches,
             fetch_steam_news,
             get_yt_dlp_status,
             update_yt_dlp,

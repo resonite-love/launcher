@@ -27,6 +27,7 @@ import ProfileEditModal from './ProfileEditModal';
 import ProfileEditPage from './ProfileEditPage';
 import ModRiskWarningModal from './ModRiskWarningModal';
 import GameUpdateModal from './GameUpdateModal';
+import GameBranchSelector from './GameBranchSelector';
 import GameVersionSelector from './GameVersionSelector';
 import GameInstallModal from './GameInstallModal';
 import { useAppStore } from '../store/useAppStore';
@@ -95,6 +96,7 @@ function ProfilesTab() {
   const [newProfileDescription, setNewProfileDescription] = useState('');
   const [createWithGame, setCreateWithGame] = useState(false);
   const [createGameBranch, setCreateGameBranch] = useState('release');
+  const [createBranchValid, setCreateBranchValid] = useState(true);
   const [createManifestId, setCreateManifestId] = useState('');
   const [createWithModLoader, setCreateWithModLoader] = useState(false);
   const [createModLoaderType, setCreateModLoaderType] = useState<'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader'>('ResoniteModLoader');
@@ -230,6 +232,7 @@ function ProfilesTab() {
   };
 
   const createProfile = async () => {
+    if (createWithGame && !createBranchValid) return;
     if (!newProfileName.trim()) {
       toast.error('プロファイル名を入力してください');
       return;
@@ -461,14 +464,14 @@ function ProfilesTab() {
     setSelectedUpdateProfile(null);
   };
 
-  const handleUpdateGame = async (manifestId?: string) => {
+  const handleUpdateGame = async (branch: string, manifestId?: string) => {
     if (!selectedUpdateProfile) return;
 
     // manifestIdが未指定の場合は最新版に更新（undefinedを渡す）
     // 特定のバージョンに更新したい場合のみmanifestIdを指定する
     await updateGame(
       selectedUpdateProfile.id,
-      selectedUpdateProfile.branch || 'release',
+      branch,
       manifestId
     );
 
@@ -923,40 +926,19 @@ function ProfilesTab() {
                       exit={{ opacity: 0, height: 0 }}
                       className="space-y-4 ml-7"
                     >
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          {t('common.branch')}
-                        </label>
-                        <div className="flex space-x-4">
-                          <label className="flex items-center space-x-2">
-                            <input
-                              type="radio"
-                              value="release"
-                              checked={createGameBranch === 'release'}
-                              onChange={(e) => setCreateGameBranch(e.target.value)}
-                              className="text-resonite-blue"
-                            />
-                            <span className="text-white">{t('profiles.installModal.release')}</span>
-                          </label>
-                          <label className="flex items-center space-x-2">
-                            <input
-                              type="radio"
-                              value="prerelease"
-                              checked={createGameBranch === 'prerelease'}
-                              onChange={(e) => setCreateGameBranch(e.target.value)}
-                              className="text-resonite-blue"
-                            />
-                            <span className="text-white">{t('profiles.installModal.prerelease')}</span>
-                          </label>
-                        </div>
-                      </div>
+                      <GameBranchSelector value={createGameBranch} onChange={branch => {
+                        setCreateGameBranch(branch);
+                        setCreateManifestId('');
+                      }} disabled={isLoading || createProfileMutation.isPending}
+                        onValidityChange={setCreateBranchValid} />
 
-                      <GameVersionSelector
+                      {createGameBranch && <GameVersionSelector
+                        key={createGameBranch}
                         branch={createGameBranch}
                         selectedVersion={createManifestId || null}
                         onVersionSelect={(version) => setCreateManifestId(version || '')}
                         disabled={isLoading}
-                      />
+                      />}
 
                       <div>
                         <div className="space-y-4 mb-4">
@@ -1055,7 +1037,7 @@ function ProfilesTab() {
                 <button
                   className="btn-primary flex-1 flex items-center justify-center space-x-2"
                   onClick={createProfile}
-                  disabled={createProfileMutation.isPending || isLoading || !newProfileName.trim()}
+                  disabled={createProfileMutation.isPending || isLoading || !newProfileName.trim() || (createWithGame && !createBranchValid)}
                 >
                   {(createProfileMutation.isPending || isLoading) ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

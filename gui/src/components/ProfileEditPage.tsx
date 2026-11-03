@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { invoke } from '@tauri-apps/api/tauri';
+import { listen } from '@tauri-apps/api/event';
 import { open } from '@tauri-apps/api/shell';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -358,12 +359,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   };
 
   const saveProfile = async () => {
-    if (!profile) return;
+    if (!profile || getIsInstalling(profileName)) return;
 
     try {
       setIsSaving(true);
+      // A completed branch change may have updated game_info since the editor opened.
+      const latestProfile = await invoke<ProfileConfig>('get_profile_config', { profileName });
       const updatedProfile: ProfileConfig = {
-        ...profile,
+        ...latestProfile,
         display_name: displayName,
         description,
         args: [...args]
@@ -440,6 +443,23 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       console.error('Failed to load profile info:', err);
     }
   };
+
+  useEffect(() => {
+    let disposed = false;
+    const unlisten = listen<{ profile_name: string; success: boolean }>('installation-completed', event => {
+      if (!disposed && event.payload.profile_name === profileName && event.payload.success) {
+        void loadProfileInfo();
+        // Refresh only installed-game metadata so unsaved name/argument edits remain intact.
+        void invoke<ProfileConfig>('get_profile_config', { profileName }).then(latest => {
+          if (!disposed) setProfile(previous => previous ? { ...previous, game_info: latest.game_info } : previous);
+        }).catch(console.error);
+      }
+    });
+    return () => {
+      disposed = true;
+      void unlisten.then(stop => stop()).catch(console.error);
+    };
+  }, [profileName]);
   
   const loadGameVersions = async () => {
     try {
@@ -913,8 +933,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     JSON.stringify(args) !== JSON.stringify(profile.args)
   );
   
-  const handleGameUpdate = async (manifestId?: string) => {
-    await updateGame(profileName, currentBranch, manifestId);
+  const handleGameUpdate = async (branch: string, manifestId?: string) => {
+    await updateGame(profileName, branch, manifestId);
   };
   
   const handleGameInstall = async (branch: string, manifestId?: string) => {
@@ -2363,7 +2383,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
             whileTap={{ scale: 0.98 }}
             className="btn-primary flex items-center space-x-2"
             onClick={saveProfile}
-            disabled={isSaving || !hasChanges}
+            disabled={isSaving || !hasChanges || getIsInstalling(profileName)}
           >
             {isSaving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -2528,7 +2548,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
               whileTap={{ scale: 0.98 }}
               className="btn-primary"
               onClick={saveProfile}
-              disabled={isSaving}
+              disabled={isSaving || getIsInstalling(profileName)}
             >
               {t('common.save')}
             </motion.button>

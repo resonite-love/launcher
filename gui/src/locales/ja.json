@@ -309,7 +309,7 @@
       "startInstall": "インストール開始"
     },
     "updateModal": {
-      "title": "ゲームアップデート",
+      "title": "ブランチ・バージョン変更",
       "profileInfo": "プロファイル情報",
       "profileLabel": "プロファイル:",
       "branchLabel": "ブランチ:",
@@ -574,6 +574,7 @@
       "kiosk": "キオスクモード（終了ボタンを非表示）",
       "logPath": "ログファイルの保存先を指定",
       "resetDash": "ダッシュメニューをリセット",
+      "neverSaveAnythingDescription": "検証用：有効な間はレコードが保存されず、変更内容が失われます。",
       "resetUserspace": "ユーザースペースをリセット",
       "forceLANOnly": "LANのみモード（インターネット接続を無効化）",
       "forceRelay": "リレー接続を強制使用",
@@ -591,6 +592,19 @@
       "disableGC": "ガベージコレクションを無効化",
       "gc": "特定のガベージコレクションモードを設定"
     }
+  },
+  "gameBranch": {
+    "release": "リリース（推奨）",
+    "other": "別ブランチ",
+    "otherSelection": "別ブランチ",
+    "selectBranch": "ブランチを選択してください",
+    "loading": "Steam のブランチ情報を取得中…",
+    "refresh": "ブランチ一覧を再取得",
+    "fetchFailed": "ブランチ一覧を取得できませんでした。取得済みの一覧、または prerelease と現在のブランチを表示しています。再取得をお試しください。",
+    "passwordRequired": "パスワード保護（選択不可）",
+    "changeNotice": "{{from}} から {{to}} に切り替えます。変更先のゲームデータをダウンロードし、成功後にプロファイルのブランチを更新します。",
+    "changeButton": "ブランチを変更して更新",
+    "noVersionHistory": "このブランチの過去バージョン情報はありません。最新版を取得できます。"
   },
   "titlebar": {
     "poweredBy": "powered by resonite.love"

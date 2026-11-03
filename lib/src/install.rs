@@ -152,8 +152,12 @@ impl ResoniteInstall {
         let manifest_id_for_update = self.manifest_id.clone();
         let profile_manager_clone = profile_manager.clone();
         
-        depot_downloader.monitor_interactive_download(
+        depot_downloader.download_resonite_interactive_with_completion(
             &game_dir_str,
+            &self.branch,
+            self.manifest_id.as_deref(),
+            self.username.as_deref(),
+            self.password.as_deref(),
             Box::new(move |success| {
                 if success {
                     println!("Installation completed for profile: {}", profile_name_for_update);
@@ -175,22 +179,18 @@ impl ResoniteInstall {
                         
                         if let Err(e) = profile_manager_clone.update_profile(&profile) {
                             eprintln!("Failed to update profile after installation: {}", e);
+                            on_complete(false);
+                            return;
                         } else {
                             println!("Profile '{}' updated successfully with game info", profile_name_for_update);
                         }
+                    } else {
+                        on_complete(false);
+                        return;
                     }
                 }
                 on_complete(success);
             })
-        )?;
-
-        // DepotDownloaderでResoniteをダウンロード（インタラクティブ）
-        depot_downloader.download_resonite_interactive(
-            &game_dir_str,
-            &self.branch,
-            self.manifest_id.as_deref(),
-            self.username.as_deref(),
-            self.password.as_deref(),
         )?;
 
         println!("Installation process launched in separate window with monitoring!");

@@ -309,7 +309,7 @@
       "startInstall": "Start Installation"
     },
     "updateModal": {
-      "title": "Game Update",
+      "title": "Change Branch / Version",
       "profileInfo": "Profile Information",
       "profileLabel": "Profile:",
       "branchLabel": "Branch:",
@@ -554,6 +554,7 @@
       "kiosk": "Kiosk mode (hide exit button)",
       "logPath": "Specify log file save location",
       "resetDash": "Reset dash menu",
+      "neverSaveAnythingDescription": "For testing: prevents all records from being saved. Changes will be lost while enabled.",
       "resetUserspace": "Reset userspace",
       "forceLANOnly": "LAN only mode (disable internet connection)",
       "forceRelay": "Force relay connection",
@@ -571,6 +572,19 @@
       "disableGC": "Disable garbage collection",
       "gc": "Set specific garbage collection mode"
     }
+  },
+  "gameBranch": {
+    "release": "Release (recommended)",
+    "other": "Other branches",
+    "otherSelection": "Other branch",
+    "selectBranch": "Select a branch",
+    "loading": "Loading Steam branches…",
+    "refresh": "Refresh branch list",
+    "fetchFailed": "Could not fetch branches. Showing cached choices, or prerelease and the current branch. Try refreshing the list.",
+    "passwordRequired": "Password protected (unavailable)",
+    "changeNotice": "Switch from {{from}} to {{to}}. Game files will be downloaded and the profile branch will be updated after a successful download.",
+    "changeButton": "Switch Branch and Update",
+    "noVersionHistory": "No version history is available for this branch. You can download the latest version."
   },
   "titlebar": {
     "poweredBy": "powered by resonite.love"

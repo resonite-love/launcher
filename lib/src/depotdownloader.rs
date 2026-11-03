@@ -144,11 +144,9 @@ impl DepotDownloader {
         args.push("-depot".to_string());
         args.push("2519832".to_string());
 
-        // ブランチを指定（prereleaseの場合）
-        if branch == "prerelease" {
-            args.push("-branch".to_string());
-            args.push("prerelease".to_string());
-        }
+        // Always forward the exact Steam branch, including public and release.
+        args.push("-branch".to_string());
+        args.push(branch.to_string());
 
         // ManifestIDが指定されている場合は追加
         if let Some(manifest) = manifest_id {
@@ -349,6 +347,7 @@ impl DepotDownloader {
         username: Option<&str>,
         password: Option<&str>,
     ) -> Result<Option<String>, Box<dyn Error>> {
+        crate::utils::validate_branch(branch)?;
         let args = self.build_resonite_args(install_dir, branch, manifest_id, username, password);
 
         let output = self.run(&args)?;
@@ -381,6 +380,7 @@ impl DepotDownloader {
         username: Option<&str>,
         password: Option<&str>,
     ) -> Result<(), Box<dyn Error>> {
+        crate::utils::validate_branch(branch)?;
         let args = self.build_resonite_args(install_dir, branch, manifest_id, username, password);
         
         self.run_interactive(&args)?;
@@ -389,63 +389,43 @@ impl DepotDownloader {
         Ok(())
     }
 
-    /// インタラクティブダウンロードの完了を監視する
-    pub fn monitor_interactive_download(
+    /// Report completion from the downloader's exit status, not existing game files.
+    pub fn download_resonite_interactive_with_completion(
         &self,
         install_dir: &str,
+        branch: &str,
+        manifest_id: Option<&str>,
+        username: Option<&str>,
+        password: Option<&str>,
         callback: Box<dyn Fn(bool) + Send + 'static>,
     ) -> Result<(), Box<dyn Error>> {
-        use std::thread;
-        use std::time::Duration;
-        use std::path::Path;
-
-        let install_path = Path::new(install_dir);
-        let resonite_exe = install_path.join("Resonite.exe");
-        
-        println!("Monitoring installation at: {}", resonite_exe.display());
-
-        // バックグラウンドスレッドで監視
-        thread::spawn(move || {
-            let mut last_exists = resonite_exe.exists();
-            let mut last_size = if last_exists {
-                std::fs::metadata(&resonite_exe).map(|m| m.len()).unwrap_or(0)
-            } else {
-                0
-            };
-
-            loop {
-                thread::sleep(Duration::from_secs(2));
-
-                let current_exists = resonite_exe.exists();
-                let current_size = if current_exists {
-                    std::fs::metadata(&resonite_exe).map(|m| m.len()).unwrap_or(0)
-                } else {
-                    0
-                };
-
-                // ファイルが新しく作成されたか、サイズが安定した場合に完了と判定
-                if current_exists && (!last_exists || (current_size > 0 && current_size == last_size)) {
-                    // さらに2秒待ってサイズが変わらないことを確認
-                    thread::sleep(Duration::from_secs(2));
-                    let final_size = if resonite_exe.exists() {
-                        std::fs::metadata(&resonite_exe).map(|m| m.len()).unwrap_or(0)
-                    } else {
-                        0
-                    };
-
-                    if final_size == current_size && final_size > 0 {
-                        println!("Installation completed! Resonite.exe detected at: {}", resonite_exe.display());
-                        callback(true);
-                        break;
-                    }
-                }
-
-                last_exists = current_exists;
-                last_size = current_size;
-            }
-        });
-
+        crate::utils::validate_branch(branch)?;
+        self.check_exists()?;
+        let args = self.build_resonite_args(install_dir, branch, manifest_id, username, password);
+        #[cfg(target_os = "windows")]
+        let mut command = {
+            use std::os::windows::process::CommandExt;
+            let quote = |value: &str| format!("'{}'", value.replace('\'', "''"));
+            let arguments = args.iter().map(|arg| quote(arg)).collect::<Vec<_>>().join(" ");
+            let script = format!("& {} {}; exit $LASTEXITCODE", quote(&self.path.to_string_lossy()), arguments);
+            let mut command = Command::new("powershell.exe");
+            command.args(["-NoProfile", "-Command", &script]);
+            command.creation_flags(0x00000010); // Interactive Steam Guard prompt in its own console.
+            command
+        };
+        #[cfg(not(target_os = "windows"))]
+        let mut command = {
+            let mut command = Command::new(&self.path);
+            command.args(&args);
+            command
+        };
+        let child = command.spawn()?;
+        std::thread::spawn(move || callback(Self::wait_for_download(child)));
         Ok(())
+    }
+
+    fn wait_for_download(mut child: std::process::Child) -> bool {
+        child.wait().map(|status| status.success()).unwrap_or(false)
     }
 
     /// アップデート確認（DepotDownloaderでは直接的な確認方法はないため、manifest-onlyを使用）
@@ -539,8 +519,28 @@ mod tests {
         assert!(args.contains(&"-dir".to_string()));
         assert!(args.contains(&"/install/path".to_string()));
 
-        // releaseブランチでは-branchが含まれない
-        assert!(!args.contains(&"-branch".to_string()));
+        assert!(args.windows(2).any(|pair| pair == ["-branch", "release"]));
+    }
+
+    #[test]
+    fn test_build_resonite_args_dynamic_branches() {
+        let (_temp, downloader) = create_test_downloader();
+        for branch in ["public", "alpha-prime", "pre-splittening"] {
+            let args = downloader.build_resonite_args("/install/path", branch, None, None, None);
+            assert!(args.windows(2).any(|pair| pair == ["-branch", branch]));
+            assert!(!args.iter().any(|arg| arg == "-manifest"));
+        }
+    }
+
+    #[test]
+    fn test_download_completion_uses_exit_status() {
+        for exit_code in [0, 1] {
+            #[cfg(target_os = "windows")]
+            let child = Command::new("cmd.exe").args(["/C", &format!("exit {exit_code}")]).spawn().unwrap();
+            #[cfg(not(target_os = "windows"))]
+            let child = Command::new("sh").args(["-c", &format!("exit {exit_code}")]).spawn().unwrap();
+            assert_eq!(DepotDownloader::wait_for_download(child), exit_code == 0);
+        }
     }
 
     #[test]
