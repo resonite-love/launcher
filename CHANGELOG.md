@@ -7,6 +7,8 @@
 
 ## [Unreleased]
 
+## [v1.12.0] - 2026-11-03
+
 ### 🎉 新機能
 
 - **作成済みプロファイルのブランチ変更に対応**: プロファイル編集の「バージョン変更」から、変更先のゲームデータを取得して切り替え可能に
@@ -932,7 +934,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/resonite-love/launcher/compare/v1.11.1...HEAD
+[Unreleased]: https://github.com/resonite-love/launcher/compare/v1.12.0...HEAD
+[v1.12.0]: https://github.com/resonite-love/launcher/compare/v1.11.1...v1.12.0
 [v1.11.1]: https://github.com/resonite-love/launcher/compare/v1.11.0...v1.11.1
 [v1.11.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.10.0...v1.11.0
 [v1.10.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.9.1...v1.10.0
