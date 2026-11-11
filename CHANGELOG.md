@@ -7,6 +7,8 @@
 
 ## [Unreleased]
 
+## [v1.13.0] - 2026-11-11
+
 ### 🎉 新機能
 
 - **RMLのバージョン変更**: MOD管理のローダー情報から公開リリースを選び、RML本体とHarmonyを指定バージョンへ変更可能に。旧バージョンへの変更・バージョン不明の環境にも対応し、既存のMOD・設定・その他の依存ライブラリを保持。プレリリースと必要DLLが不足するリリースを区別して表示
@@ -943,7 +945,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/resonite-love/launcher/compare/v1.12.0...HEAD
+[Unreleased]: https://github.com/resonite-love/launcher/compare/v1.13.0...HEAD
+[v1.13.0]: https://github.com/resonite-love/launcher/compare/v1.12.0...v1.13.0
 [v1.12.0]: https://github.com/resonite-love/launcher/compare/v1.11.1...v1.12.0
 [v1.11.1]: https://github.com/resonite-love/launcher/compare/v1.11.0...v1.11.1
 [v1.11.0]: https://github.com/kokoa-love/kokoa-resonite-tools/compare/v1.10.0...v1.11.0
