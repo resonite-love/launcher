@@ -225,6 +225,21 @@ pub struct ModManager {
 }
 
 impl ModManager {
+    // RML is a loader with two specific destinations, not a regular MOD DLL.
+    fn ensure_regular_mod(repo_url: &str) -> Result<(), Box<dyn Error + Send + Sync>> {
+        if let Ok(url) = reqwest::Url::parse(repo_url.trim()) {
+            let path = url.path().trim_end_matches('/').to_ascii_lowercase();
+            let path = path.strip_suffix(".git").unwrap_or(&path);
+            if url.host_str() == Some("github.com")
+                && (path == "/resonite-modding-group/resonitemodloader"
+                    || path.starts_with("/resonite-modding-group/resonitemodloader/"))
+            {
+                return Err("ResoniteModLoader is not a regular MOD. Use the RML install/version-change controls at the top of MOD management.".into());
+            }
+        }
+        Ok(())
+    }
+
     /// 新しいModManagerを作成
     pub fn new(profile_dir: PathBuf) -> Self {
         let mods_dir = profile_dir.join("Game").join("rml_mods");
@@ -378,6 +393,7 @@ impl ModManager {
 
     /// MODをインストール（キャッシュ情報を活用）
     pub async fn install_mod_from_cache(&self, mod_info: &ModInfo, version: Option<&str>, mod_loader_type: Option<&str>) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
+        Self::ensure_regular_mod(&mod_info.source_location)?;
         // 指定されたバージョンまたは最新バージョンのリリース情報を取得
         let release = if let Some(target_version) = version {
             mod_info.releases.iter()
@@ -442,6 +458,7 @@ impl ModManager {
 
     /// GitHubリリースの複数ファイルをチェックし、選択が必要かどうかを判定
     pub async fn check_multi_file_install(&self, repo_url: &str, version: Option<&str>) -> Result<Option<MultiFileInstallRequest>, Box<dyn Error + Send + Sync>> {
+        Self::ensure_regular_mod(repo_url)?;
         let api_url = self.github_repo_to_api_url(repo_url)?;
         
         // 全てのリリースを取得
@@ -528,6 +545,7 @@ impl ModManager {
 
     /// 複数ファイルをユーザーの選択に基づいてインストール
     pub async fn install_multiple_files(&self, repo_url: &str, version: Option<&str>, choices: Vec<FileInstallChoice>) -> Result<Vec<InstalledMod>, Box<dyn Error + Send + Sync>> {
+        Self::ensure_regular_mod(repo_url)?;
         let api_url = self.github_repo_to_api_url(repo_url)?;
         
         // リリース情報を再取得
@@ -614,6 +632,7 @@ impl ModManager {
 
     /// GitHubリポジトリからMODをインストール（フォールバック）
     pub async fn install_mod_from_github(&self, repo_url: &str, version: Option<&str>, mod_loader_type: Option<&str>) -> Result<InstalledMod, Box<dyn Error + Send + Sync>> {
+        Self::ensure_regular_mod(repo_url)?;
         let api_url = self.github_repo_to_api_url(repo_url)?;
         
         // 指定されたバージョンまたは最新リリースを取得
@@ -967,6 +986,7 @@ impl ModManager {
         let existing_mod = installed_mods.iter()
             .find(|m| m.name == mod_name)
             .ok_or(format!("MOD '{}' is not installed", mod_name))?;
+        Self::ensure_regular_mod(&existing_mod.source_location)?;
         
         // MODマニフェストから情報を取得
         let all_mods = self.fetch_mod_manifest().await?;
@@ -1121,6 +1141,7 @@ impl ModManager {
         let existing_mod = installed_mods.iter()
             .find(|m| m.name == mod_name)
             .ok_or(format!("MOD '{}' is not installed", mod_name))?;
+        Self::ensure_regular_mod(&existing_mod.source_location)?;
         
         // MODマニフェストから情報を取得
         let all_mods = self.fetch_mod_manifest().await?;
@@ -1349,5 +1370,64 @@ impl ModManager {
             }
         }
         None
+    }
+}
+
+#[cfg(test)]
+mod rml_guard_tests {
+    use super::*;
+
+    #[test]
+    fn rml_update_guard_recognizes_repository_variants() {
+        for url in [
+            "https://github.com/resonite-modding-group/ResoniteModLoader",
+            " https://github.com/resonite-modding-group/ResoniteModLoader/ ",
+            "https://github.com/Resonite-Modding-Group/ResoniteModLoader.git",
+            "https://github.com/resonite-modding-group/ResoniteModLoader/releases/tag/5.0.3",
+        ] {
+            assert!(ModManager::ensure_regular_mod(url).is_err(), "{}", url);
+        }
+        assert!(ModManager::ensure_regular_mod("https://github.com/example/ExampleMod").is_ok());
+        assert!(ModManager::ensure_regular_mod("https://github.com/resonite-modding-group/ResoniteModLoaderExample").is_ok());
+    }
+
+    #[tokio::test]
+    async fn rml_update_guard_blocks_regular_install_paths_without_writing() {
+        let profile = tempfile::tempdir().unwrap();
+        let manager = ModManager::new(profile.path().to_path_buf());
+        let url = "https://github.com/resonite-modding-group/ResoniteModLoader/";
+        let info: ModInfo = serde_json::from_value(serde_json::json!({
+            "name": "ResoniteModLoader", "description": "", "author": "",
+            "source_location": url, "releases": []
+        })).unwrap();
+        let errors = [
+            manager.install_mod_from_cache(&info, None, Some("ResoniteModLoader")).await.unwrap_err(),
+            manager.install_mod_from_github(url, None, Some("ResoniteModLoader")).await.unwrap_err(),
+            manager.check_multi_file_install(url, None).await.unwrap_err(),
+            manager.install_multiple_files(url, None, vec![]).await.unwrap_err(),
+        ];
+        for error in errors {
+            assert!(error.to_string().contains("RML install/version-change controls"));
+        }
+        assert_eq!(fs::read_dir(profile.path()).unwrap().count(), 0);
+    }
+
+    #[tokio::test]
+    async fn rml_update_guard_preserves_existing_record_and_file() {
+        let profile = tempfile::tempdir().unwrap();
+        let manager = ModManager::new(profile.path().to_path_buf());
+        let dll_path = profile.path().join("0Harmony.dll");
+        fs::write(&dll_path, "existing").unwrap();
+        manager.add_to_installed_mods(&InstalledMod {
+            name: "ResoniteModLoader".into(), description: "".into(),
+            source_location: "https://github.com/resonite-modding-group/ResoniteModLoader/".into(),
+            installed_version: "5.0.3".into(), installed_date: "".into(), dll_path: dll_path.clone(),
+            mod_loader_type: Some("ResoniteModLoader".into()), file_format: Some("dll".into()), enabled: Some(true),
+        }).unwrap();
+        let before = fs::read(&manager.installed_mods_file).unwrap();
+        assert!(manager.update_mod("ResoniteModLoader", "5.0.3").await.unwrap_err().to_string().contains("RML install/version-change controls"));
+        assert!(manager.upgrade_mod("ResoniteModLoader", None).await.unwrap_err().to_string().contains("RML install/version-change controls"));
+        assert_eq!(fs::read(&manager.installed_mods_file).unwrap(), before);
+        assert_eq!(fs::read(dll_path).unwrap(), b"existing");
     }
 }
