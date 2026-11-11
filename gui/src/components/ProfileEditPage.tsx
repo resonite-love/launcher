@@ -38,6 +38,7 @@ import {
 import toast from 'react-hot-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import ModRiskWarningModal from './ModRiskWarningModal';
+import RmlVersionModal from './RmlVersionModal';
 import MultiFileInstallModal from './MultiFileInstallModal';
 import ProfileActionsDropdown from './ProfileActionsDropdown';
 import GameVersionSelector from './GameVersionSelector';
@@ -198,6 +199,8 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   // MODローダー用の状態
   const [modLoaderInfo, setModLoaderInfo] = useState<UnifiedModLoaderInfo | null>(null);
   const [isLoadingModLoader, setIsLoadingModLoader] = useState(false);
+  const [isUpdatingModLoader, setIsUpdatingModLoader] = useState(false);
+  const [showRmlVersionModal, setShowRmlVersionModal] = useState(false);
   const [showModRiskModal, setShowModRiskModal] = useState(false);
   const [selectedModLoaderType, setSelectedModLoaderType] = useState<'ResoniteModLoader' | 'MonkeyLoader' | 'BepisLoader'>('ResoniteModLoader');
   
@@ -494,6 +497,22 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     }
   };
 
+  const changeModLoaderVersion = async (selectedVersion: string) => {
+    if (isUpdatingModLoader || isLoadingModLoader) return;
+    setIsUpdatingModLoader(true);
+    try {
+      const version = await invoke<string>('change_resonite_mod_loader_version', { profileName, version: selectedVersion });
+      setModLoaderInfo(previous => previous ? { ...previous, version } : previous);
+      setShowRmlVersionModal(false);
+      toast.success(t('profiles.editPage.rmlVersionChanged', { version }));
+      await queryClient.invalidateQueries({ queryKey: ['profiles'] });
+    } catch (err) {
+      toast.error(t('profiles.editPage.rmlVersionChangeFailed', { message: String(err) }));
+    } finally {
+      setIsUpdatingModLoader(false);
+    }
+  };
+
   const handleModRiskConfirm = async () => {
     setShowModRiskModal(false);
     await installModLoader();
@@ -768,6 +787,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   };
 
   const handleLaunch = () => {
+    if (isUpdatingModLoader) return;
     if (!hasGame) {
       toast.error(t('home.launcher.notInstalled'));
       return;
@@ -776,6 +796,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   };
 
   const handleLaunchWithMode = async (mode: string) => {
+    if (isUpdatingModLoader) return;
     if (!hasGame) {
       toast.error(t('home.launcher.notInstalled'));
       return;
@@ -1421,7 +1442,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                 {/* インストール済みMODローダー情報 */}
                 {modLoaderInfo?.installed && (
                   <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mb-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
                       <div className="flex items-center space-x-3">
                         <Package className="w-5 h-5 text-green-400" />
                         <div>
@@ -1436,20 +1457,34 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                           </p>
                         </div>
                       </div>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="btn-secondary text-xs flex items-center space-x-1"
-                        onClick={uninstallModLoader}
-                        disabled={isLoadingModLoader}
-                      >
-                        {isLoadingModLoader ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-3 h-3" />
+                      <div className="flex flex-wrap items-center gap-2">
+                        {modLoaderInfo.loader_type === 'ResoniteModLoader' && (
+                          <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="btn-primary text-xs flex items-center space-x-1"
+                            onClick={() => setShowRmlVersionModal(true)}
+                            disabled={isLoadingModLoader || isUpdatingModLoader || launchMutation.isPending}
+                          >
+                            {isUpdatingModLoader ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                            <span>{t(isUpdatingModLoader ? 'profiles.editPage.rmlVersionChanging' : 'profiles.editPage.changeRmlVersion')}</span>
+                          </motion.button>
                         )}
-                        <span>アンインストール</span>
-                      </motion.button>
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="btn-secondary text-xs flex items-center space-x-1"
+                          onClick={uninstallModLoader}
+                          disabled={isLoadingModLoader || isUpdatingModLoader}
+                        >
+                          {isLoadingModLoader ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-3 h-3" />
+                          )}
+                          <span>アンインストール</span>
+                        </motion.button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -2426,7 +2461,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     : 'btn-secondary opacity-50 cursor-not-allowed'
                 }`}
                 onClick={handleLaunch}
-                disabled={!hasGame || launchMutation.isPending}
+                disabled={!hasGame || launchMutation.isPending || isUpdatingModLoader}
                 title={hasGame ? t('profiles.editPage.launchResonite') : t('profiles.editPage.gameNotInstalledWarning')}
               >
                 {launchMutation.isPending ? (
@@ -2446,7 +2481,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                     : 'btn-secondary opacity-50 cursor-not-allowed'
                 }`}
                 onClick={() => setLaunchDropdownOpen(!launchDropdownOpen)}
-                disabled={!hasGame || launchMutation.isPending}
+                disabled={!hasGame || launchMutation.isPending || isUpdatingModLoader}
               >
                 <ChevronDown className="w-4 h-4" />
               </motion.button>
@@ -2557,6 +2592,14 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       )}
       
       {/* MOD Risk Warning Modal */}
+      {showRmlVersionModal && (
+        <RmlVersionModal
+          currentVersion={modLoaderInfo?.version}
+          isChanging={isUpdatingModLoader}
+          onClose={() => setShowRmlVersionModal(false)}
+          onVersionSelect={changeModLoaderVersion}
+        />
+      )}
       <ModRiskWarningModal
         isOpen={showModRiskModal}
         onClose={handleModRiskCancel}

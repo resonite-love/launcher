@@ -11,7 +11,7 @@ use reso_launcher_lib::{
     depotdownloader::DepotDownloader,
     install::{ResoniteInstall, ResoniteInstallManager},
     profile::{Profile, ProfileManager},
-    mod_loader::ModLoader,
+    mod_loader::{ModLoader, RmlVersion},
     mod_loader_type::ModLoaderType,
     monkey_loader::MonkeyLoader,
     mod_manager::{ModManager, ModInfo, InstalledMod, GitHubRelease, ModRelease, UnmanagedMod, MultiFileInstallRequest, FileInstallChoice, UpgradeableMod},
@@ -748,6 +748,33 @@ async fn install_mod_loader(
     }
 
     Ok(result)
+}
+
+#[tauri::command]
+async fn get_resonite_mod_loader_versions() -> Result<Vec<RmlVersion>, String> {
+    ModLoader::get_versions().await.map_err(|e| format!("Failed to get RML versions: {:#}", e))
+}
+
+// Replace only the RML binaries with the selected release.
+#[tauri::command]
+async fn change_resonite_mod_loader_version(
+    profile_name: String,
+    version: String,
+    state: State<'_, Mutex<AppState>>,
+) -> Result<String, String> {
+    let game_path = {
+        let app_state = state.lock().unwrap();
+        let profile_manager = app_state.profile_manager.as_ref()
+            .ok_or("Profile manager not initialized")?;
+        let profile = profile_manager.get_profile(&profile_name)
+            .map_err(|e| format!("Failed to get profile: {}", e))?;
+        if matches!(profile.mod_loader_type, Some(ModLoaderType::MonkeyLoader | ModLoaderType::BepisLoader)) {
+            return Err("This profile does not use ResoniteModLoader".to_string());
+        }
+        find_game_path(&profile_manager.get_profile_dir(&profile_name))?
+    };
+    ModLoader::new(game_path).change_version(&version).await
+        .map_err(|e| format!("Failed to change ResoniteModLoader version: {:#}", e))
 }
 
 // Uninstall mod loader from a profile
@@ -2633,6 +2660,8 @@ fn main() {
             update_profile_config,
             get_mod_loader_status,
             install_mod_loader,
+            get_resonite_mod_loader_versions,
+            change_resonite_mod_loader_version,
             uninstall_mod_loader,
             open_profile_folder,
             open_folder,
