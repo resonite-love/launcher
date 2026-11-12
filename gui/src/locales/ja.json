@@ -232,6 +232,8 @@
       "noMatchFound": "📦 マニフェストに該当するMODが見つかりませんでした",
       "manage": "管理",
       "searchMods": "MODを検索...",
+      "clearModSearch": "検索をクリア",
+      "noInstalledModsMatch": "検索条件に一致するインストール済みMODはありません",
       "versionControlNote": "管理システムに追加すると、バージョン管理が可能になります。",
       "add": "追加",
       "available": "が利用可能",

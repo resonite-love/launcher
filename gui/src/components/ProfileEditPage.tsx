@@ -46,6 +46,7 @@ import GameUpdateModal from './GameUpdateModal';
 import GameInstallModal from './GameInstallModal';
 import LaunchArgumentsEditor from './LaunchArgumentsEditor';
 import { ModVersionSelector } from './ModVersionSelector';
+import ModSearchInput from './ModSearchInput';
 import { ProfileDeleteConfirmModal } from './ProfileDeleteConfirmModal';
 import BulkUpgradeModal from './BulkUpgradeModal';
 import { UpgradeableModsDebug } from './UpgradeableModsDebug';
@@ -207,6 +208,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   // MOD管理用の状態
   const [isLoadingMods, setIsLoadingMods] = useState(false);
   const [modSearchQuery, setModSearchQuery] = useState('');
+  const [installedModSearchQuery, setInstalledModSearchQuery] = useState('');
   const [customRepoUrl, setCustomRepoUrl] = useState('');
   const [isInstallingMod, setIsInstallingMod] = useState<string | null>(null);
   const [selectedVersions, setSelectedVersions] = useState<{[modUrl: string]: string}>({});
@@ -227,6 +229,12 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const { data: availableMods = [], isLoading: modsLoading, refetch: refetchMods } = useModManifest(profileName);
   const { data: thunderstorePackages = [], isLoading: thunderstoreLoading, refetch: refetchThunderstore } = useThunderstorePackages(profileName, isBepisLoader);
   const { data: installedMods = [], isLoading: installedModsLoading, refetch: refetchInstalledMods } = useInstalledMods(profileName);
+  const normalizedInstalledModSearch = installedModSearchQuery.trim().toLowerCase();
+  const filteredInstalledMods = installedMods.filter(mod =>
+    [mod.name, mod.description, mod.source_location].some(value =>
+      value.toLowerCase().includes(normalizedInstalledModSearch)
+    )
+  );
   const { data: unmanagedMods = [], isLoading: unmanagedModsLoading, refetch: refetchUnmanagedMods } = useUnmanagedMods(profileName);
   const installThunderstoreModMutation = useInstallThunderstoreMod();
   // MODバージョン取得用のstate
@@ -325,6 +333,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   ];
 
   useEffect(() => {
+    setInstalledModSearchQuery('');
     loadProfile();
     loadModLoaderInfo();
     loadProfileInfo();
@@ -1583,15 +1592,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                       </div>
 
                       {(isBepisLoader ? thunderstorePackages.length > 0 : availableMods.length > 0) && (
-                        <div className="mb-4">
-                          <input
-                            type="text"
-                            value={modSearchQuery}
-                            onChange={(e) => setModSearchQuery(e.target.value)}
-                            placeholder={t('profiles.editPage.searchMods')}
-                            className="input-primary w-full"
-                          />
-                        </div>
+                        <ModSearchInput value={modSearchQuery} onChange={setModSearchQuery} />
                       )}
 
                       <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -1956,6 +1957,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                       
                       {/* Debug component */}
                       {/* <UpgradeableModsDebug profileName={profileName} /> */}
+
+                      {installedMods.length > 0 && (
+                        <ModSearchInput value={installedModSearchQuery} onChange={setInstalledModSearchQuery} />
+                      )}
                       
                       <div className="space-y-3">
                         {installedMods.length === 0 ? (
@@ -1964,8 +1969,13 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                             <p className="text-gray-400 mb-2">{t('profiles.editPage.noInstalledMods')}</p>
                             <p className="text-gray-500 text-sm">{t('profiles.editPage.installModsFirst')}</p>
                           </div>
+                        ) : filteredInstalledMods.length === 0 ? (
+                          <div className="text-center py-8">
+                            <Search className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                            <p className="text-gray-400">{t('profiles.editPage.noInstalledModsMatch')}</p>
+                          </div>
                         ) : (
-                          installedMods.map((mod, index) => (
+                          filteredInstalledMods.map((mod, index) => (
                             <motion.div
                               key={mod.name}
                               initial={{ opacity: 0, y: 10 }}
