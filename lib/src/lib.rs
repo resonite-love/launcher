@@ -7,6 +7,7 @@
 pub mod test_utils;
 
 pub mod profile;
+pub mod profile_copy;
 pub mod install;
 pub mod depotdownloader;
 pub mod mod_loader;
