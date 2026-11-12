@@ -7,6 +7,16 @@
 
 ## [Unreleased]
 
+## [v1.14.0] - 2026-11-12
+
+### 🐛 バグ修正
+
+- **複製先のMOD管理を修正**: プロファイルの複製時に、RML・MonkeyLoader・BepisLoaderのMOD管理情報に含まれるパスを複製先へ更新。複製先でのMODの有効化・無効化・削除がコピー元へ影響する問題を修正（[#35](https://github.com/resonite-love/launcher/pull/35)）
+- **不正なデータを含むプロファイルの複製を中止**: 不正なMOD管理JSON、コピー元の外を指すパス、相対パス、親ディレクトリ参照、シンボリックリンクなどを検出した場合は処理を中止し、作成途中の複製先を削除
+- **MODの設定ファイルも複製**: プロファイル直下の `launchconfig.json` のみ新規作成し、MODなどが持つ同名のファイルは複製
+
+この修正は今後のプロファイル複製に適用されます。既存の複製済みプロファイルや、起動引数・MOD固有の設定に直接記載された絶対パスは修復しません。
+
 ## [v1.13.0] - 2026-11-11
 
 ### 🎉 新機能
@@ -945,7 +955,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/resonite-love/launcher/compare/v1.13.0...HEAD
+[Unreleased]: https://github.com/resonite-love/launcher/compare/v1.14.0...HEAD
+[v1.14.0]: https://github.com/resonite-love/launcher/compare/v1.13.0...v1.14.0
 [v1.13.0]: https://github.com/resonite-love/launcher/compare/v1.12.0...v1.13.0
 [v1.12.0]: https://github.com/resonite-love/launcher/compare/v1.11.1...v1.12.0
 [v1.11.1]: https://github.com/resonite-love/launcher/compare/v1.11.0...v1.11.1
