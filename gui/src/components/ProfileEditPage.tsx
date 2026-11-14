@@ -64,6 +64,7 @@ import {
   useUpgradeMod,
   useUpgradeableMods,
   useBulkUpgradeMods,
+  UpgradeableMod,
   useUnmanagedMods,
   useAddUnmanagedMod,
   useAddAllUnmanagedMods,
@@ -218,7 +219,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const [selectedCustomModUrl, setSelectedCustomModUrl] = useState<string>('');
   const [customModVersions, setCustomModVersions] = useState<any[]>([]);
   const [modActiveTab, setModActiveTab] = useState<'install' | 'manage'>('install');
-  const [showBulkUpgradeModal, setShowBulkUpgradeModal] = useState(false);
+  const [bulkUpgradePlan, setBulkUpgradePlan] = useState<{
+    profileName: string;
+    upgrades: UpgradeableMod[];
+  } | null>(null);
   
   // Launch dropdown state
   const [launchDropdownOpen, setLaunchDropdownOpen] = useState(false);
@@ -258,7 +262,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   const updateModMutation = useUpdateMod();
   const downgradeModMutation = useDowngradeMod();
   const upgradeModMutation = useUpgradeMod();
-  const { data: upgradeableMods = [], refetch: refetchUpgradeableMods, isLoading: upgradeableModsLoading, error: upgradeableModsError } = useUpgradeableMods(profileName);
+  const { data: upgradeableMods = [], isLoading: upgradeableModsLoading, error: upgradeableModsError } = useUpgradeableMods(profileName);
   
   // Debug logging for upgradeableMods
   console.log('ProfileEditPage - upgradeableMods debug:', {
@@ -541,15 +545,17 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
   };
 
   const handleBulkUpgrade = () => {
-    setShowBulkUpgradeModal(true);
+    setBulkUpgradePlan({
+      profileName,
+      upgrades: getCompatibleUpgradeableMods(),
+    });
   };
 
   const confirmBulkUpgrade = async () => {
+    if (!bulkUpgradePlan || bulkUpgradeModsMutation.isPending) return;
     try {
-      await bulkUpgradeModsMutation.mutateAsync({ profileName });
-      setShowBulkUpgradeModal(false);
-      // Refresh upgradeable mods list
-      refetchUpgradeableMods();
+      await bulkUpgradeModsMutation.mutateAsync(bulkUpgradePlan);
+      setBulkUpgradePlan(null);
     } catch (error) {
       // Error is handled by the mutation's onError
     }
@@ -631,20 +637,22 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
     // BepisLoader時はアップグレードチェック未実装
     if (isBepisLoader) return [];
 
-    return upgradeableMods.filter(upgradeable => {
+    return upgradeableMods.flatMap(upgradeable => {
       const manifestMod = availableMods.find(m =>
         m.name === upgradeable.name || m.source_location === upgradeable.source_location
       );
 
-      if (!manifestMod?.releases) return false;
+      if (!manifestMod?.releases) return [];
 
       // 互換性のあるバージョンが存在するかチェック
       const compatibleReleases = manifestMod.releases.filter(release => isReleaseCompatible(release));
-      if (compatibleReleases.length === 0) return false;
+      if (compatibleReleases.length === 0) return [];
 
       // 現在のバージョンより新しい互換性のあるバージョンが存在するかチェック
       const latestCompatibleVersion = compatibleReleases[0].version;
-      return compareVersions(latestCompatibleVersion, upgradeable.current_version) > 0;
+      return compareVersions(latestCompatibleVersion, upgradeable.current_version) > 0
+        ? [{ ...upgradeable, latest_version: latestCompatibleVersion }]
+        : [];
     });
   };
 
@@ -1944,7 +1952,7 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
                             <motion.button
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
-                              onClick={() => setShowBulkUpgradeModal(true)}
+                              onClick={handleBulkUpgrade}
                               className="btn-primary text-xs flex items-center space-x-2 px-3 py-1.5"
                               disabled={bulkUpgradeModsMutation.isPending}
                             >
@@ -2889,19 +2897,10 @@ function ProfileEditPage({ profileName, onBack }: ProfileEditPageProps) {
       
       {/* 一括アップグレードモーダル */}
       <BulkUpgradeModal
-        isOpen={showBulkUpgradeModal}
-        onClose={() => setShowBulkUpgradeModal(false)}
-        upgradeableMods={getCompatibleUpgradeableMods()}
-        onConfirm={async () => {
-          try {
-            await bulkUpgradeModsMutation.mutateAsync({ profileName });
-            setShowBulkUpgradeModal(false);
-            refetchInstalledMods();
-            refetchUpgradeableMods();
-          } catch (error) {
-            console.error('Bulk upgrade failed:', error);
-          }
-        }}
+        isOpen={bulkUpgradePlan !== null}
+        onClose={() => setBulkUpgradePlan(null)}
+        upgradeableMods={bulkUpgradePlan?.upgrades ?? []}
+        onConfirm={confirmBulkUpgrade}
         isUpgrading={bulkUpgradeModsMutation.isPending}
       />
       
