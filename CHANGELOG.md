@@ -7,6 +7,13 @@
 
 ## [Unreleased]
 
+## [v1.15.1] - 2026-11-14
+
+### 🐛 バグ修正
+
+- **一括MOD更新の対象を修正**: 確認画面に表示したMODとバージョンだけを更新。確認対象外のMODや、確認後に追加された新しいバージョンが更新対象になる問題を修正（[#38](https://github.com/resonite-love/launcher/pull/38)）
+- **一括更新の確認内容を保持**: 確認画面を開いた時点の対象と、使用中のMODローダーに対応するバージョンを保持して実行。対象が空の場合は更新しない
+
 ## [v1.15.0] - 2026-11-14
 
 ### 🎉 新機能
@@ -966,7 +973,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/resonite-love/launcher/compare/v1.15.0...HEAD
+[Unreleased]: https://github.com/resonite-love/launcher/compare/v1.15.1...HEAD
+[v1.15.1]: https://github.com/resonite-love/launcher/compare/v1.15.0...v1.15.1
 [v1.15.0]: https://github.com/resonite-love/launcher/compare/v1.14.0...v1.15.0
 [v1.14.0]: https://github.com/resonite-love/launcher/compare/v1.13.0...v1.14.0
 [v1.13.0]: https://github.com/resonite-love/launcher/compare/v1.12.0...v1.13.0
