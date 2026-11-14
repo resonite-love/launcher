@@ -1,5 +1,12 @@
 # Tauri Commands Documentation
 
+## MOD Bulk Updates
+
+`bulk_upgrade_mods` requires `profileName: string` and `upgrades: UpgradeableMod[]`.
+The UI snapshots the confirmation list and submits those same MODs and versions.
+Only the submitted MODs are updated to their displayed `latest_version`; the command
+does not discover additional updates at execution time. An empty list does nothing.
+
 ## Profile Management
 
 ### delete_profile

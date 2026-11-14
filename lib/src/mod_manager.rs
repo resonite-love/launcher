@@ -1077,52 +1077,22 @@ impl ModManager {
         Ok(upgradeable_mods)
     }
 
-    /// アップデート可能なMODを一括でアップグレード
-    pub async fn bulk_upgrade_mods(&self) -> Result<Vec<InstalledMod>, Box<dyn Error + Send + Sync>> {
-        // インストール済みMODとマニフェストを取得
-        let installed_mods = self.get_installed_mods()?;
-        let all_mods = self.fetch_mod_manifest().await?;
-        
+    /// 確認画面に表示したMODとバージョンだけを一括でアップグレード
+    pub async fn bulk_upgrade_mods(&self, upgrades: &[UpgradeableMod]) -> Result<Vec<InstalledMod>, Box<dyn Error + Send + Sync>> {
         let mut upgraded_mods = Vec::new();
         let mut failed_upgrades = Vec::new();
-        
-        for installed_mod in &installed_mods {
-            // マニフェストから対応するMOD情報を探す
-            let manifest_mod = all_mods.iter().find(|m| 
-                m.name == installed_mod.name || m.source_location == installed_mod.source_location
-            );
-            
-            if let Some(mod_info) = manifest_mod {
-                if let Some(latest_version) = &mod_info.latest_version {
-                    // バージョン比較（簡易的にstring比較、より新しいバージョンがあるか確認）
-                    if latest_version != &installed_mod.installed_version {
-                        println!("Upgrading {} from {} to {}", 
-                                installed_mod.name, 
-                                installed_mod.installed_version, 
-                                latest_version);
-                        
-                        match self.upgrade_mod(&installed_mod.name, Some(latest_version)).await {
-                            Ok(upgraded_mod) => {
-                                upgraded_mods.push(upgraded_mod);
-                                println!("Successfully upgraded {}", installed_mod.name);
-                            }
-                            Err(e) => {
-                                let error_msg = format!("Failed to upgrade {}: {}", installed_mod.name, e);
-                                eprintln!("{}", error_msg);
-                                failed_upgrades.push(error_msg);
-                            }
-                        }
-                    } else {
-                        println!("{} is already up to date ({})", installed_mod.name, latest_version);
-                    }
-                } else {
-                    println!("No latest version available for {}", installed_mod.name);
+
+        for upgrade in upgrades {
+            match self.upgrade_mod(&upgrade.name, Some(&upgrade.latest_version)).await {
+                Ok(upgraded_mod) => upgraded_mods.push(upgraded_mod),
+                Err(e) => {
+                    let error_msg = format!("Failed to upgrade {}: {}", upgrade.name, e);
+                    eprintln!("{}", error_msg);
+                    failed_upgrades.push(error_msg);
                 }
-            } else {
-                println!("MOD {} not found in manifest, skipping", installed_mod.name);
             }
         }
-        
+
         if !failed_upgrades.is_empty() {
             println!("Failed upgrades: {}", failed_upgrades.join(", "));
         }
@@ -1430,4 +1400,114 @@ mod rml_guard_tests {
         assert_eq!(fs::read(&manager.installed_mods_file).unwrap(), before);
         assert_eq!(fs::read(dll_path).unwrap(), b"existing");
     }
+}
+
+#[cfg(test)]
+mod bulk_upgrade_tests {
+    use super::*;
+    use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    fn release(version: &str, file: &str, base_url: &str) -> ModRelease {
+        serde_json::from_value(serde_json::json!({
+            "version": version,
+            "file_name": file,
+            "download_url": format!("{}/{}", base_url, file),
+            "release_url": "", "published_at": "", "prerelease": false, "draft": false
+        })).unwrap()
+    }
+
+    fn fixture(base_url: &str)
+        -> (tempfile::TempDir, ModManager)
+    {
+        let profile = tempfile::tempdir().unwrap();
+        let manager = ModManager::new(profile.path().to_path_buf());
+        let mods = vec![
+            serde_json::from_value::<ModInfo>(serde_json::json!({
+                "name": "BoundedUIX", "description": "", "author": "",
+                "source_location": "https://github.com/ResoniteModdingGroup/BoundedUIX",
+                "latest_version": "2.0.0",
+                "releases": [release("2.0.0", "BoundedUIX.nupkg", base_url),
+                             release("1.1.0", "BoundedUIX.dll", base_url),
+                             release("1.0.0", "BoundedUIX.dll", base_url)]
+            })).unwrap(),
+            serde_json::from_value::<ModInfo>(serde_json::json!({
+                "name": "OtherMod", "description": "", "author": "",
+                "source_location": "https://github.com/example/OtherMod",
+                "latest_version": "2.0.0",
+                "releases": [release("2.0.0", "OtherMod.dll", base_url),
+                             release("1.0.0", "OtherMod.dll", base_url)]
+            })).unwrap(),
+        ];
+        fs::write(profile.path().join("mod_manifest_cache.json"), serde_json::to_vec(&mods).unwrap()).unwrap();
+        let now = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs();
+        fs::write(profile.path().join("mod_manifest_cache_meta.json"), now.to_string()).unwrap();
+        fs::create_dir_all(&manager.mods_dir).unwrap();
+        for info in mods {
+            let dll_path = manager.mods_dir.join(format!("{}.dll", info.name));
+            fs::write(&dll_path, b"existing").unwrap();
+            manager.add_to_installed_mods(&InstalledMod {
+                name: info.name, description: String::new(), source_location: info.source_location,
+                installed_version: "1.0.0".into(), installed_date: String::new(), dll_path,
+                mod_loader_type: Some("ResoniteModLoader".into()), file_format: Some("dll".into()), enabled: Some(true),
+            }).unwrap();
+        }
+        (profile, manager)
+    }
+
+    async fn download_server(request_count: usize) -> (String, tokio::task::JoinHandle<Vec<String>>) {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let url = format!("http://{}", listener.local_addr().unwrap());
+        let task = tokio::spawn(async move {
+            let mut requests = Vec::new();
+            for _ in 0..request_count {
+                let (mut stream, _) = tokio::time::timeout(Duration::from_secs(10), listener.accept()).await.unwrap().unwrap();
+                let mut buffer = [0; 4096];
+                let count = stream.read(&mut buffer).await.unwrap();
+                requests.push(String::from_utf8_lossy(&buffer[..count]).lines().next().unwrap().to_string());
+                stream.write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 7\r\nConnection: close\r\n\r\nupdated").await.unwrap();
+            }
+            requests
+        });
+        (url, task)
+    }
+
+    #[tokio::test]
+    async fn bulk_upgrade_only_installs_confirmed_mods_and_versions_after_manifest_refresh() {
+        let (url, server) = download_server(1).await;
+        let (_profile, manager) = fixture(&url);
+        let mut upgrades = manager.get_upgradeable_mods().await.unwrap();
+        assert_eq!(upgrades.len(), 2);
+        // The confirmation dialog only shows OtherMod, despite another available update.
+        upgrades.retain(|upgrade| upgrade.name == "OtherMod");
+
+        // A newer release arrives after the user has reviewed version 2.0.0.
+        let mut manifest = manager.fetch_mod_manifest().await.unwrap();
+        let other = manifest.iter_mut().find(|info| info.name == "OtherMod").unwrap();
+        other.latest_version = Some("3.0.0".into());
+        other.releases.insert(0, release("3.0.0", "OtherMod-3.dll", &url));
+        fs::write(manager.profile_dir.join("mod_manifest_cache.json"), serde_json::to_vec(&manifest).unwrap()).unwrap();
+
+        let upgraded = manager.bulk_upgrade_mods(&upgrades).await.unwrap();
+        assert_eq!(upgraded.len(), 1);
+        assert_eq!(upgraded[0].name, "OtherMod");
+        assert_eq!(upgraded[0].installed_version, "2.0.0");
+        let installed = manager.get_installed_mods().unwrap();
+        let bounded = installed.iter().find(|info| info.name == "BoundedUIX").unwrap();
+        assert_eq!(bounded.installed_version, "1.0.0");
+        assert_eq!(fs::read(&bounded.dll_path).unwrap(), b"existing");
+        assert_eq!(server.await.unwrap(), vec!["GET /OtherMod.dll HTTP/1.1"]);
+    }
+
+    #[tokio::test]
+    async fn empty_bulk_upgrade_list_does_not_update_available_mods() {
+        let (_profile, manager) = fixture("http://127.0.0.1:1");
+        assert_eq!(manager.get_upgradeable_mods().await.unwrap().len(), 2);
+        let before = fs::read(&manager.installed_mods_file).unwrap();
+        assert!(manager.bulk_upgrade_mods(&[]).await.unwrap().is_empty());
+        assert_eq!(fs::read(&manager.installed_mods_file).unwrap(), before);
+        for installed in manager.get_installed_mods().unwrap() {
+            assert_eq!(fs::read(installed.dll_path).unwrap(), b"existing");
+        }
+    }
+
 }

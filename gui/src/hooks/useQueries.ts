@@ -717,8 +717,8 @@ export const useBulkUpgradeMods = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ profileName }: { profileName: string }) => {
-      return await invoke<InstalledMod[]>('bulk_upgrade_mods', { profileName });
+    mutationFn: async ({ profileName, upgrades }: { profileName: string; upgrades: UpgradeableMod[] }) => {
+      return await invoke<InstalledMod[]>('bulk_upgrade_mods', { profileName, upgrades });
     },
     onSuccess: (result, variables) => {
       const count = result.length;

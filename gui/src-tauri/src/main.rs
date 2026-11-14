@@ -1784,6 +1784,7 @@ async fn get_upgradeable_mods(
 #[tauri::command]
 async fn bulk_upgrade_mods(
     profile_name: String,
+    upgrades: Vec<UpgradeableMod>,
     state: State<'_, Mutex<AppState>>,
 ) -> Result<Vec<InstalledMod>, String> {
     let profile_dir = {
@@ -1797,7 +1798,7 @@ async fn bulk_upgrade_mods(
     
     let mod_manager = ModManager::new(profile_dir);
     
-    mod_manager.bulk_upgrade_mods().await
+    mod_manager.bulk_upgrade_mods(&upgrades).await
         .map_err(|e| format!("Failed to bulk upgrade mods: {}", e))
 }
 
