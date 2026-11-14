@@ -232,6 +232,8 @@
       "noMatchFound": "📦 No matching MOD found in manifest",
       "manage": "Manage",
       "searchMods": "Search MODs...",
+      "clearModSearch": "Clear search",
+      "noInstalledModsMatch": "No installed MODs match your search",
       "versionControlNote": "Adding them to the management system enables version control.",
       "add": "Add",
       "available": "available",
