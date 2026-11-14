@@ -7,6 +7,17 @@
 
 ## [Unreleased]
 
+## [v1.15.0] - 2026-11-14
+
+### 🎉 新機能
+
+- **インストール済みMODの検索**: MOD管理でMOD名・説明・配布元から一覧を絞り込み。大文字・小文字を区別せず、検索語の前後の空白を除いて照合（[#36](https://github.com/resonite-love/launcher/pull/36)）
+- **MOD検索欄のクリアボタン**: 利用可能なMODとインストール済みMODの検索欄に、入力を消してフォーカスを戻すボタンを追加。各一覧の検索条件は独立し、インストール済みMODの検索はプロファイル変更時にリセット
+
+### 🐛 バグ修正
+
+- **プロファイル管理タブの遷移を修正**: 別のタブから戻った場合や編集中にタブを再選択した場合に、前の編集画面ではなくプロファイル一覧を表示（[#37](https://github.com/resonite-love/launcher/pull/37)）
+
 ## [v1.14.0] - 2026-11-12
 
 ### 🐛 バグ修正
@@ -955,7 +966,8 @@ MonkeyLoaderは新世代のMODローダーで、より高度な機能と安定�
 3. CLI版: `.exe`ファイルをダウンロードして任意の場所に配置
 4. 初回起動時のセットアップウィザードに従って設定を完了
 
-[Unreleased]: https://github.com/resonite-love/launcher/compare/v1.14.0...HEAD
+[Unreleased]: https://github.com/resonite-love/launcher/compare/v1.15.0...HEAD
+[v1.15.0]: https://github.com/resonite-love/launcher/compare/v1.14.0...v1.15.0
 [v1.14.0]: https://github.com/resonite-love/launcher/compare/v1.13.0...v1.14.0
 [v1.13.0]: https://github.com/resonite-love/launcher/compare/v1.12.0...v1.13.0
 [v1.12.0]: https://github.com/resonite-love/launcher/compare/v1.11.1...v1.12.0
