@@ -133,7 +133,14 @@ export const useAppStore = create<AppState>()(
       
       setSteamCredentials: (credentials) => set({ steamCredentials: credentials }),
       
-      setCurrentTab: (tab) => set({ currentTab: tab }),
+      setCurrentTab: (tab) => {
+        // Selecting profile management always opens its list, even if already active.
+        if (tab === 'profiles') {
+          set({ currentTab: tab, profilesPage: 'list', editingProfileName: null });
+        } else {
+          set({ currentTab: tab });
+        }
+      },
       
       // Profile page navigation
       setProfilesPage: (page) => set({ profilesPage: page }),
